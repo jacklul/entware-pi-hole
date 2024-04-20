@@ -1,0 +1,51 @@
+name: Cache
+
+inputs:
+  key_prefix:
+    required: true
+  patches_prefix:
+    required: true
+  files:
+    required: false
+    default: |
+      ./stage/*
+      !./stage/.git
+  git_path:
+    required: false
+    default: ./stage
+
+outputs:
+  cache-hit:
+    value: ${{ steps.cache-check.outputs.cache-hit }}
+
+runs:
+  using: composite
+
+  steps:
+    - name: Create hashes for cache key
+      id: hashes
+      shell: bash
+      run: |
+        echo "PATCHES=$((sha1sum "./patches/${{ inputs.patches_prefix }}-"*".patch" 2> /dev/null ; sha1sum "./patches/${{ inputs.patches_prefix }}-"*".sh" 2> /dev/null) | sha1sum | cut -c1-10)" >> $GITHUB_OUTPUT
+        echo "TESTS=$(sha1sum "./tests/${{ inputs.patches_prefix }}-"*".sh" 2> /dev/null | sha1sum | cut -c1-10)" >> $GITHUB_OUTPUT
+        echo "GIT=$((git -C "${{ inputs.git_path }}" rev-parse --abbrev-ref HEAD ; git -C "${{ inputs.git_path }}" rev-parse HEAD) | sha1sum | cut -c1-10)" >> $GITHUB_OUTPUT
+
+    - name: Check if cache already exists
+      id: cache-check
+      uses: actions/cache@v4
+      with:
+        key: ${{ inputs.key_prefix }}${{ steps.hashes.outputs.GIT }}-${{ steps.hashes.outputs.PATCHES }}-${{ steps.hashes.outputs.TESTS }}
+        path: ${{ inputs.files }}
+        lookup-only: true
+
+    - name: Clean up directory before restoring
+      if: steps.cache-check.outputs.cache-hit == 'true'
+      working-directory: ${{ inputs.git_path }}
+      shell: bash
+      run: find . -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -fr {} \;
+
+    - name: Cache files
+      uses: actions/cache@v4
+      with:
+        key: ${{ inputs.key_prefix }}${{ steps.hashes.outputs.GIT }}-${{ steps.hashes.outputs.PATCHES }}-${{ steps.hashes.outputs.TESTS }}
+        path: ${{ inputs.files }}

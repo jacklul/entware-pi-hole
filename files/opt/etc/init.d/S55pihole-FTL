@@ -1,0 +1,46 @@
+#!/bin/sh
+# https://github.com/jacklul/entware-pi-hole/
+#shellcheck disable=SC2034,SC1091
+
+ENABLED=yes
+PROCS=pihole-FTL
+ARGS="-- -u $USER"
+PREARGS=""
+DESC=$PROCS
+PATH=/opt/sbin:/opt/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+if [ -f /opt/bin/id ]; then
+    ARGS=""
+    if [ "$(id -u pihole 2> /dev/null)" = "" ]; then
+        ARGS="-- -u $(id -nu 0)"
+    fi
+fi
+
+if [ -f /opt/bin/bash ]; then
+    case $1 in
+        start | restart)
+            bash <<EOF
+sed "s/59 1 /\$((1 + RANDOM % 58)) \$((3 + RANDOM % 2)) /" -i /opt/etc/cron.d/pihole
+sed "s/59 17 /\$((1 + RANDOM % 58)) \$((12 + RANDOM % 8)) /" -i /opt/etc/cron.d/pihole
+EOF
+
+            PI_HOLE_DBFILE="$(pihole-FTL --config -q files.gravity)"
+            if [ -z "$PI_HOLE_DBFILE" ] || [ ! -f "$PI_HOLE_DBFILE" ]; then
+                echo "No gravity database found ($PI_HOLE_DBFILE) - please run 'pihole -g' first!"
+                exit 1
+            fi
+        ;;
+    esac
+
+    PRECMD="bash /opt/share/pihole/pihole-FTL-poststop.sh ; bash /opt/share/pihole/pihole-FTL-prestart.sh"
+fi
+
+. /opt/etc/init.d/rc.func
+
+if [ -f /opt/bin/bash ]; then
+    case $1 in
+        stop | kill)
+            bash /opt/share/pihole/pihole-FTL-poststop.sh
+        ;;
+    esac
+fi

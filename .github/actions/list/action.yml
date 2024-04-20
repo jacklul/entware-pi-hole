@@ -1,0 +1,14 @@
+name: List files in specified directories
+
+inputs:
+  paths:
+    required: false
+    default: .
+
+runs:
+  using: composite
+
+  steps:
+    - name: List files
+      shell: bash
+      run: for DIR in ${{ inputs.paths }}; do readlink -f $DIR && ls -aAlv --group-directories-first $DIR; done

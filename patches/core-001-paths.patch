@@ -1,0 +1,569 @@
+diff --git a/advanced/Scripts/database_migration/gravity-db.sh b/advanced/Scripts/database_migration/gravity-db.sh
+index e99f1df2..1de31179 100755
+--- a/advanced/Scripts/database_migration/gravity-db.sh
++++ b/advanced/Scripts/database_migration/gravity-db.sh
+@@ -10,7 +10,7 @@
+ # This file is copyright under the latest version of the EUPL.
+ # Please see LICENSE file for your rights under this license.
+ 
+-readonly scriptPath="/etc/.pihole/advanced/Scripts/database_migration/gravity"
++readonly scriptPath="/opt/share/pihole/database_migration/gravity"
+ 
+ upgrade_gravityDB(){
+ 	local database piholeDir auditFile version
+diff --git a/advanced/Scripts/list.sh b/advanced/Scripts/list.sh
+index 76558e58..a9592bf3 100755
+--- a/advanced/Scripts/list.sh
++++ b/advanced/Scripts/list.sh
+@@ -11,7 +11,7 @@
+ # Please see LICENSE file for your rights under this license.
+ 
+ # Globals
+-piholeDir="/etc/pihole"
++piholeDir="/opt/etc/pihole"
+ GRAVITYDB="${piholeDir}/gravity.db"
+ # Source pihole-FTL from install script
+ pihole_FTL="${piholeDir}/pihole-FTL.conf"
+@@ -37,7 +37,7 @@ declare -i domaincount
+ domaincount=0
+ reload=false
+ 
+-colfile="/opt/pihole/COL_TABLE"
++colfile="/opt/share/pihole/COL_TABLE"
+ source ${colfile}
+ 
+ # IDs are hard-wired to domain interpretation in the gravity database scheme
+diff --git a/advanced/Scripts/pihole-reenable.sh b/advanced/Scripts/pihole-reenable.sh
+index 93ec3b95..68d8801b 100755
+--- a/advanced/Scripts/pihole-reenable.sh
++++ b/advanced/Scripts/pihole-reenable.sh
+@@ -17,7 +17,7 @@
+ # This ensures that pihole ends up in the correct state after a sequence of
+ # commands suchs as: `pihole disable 30s; pihole enable; pihole disable`
+ 
+-readonly PI_HOLE_BIN_DIR="/usr/local/bin"
++readonly PI_HOLE_BIN_DIR="/opt/sbin"
+ 
+ sleep "${1}"
+ "${PI_HOLE_BIN_DIR}"/pihole enable
+diff --git a/advanced/Scripts/piholeARPTable.sh b/advanced/Scripts/piholeARPTable.sh
+index b92dd124..e7ce36bb 100755
+--- a/advanced/Scripts/piholeARPTable.sh
++++ b/advanced/Scripts/piholeARPTable.sh
+@@ -10,7 +10,7 @@
+ # This file is copyright under the latest version of the EUPL.
+ # Please see LICENSE file for your rights under this license.
+ 
+-coltable="/opt/pihole/COL_TABLE"
++coltable="/opt/share/pihole/COL_TABLE"
+ if [[ -f ${coltable} ]]; then
+     source ${coltable}
+ fi
+@@ -20,13 +20,13 @@ fi
+ # Constructed to return nothing when
+ # a) the setting is not present in the config file, or
+ # b) the setting is commented out (e.g. "#DBFILE=...")
+-FTLconf="/etc/pihole/pihole-FTL.conf"
++FTLconf="/opt/etc/pihole/pihole-FTL.conf"
+ if [ -e "$FTLconf" ]; then
+     DBFILE="$(sed -n -e 's/^\s*DBFILE\s*=\s*//p' ${FTLconf})"
+ fi
+ # Test for empty string. Use standard path in this case.
+ if [ -z "$DBFILE" ]; then
+-    DBFILE="/etc/pihole/pihole-FTL.db"
++    DBFILE="/opt/etc/pihole/pihole-FTL.db"
+ fi
+ 
+ 
+diff --git a/advanced/Scripts/piholeLogFlush.sh b/advanced/Scripts/piholeLogFlush.sh
+index 4d97fec5..10ad82bd 100755
+--- a/advanced/Scripts/piholeLogFlush.sh
++++ b/advanced/Scripts/piholeLogFlush.sh
+@@ -8,58 +8,58 @@
+ # This file is copyright under the latest version of the EUPL.
+ # Please see LICENSE file for your rights under this license.
+ 
+-colfile="/opt/pihole/COL_TABLE"
++colfile="/opt/share/pihole/COL_TABLE"
+ source ${colfile}
+ 
+ # In case we're running at the same time as a system logrotate, use a
+ # separate logrotate state file to prevent stepping on each other's
+ # toes.
+-STATEFILE="/var/lib/logrotate/pihole"
++STATEFILE="/opt/etc/pihole/logrotate.state"
+ 
+ # Determine database location
+ # Obtain DBFILE=... setting from pihole-FTL.db
+ # Constructed to return nothing when
+ # a) the setting is not present in the config file, or
+ # b) the setting is commented out (e.g. "#DBFILE=...")
+-FTLconf="/etc/pihole/pihole-FTL.conf"
++FTLconf="/opt/etc/pihole/pihole-FTL.conf"
+ if [ -e "$FTLconf" ]; then
+     DBFILE="$(sed -n -e 's/^\s*DBFILE\s*=\s*//p' ${FTLconf})"
+ fi
+ # Test for empty string. Use standard path in this case.
+ if [ -z "$DBFILE" ]; then
+-    DBFILE="/etc/pihole/pihole-FTL.db"
++    DBFILE="/opt/etc/pihole/pihole-FTL.db"
+ fi
+ 
+ if [[ "$*" != *"quiet"* ]]; then
+-    echo -ne "  ${INFO} Flushing /var/log/pihole/pihole.log ..."
++    echo -ne "  ${INFO} Flushing /opt/var/log/pihole/pihole.log ..."
+ fi
+ if [[ "$*" == *"once"* ]]; then
+     # Nightly logrotation
+-    if command -v /usr/sbin/logrotate >/dev/null; then
++    if command -v /opt/sbin/logrotate >/dev/null; then
+         # Logrotate once
+-        /usr/sbin/logrotate --force --state "${STATEFILE}" /etc/pihole/logrotate
++        /opt/sbin/logrotate --force --state "${STATEFILE}" /opt/etc/pihole/logrotate
+     else
+         # Copy pihole.log over to pihole.log.1
+         # and empty out pihole.log
+         # Note that moving the file is not an option, as
+         # dnsmasq would happily continue writing into the
+         # moved file (it will have the same file handler)
+-        cp -p /var/log/pihole/pihole.log /var/log/pihole/pihole.log.1
+-        echo " " > /var/log/pihole/pihole.log
+-        chmod 640 /var/log/pihole/pihole.log
++        cp -p /opt/var/log/pihole/pihole.log /opt/var/log/pihole/pihole.log.1
++        echo " " > /opt/var/log/pihole/pihole.log
++        chmod 640 /opt/var/log/pihole/pihole.log
+     fi
+ else
+     # Manual flushing
+-    if command -v /usr/sbin/logrotate >/dev/null; then
++    if command -v /opt/sbin/logrotate >/dev/null; then
+         # Logrotate twice to move all data out of sight of FTL
+-        /usr/sbin/logrotate --force --state "${STATEFILE}" /etc/pihole/logrotate; sleep 3
+-        /usr/sbin/logrotate --force --state "${STATEFILE}" /etc/pihole/logrotate
++        /opt/sbin/logrotate --force --state "${STATEFILE}" /opt/etc/pihole/logrotate; sleep 3
++        /opt/sbin/logrotate --force --state "${STATEFILE}" /opt/etc/pihole/logrotate
+     else
+         # Flush both pihole.log and pihole.log.1 (if existing)
+-        echo " " > /var/log/pihole/pihole.log
+-        if [ -f /var/log/pihole/pihole.log.1 ]; then
+-            echo " " > /var/log/pihole/pihole.log.1
+-            chmod 640 /var/log/pihole/pihole.log.1
++        echo " " > /opt/var/log/pihole/pihole.log
++        if [ -f /opt/var/log/pihole/pihole.log.1 ]; then
++            echo " " > /opt/var/log/pihole/pihole.log.1
++            chmod 640 /opt/var/log/pihole/pihole.log.1
+         fi
+     fi
+     # Delete most recent 24 hours from FTL's database, leave even older data intact (don't wipe out all history)
+@@ -70,6 +70,6 @@ else
+ fi
+ 
+ if [[ "$*" != *"quiet"* ]]; then
+-    echo -e "${OVER}  ${TICK} Flushed /var/log/pihole/pihole.log"
++    echo -e "${OVER}  ${TICK} Flushed /opt/var/log/pihole/pihole.log"
+     echo -e "  ${TICK} Deleted ${deleted} queries from database"
+ fi
+diff --git a/advanced/Scripts/query.sh b/advanced/Scripts/query.sh
+index 493c75ea..01a4d9cd 100755
+--- a/advanced/Scripts/query.sh
++++ b/advanced/Scripts/query.sh
+@@ -15,13 +15,13 @@
+ # Please see LICENSE file for your rights under this license.
+ 
+ # Globals
+-PI_HOLE_INSTALL_DIR="/opt/pihole"
++PI_HOLE_INSTALL_DIR="/opt/share/pihole"
+ max_results="20"
+ partial="false"
+ domain=""
+ 
+ # Source color table
+-colfile="/opt/pihole/COL_TABLE"
++colfile="/opt/share/pihole/COL_TABLE"
+ . "${colfile}"
+ 
+ # Source api functions
+diff --git a/advanced/Scripts/updatecheck.sh b/advanced/Scripts/updatecheck.sh
+index eda6c403..12d24691 100755
+--- a/advanced/Scripts/updatecheck.sh
++++ b/advanced/Scripts/updatecheck.sh
+@@ -40,15 +40,15 @@ function get_remote_hash() {
+ 
+ # Source the utils file for addOrEditKeyValPair()
+ # shellcheck disable=SC1091
+-. /opt/pihole/utils.sh
++. /opt/share/pihole/utils.sh
+ 
+ # Remove the below three legacy files if they exist
+-rm -f "/etc/pihole/GitHubVersions"
+-rm -f "/etc/pihole/localbranches"
+-rm -f "/etc/pihole/localversions"
++rm -f "/opt/etc/pihole/GitHubVersions"
++rm -f "/opt/etc/pihole/localbranches"
++rm -f "/opt/etc/pihole/localversions"
+ 
+ # Create new versions file if it does not exist
+-VERSION_FILE="/etc/pihole/versions"
++VERSION_FILE="/opt/etc/pihole/versions"
+ touch "${VERSION_FILE}"
+ chmod 644 "${VERSION_FILE}"
+ 
+@@ -67,13 +67,13 @@ fi
+ 
+ # get Core versions
+ 
+-CORE_VERSION="$(get_local_version /etc/.pihole)"
++CORE_VERSION="$(get_local_version /opt/etc/.pihole)"
+ addOrEditKeyValPair "${VERSION_FILE}" "CORE_VERSION" "${CORE_VERSION}"
+ 
+-CORE_BRANCH="$(get_local_branch /etc/.pihole)"
++CORE_BRANCH="$(get_local_branch /opt/etc/.pihole)"
+ addOrEditKeyValPair "${VERSION_FILE}" "CORE_BRANCH" "${CORE_BRANCH}"
+ 
+-CORE_HASH="$(get_local_hash /etc/.pihole)"
++CORE_HASH="$(get_local_hash /opt/etc/.pihole)"
+ addOrEditKeyValPair "${VERSION_FILE}" "CORE_HASH" "${CORE_HASH}"
+ 
+ GITHUB_CORE_VERSION="$(get_remote_version pi-hole "${CORE_BRANCH}")"
+@@ -84,13 +84,13 @@ addOrEditKeyValPair "${VERSION_FILE}" "GITHUB_CORE_HASH" "${GITHUB_CORE_HASH}"
+ 
+ # get Web versions
+ 
+-WEB_VERSION="$(get_local_version /var/www/html/admin)"
++WEB_VERSION="$(get_local_version /opt/share/pihole/www/admin)"
+ addOrEditKeyValPair "${VERSION_FILE}" "WEB_VERSION" "${WEB_VERSION}"
+ 
+-WEB_BRANCH="$(get_local_branch /var/www/html/admin)"
++WEB_BRANCH="$(get_local_branch /opt/share/pihole/admin)"
+ addOrEditKeyValPair "${VERSION_FILE}" "WEB_BRANCH" "${WEB_BRANCH}"
+ 
+-WEB_HASH="$(get_local_hash /var/www/html/admin)"
++WEB_HASH="$(get_local_hash /opt/share/pihole/admin)"
+ addOrEditKeyValPair "${VERSION_FILE}" "WEB_HASH" "${WEB_HASH}"
+ 
+ GITHUB_WEB_VERSION="$(get_remote_version web "${WEB_BRANCH}")"
+diff --git a/advanced/Scripts/utils.sh b/advanced/Scripts/utils.sh
+index 2fe419e8..255ab3bd 100755
+--- a/advanced/Scripts/utils.sh
++++ b/advanced/Scripts/utils.sh
+@@ -85,8 +85,8 @@ removeKey() {
+ # returns path of FTL's PID  file
+ #######################
+ getFTLPIDFile() {
+-  local FTLCONFFILE="/etc/pihole/pihole-FTL.conf"
+-  local DEFAULT_PID_FILE="/run/pihole-FTL.pid"
++  local FTLCONFFILE="/opt/etc/pihole/pihole-FTL.conf"
++  local DEFAULT_PID_FILE="/opt/var/run/pihole-FTL.pid"
+   local FTL_PID_FILE
+ 
+   if [ -s "${FTLCONFFILE}" ]; then
+diff --git a/advanced/Scripts/version.sh b/advanced/Scripts/version.sh
+index 2b0883af..f1f2fa22 100755
+--- a/advanced/Scripts/version.sh
++++ b/advanced/Scripts/version.sh
+@@ -13,13 +13,13 @@
+ # https://github.com/koalaman/shellcheck/wiki/SC3043#exceptions
+ 
+ # Source the versions file poupulated by updatechecker.sh
+-cachedVersions="/etc/pihole/versions"
++cachedVersions="/opt/etc/pihole/versions"
+ 
+ if [ -f ${cachedVersions} ]; then
+     # shellcheck disable=SC1090
+     . "$cachedVersions"
+ else
+-    echo "Could not find /etc/pihole/versions. Running update now."
++    echo "Could not find /opt/etc/pihole/versions. Running update now."
+     pihole updatechecker
+     # shellcheck disable=SC1090
+     . "$cachedVersions"
+diff --git a/advanced/Templates/gravity_copy.sql b/advanced/Templates/gravity_copy.sql
+index ed11b61a..b27bd6e5 100644
+--- a/advanced/Templates/gravity_copy.sql
++++ b/advanced/Templates/gravity_copy.sql
+@@ -1,6 +1,6 @@
+ .timeout 30000
+ 
+-ATTACH DATABASE '/etc/pihole/gravity.db' AS OLD;
++ATTACH DATABASE '/opt/etc/pihole/gravity.db' AS OLD;
+ 
+ BEGIN TRANSACTION;
+ 
+diff --git a/advanced/Templates/logrotate b/advanced/Templates/logrotate
+index 5f609e0f..36203f76 100644
+--- a/advanced/Templates/logrotate
++++ b/advanced/Templates/logrotate
+@@ -1,4 +1,4 @@
+-/var/log/pihole/pihole.log {
++/opt/var/log/pihole/pihole.log {
+ 	# su #
+ 	daily
+ 	copytruncate
+@@ -9,7 +9,7 @@
+ 	nomail
+ }
+ 
+-/var/log/pihole/FTL.log {
++/opt/var/log/pihole/FTL.log {
+ 	# su #
+ 	weekly
+ 	copytruncate
+@@ -20,7 +20,7 @@
+ 	nomail
+ }
+ 
+-/var/log/pihole/webserver.log {
++/opt/var/log/pihole/webserver.log {
+ 	# su #
+ 	weekly
+ 	copytruncate
+diff --git a/advanced/Templates/pihole-FTL-poststop.sh b/advanced/Templates/pihole-FTL-poststop.sh
+index ac3898d2..5abfc860 100755
+--- a/advanced/Templates/pihole-FTL-poststop.sh
++++ b/advanced/Templates/pihole-FTL-poststop.sh
+@@ -1,7 +1,7 @@
+ #!/usr/bin/env sh
+ 
+ # Source utils.sh for getFTLPIDFile()
+-PI_HOLE_SCRIPT_DIR='/opt/pihole'
++PI_HOLE_SCRIPT_DIR='/opt/share/pihole'
+ utilsfile="${PI_HOLE_SCRIPT_DIR}/utils.sh"
+ # shellcheck disable=SC1090
+ . "${utilsfile}"
+@@ -10,4 +10,4 @@ utilsfile="${PI_HOLE_SCRIPT_DIR}/utils.sh"
+ FTL_PID_FILE="$(getFTLPIDFile)"
+ 
+ # Cleanup
+-rm -f /run/pihole/FTL.sock /dev/shm/FTL-* "${FTL_PID_FILE}"
++rm -f /opt/var/run/pihole/FTL.sock /dev/shm/FTL-* "${FTL_PID_FILE}"
+diff --git a/advanced/Templates/pihole-FTL-prestart.sh b/advanced/Templates/pihole-FTL-prestart.sh
+index c6817828..a28b2002 100755
+--- a/advanced/Templates/pihole-FTL-prestart.sh
++++ b/advanced/Templates/pihole-FTL-prestart.sh
+@@ -1,7 +1,7 @@
+ #!/usr/bin/env sh
+ 
+ # Source utils.sh for getFTLPIDFile()
+-PI_HOLE_SCRIPT_DIR='/opt/pihole'
++PI_HOLE_SCRIPT_DIR='/opt/share/pihole'
+ utilsfile="${PI_HOLE_SCRIPT_DIR}/utils.sh"
+ # shellcheck disable=SC1090
+ . "${utilsfile}"
+@@ -11,36 +11,36 @@ FTL_PID_FILE="$(getFTLPIDFile)"
+ 
+ # Ensure that permissions are set so that pihole-FTL can edit all necessary files
+ # shellcheck disable=SC2174
+-mkdir -pm 0640 /var/log/pihole
+-chown -R pihole:pihole /etc/pihole /var/log/pihole
+-chmod -R 0640 /var/log/pihole
+-chmod -R 0660 /etc/pihole
++mkdir -pm 0640 /opt/var/log/pihole
++chown -R pihole:pihole /opt/etc/pihole /opt/var/log/pihole
++chmod -R 0640 /opt/var/log/pihole
++chmod -R 0660 /opt/etc/pihole
+ 
+ # Logrotate config file need to be owned by root and must not be writable by group and others
+-chown root:root /etc/pihole/logrotate
+-chmod 0644 /etc/pihole/logrotate
++chown root:root /opt/etc/pihole/logrotate
++chmod 0644 /opt/etc/pihole/logrotate
+ 
+ # allow all users to enter the directories
+-chmod 0755 /etc/pihole /var/log/pihole
++chmod 0755 /opt/etc/pihole /opt/var/log/pihole
+ 
+ # allow pihole to access subdirs in /etc/pihole (sets execution bit on dirs)
+ # credits https://stackoverflow.com/a/11512211
+-find /etc/pihole -type d -exec chmod 0755 {} \;
++find /opt/etc/pihole -type d -exec chmod 0755 {} \;
+ 
+ # Touch files to ensure they exist (create if non-existing, preserve if existing)
+ [ -f "${FTL_PID_FILE}" ] || install -D -m 644 -o pihole -g pihole /dev/null "${FTL_PID_FILE}"
+-[ -f /var/log/pihole/FTL.log ] || install -m 640 -o pihole -g pihole /dev/null /var/log/pihole/FTL.log
+-[ -f /var/log/pihole/pihole.log ] || install -m 640 -o pihole -g pihole /dev/null /var/log/pihole/pihole.log
+-[ -f /etc/pihole/dhcp.leases ] || install -m 644 -o pihole -g pihole /dev/null /etc/pihole/dhcp.leases
++[ -f /opt/var/log/pihole/FTL.log ] || install -m 640 -o pihole -g pihole /dev/null /opt/var/log/pihole/FTL.log
++[ -f /opt/var/log/pihole/pihole.log ] || install -m 640 -o pihole -g pihole /dev/null /opt/var/log/pihole/pihole.log
++[ -f /opt/etc/pihole/dhcp.leases ] || install -m 644 -o pihole -g pihole /dev/null /opt/etc/pihole/dhcp.leases
+ 
+ 
+ # Backward compatibility for user-scripts that still expect log files in /var/log instead of /var/log/pihole
+ # Should be removed with Pi-hole v6.0
+-if [ ! -f /var/log/pihole.log ]; then
+-    ln -sf /var/log/pihole/pihole.log /var/log/pihole.log
+-    chown -h pihole:pihole /var/log/pihole.log
++if [ ! -f /opt/var/log/pihole.log ]; then
++    ln -sf /opt/var/log/pihole/pihole.log /opt/var/log/pihole.log
++    chown -h pihole:pihole /opt/var/log/pihole.log
+ fi
+-if [ ! -f /var/log/pihole-FTL.log ]; then
+-    ln -sf /var/log/pihole/FTL.log /var/log/pihole-FTL.log
+-    chown -h pihole:pihole /var/log/pihole-FTL.log
++if [ ! -f /opt/var/log/pihole-FTL.log ]; then
++    ln -sf /opt/var/log/pihole/FTL.log /opt/var/log/pihole-FTL.log
++    chown -h pihole:pihole /opt/var/log/pihole-FTL.log
+ fi
+diff --git a/advanced/Templates/pihole.cron b/advanced/Templates/pihole.cron
+index c62d31ab..403ffe97 100644
+--- a/advanced/Templates/pihole.cron
++++ b/advanced/Templates/pihole.cron
+@@ -18,16 +18,16 @@
+ #          early morning. Download any updates from the adlists
+ #          Squash output to log, then splat the log to stdout on error to allow for
+ #          standard crontab job error handling.
+-59 1    * * 7   root    PATH="$PATH:/usr/sbin:/usr/local/bin/" pihole updateGravity >/var/log/pihole/pihole_updateGravity.log || cat /var/log/pihole/pihole_updateGravity.log
++59 1    * * 7   root    PATH="$PATH:/opt/sbin:/opt/bin/" pihole updateGravity >/opt/var/log/pihole/pihole_updateGravity.log || cat /opt/var/log/pihole/pihole_updateGravity.log
+ 
+ # Pi-hole: Flush the log daily at 00:00
+ #          The flush script will use logrotate if available
+ #          parameter "once": logrotate only once (default is twice)
+ #          parameter "quiet": don't print messages
+-00 00   * * *   root    PATH="$PATH:/usr/sbin:/usr/local/bin/" pihole flush once quiet
++00 00   * * *   root    PATH="$PATH:/opt/sbin:/opt/bin/" pihole flush once quiet
+ 
+-@reboot root /usr/sbin/logrotate --state /var/lib/logrotate/pihole /etc/pihole/logrotate
++@reboot root /opt/sbin/logrotate --state /opt/etc/pihole/logrotate.state /opt/etc/pihole/logrotate
+ 
+ # Pi-hole: Grab remote and local version every 24 hours
+-59 17  * * *   root    PATH="$PATH:/usr/sbin:/usr/local/bin/" pihole updatechecker
+-@reboot root    PATH="$PATH:/usr/sbin:/usr/local/bin/" pihole updatechecker reboot
++59 17  * * *   root    PATH="$PATH:/opt/sbin:/opt/bin/" pihole updatechecker
++@reboot root    PATH="$PATH:/opt/sbin:/opt/bin/" pihole updatechecker reboot
+diff --git a/gravity.sh b/gravity.sh
+index e37c8104..2b2574db 100755
+--- a/gravity.sh
++++ b/gravity.sh
+@@ -13,7 +13,7 @@
+ 
+ export LC_ALL=C
+ 
+-PI_HOLE_SCRIPT_DIR="/opt/pihole"
++PI_HOLE_SCRIPT_DIR="/opt/share/pihole"
+ # Source utils.sh for GetFTLConfigValue
+ utilsfile="${PI_HOLE_SCRIPT_DIR}/utils.sh"
+ # shellcheck disable=SC1090
+@@ -23,12 +23,12 @@ coltable="${PI_HOLE_SCRIPT_DIR}/COL_TABLE"
+ # shellcheck disable=SC1090
+ . "${coltable}"
+ # shellcheck disable=SC1091
+-. "/etc/.pihole/advanced/Scripts/database_migration/gravity-db.sh"
++. "/opt/share/pihole/database_migration/gravity-db.sh"
+ 
+ basename="pihole"
+-PIHOLE_COMMAND="/usr/local/bin/${basename}"
++PIHOLE_COMMAND="/opt/sbin/${basename}"
+ 
+-piholeDir="/etc/${basename}"
++piholeDir="/opt/etc/${basename}"
+ 
+ # Legacy (pre v5.0) list file locations
+ whitelistFile="${piholeDir}/whitelist.txt"
+@@ -36,25 +36,25 @@ blacklistFile="${piholeDir}/blacklist.txt"
+ regexFile="${piholeDir}/regex.list"
+ adListFile="${piholeDir}/adlists.list"
+ 
+-piholeGitDir="/etc/.pihole"
++piholeGitDir="/opt/share/pihole"
+ GRAVITYDB=$(getFTLConfigValue files.gravity)
+ GRAVITY_TMPDIR=$(getFTLConfigValue files.gravity_tmp)
+-gravityDBschema="${piholeGitDir}/advanced/Templates/gravity.db.sql"
+-gravityDBcopy="${piholeGitDir}/advanced/Templates/gravity_copy.sql"
++gravityDBschema="${piholeGitDir}/gravity.db.sql"
++gravityDBcopy="${piholeGitDir}/gravity_copy.sql"
+ 
+ domainsExtension="domains"
+ curl_connect_timeout=10
+ 
+ # Check gravity temp directory
+ if [ ! -d "${GRAVITY_TMPDIR}" ] || [ ! -w "${GRAVITY_TMPDIR}" ]; then
+-  echo -e "  ${COL_LIGHT_RED}Gravity temporary directory does not exist or is not a writeable directory, falling back to /tmp. ${COL_NC}"
+-  GRAVITY_TMPDIR="/tmp"
++  echo -e "  ${COL_LIGHT_RED}Gravity temporary directory does not exist or is not a writeable directory, falling back to /opt/tmp. ${COL_NC}"
++  GRAVITY_TMPDIR="/opt/tmp"
+ fi
+ 
+ # Set this only after sourcing pihole-FTL.conf as the gravity database path may
+ # have changed
+ gravityDBfile="${GRAVITYDB}"
+-gravityDBfile_default="/etc/pihole/gravity.db"
++gravityDBfile_default="/opt/etc/pihole/gravity.db"
+ gravityTEMPfile="${GRAVITYDB}_temp"
+ gravityDIR="$(dirname -- "${gravityDBfile}")"
+ gravityOLDfile="${gravityDIR}/gravity_old.db"
+@@ -937,7 +937,7 @@ if [[ "${forceDelete:-}" == true ]]; then
+   str="Deleting existing list cache"
+   echo -ne "${INFO} ${str}..."
+ 
+-  rm /etc/pihole/list.* 2>/dev/null || true
++  rm /opt/etc/pihole/list.* 2>/dev/null || true
+   echo -e "${OVER}  ${TICK} ${str}"
+ fi
+ 
+diff --git a/pihole b/pihole
+index 7c84771c..143654d4 100755
+--- a/pihole
++++ b/pihole
+@@ -9,12 +9,12 @@
+ # This file is copyright under the latest version of the EUPL.
+ # Please see LICENSE file for your rights under this license.
+ 
+-readonly PI_HOLE_SCRIPT_DIR="/opt/pihole"
++readonly PI_HOLE_SCRIPT_DIR="/opt/share/pihole"
+ 
+ # PI_HOLE_BIN_DIR is not readonly here because in some functions (checkout),
+ # they might get set again when the installer is sourced. This causes an
+ # error due to modifying a readonly variable.
+-PI_HOLE_BIN_DIR="/usr/local/bin"
++PI_HOLE_BIN_DIR="/opt/sbin"
+ 
+ readonly colfile="${PI_HOLE_SCRIPT_DIR}/COL_TABLE"
+ source "${colfile}"
+@@ -22,7 +22,7 @@ source "${colfile}"
+ utilsfile="${PI_HOLE_SCRIPT_DIR}/utils.sh"
+ source "${utilsfile}"
+ 
+-versionsfile="/etc/pihole/versions"
++versionsfile="/opt/etc/pihole/versions"
+ if [ -f "${versionsfile}" ]; then
+     # Only source versionsfile if the file exits
+     # fixes a warning during installation where versionsfile does not exist yet
+@@ -109,7 +109,7 @@ reconfigurePiholeFunc() {
+   if [ -n "${DOCKER_VERSION}" ]; then
+     unsupportedFunc
+   else
+-    /etc/.pihole/automated\ install/basic-install.sh --reconfigure
++    /opt/share/pihole/basic-install.sh --reconfigure
+     exit 0;
+   fi
+ }
+@@ -284,9 +284,9 @@ Example: 'pihole logging on'
+ Specify whether the Pi-hole log should be used
+ 
+ Options:
+-  on                  Enable the Pi-hole log at /var/log/pihole/pihole.log
+-  off                 Disable and flush the Pi-hole log at /var/log/pihole/pihole.log
+-  off noflush         Disable the Pi-hole log at /var/log/pihole/pihole.log"
++  on                  Enable the Pi-hole log at /opt/var/log/pihole/pihole.log
++  off                 Disable and flush the Pi-hole log at /opt/var/log/pihole/pihole.log
++  off noflush         Disable the Pi-hole log at /opt/var/log/pihole/pihole.log"
+     exit 0
+   elif [[ "${1}" == "off" ]]; then
+     # Disable logging
+@@ -391,7 +391,7 @@ exit 0
+ 
+ tailFunc() {
+   # Warn user if Pi-hole's logging is disabled
+-  local logging_enabled=$(grep -c "^log-queries" /etc/dnsmasq.d/01-pihole.conf)
++  local logging_enabled=$(grep -c "^log-queries" /opt/etc/dnsmasq.d/01-pihole.conf)
+   if [[ "${logging_enabled}" == "0" ]]; then
+     # No "log-queries" lines are found.
+     # Commented out lines (such as "#log-queries") are ignored
+@@ -403,7 +403,7 @@ tailFunc() {
+   # Color blocklist/blacklist/wildcard entries as red
+   # Color A/AAAA/DHCP strings as white
+   # Color everything else as gray
+-  tail -f /var/log/pihole/pihole.log | grep --line-buffered "${1}" | sed -E \
++  tail -f /opt/var/log/pihole/pihole.log | grep --line-buffered "${1}" | sed -E \
+     -e "s,($(date +'%b %d ')| dnsmasq\[[0-9]*\]),,g" \
+     -e "s,(.*(blacklisted |gravity blocked ).*),${COL_RED}&${COL_NC}," \
+     -e "s,.*(query\\[A|DHCP).*,${COL_NC}&${COL_NC}," \

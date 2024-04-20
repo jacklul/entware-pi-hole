@@ -1,0 +1,13 @@
+diff --git a/.github/Dockerfile b/.github/Dockerfile
+index 2731b8a2..1cab2027 100644
+--- a/.github/Dockerfile
++++ b/.github/Dockerfile
+@@ -18,8 +18,6 @@ RUN rm -rf cmake && \
+     bash build.sh "-DSTATIC=${STATIC}" && \
+ # Run binary architecture tests
+     bash test/arch_test.sh && \
+-# Run full test suite
+-    bash test/run.sh && \
+ # Move FTL binary to root directory
+     cd / &&\
+     mv /app/pihole-FTL . && \

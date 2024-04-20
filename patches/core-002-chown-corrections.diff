@@ -1,0 +1,53 @@
+diff --git a/advanced/Templates/pihole-FTL-prestart.sh b/advanced/Templates/pihole-FTL-prestart.sh
+index a28b2002..f41e5ef5 100755
+--- a/advanced/Templates/pihole-FTL-prestart.sh
++++ b/advanced/Templates/pihole-FTL-prestart.sh
+@@ -12,12 +12,12 @@ FTL_PID_FILE="$(getFTLPIDFile)"
+ # Ensure that permissions are set so that pihole-FTL can edit all necessary files
+ # shellcheck disable=SC2174
+ mkdir -pm 0640 /opt/var/log/pihole
+-chown -R pihole:pihole /opt/etc/pihole /opt/var/log/pihole
++[ "$(id -u pihole 2> /dev/null)" != "" ] && chown -R pihole:pihole /opt/etc/pihole /opt/var/log/pihole
+ chmod -R 0640 /opt/var/log/pihole
+ chmod -R 0660 /opt/etc/pihole
+ 
+ # Logrotate config file need to be owned by root and must not be writable by group and others
+-chown root:root /opt/etc/pihole/logrotate
++chown 0:0 /opt/etc/pihole/logrotate
+ chmod 0644 /opt/etc/pihole/logrotate
+ 
+ # allow all users to enter the directories
+@@ -38,9 +38,9 @@ find /opt/etc/pihole -type d -exec chmod 0755 {} \;
+ # Should be removed with Pi-hole v6.0
+ if [ ! -f /opt/var/log/pihole.log ]; then
+     ln -sf /opt/var/log/pihole/pihole.log /opt/var/log/pihole.log
+-    chown -h pihole:pihole /opt/var/log/pihole.log
++    [ "$(id -u pihole 2> /dev/null)" != "" ] && chown -h pihole:pihole /opt/var/log/pihole.log
+ fi
+ if [ ! -f /opt/var/log/pihole-FTL.log ]; then
+     ln -sf /opt/var/log/pihole/FTL.log /opt/var/log/pihole-FTL.log
+-    chown -h pihole:pihole /opt/var/log/pihole-FTL.log
++    [ "$(id -u pihole 2> /dev/null)" != "" ] && chown -h pihole:pihole /opt/var/log/pihole-FTL.log
+ fi
+diff --git a/gravity.sh b/gravity.sh
+index 2b2574db..3adf55c1 100755
+--- a/gravity.sh
++++ b/gravity.sh
+@@ -65,7 +65,7 @@ generate_gravity_database() {
+     echo -e "   ${CROSS} Unable to create ${gravityDBfile}"
+     return 1
+   fi
+-  chown pihole:pihole "${gravityDBfile}"
++  [ "$(id -u pihole 2> /dev/null)" != "" ] && chown pihole:pihole "${gravityDBfile}"
+   chmod g+w "${piholeDir}" "${gravityDBfile}"
+ }
+ 
+@@ -956,7 +956,7 @@ fi
+ update_gravity_timestamp
+ 
+ # Ensure proper permissions are set for the database
+-chown pihole:pihole "${gravityTEMPfile}"
++[ "$(id -u pihole 2> /dev/null)" != "" ] && chown pihole:pihole "${gravityTEMPfile}"
+ chmod g+w "${piholeDir}" "${gravityTEMPfile}"
+ 
+ # Build the tree

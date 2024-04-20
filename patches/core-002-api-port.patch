@@ -1,0 +1,14 @@
+diff --git a/advanced/Scripts/api.sh b/advanced/Scripts/api.sh
+index 18a48ce7..88a9e8b4 100755
+--- a/advanced/Scripts/api.sh
++++ b/advanced/Scripts/api.sh
+@@ -26,7 +26,8 @@ TestAPIAvailability() {
+     # Query the API URLs from FTL using CHAOS TXT local.api.ftl
+     # The result is a space-separated enumeration of full URLs
+     # e.g., "http://localhost:80/api/" "https://localhost:443/api/"
+-    chaos_api_list="$(dig +short chaos txt local.api.ftl @127.0.0.1)"
++    #shellcheck disable=SC2046
++    chaos_api_list="$(dig +short chaos txt local.api.ftl @127.0.0.1 -p "$(getFTLConfigValue dns.port)")"
+ 
+     # If the query was not successful, the variable is empty
+     if [ -z "${chaos_api_list}" ]; then

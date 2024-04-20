@@ -1,0 +1,27 @@
+diff --git a/advanced/Scripts/piholeLogFlush.sh b/advanced/Scripts/piholeLogFlush.sh
+index 4d97fec5..1d9c3962 100755
+--- a/advanced/Scripts/piholeLogFlush.sh
++++ b/advanced/Scripts/piholeLogFlush.sh
+@@ -66,7 +66,7 @@ else
+     deleted=$(pihole-FTL sqlite3 -ni "${DBFILE}" "DELETE FROM query_storage WHERE timestamp >= strftime('%s','now')-86400; select changes() from query_storage limit 1")
+ 
+     # Restart pihole-FTL to force reloading history
+-    sudo pihole restartdns
++    pihole restartdns
+ fi
+ 
+ if [[ "$*" != *"quiet"* ]]; then
+diff --git a/pihole b/pihole
+index 7c84771c..72f1fd95 100755
+--- a/pihole
++++ b/pihole
+@@ -561,6 +561,9 @@ case "${1}" in
+   *                             ) helpFunc;;
+ esac
+ 
++need_root=0
++USER=pihole
++
+ # Must be root to use this tool for most functions
+ if [[ ! $EUID -eq 0 && need_root -eq 1 ]];then
+   if [[ -x "$(command -v sudo)" ]]; then

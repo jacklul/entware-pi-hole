@@ -1,0 +1,53 @@
+diff --git a/advanced/Scripts/updatecheck.sh b/advanced/Scripts/updatecheck.sh
+index 12d24691..3a2adf2e 100755
+--- a/advanced/Scripts/updatecheck.sh
++++ b/advanced/Scripts/updatecheck.sh
+@@ -65,16 +65,21 @@ if [[ "$1" == "reboot" ]]; then
+     sleep 30
+ fi
+ 
++if [ -f "$VERSION_FILE" ]; then
++    # shellcheck disable=SC1090
++    . "$VERSION_FILE"
++fi
++
+ # get Core versions
+ 
+-CORE_VERSION="$(get_local_version /opt/etc/.pihole)"
+-addOrEditKeyValPair "${VERSION_FILE}" "CORE_VERSION" "${CORE_VERSION}"
++#CORE_VERSION="$(get_local_version /opt/etc/.pihole)"
++#addOrEditKeyValPair "${VERSION_FILE}" "CORE_VERSION" "${CORE_VERSION}"
+ 
+-CORE_BRANCH="$(get_local_branch /opt/etc/.pihole)"
+-addOrEditKeyValPair "${VERSION_FILE}" "CORE_BRANCH" "${CORE_BRANCH}"
++#CORE_BRANCH="$(get_local_branch /opt/etc/.pihole)"
++#addOrEditKeyValPair "${VERSION_FILE}" "CORE_BRANCH" "${CORE_BRANCH}"
+ 
+-CORE_HASH="$(get_local_hash /opt/etc/.pihole)"
+-addOrEditKeyValPair "${VERSION_FILE}" "CORE_HASH" "${CORE_HASH}"
++#CORE_HASH="$(get_local_hash /opt/etc/.pihole)"
++#addOrEditKeyValPair "${VERSION_FILE}" "CORE_HASH" "${CORE_HASH}"
+ 
+ GITHUB_CORE_VERSION="$(get_remote_version pi-hole "${CORE_BRANCH}")"
+ addOrEditKeyValPair "${VERSION_FILE}" "GITHUB_CORE_VERSION" "${GITHUB_CORE_VERSION}"
+@@ -84,14 +89,14 @@ addOrEditKeyValPair "${VERSION_FILE}" "GITHUB_CORE_HASH" "${GITHUB_CORE_HASH}"
+ 
+ # get Web versions
+ 
+-WEB_VERSION="$(get_local_version /opt/share/pihole/www/admin)"
+-addOrEditKeyValPair "${VERSION_FILE}" "WEB_VERSION" "${WEB_VERSION}"
++#WEB_VERSION="$(get_local_version /opt/share/pihole/www/admin)"
++#addOrEditKeyValPair "${VERSION_FILE}" "WEB_VERSION" "${WEB_VERSION}"
+ 
+-WEB_BRANCH="$(get_local_branch /opt/share/pihole/admin)"
+-addOrEditKeyValPair "${VERSION_FILE}" "WEB_BRANCH" "${WEB_BRANCH}"
++#WEB_BRANCH="$(get_local_branch /opt/share/pihole/admin)"
++#addOrEditKeyValPair "${VERSION_FILE}" "WEB_BRANCH" "${WEB_BRANCH}"
+ 
+-WEB_HASH="$(get_local_hash /opt/share/pihole/admin)"
+-addOrEditKeyValPair "${VERSION_FILE}" "WEB_HASH" "${WEB_HASH}"
++#WEB_HASH="$(get_local_hash /opt/share/pihole/admin)"
++#addOrEditKeyValPair "${VERSION_FILE}" "WEB_HASH" "${WEB_HASH}"
+ 
+ GITHUB_WEB_VERSION="$(get_remote_version web "${WEB_BRANCH}")"
+ addOrEditKeyValPair "${VERSION_FILE}" "GITHUB_WEB_VERSION" "${GITHUB_WEB_VERSION}"

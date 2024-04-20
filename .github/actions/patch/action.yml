@@ -1,0 +1,22 @@
+name: Apply patches
+
+inputs:
+  patches_prefix:
+    required: true
+  git_path:
+    required: false
+    default: ./stage
+
+runs:
+  using: composite
+
+  steps:
+    - name: Apply patches and run tests
+      shell: bash
+      run: |
+        bash ./scripts/patch.sh "${{ inputs.patches_prefix }}" "${{ inputs.git_path }}"
+        bash ./scripts/test.sh "${{ inputs.patches_prefix }}" "${{ inputs.git_path }}"
+
+    - name: Dump repository version infos
+      shell: bash
+      run: bash ./scripts/version.sh "${{ inputs.git_path }}"

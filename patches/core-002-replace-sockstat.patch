@@ -1,0 +1,33 @@
+diff --git a/pihole b/pihole
+index 7c84771..cd35f2f 100755
+--- a/pihole
++++ b/pihole
+@@ -317,7 +317,12 @@ analyze_ports() {
+   # function is getting called
+   # Check individual address family/protocol combinations
+   # For a healthy Pi-hole, they should all be up (nothing printed)
+-  lv4="$(ss --ipv4 --listening --numeric --tcp --udp src :${port})"
++  if [ -f "$(command -v ss)" ]; then
++    lv4="$(ss --ipv4 --listening --numeric --tcp --udp src :${port})"
++  else
++    lv4="$(netstat -tuln -4 | grep ":${port} ")"
++  fi
++
+   if grep -q "udp " <<< "${lv4}"; then
+       echo -e "     ${TICK} UDP (IPv4)"
+   else
+@@ -328,7 +333,13 @@ analyze_ports() {
+   else
+       echo -e "     ${CROSS} TCP (IPv4)"
+   fi
+-  lv6="$(ss --ipv6 --listening --numeric --tcp --udp src :${port})"
++
++  if [ -f "$(command -v ss)" ]; then
++    lv6="$(ss --ipv6 --listening --numeric --tcp --udp src :${port})"
++  else
++    lv6="$(netstat -tuln -6 | grep ":${port} ")"
++  fi
++
+   if grep -q "udp " <<< "${lv6}"; then
+       echo -e "     ${TICK} UDP (IPv6)"
+   else

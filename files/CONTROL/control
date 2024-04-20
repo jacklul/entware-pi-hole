@@ -1,0 +1,9 @@
+Package: pi-hole
+Version: 
+Depends: bash, cron, logrotate, curl, git-http, findutils, grep, jq, psmisc, coreutils-id, coreutils-install, coreutils-mktemp, coreutils-nohup, coreutils-sha1sum, coreutils-stat, coreutils-timeout, coreutils-whoami, procps-ng-pgrep, iputils-ping, bind-dig, net-tools
+Section: net
+URL: https://github.com/jacklul/entware-pi-hole
+Maintainer: Jack'lul, https://jacklul.github.io
+Architecture: 
+Installed-Size: 
+Description: The Pi-hole® is a DNS sinkhole that protects your devices from unwanted content without installing any client-side software.

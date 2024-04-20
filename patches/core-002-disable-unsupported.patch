@@ -1,0 +1,50 @@
+diff --git a/pihole b/pihole
+index 7c84771c..13b5b9c9 100755
+--- a/pihole
++++ b/pihole
+@@ -469,6 +469,11 @@ unsupportedFunc(){
+   exit 0
+ }
+ 
++unsupportedInEntwareFunc(){
++  echo "Function not supported in Entware package release"
++  exit 0
++}
++
+ helpFunc() {
+   echo "Usage: pihole [options]
+ Example: 'pihole -w -h'
+@@ -533,7 +538,7 @@ case "${1}" in
+   "-c" | "chronometer"          ) chronometerFunc "$@";;
+   "-q" | "query"                ) queryFunc "$@";;
+   "status"                      ) statusFunc "$2";;
+-  "tricorder"                   ) tricorderFunc;;
++  "tricorder"                   ) unsupportedInEntwareFunc;;
+ 
+   # we need to add all arguments that require sudo power to not trigger the * argument
+   "-w" | "whitelist"            ) ;;
+@@ -597,19 +602,19 @@ case "${1}" in
+   "--regex" | "regex"           ) listFunc "$@";;
+   "--white-regex" | "white-regex" ) listFunc "$@";;
+   "--white-wild" | "white-wild"   ) listFunc "$@";;
+-  "-d" | "debug"                ) debugFunc "$@";;
++  "-d" | "debug"                ) unsupportedInEntwareFunc;;
+   "-f" | "flush"                ) flushFunc "$@";;
+-  "-up" | "updatePihole"        ) updatePiholeFunc "$@";;
+-  "-r"  | "reconfigure"         ) reconfigurePiholeFunc;;
++  "-up" | "updatePihole"        ) unsupportedInEntwareFunc;;
++  "-r"  | "reconfigure"         ) unsupportedInEntwareFunc;;
+   "-g" | "updateGravity"        ) updateGravityFunc "$@";;
+   "-l" | "logging"              ) piholeLogging "$@";;
+-  "uninstall"                   ) uninstallFunc;;
++  "uninstall"                   ) unsupportedInEntwareFunc;;
+   "enable"                      ) piholeEnable 1;;
+   "disable"                     ) piholeEnable 0 "$2";;
+   "restartdns"                  ) restartDNS "$2";;
+   "reloaddns"                   ) restartDNS "reload";;
+   "setpassword"                 ) SetWebPassword "$@";;
+-  "checkout"                    ) piholeCheckoutFunc "$@";;
++  "checkout"                    ) unsupportedInEntwareFunc;;
+   "updatechecker"               ) shift; updateCheckFunc "$@";;
+   "arpflush"                    ) arpFunc "$@";;
+   "-t" | "tail"                 ) tailFunc "$2";;
