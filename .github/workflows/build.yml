@@ -4,8 +4,6 @@ on:
   create:
     tags:
       - '^\d{4}\.\d{2}\.\d{2}-\d+$'
-    branches:
-      - master
   #schedule:
   #  - cron:  '0 0 * * 1'
   workflow_dispatch:
