@@ -25,10 +25,7 @@ sed "s/59 17 /\$((1 + RANDOM % 58)) \$((12 + RANDOM % 8)) /" -i /opt/etc/cron.d/
 EOF
 
             PI_HOLE_DBFILE="$(pihole-FTL --config -q files.gravity)"
-            if [ -z "$PI_HOLE_DBFILE" ] || [ ! -f "$PI_HOLE_DBFILE" ]; then
-                echo "No gravity database found ($PI_HOLE_DBFILE) - please run 'pihole -g' first!"
-                exit 1
-            fi
+            [ -n "$PI_HOLE_DBFILE" ] && [ ! -f "$PI_HOLE_DBFILE" ] && pihole -g
         ;;
     esac
 
