@@ -3,7 +3,7 @@
 Run [Pi-hole](https://pi-hole.net) directly on your [Entware](https://github.com/Entware/Entware) supported device.  
 **Releases here are unofficial and not supported by the Pi-hole developers.**
 
-#### Warning: this project is a proof-of-concept-alpha™ and was tested only on Asus RT-AX58U v2 running official firmware.
+#### Warning: this project is a proof-of-concept-alpha™ and was tested only on Asus RT-AX58U v2 running official firmware and BusyBox v1.24.1.
 
 ### Notable changes
 

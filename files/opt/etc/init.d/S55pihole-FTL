@@ -9,20 +9,30 @@ PREARGS=""
 DESC=$PROCS
 PATH=/opt/sbin:/opt/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
-if [ -f /opt/bin/id ]; then
-    ARGS=""
-    if [ "$(id -u pihole 2> /dev/null)" = "" ]; then # use the ID 0 user when 'pihole' is not found
-        ARGS="-- -u $(id -nu 0)"
-    fi
-fi
-
 if [ -f /opt/bin/bash ]; then
     case $1 in
+        install)
+            # Install missing dependencies then exit
+            bash /opt/share/pihole/dependencies.sh "$1"
+            exit
+        ;;
         start | restart)
+            # Install missing dependencies
+            bash /opt/share/pihole/dependencies.sh "$1" || exit 1
+
             # Set random gravity update and updatechecker times
+            # Comment/uncomment logrotate line based on binary presence
             bash <<EOF
-sed "s/59 1 /\$((1 + RANDOM % 58)) \$((3 + RANDOM % 2)) /" -i /opt/etc/cron.d/pihole
-sed "s/59 17 /\$((1 + RANDOM % 58)) \$((12 + RANDOM % 8)) /" -i /opt/etc/cron.d/pihole
+if [ -f "/opt/etc/cron.d/pihole" ]; then
+    sed "s/59 1 /\$((1 + RANDOM % 58)) \$((3 + RANDOM % 2)) /" -i /opt/etc/cron.d/pihole
+    sed "s/59 17 /\$((1 + RANDOM % 58)) \$((12 + RANDOM % 8)) /" -i /opt/etc/cron.d/pihole
+
+    if [ -f "\$(command -v logrotate)" ]; then
+        sed '/sbin\/logrotate/s/^#//' -i /opt/etc/cron.d/pihole
+    else
+        sed '/sbin\/logrotate/s/^/#/' -i /opt/etc/cron.d/pihole
+    fi
+fi
 EOF
 
             # Make sure gravity database exists
@@ -31,15 +41,24 @@ EOF
         ;;
     esac
 
-    # Execute pre start script, we have to run poststop here as well for cleanup
+    # Execute pre start script through rc.func's PRECMD, we have to run poststop here as well for cleanup
     PRECMD="bash /opt/share/pihole/pihole-FTL-poststop.sh ; bash /opt/share/pihole/pihole-FTL-prestart.sh"
+fi
+
+if [ -f /opt/bin/id ]; then
+    ARGS=""
+
+    if [ "$(id -u pihole 2> /dev/null)" = "" ]; then # use the ID 0 user when 'pihole' is not found
+        ARGS="-- -u $(id -nu 0)"
+    fi
 fi
 
 . /opt/etc/init.d/rc.func
 
 if [ -f /opt/bin/bash ]; then
     case $1 in
-        stop | kill) # Run poststop when stopping by user
+        stop | kill)
+            # Run poststop when stopping by user
             bash /opt/share/pihole/pihole-FTL-poststop.sh
         ;;
     esac
