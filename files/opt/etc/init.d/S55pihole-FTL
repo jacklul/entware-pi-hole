@@ -19,19 +19,19 @@ fi
 if [ -f /opt/bin/bash ]; then
     case $1 in
         start | restart)
-			# Set random gravity update and updatechecker times
+            # Set random gravity update and updatechecker times
             bash <<EOF
 sed "s/59 1 /\$((1 + RANDOM % 58)) \$((3 + RANDOM % 2)) /" -i /opt/etc/cron.d/pihole
 sed "s/59 17 /\$((1 + RANDOM % 58)) \$((12 + RANDOM % 8)) /" -i /opt/etc/cron.d/pihole
 EOF
 
-			# Make sure gravity database exists
+            # Make sure gravity database exists
             PI_HOLE_DBFILE="$(pihole-FTL --config -q files.gravity)"
             [ -n "$PI_HOLE_DBFILE" ] && [ ! -f "$PI_HOLE_DBFILE" ] && pihole -g
         ;;
     esac
 
-	# Execute pre start script, we have to run poststop here as well for cleanup
+    # Execute pre start script, we have to run poststop here as well for cleanup
     PRECMD="bash /opt/share/pihole/pihole-FTL-poststop.sh ; bash /opt/share/pihole/pihole-FTL-prestart.sh"
 fi
 

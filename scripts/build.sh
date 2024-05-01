@@ -13,13 +13,13 @@ set -e
 [ -z "$PIHOLE_REF" ] && PIHOLE_REF=master
 
 if [ -z "$DESTINATION_DIR" ]; then
-	echo "Error: Destination directory not provided"
-	exit 1
+    echo "Error: Destination directory not provided"
+    exit 1
 fi
 
 if [ ! -d "$DESTINATION_DIR" ]; then
-	echo "Error: Directory $DESTINATION_DIR does not exist"
-	exit 1
+    echo "Error: Directory $DESTINATION_DIR does not exist"
+    exit 1
 fi
 
 [ -z "$SEARCH_DIR" ] && SEARCH_DIR="$(dirname "$SCRIPT_DIR")"
@@ -83,7 +83,7 @@ echo "Downloading macvendor.db..."
 curl -sSL "https://ftl.pi-hole.net/macvendor.db" -o "$DESTINATION_DIR/opt/etc/pihole/macvendor.db"
 
 if [ ! -f "$DESTINATION_DIR/opt/etc/pihole/versions" ]; then
-	echo "Creating versions file..."
+    echo "Creating versions file..."
 
     for PART in CORE WEB FTL; do
         PART_PATH="${PART}_PATH"

@@ -15,31 +15,31 @@ DESTINATION_DIR="$4"
 set -e
 
 if [ -z "$PACKAGE_DIR" ]; then
-	echo "Error: Package directory not provided"
-	exit 1
+    echo "Error: Package directory not provided"
+    exit 1
 fi
 
 if [ ! -d "$PACKAGE_DIR" ]; then
-	echo "Error: Directory $PACKAGE_DIR does not exist"
-	exit 1
+    echo "Error: Directory $PACKAGE_DIR does not exist"
+    exit 1
 fi
 
 if [ -z "$PACKAGE_VERSION" ]; then
-	echo "Error: Package version not provided"
-	exit 1
+    echo "Error: Package version not provided"
+    exit 1
 fi
 
 if [ -z "$PACKAGE_ARCHITECTURE" ]; then
-	echo "Error: Package architecture not provided"
-	exit 1
+    echo "Error: Package architecture not provided"
+    exit 1
 fi
 
 if [ -z "$DESTINATION_DIR" ]; then
-	DESTINATION_DIR="$(dirname "$SCRIPT_DIR")"
+    DESTINATION_DIR="$(dirname "$SCRIPT_DIR")"
 else
-	if [ ! -d "$DESTINATION_DIR" ]; then
-		mkdir -pv "$DESTINATION_DIR"
-	fi
+    if [ ! -d "$DESTINATION_DIR" ]; then
+        mkdir -pv "$DESTINATION_DIR"
+    fi
 fi
 
 # If version string is a branch name then append a timestamp to it
@@ -56,8 +56,8 @@ PACKAGE_DIR="$(realpath "$PACKAGE_DIR")"
 DESTINATION_DIR="$(realpath "$DESTINATION_DIR")"
 
 if [ ! -d "$PACKAGE_DIR/CONTROL" ]; then
-	echo "Error: Directory $PACKAGE_DIR has no CONTROL subdirectory"
-	exit 1
+    echo "Error: Directory $PACKAGE_DIR has no CONTROL subdirectory"
+    exit 1
 fi
 
 for FIELD in Package Version Depends Section URL Maintainer Architecture Installed-Size Description; do
