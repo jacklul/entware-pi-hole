@@ -79,8 +79,14 @@ echo "Setting execution permissions..."
 chmod -v 755 "$DESTINATION_DIR/opt/sbin/pihole-FTL" "$DESTINATION_DIR/opt/sbin/pihole" "$DESTINATION_DIR/opt/etc/init.d/S55pihole-FTL"
 find "$DESTINATION_DIR/opt/share/pihole" -type f -name "*.sh" -exec chmod 0755 {} \;
 
-echo "Downloading macvendor.db..."
-curl -sSL "https://ftl.pi-hole.net/macvendor.db" -o "$DESTINATION_DIR/opt/etc/pihole/macvendor.db"
+if [ ! -f "$DESTINATION_DIR/opt/etc/pihole/macvendor.db" ]; then
+    echo "Downloading macvendor.db..."
+
+    if ! curl -sSL "https://ftl.pi-hole.net/macvendor.db" -o "$DESTINATION_DIR/opt/etc/pihole/macvendor.db"; then
+        echo "Error: Could not download macvendor.db"
+        exit 1
+    fi
+fi
 
 if [ ! -f "$DESTINATION_DIR/opt/etc/pihole/versions" ]; then
     echo "Creating versions file..."
