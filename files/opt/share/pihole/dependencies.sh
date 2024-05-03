@@ -46,7 +46,7 @@ TO_INSTALL=()
 INTERACTIVE=$([ "$(readlink -f /proc/$$/fd/0 2> /dev/null)" = "/dev/null" ] && echo false || echo true)
 
 # Supress output if called with start or restart argument
-SILENT=$({ [ "$1" = "start" ] || [ "$1" = "restart" ] ; } && echo true || echo false)
+SILENT=$([ "$1" = "silent" ] && echo true || echo false)
 
 function cecho() {
     if [ "$INTERACTIVE" = true ] && [ "$SILENT" = false ]; then

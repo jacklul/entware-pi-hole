@@ -14,19 +14,22 @@ There are some changes compared to the official releases:
 
 ## Installation
 
-Add this repository to your `opkg.conf` configuration:
+- Add this repository to your `opkg.conf` configuration:
 
 ```bash
 src/gz entware-pi-hole https://jacklul.github.io/entware-pi-hole/[architecture]
 # replace [architecture] with one of the supported architectures
 ```
 
-Then run `opkg update && opkg install pi-hole`.
+- Then run `opkg update` and `opkg install pi-hole`
 
-You can also directly install the package from the [releases tab](https://github.com/jacklul/entware-pi-hole/releases/latest) or [opkg repository](https://jacklul.github.io/entware-pi-hole/) through `opkg install path-to-package.ipk` command.
+_You can also directly install the package from the [releases tab](https://github.com/jacklul/entware-pi-hole/releases/latest) or [opkg repository](https://jacklul.github.io/entware-pi-hole/) using `opkg install path-to-package.ipk` command._
 
-After the installation start `pihole-FTL` with `/opt/etc/init.d/S55pihole-FTL start`.  
-Default configuration uses Google's DNS as upstream servers, runs HTTP(S) server on ports 5080/5443 and DNS resolver on 5053 (loopback interface only) - everything can be changed in `/opt/etc/pihole/pihole.toml`.
+- Run install tasks with `/opt/etc/init.d/S55pihole-FTL install` command
+
+- Start `pihole-FTL` by running `/opt/etc/init.d/S55pihole-FTL start`
+
+_Default configuration uses Google's DNS as upstream servers, runs HTTP(S) server on ports 5080/5443 and DNS resolver on 5053 (loopback interface only) - everything can be changed in `/opt/etc/pihole/pihole.toml`._
 
 ## Support
 
