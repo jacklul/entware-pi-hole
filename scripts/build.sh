@@ -79,15 +79,6 @@ echo "Setting execution permissions..."
 chmod -v 755 "$DESTINATION_DIR/opt/sbin/pihole-FTL" "$DESTINATION_DIR/opt/sbin/pihole" "$DESTINATION_DIR/opt/etc/init.d/S55pihole-FTL"
 find "$DESTINATION_DIR/opt/share/pihole" -type f -name "*.sh" -exec chmod 0755 {} \;
 
-if [ ! -f "$DESTINATION_DIR/opt/etc/pihole/macvendor.db" ]; then
-    echo "Downloading macvendor.db..."
-
-    if ! curl -sSL "https://ftl.pi-hole.net/macvendor.db" -o "$DESTINATION_DIR/opt/etc/pihole/macvendor.db"; then
-        echo "Error: Could not download macvendor.db"
-        exit 1
-    fi
-fi
-
 if [ ! -f "$DESTINATION_DIR/opt/etc/pihole/versions" ]; then
     echo "Creating versions file..."
 
@@ -105,6 +96,43 @@ if [ ! -f "$DESTINATION_DIR/opt/etc/pihole/versions" ]; then
             } >> "$DESTINATION_DIR/opt/etc/pihole/versions"
         fi
     done
+fi
+
+if [ ! -f "$DESTINATION_DIR/opt/etc/pihole/macvendor.db" ]; then
+    echo "Downloading macvendor.db..."
+
+    if ! curl -sSL "https://ftl.pi-hole.net/macvendor.db" -o "$DESTINATION_DIR/opt/etc/pihole/macvendor.db"; then
+        echo "Error: Could not download macvendor.db"
+        exit 1
+    fi
+fi
+
+#shellcheck disable=SC2034
+SKIP_INSTALL=true # Allows sourcing installer without running it
+#shellcheck disable=SC1091
+source "$CORE_PATH/automated install/basic-install.sh"
+
+if [ ! -f "$DESTINATION_DIR/opt/etc/pihole/dns-servers.conf" ]; then
+    echo "Creating dns-servers.conf..."
+
+    if [ -z "$DNS_SERVERS" ]; then
+        echo "Error: Could not load DNS_SERVERS variable from basic-install.sh"
+        exit 1
+    fi
+
+    echo "$DNS_SERVERS" > "$DESTINATION_DIR/opt/etc/pihole/dns-servers.conf"
+fi
+
+if [ ! -f "$DESTINATION_DIR/opt/etc/pihole/adlists.list" ]; then
+    echo "Creating adlists.list..."
+
+    #shellcheck disable=SC2034
+    adlistFile="$DESTINATION_DIR/opt/etc/pihole/adlists.list"
+
+    if ! installDefaultBlocklists; then
+        echo "Error: Could not install default adlists using basic-install.sh"
+        exit 1
+    fi
 fi
 
 echo "Package created in $DESTINATION_DIR"
