@@ -77,10 +77,6 @@ cp -fv "$FTL_PATH/pihole-FTL" "$DESTINATION_DIR/opt/sbin/pihole-FTL"
 echo "Copying $ROOT_PATH/files/* to $DESTINATION_DIR"
 cp -frv "$ROOT_PATH/files"/* "$DESTINATION_DIR"
 
-echo "Setting execution permissions..."
-chmod -v 755 "$DESTINATION_DIR/opt/sbin/pihole-FTL" "$DESTINATION_DIR/opt/sbin/pihole" "$DESTINATION_DIR/opt/etc/init.d/S55pihole-FTL"
-find "$DESTINATION_DIR/opt/share/pihole" -type f -name "*.sh" -exec chmod 0755 {} \;
-
 if [ ! -f "$DESTINATION_DIR/opt/etc/pihole/macvendor.db" ]; then
     echo "Downloading macvendor.db..."
 
@@ -136,5 +132,11 @@ if [ ! -f "$DESTINATION_DIR/opt/etc/pihole/adlists.list" ]; then
         exit 1
     fi
 fi
+
+echo "Setting permissions..."
+find "$DESTINATION_DIR" -type f -exec chmod -v 0644 {} \;
+find "$DESTINATION_DIR" -type d -exec chmod -v 0755 {} \;
+chmod -v 755 "$DESTINATION_DIR/opt/sbin/"* "$DESTINATION_DIR/opt/etc/init.d/"*
+find "$DESTINATION_DIR/opt/share/pihole" -type f \( -name "*.sh" -o -name "COL_TABLE" \) -exec chmod 0755 {} \;
 
 echo "Package created in $DESTINATION_DIR"

@@ -73,6 +73,7 @@ cd "$PACKAGE_DIR"
 TMP_DIR="$DESTINATION_DIR/IPKG_BUILD.$$"
 mkdir -vp "$TMP_DIR"
 
+sudo chown -R 0:0 "$PACKAGE_DIR/opt"
 tar --exclude CONTROL --format=gnu --numeric-owner --sort=name -cpf - --mtime="$TIMESTAMP" . | gzip -n - > "$TMP_DIR/data.tar.gz"
 
 INSTALLED_SIZE=$(zcat < "$TMP_DIR"/data.tar.gz | wc -c)
@@ -81,6 +82,7 @@ sed -e "s/^Version:.*/Version: $PACKAGE_VERSION/" -i "$PACKAGE_DIR/CONTROL/contr
 sed -e "s/^Architecture:.*/Architecture: $PACKAGE_ARCHITECTURE/" -i "$PACKAGE_DIR/CONTROL/control"
 sed -e "s/^Installed-Size:.*/Installed-Size: $INSTALLED_SIZE/" -i "$PACKAGE_DIR/CONTROL/control"
 
+sudo chown -R 0:0 "$PACKAGE_DIR/CONTROL"
 ( cd "$PACKAGE_DIR/CONTROL" && tar --format=gnu --numeric-owner --sort=name -cf - --mtime="$TIMESTAMP" . | gzip -n - > "$TMP_DIR/control.tar.gz" )
 
 echo "2.0" > "$TMP_DIR/debian-binary"
@@ -95,6 +97,8 @@ fi
 PACKAGE_FILE="$DESTINATION_DIR/${PACKAGE_NAME}_${PACKAGE_VERSION}_${PACKAGE_ARCHITECTURE}.ipk"
 
 rm -f "$PACKAGE_FILE"
+
+sudo chown 0:0 "$TMP_DIR/"*
 ( cd "$TMP_DIR" && tar --format=gnu --numeric-owner --sort=name -cf - --mtime="$TIMESTAMP" ./debian-binary ./data.tar.gz ./control.tar.gz | gzip -n - > "$PACKAGE_FILE" )
 
 rm -fr "$TMP_DIR"
