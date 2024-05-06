@@ -68,6 +68,7 @@ mkdir ./build
 ./scripts/build.sh ./build
 
 # then build the IPK package
+# (you will need sudo access to set ownership of files to uid/gid 0)
 ./scripts/ipk.sh ./build
 
 # the package will be saved at the root of this repository
