@@ -10,7 +10,7 @@ DESC=$PROCS
 PATH=/opt/sbin:/opt/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 install() {
-    # Install missing script dependencies
+    # Install missing dependencies required by scripts
     bash /opt/share/pihole/dependencies.sh "$1" || exit 1
 
     # Set random gravity update and updatechecker times
@@ -31,6 +31,7 @@ EOF
     # Make sure gravity database exists
     PI_HOLE_DBFILE="$(pihole-FTL --config -q files.gravity)"
     if [ -n "$PI_HOLE_DBFILE" ] && [ ! -f "$PI_HOLE_DBFILE" ]; then
+        logger "Creating gravity database $PI_HOLE_DBFILE..."
         pihole -g || exit 1
     fi
 }
