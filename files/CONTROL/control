@@ -1,6 +1,6 @@
 Package: pi-hole
 Version: 
-Depends: bash, cron, ca-certificates, curl, git-http, bind-dig, iputils-ping, net-tools, findutils, grep, sed, jq, unzip, psmisc, procps-ng-pgrep
+Depends: bash, cron, curl, git-http, ca-bundle, bind-dig, iputils-ping, net-tools, findutils, grep, sed, jq, unzip, psmisc, procps-ng-pgrep
 Section: net
 URL: https://github.com/jacklul/entware-pi-hole
 Maintainer: Jack'lul, https://jacklul.github.io
