@@ -69,7 +69,7 @@ mkdir ./build
 
 # then build the IPK package
 # (you will need sudo access to set ownership of files to uid/gid 0)
-./scripts/ipk.sh ./build
+./scripts/ipk.sh ./build dev armv7-3.2
 
 # the package will be saved at the root of this repository
 ```
