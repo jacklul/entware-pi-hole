@@ -5,6 +5,7 @@
 [dns]
   port = 5053
   interface = "lo"
+  listeningMode = "BIND"
   upstreams = [
     "8.8.8.8",
     "8.8.4.4"
