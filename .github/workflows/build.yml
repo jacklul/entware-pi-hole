@@ -4,14 +4,16 @@ on:
   create:
     tags:
       - '^\d{4}\.\d{2}\.\d{2}-\d+$'
-  #schedule:
-  #  - cron:  '0 0 * * 1' # @TODO would probably be better to have a separate workflow for automatic updates when possible
   workflow_dispatch:
 
 env:
-  REF_CORE: development-v6                            # commit hash or tag
-  REF_WEB: development-v6                             # commit hash or tag
-  REF_FTL: development-v6                             # commit hash or tag
+  CORE_HASH: development-v6
+  WEB_HASH: development-v6
+  FTL_HASH: development-v6
+  CORE_BRANCH: development-v6
+  WEB_BRANCH: development-v6
+  FTL_BRANCH: development-v6
+# @TODO when v6 is released *_HASH should be set commit hashes and *_BRANCH to release branches
 
 jobs:
   set-version:
@@ -44,7 +46,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: pi-hole/pi-hole
-          ref: ${{ env.REF_CORE }}
+          ref: ${{ startsWith(github.ref, 'refs/tags/') && env.CORE_HASH || env.CORE_BRANCH }}
           path: ./stage
 
       - name: Cache result
@@ -89,7 +91,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: pi-hole/web
-          ref: ${{ env.REF_WEB }}
+          ref: ${{ startsWith(github.ref, 'refs/tags/') && env.WEB_HASH || env.WEB_BRANCH }}
           path: ./stage
 
       - name: Cache result
@@ -165,7 +167,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: pi-hole/FTL
-          ref: ${{ env.REF_FTL }}
+          ref: ${{ startsWith(github.ref, 'refs/tags/') && env.FTL_HASH || env.FTL_BRANCH }}
           path: ./stage
 
       - name: Cache result
@@ -390,8 +392,6 @@ jobs:
         if: ${{ startsWith(github.ref, 'refs/tags/') }}
         with:
           files: ./artifacts/*/*.ipk
-          draft: true
-          # @TODO Draft probably not needed anymore after v6 releases
 
       - name: Collect new packages
         run: |

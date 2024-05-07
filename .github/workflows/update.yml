@@ -1,0 +1,139 @@
+name: Auto Update
+
+on:
+  schedule:
+    - cron:  '0 0 * * *'
+  workflow_dispatch:
+
+env:
+  CORE_BRANCH: development-v6
+  WEB_BRANCH: development-v6
+  FTL_BRANCH: development-v6
+# @TODO when v6 is released these should be set to release branches
+
+jobs:
+  check:
+    concurrency: check
+    runs-on: ubuntu-latest
+    continue-on-error: true
+
+    outputs:
+      CORE_HASH: ${{ steps.new-hashes.outputs.CORE_HASH }}
+      WEB_HASH: ${{ steps.new-hashes.outputs.WEB_HASH }}
+      FTL_HASH: ${{ steps.new-hashes.outputs.FTL_HASH }}
+      STATUS: ${{ steps.status.outputs.RESULT }}
+
+    steps:
+      - name: Checkout own repository
+        uses: actions/checkout@v4
+
+      - name: Checkout pi-hole/pi-hole repository
+        uses: actions/checkout@v4
+        with:
+          repository: pi-hole/pi-hole
+          ref: ${{ env.CORE_BRANCH }}
+          path: ./dev/core
+
+      - name: Checkout pi-hole/web repository
+        uses: actions/checkout@v4
+        with:
+          repository: pi-hole/web
+          ref: ${{ env.WEB_BRANCH }}
+          path: ./dev/web
+
+      - name: Checkout pi-hole/FTL repository
+        uses: actions/checkout@v4
+        with:
+          repository: pi-hole/FTL
+          ref: ${{ env.FTL_BRANCH }}
+          path: ./dev/FTL
+
+      - name: Set old hashes
+        id: old-hashes
+        run: |
+          echo "CORE_HASH=$(sed -n "s/^  CORE_HASH: \([[:alnum:]]*\)\s*$/\1/p" ./.github/workflows/build.yml)" >> $GITHUB_OUTPUT
+          echo "WEB_HASH=$(sed -n "s/^  WEB_HASH: \([[:alnum:]]*\)\s*$/\1/p" ./.github/workflows/build.yml)" >> $GITHUB_OUTPUT
+          echo "FTL_HASH=$(sed -n "s/^  FTL_HASH: \([[:alnum:]]*\)\s*$/\1/p" ./.github/workflows/build.yml)" >> $GITHUB_OUTPUT
+          cat $GITHUB_OUTPUT
+
+      - name: Set new hashes
+        id: new-hashes
+        run: |
+          echo "CORE_HASH=$(git -C "./dev/core" rev-parse HEAD)" >> $GITHUB_OUTPUT
+          echo "WEB_HASH=$(git -C "./dev/web" rev-parse HEAD)" >> $GITHUB_OUTPUT
+          echo "FTL_HASH=$(git -C "./dev/FTL" rev-parse HEAD)" >> $GITHUB_OUTPUT
+          cat $GITHUB_OUTPUT
+
+      - name: Old hashes are not empty
+        if: ${{ steps.old-hashes.outputs.CORE_HASH == '' || steps.old-hashes.outputs.WEB_HASH == '' || steps.old-hashes.outputs.FTL_HASH == '' }}
+        run: exit 1
+
+      - name: At least one hash is different
+        if: ${{ steps.old-hashes.outputs.CORE_HASH == steps.new-hashes.outputs.CORE_HASH && steps.old-hashes.outputs.WEB_HASH == steps.new-hashes.outputs.WEB_HASH && steps.old-hashes.outputs.FTL_HASH == steps.new-hashes.outputs.FTL_HASH}}
+        run: exit 1
+
+      - name: Apply patches (core)
+        id: patch-core
+        uses: ./.github/actions/patch
+        with:
+          patches_prefix: core
+          git_path: ./dev/core
+
+      - name: Apply patches (web)
+        id: patch-web
+        uses: ./.github/actions/patch
+        with:
+          patches_prefix: web
+          git_path: ./dev/web
+
+      - name: Apply patches (FTL)
+        id: patch-FTL
+        uses: ./.github/actions/patch
+        with:
+          patches_prefix: FTL
+          git_path: ./dev/FTL
+
+      - name: Set status
+        id: status
+        run: echo "RESULT=true" >> $GITHUB_OUTPUT
+
+  update:
+    concurrency: update
+    needs: [check]
+    if: ${{ needs.check.outputs.STATUS == 'true' }}
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout own repository
+        uses: actions/checkout@v4
+
+      - name: Replace hashes in build workflow
+        run: |
+          sed 's/  CORE_HASH:.*$/  CORE_HASH: ${{ needs.check.outputs.CORE_HASH }}/' -i ./.github/workflows/build.yml
+          sed 's/  WEB_HASH:.*$/  WEB_HASH: ${{ needs.check.outputs.WEB_HASH }}/' -i ./.github/workflows/build.yml
+          sed 's/  FTL_HASH:.*$/  FTL_HASH: ${{ needs.check.outputs.FTL_HASH }}/' -i ./.github/workflows/build.yml
+
+      - name: Is repository modified?
+        id: modified
+        run: echo "RESULT=$([ "git diff" != "" ] && echo yes || echo no)" >> $GITHUB_OUTPUT
+
+      - name: Create tag
+        if: ${{ steps.modified.outputs.RESULT == 'yes' }}
+        id: tag
+        run: echo "RESULT=$(bash ./scripts/tag.sh)" >> $GITHUB_OUTPUT
+
+      - name: Print tag and changes
+        run: |
+          echo "New tag: ${{ steps.tag.outputs.RESULT }}"
+          git diff
+
+      - name: Commit and Push changes
+        if: ${{ steps.tag.outputs.RESULT != '' && github.event_name == 'schedule' }}
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'Automatic update to ${{ steps.tag.outputs.RESULT }}'
+          file_pattern: ./.github/workflow/build.yml
+          tagging_message: ${{ steps.tag.outputs.RESULT }}
