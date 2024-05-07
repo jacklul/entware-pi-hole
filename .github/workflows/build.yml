@@ -5,27 +5,32 @@ on:
     tags:
       - '^\d{4}\.\d{2}\.\d{2}-\d+$'
   #schedule:
-  #  - cron:  '0 0 * * 1'
+  #  - cron:  '0 0 * * 1' # @TODO would probably be better to have a separate workflow for automatic updates when possible
   workflow_dispatch:
 
 env:
-  VERSION: v6-dev-                                    # YYYY.MM.DD-N where N is package revision (1+)
   REF_CORE: development-v6                            # commit hash or tag
   REF_WEB: development-v6                             # commit hash or tag
   REF_FTL: development-v6                             # commit hash or tag
 
 jobs:
-  set-version: # @TODO When v6 is officially released this job will no longer be required as version string should be set manually in env
+  set-version:
     concurrency: set-version
     runs-on: ubuntu-latest
 
     outputs:
-      version: ${{ env.VERSION || '' }}${{ steps.version.outputs.OUTPUT }}
+      version: ${{ steps.version.outputs.OUTPUT }}
 
     steps:
+      - name: Use tag name
+        if: ${{ startsWith(github.ref, 'refs/tags/') }}
+        run: echo "$GITHUB_REF_NAME" > .version
+
       - name: Generate version string
         id: version
-        run: echo "OUTPUT=$(date +%Y.%m.%d)-$(date +%H%M%S)" >> $GITHUB_OUTPUT
+        run: |
+          [ -f .version ] && "OUTPUT=$(cat .version)" >> $GITHUB_OUTPUT || \
+            echo "OUTPUT=dev-$(date +%Y.%m.%d)-$(date +%H%M%S)" >> $GITHUB_OUTPUT
 
   build-core:
     concurrency: build-core-${{ github.ref_name || github.run_id }}
@@ -386,7 +391,7 @@ jobs:
         with:
           files: ./artifacts/*/*.ipk
           draft: true
-          # Draft probably not needed anymore after v6 releases
+          # @TODO Draft probably not needed anymore after v6 releases
 
       - name: Collect new packages
         run: |
