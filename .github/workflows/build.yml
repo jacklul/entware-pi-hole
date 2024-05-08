@@ -46,7 +46,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: pi-hole/pi-hole
-          ref: ${{ startsWith(github.ref, 'refs/tags/') && env.CORE_HASH || env.CORE_BRANCH }}
+          ref: ${{ startsWith(github.ref, 'refs/tags/') && env.CORE_HASH || ( env.CORE_BRANCH || '' ) }}
           path: ./stage
 
       - name: Cache result
@@ -91,7 +91,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: pi-hole/web
-          ref: ${{ startsWith(github.ref, 'refs/tags/') && env.WEB_HASH || env.WEB_BRANCH }}
+          ref: ${{ startsWith(github.ref, 'refs/tags/') && env.WEB_HASH || ( env.WEB_BRANCH || '' ) }}
           path: ./stage
 
       - name: Cache result
@@ -167,7 +167,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: pi-hole/FTL
-          ref: ${{ startsWith(github.ref, 'refs/tags/') && env.FTL_HASH || env.FTL_BRANCH }}
+          ref: ${{ startsWith(github.ref, 'refs/tags/') && env.FTL_HASH || ( env.FTL_BRANCH || '' ) }}
           path: ./stage
 
       - name: Cache result

@@ -15,7 +15,6 @@ jobs:
   check:
     concurrency: check
     runs-on: ubuntu-latest
-    continue-on-error: true
 
     outputs:
       CORE_HASH: ${{ steps.new-hashes.outputs.CORE_HASH }}
@@ -31,21 +30,21 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: pi-hole/pi-hole
-          ref: ${{ env.CORE_BRANCH }}
+          ref: ${{ env.CORE_BRANCH || '' }}
           path: ./dev/core
 
       - name: Checkout pi-hole/web repository
         uses: actions/checkout@v4
         with:
           repository: pi-hole/web
-          ref: ${{ env.WEB_BRANCH }}
+          ref: ${{ env.WEB_BRANCH || '' }}
           path: ./dev/web
 
       - name: Checkout pi-hole/FTL repository
         uses: actions/checkout@v4
         with:
           repository: pi-hole/FTL
-          ref: ${{ env.FTL_BRANCH }}
+          ref: ${{ env.FTL_BRANCH || '' }}
           path: ./dev/FTL
 
       - name: Set old hashes
@@ -65,15 +64,18 @@ jobs:
           cat $GITHUB_OUTPUT
 
       - name: Old hashes are not empty
-        if: ${{ steps.old-hashes.outputs.CORE_HASH == '' || steps.old-hashes.outputs.WEB_HASH == '' || steps.old-hashes.outputs.FTL_HASH == '' }}
-        run: exit 1
+        id: hashes-not-empty
+        if: ${{ steps.old-hashes.outputs.CORE_HASH != '' && steps.old-hashes.outputs.WEB_HASH != '' && steps.old-hashes.outputs.FTL_HASH != '' }}
+        run: echo "RESULT=ok" >> $GITHUB_OUTPUT
 
       - name: At least one hash is different
-        if: ${{ steps.old-hashes.outputs.CORE_HASH == steps.new-hashes.outputs.CORE_HASH && steps.old-hashes.outputs.WEB_HASH == steps.new-hashes.outputs.WEB_HASH && steps.old-hashes.outputs.FTL_HASH == steps.new-hashes.outputs.FTL_HASH}}
-        run: exit 1
+        id: hashes-different
+        if: ${{ steps.hashes-not-empty.outputs.RESULT == 'ok' && ( steps.old-hashes.outputs.CORE_HASH != steps.new-hashes.outputs.CORE_HASH || steps.old-hashes.outputs.WEB_HASH != steps.new-hashes.outputs.WEB_HASH || steps.old-hashes.outputs.FTL_HASH != steps.new-hashes.outputs.FTL_HASH ) }}
+        run: echo "RESULT=ok" >> $GITHUB_OUTPUT
 
       - name: Apply patches (core)
         id: patch-core
+        if: ${{ steps.hashes-different.outputs.RESULT == 'ok' }}
         uses: ./.github/actions/patch
         with:
           patches_prefix: core
@@ -81,6 +83,7 @@ jobs:
 
       - name: Apply patches (web)
         id: patch-web
+        if: ${{ steps.hashes-different.outputs.RESULT == 'ok' }}
         uses: ./.github/actions/patch
         with:
           patches_prefix: web
@@ -88,19 +91,21 @@ jobs:
 
       - name: Apply patches (FTL)
         id: patch-FTL
+        if: ${{ steps.hashes-different.outputs.RESULT == 'ok' }}
         uses: ./.github/actions/patch
         with:
           patches_prefix: FTL
           git_path: ./dev/FTL
 
       - name: Set status
+        if: ${{ steps.hashes-different.outputs.RESULT == 'ok' }}
         id: status
-        run: echo "RESULT=true" >> $GITHUB_OUTPUT
+        run: echo "RESULT=ok" >> $GITHUB_OUTPUT
 
   update:
     concurrency: update
     needs: [check]
-    if: ${{ needs.check.outputs.STATUS == 'true' }}
+    if: ${{ needs.check.outputs.STATUS == 'ok' }}
     runs-on: ubuntu-latest
 
     permissions:
@@ -125,7 +130,7 @@ jobs:
         id: tag
         run: echo "RESULT=$(bash ./scripts/tag.sh)" >> $GITHUB_OUTPUT
 
-      - name: Print tag and changes
+      - name: Print new tag and git diff
         run: |
           echo "New tag: ${{ steps.tag.outputs.RESULT }}"
           git diff
@@ -137,3 +142,4 @@ jobs:
           commit_message: 'Automatic update to ${{ steps.tag.outputs.RESULT }}'
           file_pattern: ./.github/workflow/build.yml
           tagging_message: ${{ steps.tag.outputs.RESULT }}
+          push_options: '--dry-run' # @TODO remove after successful test
