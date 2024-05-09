@@ -1,0 +1,27 @@
+name: Create directory listings
+
+inputs:
+  path:
+    required: false
+    default: .
+
+runs:
+  using: composite
+
+  steps:
+    - name: Pre tasks
+      shell: bash
+      run: |
+        [ -d "${{ inputs.path }}/.git" ] && mv "${{ inputs.path }}/.git" "${{ inputs.path }}/../.git.bak"
+        find "${{ inputs.path }}" -type f -name "index.html" -exec rm -f "{}" \;
+
+    - name: Generate directory listings
+      uses: jayanta525/github-pages-directory-listing@v4.0.0
+      with:
+        FOLDER: ${{ inputs.path }}
+
+    - name: Post tasks
+      shell: bash
+      run: |
+        find "${{ inputs.path }}" -type f -name "index.html" -exec sudo chown $(id -u):$(id -g) "{}" \;
+        [ -d ""${{ inputs.path }}/../.git.bak"" ] && mv "${{ inputs.path }}/../.git.bak" "${{ inputs.path }}/.git"

@@ -222,14 +222,6 @@ jobs:
             "GIT_BRANCH=${{ steps.version_infos.outputs.GIT_BRANCH }}"
             "GIT_TAG=${{ steps.version_infos.outputs.GIT_TAG }}"
 
-      #- name: Upload artifact
-      #  if: steps.cache.outputs.cache-hit != 'true'
-      #  uses: actions/upload-artifact@v4
-      #  with:
-      #    name: build-${{ matrix.arch }}
-      #    path: ./stage/build.tar
-      #    retention-days: 7
-
       - name: Extract FTL binary and generate checksum file
         if: steps.cache.outputs.cache-hit != 'true'
         working-directory: ./stage
@@ -368,15 +360,19 @@ jobs:
           sudo apt-get update
           sudo apt-get install rename
 
+      - name: Checkout own repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          sparse-checkout: /.github/*
+          sparse-checkout-cone-mode: false
+
       - name: Checkout gh-pages branch
         uses: actions/checkout@v4
         continue-on-error: true
         with:
           ref: gh-pages
-
-      - name: Rename gh-pages branch
-        run: git branch -m gh-pages gh-pages.old
-        continue-on-error: true
+          path: ./gh-pages
 
       - name: Download artifacts
         uses: actions/download-artifact@v4
@@ -395,17 +391,26 @@ jobs:
 
       - name: Collect new packages
         run: |
-          find . -maxdepth 1 -type d -name "*-*" -exec sh -c '[ -d "./artifacts/$(basename {})" ] && rm -frv {}' \;
-          mv -v ./artifacts/* .
-          rmdir -v ./artifacts
+          mkdir -p ./gh-pages
+          find ./gh-pages -maxdepth 1 -type d -name "*-*" -exec sh -c '[ -d "./artifacts/$(basename {})" ] && rm -frv {}' \;
+          mv -v ./artifacts/* ./gh-pages
 
-      - name: Create index.html
-        run: |
-          rm -f ./index.html
-          find . -maxdepth 1 -type d -not -name ".git" -not -name "." -exec sh -c 'echo "<a href=\"$(basename {})/Packages.html\">$(basename {})</a><br>" >> index.html' \;
+      - name: Create directory listings
+        uses: ./.github/actions/index
+        with:
+          path: ./gh-pages
 
       - name: List files
-        run: ls -aAl
+        uses: ./.github/actions/list
+        with:
+          paths: . ./gh-pages
+
+      - name: Prepare for upload
+        run: |
+          find . -mindepth 1 -maxdepth 1 \( ! -name "gh-pages" -type d -exec rm -fr "{}" \; \) -o \( -type f -exec rm -f "{}" \; \)
+          cp -r ./gh-pages/. .
+          rm -fr ./gh-pages
+          git branch -m gh-pages gh-pages.old || true
 
       - name: Upload packages
         uses: JamesIves/github-pages-deploy-action@v4
