@@ -6,4 +6,4 @@ URL: https://github.com/jacklul/entware-pi-hole
 Maintainer: Jack'lul, https://jacklul.github.io
 Architecture: 
 Installed-Size: 
-Description: The Pi-hole® is a DNS sinkhole that protects your devices from unwanted content without installing any client-side software.
+Description: The Pi-hole is a DNS sinkhole that protects your devices from unwanted content without installing any client-side software.
