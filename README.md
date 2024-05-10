@@ -1,4 +1,4 @@
-# Pi-hole via Entware
+# Pi-hole for Entware
 
 Run [Pi-hole](https://pi-hole.net) directly on your [Entware](https://github.com/Entware/Entware) supported device.  
 **Releases here are unofficial and not supported by the Pi-hole developers.**
@@ -15,18 +15,18 @@ There are some changes compared to the official releases:
 
 ## Installation
 
-Add this repository to your `opkg.conf` configuration:
+- Add this repository to your `opkg.conf` configuration:
 
 ```bash
 src/gz entware-pi-hole https://jacklul.github.io/entware-pi-hole/[architecture]
 # replace [architecture] with one of the supported architectures
 ```
 
-Then run `opkg update` and `opkg install pi-hole`
+- Install the package with `opkg update && opkg install pi-hole` command
 
-Run install tasks with `/opt/etc/init.d/S55pihole-FTL install` command
+- Run install tasks with `/opt/etc/init.d/S55pihole-FTL install` command
 
-Start `pihole-FTL` by running `/opt/etc/init.d/S55pihole-FTL start`
+- Start `pihole-FTL` with `/opt/etc/init.d/S55pihole-FTL start` command
 
 > [!NOTE]
 > Default configuration uses Google's DNS as upstream servers, runs HTTP(S) server on ports **5080/5443** and DNS resolver on **5053** (loopback interface only) - everything can be changed in `/opt/etc/pihole/pihole.toml`.
