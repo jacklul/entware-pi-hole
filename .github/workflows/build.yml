@@ -13,7 +13,7 @@ env:
   CORE_BRANCH: development-v6
   WEB_BRANCH: development-v6
   FTL_BRANCH: development-v6
-# @TODO when v6 is released *_HASH should be set commit hashes and *_BRANCH to release branches
+# @TODO when v6 is released *_HASH should be set to commit hashes and *_BRANCH to release branches
 
 jobs:
   set-version:
@@ -37,6 +37,9 @@ jobs:
   build-core:
     concurrency: build-core-${{ github.ref_name || github.run_id }}
     runs-on: ubuntu-latest
+
+    outputs:
+      version: ${{ steps.version.outputs.OUTPUT }}
 
     steps:
       - name: Checkout own repository
@@ -68,8 +71,11 @@ jobs:
         with:
           patches_prefix: core
 
-      - name: Remove .git directory
+      - name: Save repository version infos
         if: steps.cache.outputs.cache-hit != 'true'
+        uses: ./.github/actions/version
+
+      - name: Remove .git directory
         run: rm -fr ./stage/.git
 
       - name: Upload artifact
@@ -77,11 +83,14 @@ jobs:
         with:
           name: core
           path: ./stage/*
-          retention-days: 7
+          retention-days: 1
 
   build-web:
     concurrency: build-web-${{ github.ref_name || github.run_id }}
     runs-on: ubuntu-latest
+
+    outputs:
+      version: ${{ steps.version.outputs.OUTPUT }}
 
     steps:
       - name: Checkout own repository
@@ -113,8 +122,11 @@ jobs:
         with:
           patches_prefix: web
 
-      - name: Remove .git directory
+      - name: Save repository version infos
         if: steps.cache.outputs.cache-hit != 'true'
+        uses: ./.github/actions/version
+
+      - name: Remove .git directory
         run: rm -fr ./stage/.git
 
       - name: Upload artifact
@@ -122,12 +134,15 @@ jobs:
         with:
           name: web
           path: ./stage/*
-          retention-days: 7
+          retention-days: 1
 
   build-binary:
     concurrency: build-binary-${{ github.ref_name || github.run_id }}-${{ matrix.arch }}
     runs-on: ubuntu-latest
     continue-on-error: ${{ matrix.allow-failure }}
+
+    outputs:
+      version: ${{ steps.version.outputs.OUTPUT }}
 
     strategy:
       fail-fast: false
@@ -192,6 +207,10 @@ jobs:
         with:
           patches_prefix: FTL
 
+      - name: Save repository version infos
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: ./.github/actions/version
+
       - name: Fetch pi-hole/FTL repository infos
         if: steps.cache.outputs.cache-hit != 'true'
         id: version_infos
@@ -236,7 +255,6 @@ jobs:
           paths: ./stage
 
       - name: Remove .git directory
-        if: steps.cache.outputs.cache-hit != 'true'
         run: rm -fr ./stage/.git
 
       - name: Upload artifact
@@ -246,7 +264,7 @@ jobs:
           path: |
             ./stage/pihole-FTL*
             ./stage/.version
-          retention-days: 7
+          retention-days: 1
 
   build-package:
     concurrency: build-package-${{ github.ref_name || github.run_id }}-${{ matrix.arch }}
@@ -282,6 +300,11 @@ jobs:
           #- arch: 386
           #  entware_arch: x86-2.6 # EOS by Entware team
           #  allow-failure: false
+
+    outputs:
+      CORE_VERSION: ${{ steps.versions.outputs.CORE }}
+      WEB_VERSION: ${{ steps.versions.outputs.WEB }}
+      FTL_VERSION: ${{ steps.versions.outputs.FTL }}
 
     steps:
       - name: Fail this job
@@ -346,9 +369,19 @@ jobs:
           name: ipk-${{ matrix.entware_arch }}
           path: ./packages/*
 
+      - name: Set versions
+        id: versions
+        run: |
+          . ./artifacts/core/.version
+          echo "CORE=$VERSION" >> $GITHUB_OUTPUT
+          . ./artifacts/web/.version
+          echo "WEB=$VERSION" >> $GITHUB_OUTPUT
+          . ./artifacts/binary/.version
+          echo "FTL=$VERSION" >> $GITHUB_OUTPUT
+
   upload:
     concurrency: upload
-    needs: build-package
+    needs: [build-package]
     runs-on: ubuntu-latest
 
     permissions:
@@ -383,11 +416,31 @@ jobs:
       - name: Correct directory names
         run: rename 's/ipk-//' ./artifacts/ipk-*/
 
+      - name: Create changelog file
+        if: ${{ startsWith(github.ref, 'refs/tags/') }}
+        env:
+          CORE_VERSION: ${{ needs.build-package.outputs.CORE_VERSION }}
+          WEB_VERSION: ${{ needs.build-package.outputs.WEB_VERSION }}
+          FTL_VERSION: ${{ needs.build-package.outputs.FTL_VERSION }}
+        run: |
+          CORE_VERSION_OUT="[$CORE_VERSION](https://github.com/pi-hole/pi-hole/releases/tag/$CORE_VERSION)"
+          WEB_VERSION_OUT="[$WEB_VERSION](https://github.com/pi-hole/web/releases/tag/$WEB_VERSION)"
+          FTL_VERSION_OUT="[$FTL_VERSION](https://github.com/pi-hole/FTL/releases/tag/$FTL_VERSION)"
+          [ "$(echo "$CORE_VERSION" | cut -c1)" != "v" ] && CORE_VERSION_OUT="[$CORE_VERSION](https://github.com/pi-hole/pi-hole/commit/$CORE_VERSION)"
+          [ "$(echo "$WEB_VERSION" | cut -c1)" != "v" ] && WEB_VERSION_OUT="[$WEB_VERSION](https://github.com/pi-hole/web/commit/$WEB_VERSION)"
+          [ "$(echo "$FTL_VERSION" | cut -c1)" != "v" ] && FTL_VERSION_OUT="[$FTL_VERSION](https://github.com/pi-hole/FTL/commit/$FTL_VERSION)"
+          echo "Core version: $CORE_VERSION_OUT  " >> changelog.md
+          echo "Web version: $WEB_VERSION_OUT  " >> changelog.md
+          echo "FTL version: $FTL_VERSION_OUT  " >> changelog.md
+
       - name: Create a release
         uses: softprops/action-gh-release@v2
         if: ${{ startsWith(github.ref, 'refs/tags/') }}
         with:
           files: ./artifacts/*/*.ipk
+          body_path: changelog.md
+          generate_release_notes: true
+          draft: true
 
       - name: Collect new packages
         run: |
