@@ -4,7 +4,7 @@
 
 ENABLED=yes
 PROCS=pihole-FTL
-ARGS="-- -u $USER"
+ARGS="-- -u $USER" # this is a fallback to allow the service to start
 PREARGS=""
 DESC=$PROCS
 PATH=/opt/sbin:/opt/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
@@ -53,11 +53,23 @@ if [ -f /opt/bin/bash ]; then
 fi
 
 if [ -f /opt/bin/id ]; then
-    ARGS=""
+    TARGET_USER="$(id -nu 0)" # use the ID 0 user by default
 
-    if [ "$(id -u pihole 2> /dev/null)" = "" ]; then # use the ID 0 user when 'pihole' is not found
-        ARGS="-- -u $(id -nu 0)"
+    if [ "$(id -u pihole 2> /dev/null)" != "" ]; then # use the pihole user when available
+        TARGET_USER="pihole"
+
+        if [ -f /opt/sbin/setcap ] && [ -f /opt/bin/su ]; then # attempt to start with setcap and su
+            if setcap CAP_NET_BIND_SERVICE,CAP_NET_RAW,CAP_NET_ADMIN,CAP_SYS_NICE,CAP_IPC_LOCK,CAP_CHOWN+eip "/opt/sbin/pihole-FTL"; then
+                TARGET_USER=""
+                PREARGS="su -s sh -c"
+                ARGS="pihole"
+            else
+                echo "Warning: Setting capabilities is not supported on this system"
+            fi
+        fi
     fi
+
+    [ -n "$TARGET_USER" ] && ARGS="-- -u $TARGET_USER"
 fi
 
 . /opt/etc/init.d/rc.func
