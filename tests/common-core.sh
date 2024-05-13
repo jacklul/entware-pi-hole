@@ -17,7 +17,6 @@ $(find "$TARGET_DIR" \
     -not -path "$TARGET_DIR/.*" \
     -not -path "$TARGET_DIR/automated install/*" \
     -not -name "piholeCheckout.sh" \
-    -not -name "piholeDebug.sh" \
     -not -name "update.sh" \
     -not -name "pihole-FTL.service" \
 | sort)

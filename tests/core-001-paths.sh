@@ -13,6 +13,9 @@ for FILE in $FILES; do
     # No comments
     CONTENTS="$(grep -o "^[^#]*" < "$FILE")"
 
+    # Exceptions (@TODO the way these are handled needs to be improved)
+    CONTENTS="$(echo "$CONTENTS" | grep -av "\/etc\/os-release" | grep -av "\/etc\/\*release" | grep -av "\/etc\/selinux" | grep -av "show_content_of_files_in_dir")"
+
     echo "$CONTENTS" | grep -aE "(^|\s+|\")/etc" && exit 1
     echo "$CONTENTS" | grep -aE "(^|\s+|\")/var" && exit 1
     echo "$CONTENTS" | grep -aE "(^|\s+|\")/usr" && exit 1

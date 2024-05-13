@@ -1,5 +1,18 @@
+diff --git a/advanced/Scripts/piholeDebug.sh b/advanced/Scripts/piholeDebug.sh
+index 7c55812..b0df20d 100755
+--- a/advanced/Scripts/piholeDebug.sh
++++ b/advanced/Scripts/piholeDebug.sh
+@@ -1277,6 +1277,8 @@ analyze_pihole_log() {
+ }
+ 
+ curl_to_tricorder() {
++    echo "Upload not supported in Entware package release"
++    return
+     # Users can submit their debug logs using curl (encrypted)
+     log_write "    * Using ${COL_GREEN}curl${COL_NC} for transmission."
+     # transmit the log via TLS and store the token returned in a variable
 diff --git a/pihole b/pihole
-index 7c84771c..13b5b9c9 100755
+index 7c84771..ea91de5 100755
 --- a/pihole
 +++ b/pihole
 @@ -469,6 +469,11 @@ unsupportedFunc(){
@@ -23,12 +36,9 @@ index 7c84771c..13b5b9c9 100755
  
    # we need to add all arguments that require sudo power to not trigger the * argument
    "-w" | "whitelist"            ) ;;
-@@ -597,19 +602,19 @@ case "${1}" in
-   "--regex" | "regex"           ) listFunc "$@";;
-   "--white-regex" | "white-regex" ) listFunc "$@";;
+@@ -599,17 +604,17 @@ case "${1}" in
    "--white-wild" | "white-wild"   ) listFunc "$@";;
--  "-d" | "debug"                ) debugFunc "$@";;
-+  "-d" | "debug"                ) unsupportedInEntwareFunc;;
+   "-d" | "debug"                ) debugFunc "$@";;
    "-f" | "flush"                ) flushFunc "$@";;
 -  "-up" | "updatePihole"        ) updatePiholeFunc "$@";;
 -  "-r"  | "reconfigure"         ) reconfigurePiholeFunc;;

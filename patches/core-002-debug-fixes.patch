@@ -1,0 +1,111 @@
+diff --git a/advanced/Scripts/piholeDebug.sh b/advanced/Scripts/piholeDebug.sh
+index 7c55812..0fae20e 100755
+--- a/advanced/Scripts/piholeDebug.sh
++++ b/advanced/Scripts/piholeDebug.sh
+@@ -520,7 +520,13 @@ disk_usage() {
+ parse_locale() {
+     local pihole_locale
+     echo_current_diagnostic "Locale"
+-    pihole_locale="$(locale)"
++    if [ -f "$(command -v locale)" ]; then
++        pihole_locale="$(locale)"
++    elif [ -f "$(command -v locale.new)" ]; then
++        pihole_locale="$(locale.new)"
++    else
++        pihole_locale="No locale command found"
++    fi
+     parse_file "${pihole_locale}"
+ }
+ 
+@@ -628,9 +634,16 @@ check_required_ports() {
+     # Create an array for these ports in use
+     ports_in_use=()
+     # Sort the addresses and remove duplicates
+-    while IFS= read -r line; do
+-        ports_in_use+=( "$line" )
+-    done < <( ss --listening --numeric --tcp --udp --processes --no-header )
++	if [ -f "$(command -v ss)" ]; then
++		while IFS= read -r line; do
++			ports_in_use+=( "$line" )
++		done < <( ss --listening --numeric --tcp --udp --processes --no-header )
++	else
++		local use_nestat=y
++		while IFS= read -r line; do
++			ports_in_use+=( "$line" )
++		done < <( netstat -tulnp | grep "tcp\|udp")
++	fi
+ 
+     local ports_configured
+     # Get all configured ports
+@@ -645,11 +658,21 @@ check_required_ports() {
+     for i in "${!ports_in_use[@]}"; do
+         # loop through them and assign some local variables
+         local service_name
+-        service_name=$(echo "${ports_in_use[$i]}" | awk '{gsub(/users:\(\("/,"",$7);gsub(/".*/,"",$7);print $7}')
++		if [ -n "$use_nestat" ]; then
++			service_name="$(echo "${ports_in_use[$i]}" | awk '{print $7}' | cut -d '/' -f 2)"
++			[ -z "$service_name" ] && service_name="$(echo "${ports_in_use[$i]}" | awk '{print $6}' | cut -d '/' -f 2)"
++			[ "$service_name" = "-" ] && service_name=""
++		else
++			service_name=$(echo "${ports_in_use[$i]}" | awk '{gsub(/users:\(\("/,"",$7);gsub(/".*/,"",$7);print $7}')
++		fi
+         local protocol_type
+         protocol_type=$(echo "${ports_in_use[$i]}" | awk '{print $1}')
+         local port_number
+-        port_number="$(echo "${ports_in_use[$i]}" | awk '{print $5}')" #  | awk '{gsub(/^.*:/,"",$5);print $5}')
++		if [ -n "$use_nestat" ]; then
++			port_number="$(echo "${ports_in_use[$i]}" | awk '{print $4}')"
++		else
++			port_number="$(echo "${ports_in_use[$i]}" | awk '{print $5}')" #  | awk '{gsub(/^.*:/,"",$5);print $5}')
++		fi
+ 
+         # Check if the right services are using the right ports
+         if [[ ${ports_configured[*]} =~ $(echo "${port_number}" | rev | cut -d: -f1 | rev) ]]; then
+@@ -827,8 +850,8 @@ process_status(){
+                     status_of_process="inactive"
+                 fi
+             else
+-            # non-Docker system
+-                if service "${i}" status | grep -E 'is\srunning' &> /dev/null; then
++                # Entware
++                if /opt/etc/init.d/S55pihole-FTL check | grep -E 'alive' &> /dev/null; then
+                     status_of_process="active"
+                 else
+                     status_of_process="inactive"
+@@ -1248,7 +1271,7 @@ spinner(){
+             else
+                 printf "\r${_spin:_i++%${#_spin}:1} %02d:%02d:%02d" $((_elapsed/3600)) $(((_elapsed/60)%60)) $((_elapsed%60)) >"$(tty)"
+             fi
+-            sleep 0.25
++            sleep 1
+         done
+ 
+         # Return to the begin of the line after completion (the spinner will be overwritten)
+@@ -1296,7 +1319,7 @@ upload_to_tricorder() {
+     local username="pihole"
+     # Set the permissions and owner
+     chmod 640 ${PIHOLE_DEBUG_LOG}
+-    chown "$USER":"${username}" ${PIHOLE_DEBUG_LOG}
++    chown "$USER":"${username}" ${PIHOLE_DEBUG_LOG} 2> /dev/null
+ 
+     # Let the user know debugging is complete with something strikingly visual
+     log_write ""
+@@ -1320,7 +1343,8 @@ upload_to_tricorder() {
+             echo ""
+             # give the user a choice of uploading it or not
+             # Users can review the log file locally (or the output of the script since they are the same) and try to self-diagnose their problem
+-            read -r -p "[?] Would you like to upload the log? [y/N] " response
++            #read -r -p "[?] Would you like to upload the log? [y/N] " response
++            response=n
+             case ${response} in
+                 # If they say yes, run our function for uploading the log
+                 [yY][eE][sS]|[yY]) curl_to_tricorder;;
+@@ -1359,6 +1383,8 @@ upload_to_tricorder() {
+     log_write "   * A local copy of the debug log can be found at: ${COL_CYAN}${PIHOLE_DEBUG_LOG}${COL_NC}\\n"
+ }
+ 
++bash /opt/share/pihole/dependencies.sh "check" || exit 1
++
+ # Run through all the functions we made
+ make_temporary_log
+ initialize_debug

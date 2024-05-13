@@ -567,3 +567,63 @@ index 7c84771c..143654d4 100755
      -e "s,($(date +'%b %d ')| dnsmasq\[[0-9]*\]),,g" \
      -e "s,(.*(blacklisted |gravity blocked ).*),${COL_RED}&${COL_NC}," \
      -e "s,.*(query\\[A|DHCP).*,${COL_NC}&${COL_NC}," \
+diff --git a/advanced/Scripts/piholeDebug.sh b/advanced/Scripts/piholeDebug.sh
+index 7c55812..d2942f0 100755
+--- a/advanced/Scripts/piholeDebug.sh
++++ b/advanced/Scripts/piholeDebug.sh
+@@ -22,7 +22,7 @@ set -o pipefail
+ ######## GLOBAL VARS ########
+ # These variables would normally be next to the other files
+ # but we need them to be first in order to get the colors needed for the script output
+-PIHOLE_SCRIPTS_DIRECTORY="/opt/pihole"
++PIHOLE_SCRIPTS_DIRECTORY="/opt/share/pihole"
+ PIHOLE_COLTABLE_FILE="${PIHOLE_SCRIPTS_DIRECTORY}/COL_TABLE"
+ 
+ # These provide the colors we need for making the log more readable
+@@ -42,7 +42,7 @@ else
+ fi
+ 
+ # shellcheck disable=SC1091
+-. /etc/pihole/versions
++. /opt/etc/pihole/versions
+ 
+ # FAQ URLs for use in showing the debug log
+ FAQ_HARDWARE_REQUIREMENTS="${COL_CYAN}https://docs.pi-hole.net/main/prerequisites/${COL_NC}"
+@@ -55,18 +55,18 @@ FORUMS_URL="${COL_CYAN}https://discourse.pi-hole.net${COL_NC}"
+ 
+ # Directories required by Pi-hole
+ # https://discourse.pi-hole.net/t/what-files-does-pi-hole-use/1684
+-CORE_GIT_DIRECTORY="/etc/.pihole"
+-CRON_D_DIRECTORY="/etc/cron.d"
+-DNSMASQ_D_DIRECTORY="/etc/dnsmasq.d"
+-PIHOLE_DIRECTORY="/etc/pihole"
+-PIHOLE_SCRIPTS_DIRECTORY="/opt/pihole"
+-BIN_DIRECTORY="/usr/local/bin"
+-RUN_DIRECTORY="/run"
+-LOG_DIRECTORY="/var/log/pihole"
+-HTML_DIRECTORY="/var/www/html"
++CORE_GIT_DIRECTORY="/opt/etc/.pihole"
++CRON_D_DIRECTORY="/opt/etc/cron.d"
++DNSMASQ_D_DIRECTORY="/opt/etc/dnsmasq.d"
++PIHOLE_DIRECTORY="/opt/etc/pihole"
++PIHOLE_SCRIPTS_DIRECTORY="/opt/share/pihole"
++BIN_DIRECTORY="/opt/sbin"
++RUN_DIRECTORY="/opt/run"
++LOG_DIRECTORY="/opt/var/log/pihole"
++HTML_DIRECTORY="/opt/share/pihole/www"
+ WEB_GIT_DIRECTORY="${HTML_DIRECTORY}/admin"
+ SHM_DIRECTORY="/dev/shm"
+-ETC="/etc"
++ETC="/opt/etc"
+ 
+ # Files required by Pi-hole
+ # https://discourse.pi-hole.net/t/what-files-does-pi-hole-use/1684
+@@ -139,7 +139,7 @@ show_disclaimer(){
+ 
+ make_temporary_log() {
+     # Create a random temporary file for the log
+-    TEMPLOG=$(mktemp /tmp/pihole_temp.XXXXXX)
++    TEMPLOG=$(mktemp /opt/tmp/pihole_temp.XXXXXX)
+     # Open handle 3 for templog
+     # https://stackoverflow.com/questions/18460186/writing-outputs-to-log-file-and-console
+     exec 3>"$TEMPLOG"
