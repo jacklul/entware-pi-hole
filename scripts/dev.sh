@@ -48,11 +48,30 @@ function install_or_update_repository() {
 ##############
 
 BRANCH="$1"
+REPO=all
+[ -n "$2" ] && REPO="$2"
 
 if [ ! -d "$SCRIPT_DIR/../dev" ]; then
     mkdir -pv "$SCRIPT_DIR/../dev"
 fi
 
-install_or_update_repository "$REPO_CORE" "$SCRIPT_DIR/../dev/core" "$BRANCH"
-install_or_update_repository "$REPO_WEB" "$SCRIPT_DIR/../dev/web" "$BRANCH"
-install_or_update_repository "$REPO_FTL" "$SCRIPT_DIR/../dev/FTL" "$BRANCH"
+case $REPO in
+    all)
+        install_or_update_repository "$REPO_CORE" "$SCRIPT_DIR/../dev/core" "$BRANCH"
+        install_or_update_repository "$REPO_WEB" "$SCRIPT_DIR/../dev/web" "$BRANCH"
+        install_or_update_repository "$REPO_FTL" "$SCRIPT_DIR/../dev/FTL" "$BRANCH"
+    ;;
+    core)
+        install_or_update_repository "$REPO_CORE" "$SCRIPT_DIR/../dev/core" "$BRANCH"
+    ;;
+    web)
+        install_or_update_repository "$REPO_WEB" "$SCRIPT_DIR/../dev/web" "$BRANCH"
+    ;;
+    FTL)
+        install_or_update_repository "$REPO_FTL" "$SCRIPT_DIR/../dev/FTL" "$BRANCH"
+    ;;
+    *)
+        echo "Invalid repo selected, valid values: all, core, web, FTL"
+        exit 1
+    ;;
+esac
