@@ -24,12 +24,15 @@ src/gz entware-pi-hole https://jacklul.github.io/entware-pi-hole/[architecture]
 
 - Install the package with `opkg update && opkg install pi-hole` command
 
-- Run install tasks with `/opt/etc/init.d/S55pihole-FTL install` command
+- Run install tasks with `/opt/etc/init.d/S55pihole-FTL install` command (this is optional - start command runs this silently)
 
 - Start `pihole-FTL` with `/opt/etc/init.d/S55pihole-FTL start` command
 
 > [!NOTE]
 > Default configuration uses Google's DNS as upstream servers, runs HTTP(S) server on ports **5080/5443** and DNS resolver on **5053** (loopback interface only) - everything can be changed in `/opt/etc/pihole/pihole.toml`.
+
+> [!IMPORTANT]
+> When upgrading make sure to restart `pihole-FTL` to re-run install tasks - `/opt/etc/init.d/S55pihole-FTL restart`.
 
 ## Support
 
