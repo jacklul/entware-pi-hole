@@ -15,6 +15,7 @@ install() {
 
     # Set random gravity update and updatechecker times
     # Comment/uncomment logrotate line based on binary presence
+    # Set user and group for rotated log files
     bash <<EOF
 if [ -f "/opt/etc/cron.d/pihole" ]; then
     sed "s/59 1 /\$((1 + RANDOM % 58)) \$((3 + RANDOM % 2)) /" -i /opt/etc/cron.d/pihole
@@ -22,6 +23,15 @@ if [ -f "/opt/etc/cron.d/pihole" ]; then
 
     if [ -f "\$(command -v logrotate)" ]; then
         sed '/sbin\/logrotate/s/^#//' -i /opt/etc/cron.d/pihole
+
+        LOG_USER_GROUP="\$(stat -c '%U %G' /opt/var/log 2> /dev/null)"
+        if [ -n "\$LOG_USER_GROUP" ]; then
+            if grep -q "# su #" /opt/etc/pihole/logrotate; then
+                sed "s/# su #/su \$LOG_USER_GROUP/g;" -i /opt/etc/pihole/logrotate
+            else
+                sed "s/su.*$/su \$LOG_USER_GROUP/g;" -i /opt/etc/pihole/logrotate
+            fi
+        fi
     else
         sed '/sbin\/logrotate/s/^/#/' -i /opt/etc/cron.d/pihole
     fi
