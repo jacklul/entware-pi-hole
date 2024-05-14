@@ -4,10 +4,15 @@
 
 ENABLED=yes
 PROCS=pihole-FTL
-ARGS="-- -u $USER" # this is a fallback to allow the service to start
+ARGS=""
 PREARGS=""
 DESC=$PROCS
 PATH=/opt/sbin:/opt/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+logecho() {
+    logger "$@"
+    echo "$@"
+}
 
 install() {
     # Install missing dependencies required by scripts
@@ -41,7 +46,7 @@ EOF
     # Make sure gravity database exists
     PI_HOLE_DBFILE="$(pihole-FTL --config -q files.gravity)"
     if [ -n "$PI_HOLE_DBFILE" ] && [ ! -f "$PI_HOLE_DBFILE" ]; then
-        logger "Creating gravity database $PI_HOLE_DBFILE..."
+        logecho "Creating gravity database $PI_HOLE_DBFILE..."
         pihole -g || exit 1
     fi
 }
@@ -62,8 +67,8 @@ if [ -f /opt/bin/bash ]; then
     PRECMD="bash /opt/share/pihole/pihole-FTL-poststop.sh ; bash /opt/share/pihole/pihole-FTL-prestart.sh"
 fi
 
-if [ -f /opt/bin/id ]; then
-    TARGET_USER="$(id -nu 0)" # use the ID 0 user by default
+if [ -f /opt/bin/id ] && [ -z "$ARGS" ] && [ -z "$PREARGS" ]; then
+    ROOT_USER="$(id -nu 0)" # get username of ID 0 user
 
     if [ "$(id -u pihole 2> /dev/null)" != "" ]; then # use the pihole user when available
         TARGET_USER="pihole"
@@ -73,13 +78,17 @@ if [ -f /opt/bin/id ]; then
                 TARGET_USER=""
                 PREARGS="su -s sh -c"
                 ARGS="pihole"
-            else
-                echo "Warning: Setting capabilities is not supported on this system"
             fi
         fi
-    fi
 
-    [ -n "$TARGET_USER" ] && ARGS="-- -u $TARGET_USER"
+        if [ -n "$TARGET_USER" ]; then
+            ARGS="-- -u $TARGET_USER"
+            logecho "Starting pihole-FTL as '$ROOT_USER' (then dropping to '$TARGET_USER') because setting capabilities is not supported on this system"
+        fi
+    else
+        ARGS="-- -u $ROOT_USER"
+        logecho "Starting pihole-FTL as '$TARGET_USER' because 'pihole' user does not exist"
+    fi
 fi
 
 . /opt/etc/init.d/rc.func
