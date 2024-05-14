@@ -68,9 +68,9 @@ function cecho() {
     fi
 }
 
-cecho "Checking for dependencies..."
-
 if [ -f "$CONTROL_FILE" ]; then
+    cecho "Checking for core dependencies..."
+
     DEPENDS="$(grep "^Depends:" < "$CONTROL_FILE" | sed -e "s/^[^:]*:[[:space:]]*//")"
     IFS=', ' read -r -a CORE_PACKAGES <<< "$DEPENDS"
     INSTALLED="$(opkg list-installed)"
@@ -93,6 +93,8 @@ if [ -f "$CONTROL_FILE" ]; then
         cecho ""
     done
 fi
+
+cecho "Checking for scripting dependencies..."
 
 for KEY in "${!DEPENDENCIES[@]}"; do
     cecho -n "- $KEY"
