@@ -1,5 +1,5 @@
 diff --git a/src/api/action.c b/src/api/action.c
-index 138c1c6..f87028e 100644
+index 138c1c6c..f87028e0 100644
 --- a/src/api/action.c
 +++ b/src/api/action.c
 @@ -117,7 +117,7 @@ static int run_and_stream_command(struct ftl_conn *api, const char *path, const
@@ -12,7 +12,7 @@ index 138c1c6..f87028e 100644
  
  int api_action_restartDNS(struct ftl_conn *api)
 diff --git a/src/api/info.c b/src/api/info.c
-index 581fc0b..bd0d08b 100644
+index 581fc0b7..bd0d08b0 100644
 --- a/src/api/info.c
 +++ b/src/api/info.c
 @@ -58,7 +58,7 @@
@@ -25,7 +25,7 @@ index 581fc0b..bd0d08b 100644
  int api_info_client(struct ftl_conn *api)
  {
 diff --git a/src/args.c b/src/args.c
-index 29b24e2..ebed577 100644
+index 29b24e2f..ebed5773 100644
 --- a/src/args.c
 +++ b/src/args.c
 @@ -321,9 +321,9 @@ void parse_args(int argc, char* argv[])
@@ -53,7 +53,7 @@ index 29b24e2..ebed577 100644
  		}
  
 diff --git a/src/config/config.c b/src/config/config.c
-index f5bb3fa..88ec305 100644
+index f5bb3fa1..88ec305d 100644
 --- a/src/config/config.c
 +++ b/src/config/config.c
 @@ -491,7 +491,7 @@ void initConfig(struct config *conf)
@@ -210,7 +210,7 @@ index f5bb3fa..88ec305 100644
  	config.files.log.ftl.c = validate_filepath;
  
 diff --git a/src/config/config.h b/src/config/config.h
-index 6cd4f05..5a7c1fa 100644
+index 6cd4f05e..5a7c1faf 100644
 --- a/src/config/config.h
 +++ b/src/config/config.h
 @@ -28,7 +28,7 @@
@@ -232,7 +232,7 @@ index 6cd4f05..5a7c1fa 100644
  union conf_value {
  	bool b;                                     // boolean value
 diff --git a/src/config/dnsmasq_config.c b/src/config/dnsmasq_config.c
-index 8943c23..b9d96a2 100644
+index 8943c23f..b9d96a2d 100644
 --- a/src/config/dnsmasq_config.c
 +++ b/src/config/dnsmasq_config.c
 @@ -207,12 +207,12 @@ static void write_config_header(FILE *fp, const char *description)
@@ -312,7 +312,7 @@ index 8943c23..b9d96a2 100644
  	}
  
 diff --git a/src/config/dnsmasq_config.h b/src/config/dnsmasq_config.h
-index 77b1405..84f9c01 100644
+index 77b1405c..84f9c01f 100644
 --- a/src/config/dnsmasq_config.h
 +++ b/src/config/dnsmasq_config.h
 @@ -22,13 +22,13 @@ bool read_legacy_cnames_config(void);
@@ -337,7 +337,7 @@ index 77b1405..84f9c01 100644
  
  #endif //DNSMASQ_CONFIG_H
 diff --git a/src/config/inotify.c b/src/config/inotify.c
-index 1776735..ca5423d 100644
+index 17767350..ca5423db 100644
 --- a/src/config/inotify.c
 +++ b/src/config/inotify.c
 @@ -14,7 +14,7 @@
@@ -350,7 +350,7 @@ index 1776735..ca5423d 100644
  static int inotify_fd = -1;
  static int inotify_wd = -1;
 diff --git a/src/config/legacy_reader.c b/src/config/legacy_reader.c
-index 857bcc2..6f65925 100644
+index 857bcc2b..6f659256 100644
 --- a/src/config/legacy_reader.c
 +++ b/src/config/legacy_reader.c
 @@ -67,7 +67,7 @@ bool getLogFilePathLegacy(struct config *conf, FILE *fp)
@@ -363,7 +363,7 @@ index 857bcc2..6f65925 100644
  
  		// Test if memory allocation was successful
 diff --git a/src/database/shell.c b/src/database/shell.c
-index 3de2f5d..c8fc9f2 100644
+index 3de2f5d0..c8fc9f2a 100644
 --- a/src/database/shell.c
 +++ b/src/database/shell.c
 @@ -23357,7 +23357,7 @@ static void newTempFile(ShellState *p, const char *zSuffix){
@@ -376,7 +376,7 @@ index 3de2f5d..c8fc9f2 100644
      }
      p->zTempFile = sqlite3_mprintf("%s/temp%llx.%s", zTemp, r, zSuffix);
 diff --git a/src/database/sqlite3.c b/src/database/sqlite3.c
-index 0d22c71..6747376 100644
+index 0d22c717..67473762 100644
 --- a/src/database/sqlite3.c
 +++ b/src/database/sqlite3.c
 @@ -44006,9 +44006,9 @@ static int fillInUnixFile(
@@ -415,7 +415,7 @@ index 0d22c71..6747376 100644
         0        /* List terminator */
      };
 diff --git a/src/dnsmasq/CMakeLists.txt b/src/dnsmasq/CMakeLists.txt
-index 2497bc7..3397ae5 100644
+index 2497bc72..3397ae56 100644
 --- a/src/dnsmasq/CMakeLists.txt
 +++ b/src/dnsmasq/CMakeLists.txt
 @@ -64,6 +64,6 @@ set(sources
@@ -427,7 +427,7 @@ index 2497bc7..3397ae5 100644
  target_compile_options(dnsmasq PRIVATE -Wno-maybe-uninitialized)
  target_include_directories(dnsmasq PRIVATE ${PROJECT_SOURCE_DIR}/src ${PROJECT_SOURCE_DIR}/src/lua)
 diff --git a/src/dnsmasq/config.h b/src/dnsmasq/config.h
-index b04f964..7e161a7 100644
+index b04f964f..7e161a74 100644
 --- a/src/dnsmasq/config.h
 +++ b/src/dnsmasq/config.h
 @@ -44,8 +44,8 @@
@@ -478,7 +478,7 @@ index b04f964..7e161a7 100644
  #endif
  
 diff --git a/src/dnsmasq/option.c b/src/dnsmasq/option.c
-index 249a6f3..88ec21c 100644
+index 249a6f35..88ec21cc 100644
 --- a/src/dnsmasq/option.c
 +++ b/src/dnsmasq/option.c
 @@ -417,7 +417,7 @@ static struct {
@@ -500,7 +500,7 @@ index 249a6f3..88ec21c 100644
    { LOPT_MAXTTL, ARG_ONE, "<integer>", gettext_noop("Specify time-to-live in seconds for maximum TTL to send to clients."), NULL },
    { LOPT_MAXCTTL, ARG_ONE, "<integer>", gettext_noop("Specify time-to-live ceiling for cache."), NULL },
 diff --git a/src/files.h b/src/files.h
-index 742e8d9..ae24ff4 100644
+index 742e8d9a..ae24ff4a 100644
 --- a/src/files.h
 +++ b/src/files.h
 @@ -18,7 +18,7 @@
@@ -513,7 +513,7 @@ index 742e8d9..ae24ff4 100644
  bool chmod_file(const char *filename, const mode_t mode);
  bool file_exists(const char *filename);
 diff --git a/src/lua/CMakeLists.txt b/src/lua/CMakeLists.txt
-index 908b5a7..cda1bf9 100644
+index 908b5a7e..cda1bf9d 100644
 --- a/src/lua/CMakeLists.txt
 +++ b/src/lua/CMakeLists.txt
 @@ -72,7 +72,7 @@ target_compile_options(lua PRIVATE -Wno-maybe-uninitialized -Wno-unused-variable
@@ -526,7 +526,7 @@ index 908b5a7..cda1bf9 100644
  if(LUA_DL STREQUAL "true")
      target_compile_definitions(lua PRIVATE LUA_USE_DLOPEN)
 diff --git a/src/lua/loslib.c b/src/lua/loslib.c
-index ad5a927..57be3ec 100644
+index ad5a9276..57be3ecd 100644
 --- a/src/lua/loslib.c
 +++ b/src/lua/loslib.c
 @@ -108,7 +108,7 @@
@@ -539,7 +539,7 @@ index ad5a927..57be3ec 100644
  
  #define lua_tmpnam(b,e) { \
 diff --git a/src/zip/teleporter.c b/src/zip/teleporter.c
-index 26480ca..e128937 100644
+index 5eb02317..9f8f6a2a 100644
 --- a/src/zip/teleporter.c
 +++ b/src/zip/teleporter.c
 @@ -168,23 +168,23 @@ const char *generate_teleporter_zip(mz_zip_archive *zip, char filename[128], voi
@@ -562,7 +562,8 @@ index 26480ca..e128937 100644
  	if(file_exists(file_path) && !mz_zip_writer_add_file(zip, file_path+1, file_path, file_comment, (uint16_t)strlen(file_comment), MZ_BEST_COMPRESSION))
  	{
  		mz_zip_writer_end(zip);
- 		return "Failed to add /etc/hosts to heap ZIP archive!";
+-		return "Failed to add /etc/pihole/dhcp.leases to heap ZIP archive!";
++		return "Failed to add /opt/etc/pihole/dhcp.leases to heap ZIP archive!";
  	}
  
 -	const char *directory = "/etc/dnsmasq.d";
