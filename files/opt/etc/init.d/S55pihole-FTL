@@ -65,7 +65,7 @@ case $1 in
             # This fixes permission issue for queries database's journal
             PI_HOLE_QUERIESDB_FILE="$(pihole-FTL --config -q files.database)"
             if [ -n "$PI_HOLE_QUERIESDB_FILE" ]; then
-                { sleep 1; chown pihole:pihole "$PI_HOLE_QUERIESDB_FILE-*"; } &
+                { sleep 5; chown pihole:pihole "$PI_HOLE_QUERIESDB_FILE-"*; } > /dev/null 2>&1 &
             fi
         fi
     ;;
