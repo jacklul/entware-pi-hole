@@ -468,6 +468,7 @@ jobs:
       - name: Upload packages
         uses: JamesIves/github-pages-deploy-action@v4
         if: ${{ startsWith(github.ref, 'refs/tags/') || github.ref_name == 'master' || github.event_name == 'schedule' }}
+        # @TODO when v6 is released builds on master should not be allowed to upload
         with:
           branch: gh-pages
           folder: .
