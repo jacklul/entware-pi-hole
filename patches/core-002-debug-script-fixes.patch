@@ -1,8 +1,43 @@
 diff --git a/advanced/Scripts/piholeDebug.sh b/advanced/Scripts/piholeDebug.sh
-index d2942f0..476907f 100755
+index 7c558127..c1f6a35c 100755
 --- a/advanced/Scripts/piholeDebug.sh
 +++ b/advanced/Scripts/piholeDebug.sh
-@@ -520,7 +520,13 @@ disk_usage() {
+@@ -159,6 +159,34 @@ copy_to_debug_log() {
+     cat /proc/$$/fd/3 > "${PIHOLE_DEBUG_LOG}"
+ }
+ 
++install_entware_dependencies() {
++    # Check for missing dependencies (need by this script only) and install them
++    local DEPS="rev lscpu" # lshw not available in Entware
++    local MISSING=""
++
++    for DEP in $DEPS; do
++        if ! command -v "$DEP" &> /dev/null; then
++            #shellcheck disable=SC2086
++            MISSING="$(echo "$MISSING $DEP" | awk '{$1=$1};1')"
++        fi
++    done
++
++    if [ -n "$MISSING" ]; then
++        echo "Missing dependencies: $MISSING"
++
++        #shellcheck disable=SC2162
++        read -p "Install ? [Y/n] : " -n1 REPLY
++        echo
++
++        case $REPLY in
++            [Yy]*)
++                #shellcheck disable=SC2086
++                opkg install $MISSING
++            ;;
++        esac
++    fi
++}
++
+ initialize_debug() {
+     local system_uptime
+     # Clear the screen so the debug log is readable
+@@ -520,7 +548,13 @@ disk_usage() {
  parse_locale() {
      local pihole_locale
      echo_current_diagnostic "Locale"
@@ -17,7 +52,7 @@ index d2942f0..476907f 100755
      parse_file "${pihole_locale}"
  }
  
-@@ -1248,7 +1254,7 @@ spinner(){
+@@ -1248,7 +1282,7 @@ spinner(){
              else
                  printf "\r${_spin:_i++%${#_spin}:1} %02d:%02d:%02d" $((_elapsed/3600)) $(((_elapsed/60)%60)) $((_elapsed%60)) >"$(tty)"
              fi
@@ -26,3 +61,11 @@ index d2942f0..476907f 100755
          done
  
          # Return to the begin of the line after completion (the spinner will be overwritten)
+@@ -1360,6 +1394,7 @@ upload_to_tricorder() {
+ }
+ 
+ # Run through all the functions we made
++install_entware_dependencies
+ make_temporary_log
+ initialize_debug
+ check_component_versions
