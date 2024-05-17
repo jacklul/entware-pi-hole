@@ -82,6 +82,11 @@ sed -e "s/^Version:.*/Version: $PACKAGE_VERSION/" -i "$PACKAGE_DIR/CONTROL/contr
 sed -e "s/^Architecture:.*/Architecture: $PACKAGE_ARCHITECTURE/" -i "$PACKAGE_DIR/CONTROL/control"
 sed -e "s/^Installed-Size:.*/Installed-Size: $INSTALLED_SIZE/" -i "$PACKAGE_DIR/CONTROL/control"
 
+[ -f "$PACKAGE_DIR/CONTROL/preinst" ] && chmod 0755 "$PACKAGE_DIR/CONTROL/preinst"
+[ -f "$PACKAGE_DIR/CONTROL/postinst" ] && chmod 0755 "$PACKAGE_DIR/CONTROL/postinst"
+[ -f "$PACKAGE_DIR/CONTROL/prerm" ] && chmod 0755 "$PACKAGE_DIR/CONTROL/prerm"
+[ -f "$PACKAGE_DIR/CONTROL/postrm" ] && chmod 0755 "$PACKAGE_DIR/CONTROL/postrm"
+
 sudo chown -R 0:0 "$PACKAGE_DIR/CONTROL"
 ( cd "$PACKAGE_DIR/CONTROL" && tar --format=gnu --numeric-owner --sort=name -cf - --mtime="$TIMESTAMP" . | gzip -n - > "$TMP_DIR/control.tar.gz" )
 

@@ -14,90 +14,63 @@ logecho() {
     echo "$@"
 }
 
-install() {
-    # Install missing dependencies required by scripts
-    bash /opt/share/pihole/dependencies.sh "$1" || exit 1
+case $1 in
+    start | restart)
+        # Make sure gravity database exists
+        PI_HOLE_GRAVITYDB_FILE="$(pihole-FTL --config -q files.gravity)"
+        if [ -n "$PI_HOLE_GRAVITYDB_FILE" ] && [ ! -f "$PI_HOLE_GRAVITYDB_FILE" ]; then
+            logecho "Creating gravity database $PI_HOLE_GRAVITYDB_FILE..."
+            pihole -g || exit 1
+        fi
 
-    # Set random gravity update and updatechecker times
-    # Comment/uncomment logrotate line based on binary presence
-    # Set user and group for rotated log files
-    bash <<EOF
-if [ -f "/opt/etc/cron.d/pihole" ]; then
-    sed "s/59 1 /\$((1 + RANDOM % 58)) \$((3 + RANDOM % 2)) /" -i /opt/etc/cron.d/pihole
-    sed "s/59 17 /\$((1 + RANDOM % 58)) \$((12 + RANDOM % 8)) /" -i /opt/etc/cron.d/pihole
+        # Attempt to start using setcap and su or as 'pihole' user
+        if [ -z "$ARGS" ] && [ -z "$PREARGS" ]; then
+            ROOT_USER="$(id -nu 0 2> /dev/null)"
 
-    if [ -f "\$(command -v logrotate)" ]; then
-        sed '/sbin\/logrotate/s/^#//' -i /opt/etc/cron.d/pihole
+            if [ -n "$ROOT_USER" ]; then # if this is empty then this can indicate absence of 'id' command
+                if [ "$(id -u pihole 2> /dev/null)" != "" ]; then
+                    TARGET_USER="pihole"
 
-        LOG_USER_GROUP="\$(stat -c '%U %G' /opt/var/log 2> /dev/null)"
-        if [ -n "\$LOG_USER_GROUP" ]; then
-            if grep -q "# su #" /opt/etc/pihole/logrotate; then
-                sed "s/# su #/su \$LOG_USER_GROUP/g;" -i /opt/etc/pihole/logrotate
-            else
-                sed "s/su.*$/su \$LOG_USER_GROUP/g;" -i /opt/etc/pihole/logrotate
+                    if [ -f /opt/sbin/setcap ] && [ -f /opt/bin/su ]; then
+                        if setcap CAP_NET_BIND_SERVICE,CAP_NET_RAW,CAP_NET_ADMIN,CAP_SYS_NICE,CAP_IPC_LOCK,CAP_CHOWN+eip "/opt/sbin/pihole-FTL"; then
+                            TARGET_USER=""
+                            PREARGS="su -s sh -c"
+                            ARGS="pihole"
+                        fi
+                    fi
+
+                    if [ -n "$TARGET_USER" ]; then # setcap not supported - start as root user but then change to pihole
+                        ARGS="-- -u $TARGET_USER"
+                        logecho "Starting pihole-FTL as '$ROOT_USER' (then dropping to '$TARGET_USER') because setting capabilities is not supported on this system"
+                    fi
+                else # start as root user
+                    ARGS="-- -u $ROOT_USER"
+                    logecho "Starting pihole-FTL as '$TARGET_USER' because 'pihole' user does not exist"
+                fi
             fi
         fi
-    else
-        sed '/sbin\/logrotate/s/^/#/' -i /opt/etc/cron.d/pihole
-    fi
-fi
-EOF
+    ;;
+esac
 
-    # Make sure gravity database exists
-    PI_HOLE_DBFILE="$(pihole-FTL --config -q files.gravity)"
-    if [ -n "$PI_HOLE_DBFILE" ] && [ ! -f "$PI_HOLE_DBFILE" ]; then
-        logecho "Creating gravity database $PI_HOLE_DBFILE..."
-        pihole -g || exit 1
-    fi
-}
-
-if [ -f /opt/bin/bash ]; then
-    case $1 in
-        install)
-            install
-            exit 0
-        ;;
-        start | restart)
-            # Run install tasks silently with each start/restart
-            install "silent"
-        ;;
-    esac
-
-    # Execute pre start script through rc.func's PRECMD, we have to run poststop here as well for cleanup
+# Execute pre start script through rc.func's PRECMD, we have to run poststop here as well for potential cleanup
+if [ -z "$PRECMD" ]; then
     PRECMD="bash /opt/share/pihole/pihole-FTL-poststop.sh ; bash /opt/share/pihole/pihole-FTL-prestart.sh"
-fi
-
-if [ -f /opt/bin/id ] && [ -z "$ARGS" ] && [ -z "$PREARGS" ]; then
-    ROOT_USER="$(id -nu 0)" # get username of ID 0 user
-
-    if [ "$(id -u pihole 2> /dev/null)" != "" ]; then # use the pihole user when available
-        TARGET_USER="pihole"
-
-        if [ -f /opt/sbin/setcap ] && [ -f /opt/bin/su ]; then # attempt to start with setcap and su
-            if setcap CAP_NET_BIND_SERVICE,CAP_NET_RAW,CAP_NET_ADMIN,CAP_SYS_NICE,CAP_IPC_LOCK,CAP_CHOWN+eip "/opt/sbin/pihole-FTL"; then
-                TARGET_USER=""
-                PREARGS="su -s sh -c"
-                ARGS="pihole"
-            fi
-        fi
-
-        if [ -n "$TARGET_USER" ]; then
-            ARGS="-- -u $TARGET_USER"
-            logecho "Starting pihole-FTL as '$ROOT_USER' (then dropping to '$TARGET_USER') because setting capabilities is not supported on this system"
-        fi
-    else
-        ARGS="-- -u $ROOT_USER"
-        logecho "Starting pihole-FTL as '$TARGET_USER' because 'pihole' user does not exist"
-    fi
 fi
 
 . /opt/etc/init.d/rc.func
 
-if [ -f /opt/bin/bash ]; then
-    case $1 in
-        stop | kill)
-            # Run poststop when stopping by user
-            bash /opt/share/pihole/pihole-FTL-poststop.sh
-        ;;
-    esac
-fi
+case $1 in
+    start | restart)
+        if [ "$(id -u pihole 2> /dev/null)" != "" ]; then
+            # This fixes permission issue for queries database's journal
+            PI_HOLE_QUERIESDB_FILE="$(pihole-FTL --config -q files.database)"
+            if [ -n "$PI_HOLE_QUERIESDB_FILE" ]; then
+                { sleep 1; chown pihole:pihole "$PI_HOLE_QUERIESDB_FILE-*"; } &
+            fi
+        fi
+    ;;
+    stop | kill)
+        # Run poststop after stop/kill
+        bash /opt/share/pihole/pihole-FTL-poststop.sh
+    ;;
+esac

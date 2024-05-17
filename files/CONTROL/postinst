@@ -1,0 +1,83 @@
+#!/bin/sh
+
+# Link to system files if they don't exist in /opt
+[ ! -f "/opt/etc/hosts" ] && [ -f "/etc/hosts" ] && ln -s "/etc/hosts" "/opt/etc/hosts"
+[ ! -f "/opt/etc/ethers" ] && [ -f "/etc/ethers" ] && ln -s "/etc/ethers" "/opt/etc/ethers"
+[ ! -f "/opt/etc/resolv.conf" ] && [ -f "/etc/resolv.conf" ] && ln -s "/etc/resolv.conf" "/opt/etc/resolv.conf"
+
+# Set random gravity update and updatechecker times
+if [ -f "/opt/etc/cron.d/pihole" ]; then
+    MINUTE_GRAVITY="$(bash -c "echo \$((1 + RANDOM % 58))")"
+    MINUTE_UPDATECHECK="$(bash -c "echo \$((1 + RANDOM % 58))")"
+    HOUR_GRAVITY="$(bash -c "echo \$((3 + RANDOM % 2))")"
+    HOUR_UPDATECHECK="$(bash -c "echo \$((12 + RANDOM % 8))")"
+
+    if [ -n "$MINUTE_GRAVITY" ] && [ -n "$MINUTE_UPDATECHECK" ] && [ -n "$HOUR_GRAVITY" ] && [ -n "$HOUR_UPDATECHECK" ]; then
+        sed "s/59 1 /$MINUTE_GRAVITY $HOUR_GRAVITY /" -i "/opt/etc/cron.d/pihole"
+        sed "s/59 17 /$MINUTE_UPDATECHECK $HOUR_UPDATECHECK /" -i "/opt/etc/cron.d/pihole"
+    fi
+fi
+
+# Set user and group used for rotating the logs
+if [ -f "/opt/etc/pihole/logrotate" ]; then
+    #shellcheck disable=SC2010
+    LOG_USER_GROUP="$(ls -al "/opt/var/log" | grep ' \.$' | awk '{print $3 " " $4}')"
+
+    if [ -n "$LOG_USER_GROUP" ]; then
+        if grep -q "# su #" "/opt/etc/pihole/logrotate"; then
+            sed "s/# su #/su $LOG_USER_GROUP/g;" -i "/opt/etc/pihole/logrotate"
+        else
+            sed "s/su.*$/su $LOG_USER_GROUP/g;" -i "/opt/etc/pihole/logrotate"
+        fi
+    fi
+fi
+
+# Some of these commands might be missing depending on the system
+# so we check if they exist and then prompt the user to install them
+COREUTILS_DEPS="basename cat chmod chown cp cut date df dirname du echo expr false head id install kill ln ls mkdir mktemp mv nohup printf pwd rm sha1sum sleep sort stat stty tail tee test timeout touch tr true tty uptime whoami"
+
+CHECK_COMMAND=""
+type 2> /dev/null && CHECK_COMMAND="type"
+which --help > /dev/null 2>&1 && CHECK_COMMAND="which"
+
+if [ -n "$CHECK_COMMAND" ]; then
+    MISSING_CMDS=""
+    MISSING_PKGS=""
+
+    for COREUTILS_COMMAND in $COREUTILS_DEPS; do
+        #shellcheck disable=SC2086
+        if ! $CHECK_COMMAND $COREUTILS_COMMAND > /dev/null 2>&1; then
+            MISSING_CMDS="$MISSING_CMDS $COREUTILS_COMMAND"
+            MISSING_PKGS="$MISSING_PKGS coreutils-$COREUTILS_COMMAND"
+        fi
+    done
+
+    if [ -n "$MISSING_CMDS" ]; then
+        MISSING_CMDS="$(echo "$MISSING_CMDS" | awk '{$1=$1};1')"
+        MISSING_PKGS="$(echo "$MISSING_PKGS" | awk '{$1=$1};1')"
+
+        cat << EOF
+Your system is missing required commands:
+ $MISSING_CMDS
+
+Install them by running the following command:
+ opkg install $MISSING_PKGS
+
+EOF
+
+        STDIN_FD="$(readlink -f /proc/$$/fd/0 2> /dev/null)"
+        if [ -n "$STDIN_FD" ] && [ "$STDIN_FD" != "/dev/null" ]; then
+            printf "Press any key to continue..."
+            #shellcheck disable=SC2034
+            read -r reply
+        fi
+    fi
+else
+    cat << EOF
+Unable to check for script dependencies - 'type' and 'which' commands not found
+
+Make sure the following commands are available on your system:
+ $COREUTILS_DEPS
+
+EOF
+fi
