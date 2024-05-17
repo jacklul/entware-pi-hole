@@ -1,5 +1,5 @@
 diff --git a/advanced/Scripts/database_migration/gravity-db.sh b/advanced/Scripts/database_migration/gravity-db.sh
-index e99f1df2..1de31179 100755
+index e99f1df..1de3117 100755
 --- a/advanced/Scripts/database_migration/gravity-db.sh
 +++ b/advanced/Scripts/database_migration/gravity-db.sh
 @@ -10,7 +10,7 @@
@@ -12,7 +12,7 @@ index e99f1df2..1de31179 100755
  upgrade_gravityDB(){
  	local database piholeDir auditFile version
 diff --git a/advanced/Scripts/list.sh b/advanced/Scripts/list.sh
-index 76558e58..a9592bf3 100755
+index 76558e5..a9592bf 100755
 --- a/advanced/Scripts/list.sh
 +++ b/advanced/Scripts/list.sh
 @@ -11,7 +11,7 @@
@@ -34,7 +34,7 @@ index 76558e58..a9592bf3 100755
  
  # IDs are hard-wired to domain interpretation in the gravity database scheme
 diff --git a/advanced/Scripts/pihole-reenable.sh b/advanced/Scripts/pihole-reenable.sh
-index 93ec3b95..68d8801b 100755
+index 93ec3b9..68d8801 100755
 --- a/advanced/Scripts/pihole-reenable.sh
 +++ b/advanced/Scripts/pihole-reenable.sh
 @@ -17,7 +17,7 @@
@@ -47,7 +47,7 @@ index 93ec3b95..68d8801b 100755
  sleep "${1}"
  "${PI_HOLE_BIN_DIR}"/pihole enable
 diff --git a/advanced/Scripts/piholeARPTable.sh b/advanced/Scripts/piholeARPTable.sh
-index b92dd124..e7ce36bb 100755
+index b92dd12..e7ce36b 100755
 --- a/advanced/Scripts/piholeARPTable.sh
 +++ b/advanced/Scripts/piholeARPTable.sh
 @@ -10,7 +10,7 @@
@@ -75,8 +75,68 @@ index b92dd124..e7ce36bb 100755
  fi
  
  
+diff --git a/advanced/Scripts/piholeDebug.sh b/advanced/Scripts/piholeDebug.sh
+index 7c55812..d2942f0 100755
+--- a/advanced/Scripts/piholeDebug.sh
++++ b/advanced/Scripts/piholeDebug.sh
+@@ -22,7 +22,7 @@ set -o pipefail
+ ######## GLOBAL VARS ########
+ # These variables would normally be next to the other files
+ # but we need them to be first in order to get the colors needed for the script output
+-PIHOLE_SCRIPTS_DIRECTORY="/opt/pihole"
++PIHOLE_SCRIPTS_DIRECTORY="/opt/share/pihole"
+ PIHOLE_COLTABLE_FILE="${PIHOLE_SCRIPTS_DIRECTORY}/COL_TABLE"
+ 
+ # These provide the colors we need for making the log more readable
+@@ -42,7 +42,7 @@ else
+ fi
+ 
+ # shellcheck disable=SC1091
+-. /etc/pihole/versions
++. /opt/etc/pihole/versions
+ 
+ # FAQ URLs for use in showing the debug log
+ FAQ_HARDWARE_REQUIREMENTS="${COL_CYAN}https://docs.pi-hole.net/main/prerequisites/${COL_NC}"
+@@ -55,18 +55,18 @@ FORUMS_URL="${COL_CYAN}https://discourse.pi-hole.net${COL_NC}"
+ 
+ # Directories required by Pi-hole
+ # https://discourse.pi-hole.net/t/what-files-does-pi-hole-use/1684
+-CORE_GIT_DIRECTORY="/etc/.pihole"
+-CRON_D_DIRECTORY="/etc/cron.d"
+-DNSMASQ_D_DIRECTORY="/etc/dnsmasq.d"
+-PIHOLE_DIRECTORY="/etc/pihole"
+-PIHOLE_SCRIPTS_DIRECTORY="/opt/pihole"
+-BIN_DIRECTORY="/usr/local/bin"
+-RUN_DIRECTORY="/run"
+-LOG_DIRECTORY="/var/log/pihole"
+-HTML_DIRECTORY="/var/www/html"
++CORE_GIT_DIRECTORY="/opt/etc/.pihole"
++CRON_D_DIRECTORY="/opt/etc/cron.d"
++DNSMASQ_D_DIRECTORY="/opt/etc/dnsmasq.d"
++PIHOLE_DIRECTORY="/opt/etc/pihole"
++PIHOLE_SCRIPTS_DIRECTORY="/opt/share/pihole"
++BIN_DIRECTORY="/opt/sbin"
++RUN_DIRECTORY="/opt/run"
++LOG_DIRECTORY="/opt/var/log/pihole"
++HTML_DIRECTORY="/opt/share/pihole/www"
+ WEB_GIT_DIRECTORY="${HTML_DIRECTORY}/admin"
+ SHM_DIRECTORY="/dev/shm"
+-ETC="/etc"
++ETC="/opt/etc"
+ 
+ # Files required by Pi-hole
+ # https://discourse.pi-hole.net/t/what-files-does-pi-hole-use/1684
+@@ -139,7 +139,7 @@ show_disclaimer(){
+ 
+ make_temporary_log() {
+     # Create a random temporary file for the log
+-    TEMPLOG=$(mktemp /tmp/pihole_temp.XXXXXX)
++    TEMPLOG=$(mktemp /opt/tmp/pihole_temp.XXXXXX)
+     # Open handle 3 for templog
+     # https://stackoverflow.com/questions/18460186/writing-outputs-to-log-file-and-console
+     exec 3>"$TEMPLOG"
 diff --git a/advanced/Scripts/piholeLogFlush.sh b/advanced/Scripts/piholeLogFlush.sh
-index 4d97fec5..10ad82bd 100755
+index 4d97fec..10ad82b 100755
 --- a/advanced/Scripts/piholeLogFlush.sh
 +++ b/advanced/Scripts/piholeLogFlush.sh
 @@ -8,58 +8,58 @@
@@ -164,7 +224,7 @@ index 4d97fec5..10ad82bd 100755
      echo -e "  ${TICK} Deleted ${deleted} queries from database"
  fi
 diff --git a/advanced/Scripts/query.sh b/advanced/Scripts/query.sh
-index 493c75ea..01a4d9cd 100755
+index 493c75e..01a4d9c 100755
 --- a/advanced/Scripts/query.sh
 +++ b/advanced/Scripts/query.sh
 @@ -15,13 +15,13 @@
@@ -184,7 +244,7 @@ index 493c75ea..01a4d9cd 100755
  
  # Source api functions
 diff --git a/advanced/Scripts/updatecheck.sh b/advanced/Scripts/updatecheck.sh
-index eda6c403..12d24691 100755
+index eda6c40..12d2469 100755
 --- a/advanced/Scripts/updatecheck.sh
 +++ b/advanced/Scripts/updatecheck.sh
 @@ -40,15 +40,15 @@ function get_remote_hash() {
@@ -243,7 +303,7 @@ index eda6c403..12d24691 100755
  
  GITHUB_WEB_VERSION="$(get_remote_version web "${WEB_BRANCH}")"
 diff --git a/advanced/Scripts/utils.sh b/advanced/Scripts/utils.sh
-index 2fe419e8..255ab3bd 100755
+index 2fe419e..255ab3b 100755
 --- a/advanced/Scripts/utils.sh
 +++ b/advanced/Scripts/utils.sh
 @@ -85,8 +85,8 @@ removeKey() {
@@ -258,7 +318,7 @@ index 2fe419e8..255ab3bd 100755
  
    if [ -s "${FTLCONFFILE}" ]; then
 diff --git a/advanced/Scripts/version.sh b/advanced/Scripts/version.sh
-index 2b0883af..f1f2fa22 100755
+index 2b0883a..f1f2fa2 100755
 --- a/advanced/Scripts/version.sh
 +++ b/advanced/Scripts/version.sh
 @@ -13,13 +13,13 @@
@@ -278,7 +338,7 @@ index 2b0883af..f1f2fa22 100755
      # shellcheck disable=SC1090
      . "$cachedVersions"
 diff --git a/advanced/Templates/gravity_copy.sql b/advanced/Templates/gravity_copy.sql
-index ed11b61a..b27bd6e5 100644
+index ed11b61..b27bd6e 100644
 --- a/advanced/Templates/gravity_copy.sql
 +++ b/advanced/Templates/gravity_copy.sql
 @@ -1,6 +1,6 @@
@@ -290,7 +350,7 @@ index ed11b61a..b27bd6e5 100644
  BEGIN TRANSACTION;
  
 diff --git a/advanced/Templates/logrotate b/advanced/Templates/logrotate
-index 5f609e0f..36203f76 100644
+index 5f609e0..36203f7 100644
 --- a/advanced/Templates/logrotate
 +++ b/advanced/Templates/logrotate
 @@ -1,4 +1,4 @@
@@ -318,7 +378,7 @@ index 5f609e0f..36203f76 100644
  	weekly
  	copytruncate
 diff --git a/advanced/Templates/pihole-FTL-poststop.sh b/advanced/Templates/pihole-FTL-poststop.sh
-index ac3898d2..5abfc860 100755
+index ac3898d..5abfc86 100755
 --- a/advanced/Templates/pihole-FTL-poststop.sh
 +++ b/advanced/Templates/pihole-FTL-poststop.sh
 @@ -1,7 +1,7 @@
@@ -337,7 +397,7 @@ index ac3898d2..5abfc860 100755
 -rm -f /run/pihole/FTL.sock /dev/shm/FTL-* "${FTL_PID_FILE}"
 +rm -f /opt/var/run/pihole/FTL.sock /dev/shm/FTL-* "${FTL_PID_FILE}"
 diff --git a/advanced/Templates/pihole-FTL-prestart.sh b/advanced/Templates/pihole-FTL-prestart.sh
-index c6817828..a28b2002 100755
+index c681782..a28b200 100755
 --- a/advanced/Templates/pihole-FTL-prestart.sh
 +++ b/advanced/Templates/pihole-FTL-prestart.sh
 @@ -1,7 +1,7 @@
@@ -404,7 +464,7 @@ index c6817828..a28b2002 100755
 +    chown -h pihole:pihole /opt/var/log/pihole-FTL.log
  fi
 diff --git a/advanced/Templates/pihole.cron b/advanced/Templates/pihole.cron
-index c62d31ab..403ffe97 100644
+index c62d31a..403ffe9 100644
 --- a/advanced/Templates/pihole.cron
 +++ b/advanced/Templates/pihole.cron
 @@ -18,16 +18,16 @@
@@ -430,7 +490,7 @@ index c62d31ab..403ffe97 100644
 +59 17  * * *   root    PATH="$PATH:/opt/sbin:/opt/bin/" pihole updatechecker
 +@reboot root    PATH="$PATH:/opt/sbin:/opt/bin/" pihole updatechecker reboot
 diff --git a/gravity.sh b/gravity.sh
-index e37c8104..2b2574db 100755
+index 522d92f..8354825 100755
 --- a/gravity.sh
 +++ b/gravity.sh
 @@ -13,7 +13,7 @@
@@ -490,7 +550,7 @@ index e37c8104..2b2574db 100755
  gravityTEMPfile="${GRAVITYDB}_temp"
  gravityDIR="$(dirname -- "${gravityDBfile}")"
  gravityOLDfile="${gravityDIR}/gravity_old.db"
-@@ -937,7 +937,7 @@ if [[ "${forceDelete:-}" == true ]]; then
+@@ -940,7 +940,7 @@ if [[ "${forceDelete:-}" == true ]]; then
    str="Deleting existing list cache"
    echo -ne "${INFO} ${str}..."
  
@@ -500,7 +560,7 @@ index e37c8104..2b2574db 100755
  fi
  
 diff --git a/pihole b/pihole
-index 7c84771c..143654d4 100755
+index 7c84771..143654d 100755
 --- a/pihole
 +++ b/pihole
 @@ -9,12 +9,12 @@
@@ -567,63 +627,3 @@ index 7c84771c..143654d4 100755
      -e "s,($(date +'%b %d ')| dnsmasq\[[0-9]*\]),,g" \
      -e "s,(.*(blacklisted |gravity blocked ).*),${COL_RED}&${COL_NC}," \
      -e "s,.*(query\\[A|DHCP).*,${COL_NC}&${COL_NC}," \
-diff --git a/advanced/Scripts/piholeDebug.sh b/advanced/Scripts/piholeDebug.sh
-index 7c55812..d2942f0 100755
---- a/advanced/Scripts/piholeDebug.sh
-+++ b/advanced/Scripts/piholeDebug.sh
-@@ -22,7 +22,7 @@ set -o pipefail
- ######## GLOBAL VARS ########
- # These variables would normally be next to the other files
- # but we need them to be first in order to get the colors needed for the script output
--PIHOLE_SCRIPTS_DIRECTORY="/opt/pihole"
-+PIHOLE_SCRIPTS_DIRECTORY="/opt/share/pihole"
- PIHOLE_COLTABLE_FILE="${PIHOLE_SCRIPTS_DIRECTORY}/COL_TABLE"
- 
- # These provide the colors we need for making the log more readable
-@@ -42,7 +42,7 @@ else
- fi
- 
- # shellcheck disable=SC1091
--. /etc/pihole/versions
-+. /opt/etc/pihole/versions
- 
- # FAQ URLs for use in showing the debug log
- FAQ_HARDWARE_REQUIREMENTS="${COL_CYAN}https://docs.pi-hole.net/main/prerequisites/${COL_NC}"
-@@ -55,18 +55,18 @@ FORUMS_URL="${COL_CYAN}https://discourse.pi-hole.net${COL_NC}"
- 
- # Directories required by Pi-hole
- # https://discourse.pi-hole.net/t/what-files-does-pi-hole-use/1684
--CORE_GIT_DIRECTORY="/etc/.pihole"
--CRON_D_DIRECTORY="/etc/cron.d"
--DNSMASQ_D_DIRECTORY="/etc/dnsmasq.d"
--PIHOLE_DIRECTORY="/etc/pihole"
--PIHOLE_SCRIPTS_DIRECTORY="/opt/pihole"
--BIN_DIRECTORY="/usr/local/bin"
--RUN_DIRECTORY="/run"
--LOG_DIRECTORY="/var/log/pihole"
--HTML_DIRECTORY="/var/www/html"
-+CORE_GIT_DIRECTORY="/opt/etc/.pihole"
-+CRON_D_DIRECTORY="/opt/etc/cron.d"
-+DNSMASQ_D_DIRECTORY="/opt/etc/dnsmasq.d"
-+PIHOLE_DIRECTORY="/opt/etc/pihole"
-+PIHOLE_SCRIPTS_DIRECTORY="/opt/share/pihole"
-+BIN_DIRECTORY="/opt/sbin"
-+RUN_DIRECTORY="/opt/run"
-+LOG_DIRECTORY="/opt/var/log/pihole"
-+HTML_DIRECTORY="/opt/share/pihole/www"
- WEB_GIT_DIRECTORY="${HTML_DIRECTORY}/admin"
- SHM_DIRECTORY="/dev/shm"
--ETC="/etc"
-+ETC="/opt/etc"
- 
- # Files required by Pi-hole
- # https://discourse.pi-hole.net/t/what-files-does-pi-hole-use/1684
-@@ -139,7 +139,7 @@ show_disclaimer(){
- 
- make_temporary_log() {
-     # Create a random temporary file for the log
--    TEMPLOG=$(mktemp /tmp/pihole_temp.XXXXXX)
-+    TEMPLOG=$(mktemp /opt/tmp/pihole_temp.XXXXXX)
-     # Open handle 3 for templog
-     # https://stackoverflow.com/questions/18460186/writing-outputs-to-log-file-and-console
-     exec 3>"$TEMPLOG"

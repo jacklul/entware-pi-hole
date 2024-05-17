@@ -1,5 +1,18 @@
+diff --git a/advanced/Scripts/piholeDebug.sh b/advanced/Scripts/piholeDebug.sh
+index d2942f0..6018627 100755
+--- a/advanced/Scripts/piholeDebug.sh
++++ b/advanced/Scripts/piholeDebug.sh
+@@ -1296,7 +1296,7 @@ upload_to_tricorder() {
+     local username="pihole"
+     # Set the permissions and owner
+     chmod 640 ${PIHOLE_DEBUG_LOG}
+-    chown "$USER":"${username}" ${PIHOLE_DEBUG_LOG}
++    chown "$USER":"${username}" ${PIHOLE_DEBUG_LOG} 2> /dev/null
+ 
+     # Let the user know debugging is complete with something strikingly visual
+     log_write ""
 diff --git a/advanced/Templates/pihole-FTL-prestart.sh b/advanced/Templates/pihole-FTL-prestart.sh
-index a28b2002..f41e5ef5 100755
+index a28b200..f41e5ef 100755
 --- a/advanced/Templates/pihole-FTL-prestart.sh
 +++ b/advanced/Templates/pihole-FTL-prestart.sh
 @@ -12,12 +12,12 @@ FTL_PID_FILE="$(getFTLPIDFile)"
@@ -30,7 +43,7 @@ index a28b2002..f41e5ef5 100755
 +    [ "$(id -u pihole 2> /dev/null)" != "" ] && chown -h pihole:pihole /opt/var/log/pihole-FTL.log
  fi
 diff --git a/gravity.sh b/gravity.sh
-index 2b2574db..3adf55c1 100755
+index 8354825..502b536 100755
 --- a/gravity.sh
 +++ b/gravity.sh
 @@ -65,7 +65,7 @@ generate_gravity_database() {
@@ -42,7 +55,7 @@ index 2b2574db..3adf55c1 100755
    chmod g+w "${piholeDir}" "${gravityDBfile}"
  }
  
-@@ -956,7 +956,7 @@ fi
+@@ -959,7 +959,7 @@ fi
  update_gravity_timestamp
  
  # Ensure proper permissions are set for the database

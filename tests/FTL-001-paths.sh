@@ -18,18 +18,52 @@ for FILE in $FILES; do
     if [ "$EXTENSION" = "sh" ] || [ "$EXTENSION" = "txt" ]; then
         CONTENTS="$(grep -Ev "^(\s*#)" < "$FILE")"
     else
-        CONTENTS="$(grep -Ev "^(\s*//|\s*/\*|\s*\*|\s*\*/)" < "$FILE")"
+        #CONTENTS="$(grep -Ev "^(\s*//|\s*/\*|\s*\*|\s*\*/)" < "$FILE")"
+
+        CONTENTS="$(cat "$FILE" | awk '
+BEGIN { multi_line_comment = 0 }
+{
+    while (match($0, /\/\*[^*]*\*\//)) {
+        $0 = substr($0, 1, RSTART-1) substr($0, RSTART+RLENGTH)
+    }
+    while (match($0, /\/\*/)) {
+        multi_line_comment = 1
+        $0 = substr($0, 1, RSTART-1)
+        rest_of_line = substr($0, RSTART+RLENGTH)
+        while (multi_line_comment && getline > 0) {
+            if (match($0, /\*\//)) {
+                $0 = substr($0, RSTART+RLENGTH)
+                multi_line_comment = 0
+            }
+        }
+        $0 = rest_of_line $0
+    }
+    if (!multi_line_comment) {
+        sub(/\/\/.*/, "")
+        print
+    }
+}')"
     fi
 
     # Exceptions (@TODO the way these are handled needs to be improved)
-    CONTENTS="$(echo "$CONTENTS" | grep -av "\/etc\/hosts" | grep -av "/etc/ethers" | grep -av "/etc/resolv.conf" | grep -av "/etc/hostname" | grep -av "find_library" | grep -av "CMAKE_INSTALL_PREFIX" | grep -av "/etc/config/resolv.conf" | grep -av "/var/db/dnsmasq.leases" | grep -av "/var/cache/dnsmasq.leases" | grep -av "/usr/local/etc/dnsmasq.conf" | grep -av "LUA_ROOT" | grep -av "/src/lua" | grep -av "       \"document_root\", \"/var/www\",")"
+    CONTENTS="$(echo "$CONTENTS" | grep -av "HINTS /usr/local/lib64")" # /src/CMakeLists.txt
+    CONTENTS="$(echo "$CONTENTS" | grep -av "CMAKE_INSTALL_PREFIX \"/usr\"")" # /src/CMakeLists.txt
+    CONTENTS="$(echo "$CONTENTS" | grep -av "/etc/hostname")" # src/config/config.c
+    CONTENTS="$(echo "$CONTENTS" | grep -av "/etc/config/resolv.conf")" # src/dnsmasq/config.h
+    CONTENTS="$(echo "$CONTENTS" | grep -av "/usr/local/etc/dnsmasq.conf")" # src/dnsmasq/config.h
+    CONTENTS="$(echo "$CONTENTS" | grep -av "/var/cache/dnsmasq.leases")" # src/dnsmasq/config.h
+    CONTENTS="$(echo "$CONTENTS" | grep -av "/var/db/dnsmasq.leases")" # src/dnsmasq/config.h
+    CONTENTS="$(echo "$CONTENTS" | grep -av "\${PROJECT_SOURCE_DIR}/src/lua /usr/local/include")" # src/webserver/civetweb/CMakeLists.txt
+    CONTENTS="$(echo "$CONTENTS" | grep -av "LUA_ROOT	\"/usr/local/\"")" # src/lua/luaconf.h
+    CONTENTS="$(echo "$CONTENTS" | grep -av "Failed to add /etc/hosts")" # src/zip/teleporter.c @TODO this is a mistake on devs side
 
-    echo -e "$CONTENTS" | grep -aE "(^|\s+|\")/etc" && exit 1
-    echo -e "$CONTENTS" | grep -aE "(^|\s+|\")/var" && exit 1
-    echo -e "$CONTENTS" | grep -aE "(^|\s+|\")/usr" && exit 1
-    echo -e "$CONTENTS" | grep -aE "(^|\s+|\")/tmp" && exit 1
-    echo -e "$CONTENTS" | grep -aE "(^|\s+|\")/run" && exit 1
-    echo -e "$CONTENTS" | grep -aE "(^|\s+|\")/opt/pihole" && exit 1
+    # Checks
+    echo -e "$CONTENTS" | grep -aEn "(^|\s+|\")/etc" && exit 1
+    echo -e "$CONTENTS" | grep -aEn "(^|\s+|\")/var" && exit 1
+    echo -e "$CONTENTS" | grep -aEn "(^|\s+|\")/usr" && exit 1
+    echo -e "$CONTENTS" | grep -aEn "(^|\s+|\")/tmp" && exit 1
+    echo -e "$CONTENTS" | grep -aEn "(^|\s+|\")/run" && exit 1
+    echo -e "$CONTENTS" | grep -aEn "(^|\s+|\")/opt/pihole" && exit 1
 done
 
 exit 0

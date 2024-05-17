@@ -14,6 +14,7 @@ for FILE in $FILES; do
     # No comments
     CONTENTS="$(grep -o "^[^#]*" < "$FILE"))"
 
+    # Checks
     echo "$CONTENTS" | grep -aE "service pihole-FTL" && exit 1
     echo "$CONTENTS" | grep -aE "systemctl [[:alnum:]_]+ pihole-FTL" && exit 1
 done

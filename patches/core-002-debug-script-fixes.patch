@@ -1,0 +1,28 @@
+diff --git a/advanced/Scripts/piholeDebug.sh b/advanced/Scripts/piholeDebug.sh
+index d2942f0..476907f 100755
+--- a/advanced/Scripts/piholeDebug.sh
++++ b/advanced/Scripts/piholeDebug.sh
+@@ -520,7 +520,13 @@ disk_usage() {
+ parse_locale() {
+     local pihole_locale
+     echo_current_diagnostic "Locale"
+-    pihole_locale="$(locale)"
++    if [ -f "$(command -v locale)" ]; then
++        pihole_locale="$(locale)"
++    elif [ -f "$(command -v locale.new)" ]; then
++        pihole_locale="$(locale.new)"
++    else
++        pihole_locale="No locale command found"
++    fi
+     parse_file "${pihole_locale}"
+ }
+ 
+@@ -1248,7 +1254,7 @@ spinner(){
+             else
+                 printf "\r${_spin:_i++%${#_spin}:1} %02d:%02d:%02d" $((_elapsed/3600)) $(((_elapsed/60)%60)) $((_elapsed%60)) >"$(tty)"
+             fi
+-            sleep 0.25
++            sleep 1
+         done
+ 
+         # Return to the begin of the line after completion (the spinner will be overwritten)
