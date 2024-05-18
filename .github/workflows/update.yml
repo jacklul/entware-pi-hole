@@ -135,11 +135,12 @@ jobs:
           echo "New tag: ${{ steps.tag.outputs.RESULT }}"
           git diff
 
-      - name: Commit and Push changes
-        if: ${{ steps.tag.outputs.RESULT != '' && github.event_name == 'schedule' }}
-        uses: stefanzweifel/git-auto-commit-action@v5
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        if: ${{ steps.tag.outputs.RESULT != '' }}
         with:
-          commit_message: 'Automatic update to ${{ steps.tag.outputs.RESULT }}'
-          file_pattern: ./.github/workflow/build.yml
-          tagging_message: ${{ steps.tag.outputs.RESULT }}
-          push_options: '--dry-run' # @TODO remove after successful test
+          branch: auto-update-pull-request
+          delete-branch: true
+          commit-message: 'Automatic update to ${{ steps.tag.outputs.RESULT }}'
+          title: 'Automatic update to ${{ steps.tag.outputs.RESULT }}'
+          body: ''

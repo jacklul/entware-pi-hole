@@ -4,6 +4,7 @@ on:
   create:
     tags:
       - '^\d{4}\.\d{2}\.\d{2}-\d+$'
+  pull_request:
   workflow_dispatch:
 
 env:
@@ -19,6 +20,7 @@ jobs:
   set-version:
     concurrency: set-version
     runs-on: ubuntu-latest
+    if: ${{ !contains(github.head_ref, 'gh-pages') }}
 
     outputs:
       version: ${{ steps.version.outputs.OUTPUT }}
@@ -172,7 +174,8 @@ jobs:
 
     steps:
       - name: Fail this job
-        if: ${{ matrix.allow-failure && github.ref_name != 'master' && !startsWith(github.ref, 'refs/tags/') && github.event_name != 'schedule' }}
+        if: ${{ matrix.allow-failure && github.ref_name != 'master' && !startsWith(github.ref, 'refs/tags/') }}
+        # @TODO when v6 is released master should not be excluded here
         run: exit 1
 
       - name: Checkout own repository
@@ -308,7 +311,8 @@ jobs:
 
     steps:
       - name: Fail this job
-        if: ${{ matrix.allow-failure && github.ref_name != 'master' && !startsWith(github.ref, 'refs/tags/') && github.event_name != 'schedule' }}
+        if: ${{ matrix.allow-failure && github.ref_name != 'master' && !startsWith(github.ref, 'refs/tags/') }}
+        # @TODO when v6 is released master should not be excluded here
         run: exit 1
 
       - name: Checkout own repository
@@ -467,7 +471,7 @@ jobs:
 
       - name: Upload packages
         uses: JamesIves/github-pages-deploy-action@v4
-        if: ${{ startsWith(github.ref, 'refs/tags/') || github.ref_name == 'master' || github.event_name == 'schedule' }}
+        if: ${{ startsWith(github.ref, 'refs/tags/') || github.ref_name == 'master' }}
         # @TODO when v6 is released builds on master should not be allowed to upload
         with:
           branch: gh-pages
