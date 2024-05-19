@@ -11,7 +11,7 @@ Run [Pi-hole](https://pi-hole.net) directly on your [Entware](https://github.com
 There are some changes compared to the official releases:
 
 - `ss` is replaced with `netstat` when not found (used in `pihole status`) - Entware has no `iproute2` package
-- `pihole`'s `tricoder`, `debug`, `update`, `reconfigure`, `uninstall` and `checkout` functions are removed
+- `pihole`'s `tricoder`, `update`, `reconfigure`, `uninstall` and `checkout` functions are removed
 
 ## Installation
 
@@ -30,9 +30,6 @@ src/gz entware-pi-hole https://jacklul.github.io/entware-pi-hole/[architecture]
 
 > [!NOTE]
 > Default configuration uses Google's DNS as upstream servers, runs HTTP(S) server on ports **5080/5443** and DNS resolver on **5053** (loopback interface only) - everything can be changed in `/opt/etc/pihole/pihole.toml`.
-
-> [!IMPORTANT]
-> When upgrading make sure to restart `pihole-FTL` to re-run install tasks - `/opt/etc/init.d/S55pihole-FTL restart`.
 
 ## Support
 
