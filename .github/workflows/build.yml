@@ -1,7 +1,7 @@
 name: Build and Upload
 
 on:
-  create:
+  push:
     tags:
       - '^\d{4}\.\d{2}\.\d{2}-\d+$'
   pull_request:
