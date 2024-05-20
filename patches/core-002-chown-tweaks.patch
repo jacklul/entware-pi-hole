@@ -1,5 +1,5 @@
 diff --git a/advanced/Scripts/piholeDebug.sh b/advanced/Scripts/piholeDebug.sh
-index d2942f0..6018627 100755
+index 7c558127..6f335aed 100755
 --- a/advanced/Scripts/piholeDebug.sh
 +++ b/advanced/Scripts/piholeDebug.sh
 @@ -1296,7 +1296,7 @@ upload_to_tricorder() {
@@ -12,7 +12,7 @@ index d2942f0..6018627 100755
      # Let the user know debugging is complete with something strikingly visual
      log_write ""
 diff --git a/advanced/Templates/pihole-FTL-prestart.sh b/advanced/Templates/pihole-FTL-prestart.sh
-index a28b200..f41e5ef 100755
+index c6817828..b585d7ef 100755
 --- a/advanced/Templates/pihole-FTL-prestart.sh
 +++ b/advanced/Templates/pihole-FTL-prestart.sh
 @@ -12,12 +12,12 @@ FTL_PID_FILE="$(getFTLPIDFile)"
@@ -43,7 +43,7 @@ index a28b200..f41e5ef 100755
 +    [ "$(id -u pihole 2> /dev/null)" != "" ] && chown -h pihole:pihole /opt/var/log/pihole-FTL.log
  fi
 diff --git a/gravity.sh b/gravity.sh
-index 8354825..502b536 100755
+index 522d92f5..3a63c6f0 100755
 --- a/gravity.sh
 +++ b/gravity.sh
 @@ -65,7 +65,7 @@ generate_gravity_database() {

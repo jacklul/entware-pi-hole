@@ -1,5 +1,5 @@
 diff --git a/advanced/Scripts/updatecheck.sh b/advanced/Scripts/updatecheck.sh
-index 12d2469..db1d7f7 100755
+index eda6c403..d46ac01f 100755
 --- a/advanced/Scripts/updatecheck.sh
 +++ b/advanced/Scripts/updatecheck.sh
 @@ -65,16 +65,21 @@ if [[ "$1" == "reboot" ]]; then

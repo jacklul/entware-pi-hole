@@ -1,5 +1,5 @@
 diff --git a/advanced/Scripts/COL_TABLE b/advanced/Scripts/COL_TABLE
-index 4344c7b..045d26e 100644
+index 4344c7b8..045d26e6 100644
 --- a/advanced/Scripts/COL_TABLE
 +++ b/advanced/Scripts/COL_TABLE
 @@ -1,5 +1,5 @@
@@ -10,7 +10,7 @@ index 4344c7b..045d26e 100644
    # If something MUST be emphasized, use both
    COL_BOLD='[1m'
 diff --git a/advanced/Scripts/piholeDebug.sh b/advanced/Scripts/piholeDebug.sh
-index 7c55812..0bfbd01 100755
+index 7c558127..0bfbd015 100755
 --- a/advanced/Scripts/piholeDebug.sh
 +++ b/advanced/Scripts/piholeDebug.sh
 @@ -1235,10 +1235,10 @@ spinner(){

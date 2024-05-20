@@ -25,7 +25,7 @@ index 581fc0b7..bd0d08b0 100644
  int api_info_client(struct ftl_conn *api)
  {
 diff --git a/src/args.c b/src/args.c
-index 29b24e2f..ebed5773 100644
+index e4bbd0cd..77064c02 100644
 --- a/src/args.c
 +++ b/src/args.c
 @@ -321,9 +321,9 @@ void parse_args(int argc, char* argv[])
@@ -513,7 +513,7 @@ index 742e8d9a..ae24ff4a 100644
  bool chmod_file(const char *filename, const mode_t mode);
  bool file_exists(const char *filename);
 diff --git a/src/lua/CMakeLists.txt b/src/lua/CMakeLists.txt
-index 908b5a7e..cda1bf9d 100644
+index 7abcb4af..8730727d 100644
 --- a/src/lua/CMakeLists.txt
 +++ b/src/lua/CMakeLists.txt
 @@ -72,7 +72,7 @@ target_compile_options(lua PRIVATE -Wno-maybe-uninitialized -Wno-unused-variable

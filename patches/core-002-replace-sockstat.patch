@@ -1,8 +1,8 @@
 diff --git a/advanced/Scripts/piholeDebug.sh b/advanced/Scripts/piholeDebug.sh
-index d2942f0..9327a8a 100755
+index 7c558127..d8b9eb3d 100755
 --- a/advanced/Scripts/piholeDebug.sh
 +++ b/advanced/Scripts/piholeDebug.sh
-@@ -628,9 +634,16 @@ check_required_ports() {
+@@ -628,9 +628,16 @@ check_required_ports() {
      # Create an array for these ports in use
      ports_in_use=()
      # Sort the addresses and remove duplicates
@@ -22,7 +22,7 @@ index d2942f0..9327a8a 100755
  
      local ports_configured
      # Get all configured ports
-@@ -645,11 +658,21 @@ check_required_ports() {
+@@ -645,11 +652,21 @@ check_required_ports() {
      for i in "${!ports_in_use[@]}"; do
          # loop through them and assign some local variables
          local service_name
@@ -47,7 +47,7 @@ index d2942f0..9327a8a 100755
          # Check if the right services are using the right ports
          if [[ ${ports_configured[*]} =~ $(echo "${port_number}" | rev | cut -d: -f1 | rev) ]]; then
 diff --git a/pihole b/pihole
-index 143654d..aaa1925 100755
+index 7c84771c..cd35f2fb 100755
 --- a/pihole
 +++ b/pihole
 @@ -317,7 +317,12 @@ analyze_ports() {

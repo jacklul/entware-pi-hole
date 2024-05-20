@@ -1,5 +1,5 @@
 diff --git a/advanced/Scripts/piholeDebug.sh b/advanced/Scripts/piholeDebug.sh
-index 7c55812..b0df20d 100755
+index 7c558127..8153832d 100755
 --- a/advanced/Scripts/piholeDebug.sh
 +++ b/advanced/Scripts/piholeDebug.sh
 @@ -1277,6 +1277,8 @@ analyze_pihole_log() {
@@ -11,7 +11,7 @@ index 7c55812..b0df20d 100755
      # Users can submit their debug logs using curl (encrypted)
      log_write "    * Using ${COL_GREEN}curl${COL_NC} for transmission."
      # transmit the log via TLS and store the token returned in a variable
-@@ -1312,7 +1337,7 @@ upload_to_tricorder() {
+@@ -1312,7 +1314,7 @@ upload_to_tricorder() {
          # let the user know
          log_write "${INFO} Debug script running in automated mode"
          # and then decide again which tool to use to submit it
@@ -20,7 +20,7 @@ index 7c55812..b0df20d 100755
          # If we're not running in automated mode,
      else
          # if not being called from the web interface
-@@ -1320,7 +1326,8 @@ upload_to_tricorder() {
+@@ -1320,7 +1322,8 @@ upload_to_tricorder() {
              echo ""
              # give the user a choice of uploading it or not
              # Users can review the log file locally (or the output of the script since they are the same) and try to self-diagnose their problem
@@ -30,9 +30,8 @@ index 7c55812..b0df20d 100755
              case ${response} in
                  # If they say yes, run our function for uploading the log
                  [yY][eE][sS]|[yY]) curl_to_tricorder;;
-
 diff --git a/pihole b/pihole
-index 7c84771..ea91de5 100755
+index 7c84771c..ea91de57 100755
 --- a/pihole
 +++ b/pihole
 @@ -469,6 +469,11 @@ unsupportedFunc(){
