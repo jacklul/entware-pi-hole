@@ -34,7 +34,8 @@ fi
 
 # Some of these commands might be missing depending on the system
 # so we check if they exist and then prompt the user to install them
-COREUTILS_DEPS="basename cat chmod chown cp cut date df dirname du echo expr false head id install kill ln ls mkdir mktemp mv nohup printf pwd rm sha1sum sleep sort stat stty tail tee test timeout touch tr true tty uptime whoami"
+COMMAND_DEPS="su:shadow-su setcap:libcap-bin killall:psmisc pgrep:procps-ng-pgrep tput:libncurses-dev rev lscpu"
+COREUTILS_DEPS="basename cat chmod chown cp cut date df dirname echo expr false head id install kill ln ls mkdir mktemp mv nohup printf pwd rm sha1sum sleep stat stty tail tee test timeout touch tr true tty uptime whoami"
 
 CHECK_COMMAND=""
 type 2> /dev/null && CHECK_COMMAND="type"
@@ -44,11 +45,28 @@ if [ -n "$CHECK_COMMAND" ]; then
     MISSING_CMDS=""
     MISSING_PKGS=""
 
-    for COREUTILS_COMMAND in $COREUTILS_DEPS; do
+    for COMMAND in $COMMAND_DEPS; do
+        if echo "$COMMAND" | grep -q ":"; then
+            PACKAGE="$(echo "$COMMAND" | cut -d ':' -f 2 2> /dev/null)"
+            COMMAND="$(echo "$COMMAND" | cut -d ':' -f 1 2> /dev/null)"
+
+            echo "$COMMAND" | grep -q ":" && continue # no 'cut' command?
+        else
+            PACKAGE="$COMMAND"
+        fi
+
         #shellcheck disable=SC2086
-        if ! $CHECK_COMMAND $COREUTILS_COMMAND > /dev/null 2>&1; then
-            MISSING_CMDS="$MISSING_CMDS $COREUTILS_COMMAND"
-            MISSING_PKGS="$MISSING_PKGS coreutils-$COREUTILS_COMMAND"
+        if ! $CHECK_COMMAND $COMMAND > /dev/null 2>&1; then
+            MISSING_CMDS="$MISSING_CMDS $COMMAND"
+            MISSING_PKGS="$MISSING_PKGS $PACKAGE"
+        fi
+    done
+
+    for COMMAND in $COREUTILS_DEPS; do
+        #shellcheck disable=SC2086
+        if ! $CHECK_COMMAND $COMMAND > /dev/null 2>&1; then
+            MISSING_CMDS="$MISSING_CMDS $COMMAND"
+            MISSING_PKGS="$MISSING_PKGS coreutils-$COMMAND"
         fi
     done
 
@@ -65,19 +83,44 @@ Install them by running the following command:
 
 EOF
 
+        # Check if this is interactive console session
         STDIN_FD="$(readlink -f /proc/$$/fd/0 2> /dev/null)"
+
         if [ -n "$STDIN_FD" ] && [ "$STDIN_FD" != "/dev/null" ]; then
-            printf "Press any key to continue..."
+            #printf "Press any key to continue..."
+            printf "Do you want to install them automatically? [Y/n]: "
+
             #shellcheck disable=SC2034
             read -r reply
+
+            case "$reply" in
+                [yY]*)
+                    SCRIPT_BASE="/opt/tmp/pi-hole-install-deps"
+
+                    cat <<EOT > "$SCRIPT_BASE.sh"
+#!/bin/sh
+
+printf "Waiting for opkg to finish..."
+
+start_time=\$(date +%s)
+while [ -f /opt/tmp/opkg.lock ] && [ \$(( \$(date +%s) - start_time )) -le 60 ]; do
+    printf "."
+    sleep 1
+done
+
+echo
+opkg install $MISSING_PKGS
+echo "Done!"
+
+rm -f "\$0"
+EOT
+                    echo "Running install in the background... ('tail -f $SCRIPT_BASE.log' for output)"
+                    sh "$SCRIPT_BASE.sh" > "$SCRIPT_BASE.log" 2>&1 & 
+                ;;
+            esac
         fi
     fi
 else
-    cat << EOF
-Unable to check for script dependencies - 'type' and 'which' commands not found
-
-Make sure the following commands are available on your system:
- $COREUTILS_DEPS
-
-EOF
+    echo "Warning: Unable to check for missing dependencies - 'type' and 'which' commands are not found!"
 fi
+
