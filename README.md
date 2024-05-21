@@ -18,13 +18,11 @@ There are some changes compared to the official releases:
 - Add this repository to your `opkg.conf` configuration:
 
 ```bash
-src/gz entware-pi-hole https://jacklul.github.io/entware-pi-hole/[architecture]
+src/gz pi-hole https://jacklul.github.io/entware-pi-hole/[architecture]
 # replace [architecture] with one of the supported architectures
 ```
 
 - Install the package with `opkg update && opkg install pi-hole` command
-
-- Run install tasks with `/opt/etc/init.d/S55pihole-FTL install` command (this is optional - start command runs this silently)
 
 - Start `pihole-FTL` with `/opt/etc/init.d/S55pihole-FTL start` command
 
