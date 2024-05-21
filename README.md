@@ -6,13 +6,6 @@ Run [Pi-hole](https://pi-hole.net) directly on your [Entware](https://github.com
 > [!WARNING]
 > This project is a **proof-of-concept-alpha™** and was tested only on **Asus RT-AX58U v2** running official **388.2** firmware with **BusyBox v1.24.1**.
 
-### Notable changes
-
-There are some changes compared to the official releases:
-
-- `ss` is replaced with `netstat` when not found (used in `pihole status`) - Entware has no `iproute2` package
-- `pihole`'s `tricoder`, `update`, `reconfigure`, `uninstall` and `checkout` functions are removed
-
 ## Installation
 
 - Add this repository to your `opkg.conf` configuration:
