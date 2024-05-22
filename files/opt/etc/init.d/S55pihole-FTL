@@ -1,6 +1,6 @@
 #!/bin/sh
 # https://github.com/jacklul/entware-pi-hole/
-#shellcheck disable=SC2034,SC1091
+#shellcheck disable=SC2034
 
 ENABLED=yes
 PROCS=pihole-FTL
@@ -52,6 +52,7 @@ if [ -z "$PRECMD" ]; then
     PRECMD="bash /opt/share/pihole/pihole-FTL-poststop.sh ; bash /opt/share/pihole/pihole-FTL-prestart.sh"
 fi
 
+#shellcheck disable=SC1091
 . /opt/etc/init.d/rc.func
 
 case $1 in

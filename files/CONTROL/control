@@ -1,9 +1,14 @@
 Package: pi-hole
 Version: 
 Depends: bash, cron, curl, git-http, ca-bundle, bind-dig, iputils-ping, net-tools, findutils, grep, sed, jq, libcap-bin, shadow-su, psmisc, procps-ng-pgrep, libncurses-dev, rev, lscpu, coreutils-cut, coreutils-expr, coreutils-id, coreutils-install, coreutils-mktemp, coreutils-nohup, coreutils-printf, coreutils-sha1sum, coreutils-sleep, coreutils-stat, coreutils-stty, coreutils-tee, coreutils-timeout, coreutils-tr, coreutils-tty, coreutils-whoami
+Source: https://github.com/jacklul/entware-pi-hole
+License: EUPL-1.2
+LicenseFiles: LICENSE
 Section: net
-URL: https://github.com/jacklul/entware-pi-hole
+URL: https://github.com/pi-hole/pi-hole
 Maintainer: Jack'lul, https://jacklul.github.io
 Architecture: 
 Installed-Size: 
-Description: The Pi-hole is a DNS sinkhole that protects your devices from unwanted content without installing any client-side software.
+Description:  The Pi-hole is a DNS sinkhole that protects your devices from unwanted content without installing any client-side software.
+ 
+ This is an unofficial package not supported by the Pi-hole developers!
