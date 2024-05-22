@@ -1,6 +1,5 @@
 #!/bin/bash
-# Make sure there is no call to "service pihole-FTL"
-# or "systemctl action pihole-FTL"
+# Make sure there is no call to "service pihole-FTL" or "systemctl action pihole-FTL"
 
 #shellcheck disable=SC1091
 . "$(dirname "$(readlink -f "$0")")/common-core.sh"

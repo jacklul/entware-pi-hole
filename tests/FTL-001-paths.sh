@@ -20,7 +20,7 @@ for FILE in $FILES; do
     else
         #CONTENTS="$(grep -Ev "^(\s*//|\s*/\*|\s*\*|\s*\*/)" < "$FILE")"
 
-        CONTENTS="$(cat "$FILE" | awk '
+        CONTENTS="$(awk '
 BEGIN { multi_line_comment = 0 }
 {
     while (match($0, /\/\*[^*]*\*\//)) {
@@ -42,7 +42,7 @@ BEGIN { multi_line_comment = 0 }
         sub(/\/\/.*/, "")
         print
     }
-}')"
+}' < "$FILE")"
     fi
 
     # Exceptions (@TODO the way these are handled needs to be improved)
