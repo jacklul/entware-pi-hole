@@ -26,14 +26,18 @@ jobs:
       version: ${{ steps.version.outputs.OUTPUT }}
 
     steps:
-      - name: Use tag name
+      - name: Use ref tag name
         if: ${{ startsWith(github.ref, 'refs/tags/') }}
         run: echo "$GITHUB_REF_NAME" > .version
+
+      - name: Use latest tag name
+        if: ${{ github.ref_name == 'master' }}
+        run: echo "$(git ls-remote --tags --sort="v:refname" "https://github.com/${{ github.repository }}" | tail -n1 | sed 's/.*\///; s/\^{}//')" > .version
 
       - name: Generate version string
         id: version
         run: |
-          [ -f .version ] && "OUTPUT=$(cat .version)" >> $GITHUB_OUTPUT || \
+          [ -s .version ] && "OUTPUT=$(cat .version)" >> $GITHUB_OUTPUT || \
             echo "OUTPUT=dev-$(date +%Y.%m.%d)-$(date +%H%M%S)" >> $GITHUB_OUTPUT
 
   build-core:
@@ -175,7 +179,6 @@ jobs:
     steps:
       - name: Fail this job
         if: ${{ matrix.allow-failure && github.ref_name != 'master' && !startsWith(github.ref, 'refs/tags/') }}
-        # @TODO when v6 is released master should not be excluded here
         run: exit 1
 
       - name: Checkout own repository
@@ -308,11 +311,11 @@ jobs:
       CORE_VERSION: ${{ steps.versions.outputs.CORE }}
       WEB_VERSION: ${{ steps.versions.outputs.WEB }}
       FTL_VERSION: ${{ steps.versions.outputs.FTL }}
+      IPK_VERSION: ${{ steps.versions.outputs.IPK }}
 
     steps:
       - name: Fail this job
         if: ${{ matrix.allow-failure && github.ref_name != 'master' && !startsWith(github.ref, 'refs/tags/') }}
-        # @TODO when v6 is released master should not be excluded here
         run: exit 1
 
       - name: Checkout own repository
@@ -376,6 +379,7 @@ jobs:
       - name: Set versions
         id: versions
         run: |
+          echo "IPK=${{ needs.set-version.outputs.version }}" >> $GITHUB_OUTPUT
           . ./artifacts/core/.version
           echo "CORE=$VERSION" >> $GITHUB_OUTPUT
           . ./artifacts/web/.version
@@ -437,14 +441,16 @@ jobs:
           echo "Web version: $WEB_VERSION_OUT  " >> changelog.md
           echo "FTL version: $FTL_VERSION_OUT  " >> changelog.md
 
-      - name: Create a release
+      - name: Create or Edit a release
         uses: softprops/action-gh-release@v2
-        if: ${{ startsWith(github.ref, 'refs/tags/') }}
+        if: ${{ startsWith(github.ref, 'refs/tags/') || (github.ref_name == 'master' && !startsWith(needs.build-package.outputs.IPK_VERSION, 'dev-')) }}
         with:
           files: ./artifacts/*/*.ipk
+          tag_name: ${{ needs.build-package.outputs.IPK_VERSION }}
           body_path: changelog.md
+          append_body: true
           generate_release_notes: true
-          draft: true
+          make_latest: true
 
       - name: Collect new packages
         run: |
@@ -472,7 +478,6 @@ jobs:
       - name: Upload packages
         uses: JamesIves/github-pages-deploy-action@v4
         if: ${{ startsWith(github.ref, 'refs/tags/') || github.ref_name == 'master' }}
-        # @TODO when v6 is released builds on master should not be allowed to upload
         with:
           branch: gh-pages
           folder: .
