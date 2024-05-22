@@ -1,6 +1,6 @@
 # Pi-hole for Entware
 
-Run [Pi-hole](https://pi-hole.net) directly on your [Entware](https://github.com/Entware/Entware) supported device.  
+Run [Pi-hole](https://pi-hole.net)® directly on your [Entware](https://github.com/Entware/Entware) supported device.  
 **Releases here are unofficial and not supported by the Pi-hole developers.**
 
 > [!WARNING]
@@ -10,17 +10,27 @@ Run [Pi-hole](https://pi-hole.net) directly on your [Entware](https://github.com
 
 - Add this repository to your `opkg.conf` configuration:
 
-```bash
+```conf
 src/gz pi-hole https://jacklul.github.io/entware-pi-hole/[architecture]
 # replace [architecture] with one of the supported architectures
 ```
 
-- Install the package with `opkg update && opkg install pi-hole` command
+- Install the package:
 
-- Start `pihole-FTL` with `/opt/etc/init.d/S55pihole-FTL start` command
+```bash
+opkg update
+opkg install pi-hole
+```
+
+- Start `pihole-FTL` daemon:
+
+```bash
+/opt/etc/init.d/S55pihole-FTL start
+```
 
 > [!NOTE]
 > Default configuration uses Google's DNS as upstream servers, runs HTTP(S) server on ports **5080/5443** and DNS resolver on **5053** (loopback interface only) - everything can be changed in `/opt/etc/pihole/pihole.toml`.
+> The default ports and interface were set specifically to not initially conflict with anything that could be running in the system already.
 
 ## Support
 
@@ -30,7 +40,8 @@ Because how different each device can be I won't be able to help with every issu
 
 Everything here was designed to build through [Github Actions](https://github.com/features/actions) but it can also be done manually:
 
-<details><summary>Show the instructions!</summary>
+<details>
+<summary>Show the instructions</summary>
 
 ```bash
 # Fetch repositories
@@ -65,3 +76,8 @@ mkdir ./build
 # the package will be saved at the root of this repository
 ```
 </details>
+
+## License
+
+Contents of this repository are licensed under [MIT](/LICENSE).  
+Pi-hole® is licensed under [EUPL](https://github.com/pi-hole/pi-hole?tab=License-1-ov-file).
