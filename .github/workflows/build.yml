@@ -198,7 +198,7 @@ jobs:
           key_prefix: binary-${{ matrix.arch }}-
           patches_prefix: FTL
           files: |
-            ./stage/pihole-FTL*
+            ./stage/pihole-FTL
             ./stage/.version
 
       - name: List files (initial state)
@@ -268,7 +268,7 @@ jobs:
         with:
           name: binary-${{ matrix.arch }}
           path: |
-            ./stage/pihole-FTL*
+            ./stage/pihole-FTL
             ./stage/.version
           retention-days: 1
 
