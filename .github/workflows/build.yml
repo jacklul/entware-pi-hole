@@ -8,9 +8,9 @@ on:
   workflow_dispatch:
 
 env:
-  CORE_HASH: development-v6
-  WEB_HASH: development-v6
-  FTL_HASH: development-v6
+  #CORE_HASH: 
+  #WEB_HASH: 
+  #FTL_HASH: 
   CORE_BRANCH: development-v6
   WEB_BRANCH: development-v6
   FTL_BRANCH: development-v6
@@ -65,11 +65,11 @@ jobs:
           key_prefix: core-
           patches_prefix: core
 
-      - name: List files (initial state)
-        if: steps.cache.outputs.cache-hit != 'true'
-        uses: ./.github/actions/list
-        with:
-          paths: . ./stage
+      #- name: List files (initial state)
+      #  if: steps.cache.outputs.cache-hit != 'true'
+      #  uses: ./.github/actions/list
+      #  with:
+      #    paths: . ./stage
 
       - name: Apply patches
         if: steps.cache.outputs.cache-hit != 'true'
@@ -80,6 +80,12 @@ jobs:
       - name: Save repository version infos
         if: steps.cache.outputs.cache-hit != 'true'
         uses: ./.github/actions/version
+
+      #- name: List files (after patching)
+      #  if: steps.cache.outputs.cache-hit != 'true'
+      #  uses: ./.github/actions/list
+      #  with:
+      #    paths: ./stage
 
       - name: Remove .git directory
         run: rm -fr ./stage/.git
@@ -116,11 +122,11 @@ jobs:
           key_prefix: web-
           patches_prefix: web
 
-      - name: List files (initial state)
-        if: steps.cache.outputs.cache-hit != 'true'
-        uses: ./.github/actions/list
-        with:
-          paths: . ./stage
+      #- name: List files (initial state)
+      #  if: steps.cache.outputs.cache-hit != 'true'
+      #  uses: ./.github/actions/list
+      #  with:
+      #    paths: . ./stage
 
       - name: Apply patches
         if: steps.cache.outputs.cache-hit != 'true'
@@ -131,6 +137,12 @@ jobs:
       - name: Save repository version infos
         if: steps.cache.outputs.cache-hit != 'true'
         uses: ./.github/actions/version
+
+      #- name: List files (after patching)
+      #  if: steps.cache.outputs.cache-hit != 'true'
+      #  uses: ./.github/actions/list
+      #  with:
+      #    paths: ./stage
 
       - name: Remove .git directory
         run: rm -fr ./stage/.git
@@ -201,11 +213,11 @@ jobs:
             ./stage/pihole-FTL
             ./stage/.version
 
-      - name: List files (initial state)
-        if: steps.cache.outputs.cache-hit != 'true'
-        uses: ./.github/actions/list
-        with:
-          paths: . ./stage
+      #- name: List files (initial state)
+      #  if: steps.cache.outputs.cache-hit != 'true'
+      #  uses: ./.github/actions/list
+      #  with:
+      #    paths: . ./stage
 
       - name: Apply patches
         if: steps.cache.outputs.cache-hit != 'true'
@@ -254,11 +266,11 @@ jobs:
           tar -xf ./build.tar pihole-FTL
           sha1sum pihole-FTL > pihole-FTL.sha1
 
-      - name: List files (after build)
-        if: steps.cache.outputs.cache-hit != 'true'
-        uses: ./.github/actions/list
-        with:
-          paths: ./stage
+      #- name: List files (after build)
+      #  if: steps.cache.outputs.cache-hit != 'true'
+      #  uses: ./.github/actions/list
+      #  with:
+      #    paths: ./stage
 
       - name: Remove .git directory
         run: rm -fr ./stage/.git
@@ -339,10 +351,10 @@ jobs:
           name: binary-${{ matrix.arch }}
           path: ./artifacts/binary
 
-      - name: List files (initial state)
-        uses: ./.github/actions/list
-        with:
-          paths: . ./artifacts ./artifacts/core ./artifacts/web ./artifacts/binary
+      #- name: List files (initial state)
+      #  uses: ./.github/actions/list
+      #  with:
+      #    paths: . ./artifacts ./artifacts/core ./artifacts/web ./artifacts/binary
 
       - name: Build package
         run: |
@@ -365,10 +377,10 @@ jobs:
           sed 's#href="/css#href="css#' -i ./packages/Packages.html
           cp -frv ./ipk-html-indexer/css ./packages
 
-      - name: List files (after build)
-        uses: ./.github/actions/list
-        with:
-          paths: ./packages
+      #- name: List files (after build)
+      #  uses: ./.github/actions/list
+      #  with:
+      #    paths: ./packages
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -463,10 +475,10 @@ jobs:
         with:
           path: ./gh-pages
 
-      - name: List files
-        uses: ./.github/actions/list
-        with:
-          paths: . ./gh-pages
+      #- name: List files
+      #  uses: ./.github/actions/list
+      #  with:
+      #    paths: . ./gh-pages
 
       - name: Prepare for upload
         run: |
