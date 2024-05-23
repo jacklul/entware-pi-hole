@@ -28,9 +28,9 @@ opkg install pi-hole
 /opt/etc/init.d/S55pihole-FTL start
 ```
 
-> [!NOTE]
-> Default configuration uses Google's DNS as upstream servers, runs HTTP(S) server on ports **5080/5443** and DNS resolver on **5053** (loopback interface only) - everything can be changed in `/opt/etc/pihole/pihole.toml`.
-> The default ports and interface were set specifically to not initially conflict with anything that could be running in the system already.
+> [!IMPORTANT]
+> The service might initially not start due to ports being in use - make adjustements in `/opt/etc/pihole/pihole.toml` when necessary.
+> For device or firmware specific setup instructions check the [Wiki](/wiki).
 
 ## Support
 
