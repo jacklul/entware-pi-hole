@@ -12,8 +12,8 @@ runs:
     - name: Pre tasks
       shell: bash
       run: |
-        [ -d "${{ inputs.path }}/.git" ] && mv "${{ inputs.path }}/.git" "${{ inputs.path }}/../.git.bak"
-        find "${{ inputs.path }}" -type f -name "index.html" -exec rm -f "{}" \;
+        [ -d "${{ inputs.path }}/.git" ] && mv -v "${{ inputs.path }}/.git" "${{ inputs.path }}/../.git.bak"
+        find "${{ inputs.path }}" -type f -name "index.html" -exec rm -fv "{}" \;
 
     - name: Generate directory listings
       uses: jayanta525/github-pages-directory-listing@v4.0.0
@@ -23,5 +23,5 @@ runs:
     - name: Post tasks
       shell: bash
       run: |
-        find "${{ inputs.path }}" -type f -name "index.html" -exec sudo chown $(id -u):$(id -g) "{}" \;
-        [ -d ""${{ inputs.path }}/../.git.bak"" ] && mv "${{ inputs.path }}/../.git.bak" "${{ inputs.path }}/.git"
+        find "${{ inputs.path }}" -type f -name "index.html" -exec sudo chown -fv $(id -u):$(id -g) "{}" \;
+        [ -d "${{ inputs.path }}/../.git.bak" ] && mv -v "${{ inputs.path }}/../.git.bak" "${{ inputs.path }}/.git"

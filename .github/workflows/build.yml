@@ -1,10 +1,16 @@
 name: Build and Upload
 
 on:
+  #schedule:
+  #  - cron: "0 0 * * *"
+  # @TODO when v6 is released this should be uncommented
   push:
-    tags:
-      - '^\d{4}\.\d{2}\.\d{2}-\d+$'
+    #branches-ignore:
+    #  - 'master'
+    # @TODO when v6 is released this should be uncommented
   pull_request:
+  release:
+    types: [published]
   workflow_dispatch:
 
 env:
@@ -14,38 +20,35 @@ env:
   CORE_BRANCH: development-v6
   WEB_BRANCH: development-v6
   FTL_BRANCH: development-v6
-# @TODO when v6 is released *_HASH should be set to commit hashes and *_BRANCH to release branches
+# @TODO when v6 is released *_HASH should be set to release commit hashes and *_BRANCH to release branches
 
 jobs:
-  set-version:
-    concurrency: set-version-${{ github.ref_name || github.run_id }}
+  globals:
+    concurrency: globals-${{ github.ref_name || github.run_id }}
     runs-on: ubuntu-latest
     if: ${{ !contains(github.head_ref, 'gh-pages') }}
 
     outputs:
-      version: ${{ steps.version.outputs.OUTPUT }}
+      VERSION: ${{ steps.globals.outputs.VERSION }}
+      CORE_REF: ${{ steps.globals.outputs.CORE_REF }}
+      WEB_REF: ${{ steps.globals.outputs.WEB_REF }}
+      FTL_REF: ${{ steps.globals.outputs.FTL_REF }}
 
     steps:
-      - name: Use ref tag name
-        if: ${{ startsWith(github.ref, 'refs/tags/') }}
-        run: echo "$GITHUB_REF_NAME" > .version
+      - name: Checkout own repository
+        uses: actions/checkout@v4
 
-      - name: Use latest tag name
-        if: ${{ github.ref_name == 'master' }}
-        run: echo "$(git ls-remote --tags --sort="v:refname" "https://github.com/${{ github.repository }}" | tail -n1 | sed 's/.*\///; s/\^{}//')" > .version
-
-      - name: Generate version string
-        id: version
-        run: |
-          [ -s .version ] && "OUTPUT=$(cat .version)" >> $GITHUB_OUTPUT || \
-            echo "OUTPUT=dev-$(date +%Y.%m.%d)-$(date +%H%M%S)" >> $GITHUB_OUTPUT
+      - name: Set outputs
+        id: globals
+        run: bash ./scripts/globals.sh
 
   build-core:
     concurrency: build-core-${{ github.ref_name || github.run_id }}
+    needs: [globals]
     runs-on: ubuntu-latest
 
     outputs:
-      version: ${{ steps.version.outputs.OUTPUT }}
+      VERSION: ${{ steps.version.outputs.OUTPUT }}
 
     steps:
       - name: Checkout own repository
@@ -55,7 +58,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: pi-hole/pi-hole
-          ref: ${{ startsWith(github.ref, 'refs/tags/') && env.CORE_HASH || ( env.CORE_BRANCH || '' ) }}
+          ref: ${{ needs.globals.outputs.CORE_REF }}
           path: ./stage
 
       - name: Cache result
@@ -64,12 +67,6 @@ jobs:
         with:
           key_prefix: core-
           patches_prefix: core
-
-      #- name: List files (initial state)
-      #  if: steps.cache.outputs.cache-hit != 'true'
-      #  uses: ./.github/actions/list
-      #  with:
-      #    paths: . ./stage
 
       - name: Apply patches
         if: steps.cache.outputs.cache-hit != 'true'
@@ -80,12 +77,6 @@ jobs:
       - name: Save repository version infos
         if: steps.cache.outputs.cache-hit != 'true'
         uses: ./.github/actions/version
-
-      #- name: List files (after patching)
-      #  if: steps.cache.outputs.cache-hit != 'true'
-      #  uses: ./.github/actions/list
-      #  with:
-      #    paths: ./stage
 
       - name: Remove .git directory
         run: rm -fr ./stage/.git
@@ -99,10 +90,11 @@ jobs:
 
   build-web:
     concurrency: build-web-${{ github.ref_name || github.run_id }}
+    needs: [globals]
     runs-on: ubuntu-latest
 
     outputs:
-      version: ${{ steps.version.outputs.OUTPUT }}
+      VERSION: ${{ steps.version.outputs.OUTPUT }}
 
     steps:
       - name: Checkout own repository
@@ -112,7 +104,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: pi-hole/web
-          ref: ${{ startsWith(github.ref, 'refs/tags/') && env.WEB_HASH || ( env.WEB_BRANCH || '' ) }}
+          ref: ${{ needs.globals.outputs.WEB_REF }}
           path: ./stage
 
       - name: Cache result
@@ -121,12 +113,6 @@ jobs:
         with:
           key_prefix: web-
           patches_prefix: web
-
-      #- name: List files (initial state)
-      #  if: steps.cache.outputs.cache-hit != 'true'
-      #  uses: ./.github/actions/list
-      #  with:
-      #    paths: . ./stage
 
       - name: Apply patches
         if: steps.cache.outputs.cache-hit != 'true'
@@ -137,12 +123,6 @@ jobs:
       - name: Save repository version infos
         if: steps.cache.outputs.cache-hit != 'true'
         uses: ./.github/actions/version
-
-      #- name: List files (after patching)
-      #  if: steps.cache.outputs.cache-hit != 'true'
-      #  uses: ./.github/actions/list
-      #  with:
-      #    paths: ./stage
 
       - name: Remove .git directory
         run: rm -fr ./stage/.git
@@ -156,11 +136,12 @@ jobs:
 
   build-binary:
     concurrency: build-binary-${{ github.ref_name || github.run_id }}-${{ matrix.arch }}
+    needs: [globals]
     runs-on: ubuntu-latest
     continue-on-error: ${{ matrix.allow-failure }}
 
     outputs:
-      version: ${{ steps.version.outputs.OUTPUT }}
+      VERSION: ${{ steps.version.outputs.OUTPUT }}
 
     strategy:
       fail-fast: false
@@ -200,7 +181,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: pi-hole/FTL
-          ref: ${{ startsWith(github.ref, 'refs/tags/') && env.FTL_HASH || ( env.FTL_BRANCH || '' ) }}
+          ref: ${{ needs.globals.outputs.FTL_REF }}
           path: ./stage
 
       - name: Cache result
@@ -212,12 +193,6 @@ jobs:
           files: |
             ./stage/pihole-FTL
             ./stage/.version
-
-      #- name: List files (initial state)
-      #  if: steps.cache.outputs.cache-hit != 'true'
-      #  uses: ./.github/actions/list
-      #  with:
-      #    paths: . ./stage
 
       - name: Apply patches
         if: steps.cache.outputs.cache-hit != 'true'
@@ -266,12 +241,6 @@ jobs:
           tar -xf ./build.tar pihole-FTL
           sha1sum pihole-FTL > pihole-FTL.sha1
 
-      #- name: List files (after build)
-      #  if: steps.cache.outputs.cache-hit != 'true'
-      #  uses: ./.github/actions/list
-      #  with:
-      #    paths: ./stage
-
       - name: Remove .git directory
         run: rm -fr ./stage/.git
 
@@ -286,7 +255,7 @@ jobs:
 
   build-package:
     concurrency: build-package-${{ github.ref_name || github.run_id }}-${{ matrix.arch }}
-    needs: [set-version, build-core, build-web, build-binary]
+    needs: [globals, build-core, build-web, build-binary]
     runs-on: ubuntu-latest
     continue-on-error: ${{ matrix.allow-failure }}
 
@@ -320,10 +289,10 @@ jobs:
           #  allow-failure: false
 
     outputs:
+      IPK_VERSION: ${{ steps.versions.outputs.IPK }}
       CORE_VERSION: ${{ steps.versions.outputs.CORE }}
       WEB_VERSION: ${{ steps.versions.outputs.WEB }}
       FTL_VERSION: ${{ steps.versions.outputs.FTL }}
-      IPK_VERSION: ${{ steps.versions.outputs.IPK }}
 
     steps:
       - name: Fail this job
@@ -351,36 +320,16 @@ jobs:
           name: binary-${{ matrix.arch }}
           path: ./artifacts/binary
 
-      #- name: List files (initial state)
-      #  uses: ./.github/actions/list
-      #  with:
-      #    paths: . ./artifacts ./artifacts/core ./artifacts/web ./artifacts/binary
+      - name: Add '-dev' postfix to package name
+        if: ${{ github.ref_name == 'develop' }}
+        run: sed '/^Package:/ s/$/-dev/' -i ./files/CONTROL/control
 
       - name: Build package
         run: |
           mkdir -pv ./build ./packages
           bash ./scripts/build.sh ./build
-          bash ./scripts/ipk.sh ./build "${{ needs.set-version.outputs.version }}" ${{ matrix.entware_arch }}
+          bash ./scripts/ipk.sh ./build "${{ needs.globals.outputs.VERSION }}" ${{ matrix.entware_arch }}
           mv -fv ./*.ipk ./packages
-
-      - name: Checkout Entware/ipk-html-indexer repository
-        uses: actions/checkout@v4
-        with:
-          repository: Entware/ipk-html-indexer
-          path: ./ipk-html-indexer
-
-      - name: Run ipk-html-indexer
-        run: |
-          sudo ln -sv "$(readlink -f ./ipk-html-indexer/mkindex.py)" /usr/local/bin/mkindex.py
-          sudo ln -sv "$(readlink -f ./ipk-html-indexer/mkhtml.py)" /usr/local/bin/mkhtml.py
-          bash ./ipk-html-indexer/index_feed.sh -h -f ./packages
-          sed 's#href="/css#href="css#' -i ./packages/Packages.html
-          cp -frv ./ipk-html-indexer/css ./packages
-
-      #- name: List files (after build)
-      #  uses: ./.github/actions/list
-      #  with:
-      #    paths: ./packages
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -391,7 +340,7 @@ jobs:
       - name: Set versions
         id: versions
         run: |
-          echo "IPK=${{ needs.set-version.outputs.version }}" >> $GITHUB_OUTPUT
+          echo "IPK=${{ needs.globals.outputs.VERSION }}" >> $GITHUB_OUTPUT
           . ./artifacts/core/.version
           echo "CORE=$VERSION" >> $GITHUB_OUTPUT
           . ./artifacts/web/.version
@@ -399,20 +348,58 @@ jobs:
           . ./artifacts/binary/.version
           echo "FTL=$VERSION" >> $GITHUB_OUTPUT
 
-  upload:
-    concurrency: upload
+  release:
+    concurrency: release-${{ github.ref_name || github.run_id }}
     needs: [build-package]
+    if: ${{ startsWith(github.ref, 'refs/tags/') }}
     runs-on: ubuntu-latest
 
     permissions:
       contents: write
 
     steps:
-      - name: Setup dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install rename
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: ipk-*
+          path: ./artifacts
 
+      - name: Create changelog file
+        env:
+          CORE_VERSION: ${{ needs.build-package.outputs.CORE_VERSION }}
+          WEB_VERSION: ${{ needs.build-package.outputs.WEB_VERSION }}
+          FTL_VERSION: ${{ needs.build-package.outputs.FTL_VERSION }}
+        run: |
+          CORE_VERSION_OUT="[$CORE_VERSION](https://github.com/pi-hole/pi-hole/releases/tag/$CORE_VERSION)"
+          WEB_VERSION_OUT="[$WEB_VERSION](https://github.com/pi-hole/web/releases/tag/$WEB_VERSION)"
+          FTL_VERSION_OUT="[$FTL_VERSION](https://github.com/pi-hole/FTL/releases/tag/$FTL_VERSION)"
+          [ "$(echo "$CORE_VERSION" | cut -c1)" != "v" ] && CORE_VERSION_OUT="[$CORE_VERSION](https://github.com/pi-hole/pi-hole/commit/$CORE_VERSION)"
+          [ "$(echo "$WEB_VERSION" | cut -c1)" != "v" ] && WEB_VERSION_OUT="[$WEB_VERSION](https://github.com/pi-hole/web/commit/$WEB_VERSION)"
+          [ "$(echo "$FTL_VERSION" | cut -c1)" != "v" ] && FTL_VERSION_OUT="[$FTL_VERSION](https://github.com/pi-hole/FTL/commit/$FTL_VERSION)"
+          echo "Core version: $CORE_VERSION_OUT  " >> changelog.md
+          echo "Web version: $WEB_VERSION_OUT  " >> changelog.md
+          echo "FTL version: $FTL_VERSION_OUT  " >> changelog.md
+
+      - name: Create or Edit a release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ./artifacts/*/*.ipk
+          tag_name: ${{ needs.build-package.outputs.IPK_VERSION }}
+          body_path: changelog.md
+          append_body: true
+          generate_release_notes: true
+
+  upload:
+    concurrency: upload
+    needs: [build-package]
+    if: ${{ startsWith(github.ref, 'refs/tags/') || github.ref_name == 'develop' || github.ref_name == 'master' }}
+    # @TODO when v6 is released master should not trigger this job
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
       - name: Checkout own repository
         uses: actions/checkout@v4
         with:
@@ -433,63 +420,62 @@ jobs:
           pattern: ipk-*
           path: ./artifacts
 
-      - name: Correct directory names
-        run: rename 's/ipk-//' ./artifacts/ipk-*/
-
-      - name: Create changelog file
-        if: ${{ startsWith(github.ref, 'refs/tags/') }}
-        env:
-          CORE_VERSION: ${{ needs.build-package.outputs.CORE_VERSION }}
-          WEB_VERSION: ${{ needs.build-package.outputs.WEB_VERSION }}
-          FTL_VERSION: ${{ needs.build-package.outputs.FTL_VERSION }}
-        run: |
-          CORE_VERSION_OUT="[$CORE_VERSION](https://github.com/pi-hole/pi-hole/releases/tag/$CORE_VERSION)"
-          WEB_VERSION_OUT="[$WEB_VERSION](https://github.com/pi-hole/web/releases/tag/$WEB_VERSION)"
-          FTL_VERSION_OUT="[$FTL_VERSION](https://github.com/pi-hole/FTL/releases/tag/$FTL_VERSION)"
-          [ "$(echo "$CORE_VERSION" | cut -c1)" != "v" ] && CORE_VERSION_OUT="[$CORE_VERSION](https://github.com/pi-hole/pi-hole/commit/$CORE_VERSION)"
-          [ "$(echo "$WEB_VERSION" | cut -c1)" != "v" ] && WEB_VERSION_OUT="[$WEB_VERSION](https://github.com/pi-hole/web/commit/$WEB_VERSION)"
-          [ "$(echo "$FTL_VERSION" | cut -c1)" != "v" ] && FTL_VERSION_OUT="[$FTL_VERSION](https://github.com/pi-hole/FTL/commit/$FTL_VERSION)"
-          echo "Core version: $CORE_VERSION_OUT  " >> changelog.md
-          echo "Web version: $WEB_VERSION_OUT  " >> changelog.md
-          echo "FTL version: $FTL_VERSION_OUT  " >> changelog.md
-
-      - name: Create or Edit a release
-        uses: softprops/action-gh-release@v2
-        if: ${{ startsWith(github.ref, 'refs/tags/') || (github.ref_name == 'master' && !startsWith(needs.build-package.outputs.IPK_VERSION, 'dev-')) }}
-        with:
-          files: ./artifacts/*/*.ipk
-          tag_name: ${{ needs.build-package.outputs.IPK_VERSION }}
-          body_path: changelog.md
-          append_body: true
-          generate_release_notes: true
-          make_latest: true
-
       - name: Collect new packages
         run: |
           mkdir -p ./gh-pages
-          find ./gh-pages -maxdepth 1 -type d -name "*-*" -exec sh -c '[ -d "./artifacts/$(basename {})" ] && rm -frv {}' \;
-          mv -v ./artifacts/* ./gh-pages
+          find ./artifacts -mindepth 1 -maxdepth 1 -type d -name 'ipk-*' -exec bash -c 'mv -v "$1" "${1//ipk-}"' bash {} \;
+          ls ./artifacts/ipk-* 2> /dev/null && { echo "Found directory starting with ipk-"; exit 1; } 
+          find ./artifacts -mindepth 1 -maxdepth 1 -type d -name "*-*.*" -exec bash -c '
+            ARCH=$(basename "$1")
+            echo "Removing old packages for $ARCH"
+            if [ "$(find "$1" -maxdepth 1 -type f -name "*-dev_*.ipk" -print -quit)" ]; then
+              find "./gh-pages/$ARCH" -maxdepth 2 -type f -name "*-dev_*.ipk" -delete -print
+            else
+              find "./gh-pages/$ARCH" -maxdepth 2 -type f \( -name "*.ipk" ! -name "*-dev_*.ipk" \) -delete -print
+            fi
+          ' bash {} \;
+          cp -rv ./artifacts/* ./gh-pages
+
+      - name: Checkout Entware/ipk-html-indexer repository
+        uses: actions/checkout@v4
+        with:
+          repository: Entware/ipk-html-indexer
+          path: ./ipk-html-indexer
+
+      - name: Run ipk-html-indexer
+        run: |
+          sudo ln -sv "$(readlink -f ./ipk-html-indexer/mkindex.py)" /usr/local/bin/mkindex.py
+          sudo ln -sv "$(readlink -f ./ipk-html-indexer/mkhtml.py)" /usr/local/bin/mkhtml.py
+          find ./gh-pages -mindepth 1 -maxdepth 1 -type d -name "*-*.*" -exec bash -c '
+            bash ./ipk-html-indexer/index_feed.sh -h -f "$1"
+            sed "s#href=\"/css#href=\"css#" -i "$1/Packages.html"
+            cp -frv ./ipk-html-indexer/css "$1"
+          ' bash {} \;
+
+      - name: Cleanup gh-pages directory
+        run: find ./gh-pages -mindepth 1 -maxdepth 1 -type d -regextype sed \( ! -regex '.*/[[:alnum:]]*-[0-9]\.[0-9]$' ! -name ".git" \) -exec rm -frv "{}" \;
 
       - name: Create directory listings
         uses: ./.github/actions/index
         with:
           path: ./gh-pages
 
-      #- name: List files
-      #  uses: ./.github/actions/list
-      #  with:
-      #    paths: . ./gh-pages
+      - name: List files
+        uses: ./.github/actions/list
+        with:
+          paths: . ./artifacts ./gh-pages
 
       - name: Prepare for upload
         run: |
           find . -mindepth 1 -maxdepth 1 \( ! -name "gh-pages" -type d -exec rm -fr "{}" \; \) -o \( -type f -exec rm -f "{}" \; \)
-          cp -r ./gh-pages/. .
-          rm -fr ./gh-pages
-          git branch -m gh-pages gh-pages.old || true
+          shopt -s dotglob && mv -v ./gh-pages/* .
+
+      - name: Rename gh-pages branch
+        continue-on-error: true
+        run: git branch -m gh-pages gh-pages.old
 
       - name: Upload packages
         uses: JamesIves/github-pages-deploy-action@v4
-        if: ${{ startsWith(github.ref, 'refs/tags/') || github.ref_name == 'master' }}
         with:
           branch: gh-pages
           folder: .
@@ -503,4 +489,4 @@ jobs:
           name: upload
           path: |
             ./index.html
-            ./*-*/*
+            ./*-*.*/*
