@@ -1,0 +1,50 @@
+diff --git a/scripts/pi-hole/js/footer.js b/scripts/pi-hole/js/footer.js
+index 65726b0..00f9fe4 100644
+--- a/scripts/pi-hole/js/footer.js
++++ b/scripts/pi-hole/js/footer.js
+@@ -485,6 +485,7 @@ function updateVersionInfo() {
+     var version = data.version;
+     var updateAvailable = false;
+     var dockerUpdate = false;
++    var entwareUpdate = false;
+     $("#versions").empty();
+ 
+     var versions = [
+@@ -496,6 +497,14 @@ function updateVersionInfo() {
+         hash: null,
+         url: "https://github.com/pi-hole/docker-pi-hole/releases",
+       },
++      {
++        name: "Entware package",
++        local: version.entware.local,
++        remote: version.entware.remote,
++        branch: null,
++        hash: null,
++        url: "https://github.com/jacklul/entware-pi-hole/releases",
++      },
+       {
+         name: "Core",
+         local: version.core.local.version,
+@@ -562,6 +571,11 @@ function updateVersionInfo() {
+           dockerUpdate = true;
+         }
+ 
++        if (v.name === "Entware package" && versionCompare(v.local, v.remote) === -1) {
++          updateComponentAvailable = true;
++          entwareUpdate = true;
++        }
++
+         if (updateComponentAvailable) {
+           $("#versions").append(
+             "<li><strong>" +
+@@ -584,6 +598,10 @@ function updateVersionInfo() {
+       $("#update-hint").html(
+         'To install updates, <a href="https://github.com/pi-hole/docker-pi-hole#upgrading-persistence-and-customizations" rel="noopener" target="_blank">replace this old container with a fresh upgraded image</a>.'
+       );
++    else if (entwareUpdate)
++      $("#update-hint").html(
++        'To install updates, run <code><a href="https://github.com/jacklul/entware-pi-hole/" rel="noopener" target="_blank">opkg update && opkg upgrade pi-hole</a></code>.'
++      );
+     else if (updateAvailable)
+       $("#update-hint").html(
+         'To install updates, run <code><a href="https://docs.pi-hole.net/main/update/" rel="noopener" target="_blank">pihole -up</a></code>.'

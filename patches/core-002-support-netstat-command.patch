@@ -9,7 +9,7 @@ index 7c558127..d8b9eb3d 100755
 -    while IFS= read -r line; do
 -        ports_in_use+=( "$line" )
 -    done < <( ss --listening --numeric --tcp --udp --processes --no-header )
-+    if [ -f "$(command -v ss)" ]; then
++    if command -v ss > /dev/null; then
 +        while IFS= read -r line; do
 +            ports_in_use+=( "$line" )
 +        done < <( ss --listening --numeric --tcp --udp --processes --no-header )
@@ -27,7 +27,7 @@ index 7c558127..d8b9eb3d 100755
          # loop through them and assign some local variables
          local service_name
 -        service_name=$(echo "${ports_in_use[$i]}" | awk '{gsub(/users:\(\("/,"",$7);gsub(/".*/,"",$7);print $7}')
-+        if [ -n "$use_nestat" ]; then
++        if [ -n "${use_nestat}" ]; then
 +            service_name="$(echo "${ports_in_use[$i]}" | awk '{print $7}' | cut -d '/' -f 2)"
 +            [ -z "$service_name" ] && service_name="$(echo "${ports_in_use[$i]}" | awk '{print $6}' | cut -d '/' -f 2)"
 +            [ "$service_name" = "-" ] && service_name=""
@@ -38,7 +38,7 @@ index 7c558127..d8b9eb3d 100755
          protocol_type=$(echo "${ports_in_use[$i]}" | awk '{print $1}')
          local port_number
 -        port_number="$(echo "${ports_in_use[$i]}" | awk '{print $5}')" #  | awk '{gsub(/^.*:/,"",$5);print $5}')
-+        if [ -n "$use_nestat" ]; then
++        if [ -n "${use_nestat}" ]; then
 +            port_number="$(echo "${ports_in_use[$i]}" | awk '{print $4}')"
 +        else
 +            port_number="$(echo "${ports_in_use[$i]}" | awk '{print $5}')" #  | awk '{gsub(/^.*:/,"",$5);print $5}')
@@ -55,7 +55,7 @@ index 7c84771c..cd35f2fb 100755
    # Check individual address family/protocol combinations
    # For a healthy Pi-hole, they should all be up (nothing printed)
 -  lv4="$(ss --ipv4 --listening --numeric --tcp --udp src :${port})"
-+  if [ -f "$(command -v ss)" ]; then
++  if command -v ss > /dev/null; then
 +    lv4="$(ss --ipv4 --listening --numeric --tcp --udp src :${port})"
 +  else
 +    lv4="$(netstat -tuln -4 | grep ":${port} ")"
@@ -70,7 +70,7 @@ index 7c84771c..cd35f2fb 100755
    fi
 -  lv6="$(ss --ipv6 --listening --numeric --tcp --udp src :${port})"
 +
-+  if [ -f "$(command -v ss)" ]; then
++  if command -v ss > /dev/null; then
 +    lv6="$(ss --ipv6 --listening --numeric --tcp --udp src :${port})"
 +  else
 +    lv6="$(netstat -tuln -6 | grep ":${port} ")"

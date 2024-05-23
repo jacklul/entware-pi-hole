@@ -1,0 +1,31 @@
+diff --git a/advanced/Scripts/piholeDebug.sh b/advanced/Scripts/piholeDebug.sh
+index 7c55812..1c81a2d 100755
+--- a/advanced/Scripts/piholeDebug.sh
++++ b/advanced/Scripts/piholeDebug.sh
+@@ -376,6 +376,16 @@ diagnose_operating_system() {
+     # If DOCKER_VERSION is set (Sourced from /etc/pihole/versions at start of script), include this information in the debug output
+     [ -n "${DOCKER_VERSION}" ] && log_write "${INFO} Pi-hole Docker Container: ${DOCKER_VERSION}"
+ 
++    # Existence of this file indicates Entware package is used
++    if [ -f /opt/etc/opkg.conf ];then
++        # shellcheck disable=SC2155
++        local entware_package_version="$(opkg list-installed pi-hole | awk '{print $3}')"
++
++        log_write "${INFO} Pi-hole Entware package release: ${entware_package_version}"
++        log_write "${INFO} Entware release details: "
++        make_array_from_file "${dir_to_parse}/${each_file}"
++    fi
++
+     # If there is a /etc/*release file, it's probably a supported operating system, so we can
+     if ls /etc/*release 1> /dev/null 2>&1; then
+         # display the attributes to the user from the function made earlier
+@@ -521,6 +531,9 @@ parse_locale() {
+     local pihole_locale
+     echo_current_diagnostic "Locale"
+     pihole_locale="$(locale)"
++    if [ -f /opt/etc/opkg.conf ] && [ -f "$(command -v locale.new)" ]; then
++        pihole_locale="$(locale.new)"
++    fi
+     parse_file "${pihole_locale}"
+ }
+ 

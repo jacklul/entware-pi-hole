@@ -1,17 +1,20 @@
 diff --git a/advanced/Scripts/piholeDebug.sh b/advanced/Scripts/piholeDebug.sh
-index 7c558127..8153832d 100755
+index 7c55812..2150ba0 100755
 --- a/advanced/Scripts/piholeDebug.sh
 +++ b/advanced/Scripts/piholeDebug.sh
-@@ -1277,6 +1277,8 @@ analyze_pihole_log() {
+@@ -1277,6 +1277,11 @@ analyze_pihole_log() {
  }
  
  curl_to_tricorder() {
-+    echo "Upload not supported in Entware package release"
-+    return
++    if [ -f /opt/etc/opkg.conf ]; then
++        echo "Upload not supported in unofficial Entware package release"
++        return
++    fi
++
      # Users can submit their debug logs using curl (encrypted)
      log_write "    * Using ${COL_GREEN}curl${COL_NC} for transmission."
      # transmit the log via TLS and store the token returned in a variable
-@@ -1312,7 +1314,7 @@ upload_to_tricorder() {
+@@ -1312,7 +1317,7 @@ upload_to_tricorder() {
          # let the user know
          log_write "${INFO} Debug script running in automated mode"
          # and then decide again which tool to use to submit it
@@ -20,7 +23,7 @@ index 7c558127..8153832d 100755
          # If we're not running in automated mode,
      else
          # if not being called from the web interface
-@@ -1320,7 +1322,8 @@ upload_to_tricorder() {
+@@ -1320,7 +1325,8 @@ upload_to_tricorder() {
              echo ""
              # give the user a choice of uploading it or not
              # Users can review the log file locally (or the output of the script since they are the same) and try to self-diagnose their problem
@@ -31,49 +34,67 @@ index 7c558127..8153832d 100755
                  # If they say yes, run our function for uploading the log
                  [yY][eE][sS]|[yY]) curl_to_tricorder;;
 diff --git a/pihole b/pihole
-index 7c84771c..ea91de57 100755
+index 7c84771..f4125a9 100755
 --- a/pihole
 +++ b/pihole
-@@ -469,6 +469,11 @@ unsupportedFunc(){
+@@ -96,7 +96,7 @@ arpFunc() {
+ }
+ 
+ updatePiholeFunc() {
+-  if [ -n "${DOCKER_VERSION}" ]; then
++  if [ -n "${DOCKER_VERSION}" ] || [ -f /opt/etc/opkg.conf ]; then
+     unsupportedFunc
+   else
+     shift
+@@ -106,7 +106,7 @@ updatePiholeFunc() {
+ }
+ 
+ reconfigurePiholeFunc() {
+-  if [ -n "${DOCKER_VERSION}" ]; then
++  if [ -n "${DOCKER_VERSION}" ] || [ -f /opt/etc/opkg.conf ]; then
+     unsupportedFunc
+   else
+     /opt/share/pihole/basic-install.sh --reconfigure
+@@ -131,7 +131,7 @@ chronometerFunc() {
+ 
+ 
+ uninstallFunc() {
+-  if [ -n "${DOCKER_VERSION}" ]; then
++  if [ -n "${DOCKER_VERSION}" ] || [ -f /opt/etc/opkg.conf ]; then
+     unsupportedFunc
+   else
+     "${PI_HOLE_SCRIPT_DIR}"/uninstall.sh
+@@ -412,7 +412,7 @@ tailFunc() {
+ }
+ 
+ piholeCheckoutFunc() {
+-  if [ -n "${DOCKER_VERSION}" ]; then
++  if [ -n "${DOCKER_VERSION}" ] || [ -f /opt/etc/opkg.conf ]; then
+     unsupportedFunc
+   else
+     if [[ "$2" == "-h" ]] || [[ "$2" == "--help" ]]; then
+@@ -439,6 +439,10 @@ piholeCheckoutFunc() {
+ }
+ 
+ tricorderFunc() {
++  if [ -f /opt/etc/opkg.conf ]; then
++    unsupportedFunc
++  fi
++
+   local tricorder_token
+   if [[ ! -p "/dev/stdin" ]]; then
+     echo -e "  ${INFO} Please do not call Tricorder directly"
+@@ -465,7 +469,12 @@ updateCheckFunc() {
+ }
+ 
+ unsupportedFunc(){
+-  echo "Function not supported in Docker images"
++  if [ -n "${DOCKER_VERSION}" ]; then
++    echo "Function not supported in Docker images"
++  elif [ -f /opt/etc/opkg.conf ]; then
++    echo "Function not supported in unofficial Entware package release"
++  fi
++
    exit 0
  }
  
-+unsupportedInEntwareFunc(){
-+  echo "Function not supported in Entware package release"
-+  exit 0
-+}
-+
- helpFunc() {
-   echo "Usage: pihole [options]
- Example: 'pihole -w -h'
-@@ -533,7 +538,7 @@ case "${1}" in
-   "-c" | "chronometer"          ) chronometerFunc "$@";;
-   "-q" | "query"                ) queryFunc "$@";;
-   "status"                      ) statusFunc "$2";;
--  "tricorder"                   ) tricorderFunc;;
-+  "tricorder"                   ) unsupportedInEntwareFunc;;
- 
-   # we need to add all arguments that require sudo power to not trigger the * argument
-   "-w" | "whitelist"            ) ;;
-@@ -599,17 +604,17 @@ case "${1}" in
-   "--white-wild" | "white-wild"   ) listFunc "$@";;
-   "-d" | "debug"                ) debugFunc "$@";;
-   "-f" | "flush"                ) flushFunc "$@";;
--  "-up" | "updatePihole"        ) updatePiholeFunc "$@";;
--  "-r"  | "reconfigure"         ) reconfigurePiholeFunc;;
-+  "-up" | "updatePihole"        ) unsupportedInEntwareFunc;;
-+  "-r"  | "reconfigure"         ) unsupportedInEntwareFunc;;
-   "-g" | "updateGravity"        ) updateGravityFunc "$@";;
-   "-l" | "logging"              ) piholeLogging "$@";;
--  "uninstall"                   ) uninstallFunc;;
-+  "uninstall"                   ) unsupportedInEntwareFunc;;
-   "enable"                      ) piholeEnable 1;;
-   "disable"                     ) piholeEnable 0 "$2";;
-   "restartdns"                  ) restartDNS "$2";;
-   "reloaddns"                   ) restartDNS "reload";;
-   "setpassword"                 ) SetWebPassword "$@";;
--  "checkout"                    ) piholeCheckoutFunc "$@";;
-+  "checkout"                    ) unsupportedInEntwareFunc;;
-   "updatechecker"               ) shift; updateCheckFunc "$@";;
-   "arpflush"                    ) arpFunc "$@";;
-   "-t" | "tail"                 ) tailFunc "$2";;

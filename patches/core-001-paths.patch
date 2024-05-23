@@ -294,11 +294,11 @@ index eda6c403..12d24691 100755
  addOrEditKeyValPair "${VERSION_FILE}" "WEB_VERSION" "${WEB_VERSION}"
  
 -WEB_BRANCH="$(get_local_branch /var/www/html/admin)"
-+WEB_BRANCH="$(get_local_branch /opt/share/pihole/admin)"
++WEB_BRANCH="$(get_local_branch /opt/share/pihole/www/admin)"
  addOrEditKeyValPair "${VERSION_FILE}" "WEB_BRANCH" "${WEB_BRANCH}"
  
 -WEB_HASH="$(get_local_hash /var/www/html/admin)"
-+WEB_HASH="$(get_local_hash /opt/share/pihole/admin)"
++WEB_HASH="$(get_local_hash /opt/share/pihole/www/admin)"
  addOrEditKeyValPair "${VERSION_FILE}" "WEB_HASH" "${WEB_HASH}"
  
  GITHUB_WEB_VERSION="$(get_remote_version web "${WEB_BRANCH}")"

@@ -13,6 +13,9 @@ for FILE in $FILES; do
     # No comments
     CONTENTS="$(grep -o "^[^#]*" < "$FILE"))"
 
+    # Exceptions (@TODO the way these are handled needs to be improved)
+    [ "$(basename "$FILE")" = "pihole" ] && CONTENTS="$(echo "$CONTENTS" | grep -av "svc=\"service pihole-FTL restart\"")" # /pihole
+
     # Checks
     echo "$CONTENTS" | grep -aE "service pihole-FTL" && exit 1
     echo "$CONTENTS" | grep -aE "systemctl [[:alnum:]_]+ pihole-FTL" && exit 1

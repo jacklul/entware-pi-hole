@@ -1,0 +1,124 @@
+diff --git a/advanced/Scripts/updatecheck.sh b/advanced/Scripts/updatecheck.sh
+index eda6c40..a12db47 100755
+--- a/advanced/Scripts/updatecheck.sh
++++ b/advanced/Scripts/updatecheck.sh
+@@ -34,6 +34,20 @@ function get_remote_version() {
+     fi
+ }
+ 
++function get_remote_entware_version() {
++    # shellcheck disable=SC2155
++    local repo="$(curl -s "https://api.github.com/repos/jacklul/entware-pi-hole/releases/latest" | jq --raw-output .tag_name 2> /dev/null)"
++
++    if [ -n "${repo}" ] && [ "${repo}" != "null" ]; then
++        echo "${repo}"
++    else # fallback - fetch version directly from Packages file
++        # shellcheck disable=SC2155
++        local arch="$(opkg print-architecture | grep -v " all " | awk '{print $2}')"
++
++        curl -s "https://jacklul.github.io/entware-pi-hole/${arch}/Packages" 2>/dev/null | grep "^Version:" | sed -e "s/^[^:]*:[[:space:]]*//" || return 1
++    fi
++}
++
+ function get_remote_hash() {
+     git ls-remote "https://github.com/pi-hole/${1}" --tags "${2}" | awk '{print substr($0, 1,8);}' || return 1
+ }
+@@ -60,21 +74,32 @@ if [[ ! "${DOCKER_TAG}" =~ $regex ]]; then
+     unset DOCKER_TAG
+ fi
+ 
++# check if running in Entware
++IS_ENTWARE=$([ -f /opt/etc/opkg.conf ] && echo true || echo false)
++
+ # used in cronjob
+ if [[ "$1" == "reboot" ]]; then
+     sleep 30
+ fi
+ 
++# load current versions when running in Entware since we don't have locally cloned repos in this case
++if $IS_ENTWARE && [ -f "${VERSION_FILE}" ]; then
++    # shellcheck disable=SC1090
++    . "${VERSION_FILE}"
++fi
++
+ # get Core versions
+ 
+-CORE_VERSION="$(get_local_version /opt/etc/.pihole)"
+-addOrEditKeyValPair "${VERSION_FILE}" "CORE_VERSION" "${CORE_VERSION}"
++if ! $IS_ENTWARE; then
++    CORE_VERSION="$(get_local_version /opt/etc/.pihole)"
++    addOrEditKeyValPair "${VERSION_FILE}" "CORE_VERSION" "${CORE_VERSION}"
+ 
+-CORE_BRANCH="$(get_local_branch /opt/etc/.pihole)"
+-addOrEditKeyValPair "${VERSION_FILE}" "CORE_BRANCH" "${CORE_BRANCH}"
++    CORE_BRANCH="$(get_local_branch /opt/etc/.pihole)"
++    addOrEditKeyValPair "${VERSION_FILE}" "CORE_BRANCH" "${CORE_BRANCH}"
+ 
+-CORE_HASH="$(get_local_hash /opt/etc/.pihole)"
+-addOrEditKeyValPair "${VERSION_FILE}" "CORE_HASH" "${CORE_HASH}"
++    CORE_HASH="$(get_local_hash /opt/etc/.pihole)"
++    addOrEditKeyValPair "${VERSION_FILE}" "CORE_HASH" "${CORE_HASH}"
++fi
+ 
+ GITHUB_CORE_VERSION="$(get_remote_version pi-hole "${CORE_BRANCH}")"
+ addOrEditKeyValPair "${VERSION_FILE}" "GITHUB_CORE_VERSION" "${GITHUB_CORE_VERSION}"
+@@ -84,14 +109,16 @@ addOrEditKeyValPair "${VERSION_FILE}" "GITHUB_CORE_HASH" "${GITHUB_CORE_HASH}"
+ 
+ # get Web versions
+ 
+-WEB_VERSION="$(get_local_version /opt/share/pihole/www/admin)"
+-addOrEditKeyValPair "${VERSION_FILE}" "WEB_VERSION" "${WEB_VERSION}"
++if ! $IS_ENTWARE; then
++    WEB_VERSION="$(get_local_version /opt/share/pihole/www/admin)"
++    addOrEditKeyValPair "${VERSION_FILE}" "WEB_VERSION" "${WEB_VERSION}"
+ 
+-WEB_BRANCH="$(get_local_branch /opt/share/pihole/www/admin)"
+-addOrEditKeyValPair "${VERSION_FILE}" "WEB_BRANCH" "${WEB_BRANCH}"
++    WEB_BRANCH="$(get_local_branch /opt/share/pihole/www/admin)"
++    addOrEditKeyValPair "${VERSION_FILE}" "WEB_BRANCH" "${WEB_BRANCH}"
+ 
+-WEB_HASH="$(get_local_hash /opt/share/pihole/www/admin)"
+-addOrEditKeyValPair "${VERSION_FILE}" "WEB_HASH" "${WEB_HASH}"
++    WEB_HASH="$(get_local_hash /opt/share/pihole/www/admin)"
++    addOrEditKeyValPair "${VERSION_FILE}" "WEB_HASH" "${WEB_HASH}"
++fi
+ 
+ GITHUB_WEB_VERSION="$(get_remote_version web "${WEB_BRANCH}")"
+ addOrEditKeyValPair "${VERSION_FILE}" "GITHUB_WEB_VERSION" "${GITHUB_WEB_VERSION}"
+@@ -101,14 +128,16 @@ addOrEditKeyValPair "${VERSION_FILE}" "GITHUB_WEB_HASH" "${GITHUB_WEB_HASH}"
+ 
+ # get FTL versions
+ 
+-FTL_VERSION="$(pihole-FTL version)"
+-addOrEditKeyValPair "${VERSION_FILE}" "FTL_VERSION" "${FTL_VERSION}"
++if ! $IS_ENTWARE; then
++    FTL_VERSION="$(pihole-FTL version)"
++    addOrEditKeyValPair "${VERSION_FILE}" "FTL_VERSION" "${FTL_VERSION}"
+ 
+-FTL_BRANCH="$(pihole-FTL branch)"
+-addOrEditKeyValPair "${VERSION_FILE}" "FTL_BRANCH" "${FTL_BRANCH}"
++    FTL_BRANCH="$(pihole-FTL branch)"
++    addOrEditKeyValPair "${VERSION_FILE}" "FTL_BRANCH" "${FTL_BRANCH}"
+ 
+-FTL_HASH="$(pihole-FTL --hash)"
+-addOrEditKeyValPair "${VERSION_FILE}" "FTL_HASH" "${FTL_HASH}"
++    FTL_HASH="$(pihole-FTL --hash)"
++    addOrEditKeyValPair "${VERSION_FILE}" "FTL_HASH" "${FTL_HASH}"
++fi
+ 
+ GITHUB_FTL_VERSION="$(get_remote_version FTL "${FTL_BRANCH}")"
+ addOrEditKeyValPair "${VERSION_FILE}" "GITHUB_FTL_VERSION" "${GITHUB_FTL_VERSION}"
+@@ -124,3 +153,13 @@ if [[ "${DOCKER_TAG}" ]]; then
+     GITHUB_DOCKER_VERSION="$(get_remote_version docker-pi-hole)"
+     addOrEditKeyValPair "${VERSION_FILE}" "GITHUB_DOCKER_VERSION" "${GITHUB_DOCKER_VERSION}"
+ fi
++
++# get Entware package versions
++
++if $IS_ENTWARE; then
++    ENTWARE_VERSION="$(opkg list-installed pi-hole | awk '{print $3}')"
++    addOrEditKeyValPair "${VERSION_FILE}" "ENTWARE_VERSION" "${ENTWARE_VERSION}"
++
++    GITHUB_ENTWARE_VERSION="$(get_remote_entware_version)"
++    addOrEditKeyValPair "${VERSION_FILE}" "GITHUB_ENTWARE_VERSION" "${GITHUB_ENTWARE_VERSION}"
++fi
