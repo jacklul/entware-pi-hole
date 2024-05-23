@@ -52,14 +52,14 @@ WEB_PATH="$(readlink -f "$(dirname "$WEB_PATH")")"
 FTL_PATH="$(readlink -f "$(dirname "$FTL_PATH")")"
 
 echo "Creating directories..."
-mkdir -pv "$DESTINATION_DIR/opt/etc/pihole" "$DESTINATION_DIR/opt/etc/cron.d" "$DESTINATION_DIR/opt/share/pihole/www/admin" "$DESTINATION_DIR/opt/sbin" "$DESTINATION_DIR/opt/var/log/pihole"
+mkdir -pv "$DESTINATION_DIR/opt/etc/pihole" "$DESTINATION_DIR/opt/etc/cron.d" "$DESTINATION_DIR/opt/share/pihole/www/admin" "$DESTINATION_DIR/opt/bin" "$DESTINATION_DIR/opt/var/log/pihole"
 
 echo "Copying scripts and other essential files..."
 cp -frv "$CORE_PATH/advanced/Scripts"/* "$DESTINATION_DIR/opt/share/pihole"
 cp -fv "$CORE_PATH/advanced/Templates"/*.sh "$DESTINATION_DIR/opt/share/pihole"
 cp -fv "$CORE_PATH/advanced/Templates"/*.sql "$DESTINATION_DIR/opt/share/pihole"
 cp -fv "$CORE_PATH/gravity.sh" "$DESTINATION_DIR/opt/share/pihole/gravity.sh"
-cp -fv "$CORE_PATH/pihole" "$DESTINATION_DIR/opt/sbin/pihole"
+cp -fv "$CORE_PATH/pihole" "$DESTINATION_DIR/opt/bin/pihole"
 
 echo "Copying configuration files..."
 [ -f "$CORE_PATH/advanced/Templates/pihole-FTL.conf" ] && cp -fv "$CORE_PATH/advanced/Templates/pihole-FTL.conf" "$DESTINATION_DIR/opt/etc/pihole/pihole-FTL.conf"
@@ -72,7 +72,7 @@ rm -f "$DESTINATION_DIR/opt/share/pihole/www/admin/"*.md
 rm -f "$DESTINATION_DIR/opt/share/pihole/www/admin/"*.json
 
 echo "Copying FTL binary..."
-cp -fv "$FTL_PATH/pihole-FTL" "$DESTINATION_DIR/opt/sbin/pihole-FTL"
+cp -fv "$FTL_PATH/pihole-FTL" "$DESTINATION_DIR/opt/bin/pihole-FTL"
 
 echo "Copying $ROOT_PATH/files/* to $DESTINATION_DIR"
 cp -frv "$ROOT_PATH/files"/* "$DESTINATION_DIR"
@@ -136,7 +136,7 @@ fi
 echo "Setting permissions..."
 find "$DESTINATION_DIR" -type f -exec chmod -v 0644 {} \;
 find "$DESTINATION_DIR" -type d -exec chmod -v 0755 {} \;
-chmod -v 755 "$DESTINATION_DIR/opt/sbin/"* "$DESTINATION_DIR/opt/etc/init.d/"*
+chmod -v 755 "$DESTINATION_DIR/opt/bin/"* "$DESTINATION_DIR/opt/etc/init.d/"*
 find "$DESTINATION_DIR/opt/share/pihole" -type f \( -name "*.sh" -o -name "COL_TABLE" \) -exec chmod 0755 {} \;
 
 echo "Package created in $DESTINATION_DIR"

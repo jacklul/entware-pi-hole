@@ -42,7 +42,7 @@ index 93ec3b95..68d8801b 100755
  # commands suchs as: `pihole disable 30s; pihole enable; pihole disable`
  
 -readonly PI_HOLE_BIN_DIR="/usr/local/bin"
-+readonly PI_HOLE_BIN_DIR="/opt/sbin"
++readonly PI_HOLE_BIN_DIR="/opt/bin"
  
  sleep "${1}"
  "${PI_HOLE_BIN_DIR}"/pihole enable
@@ -511,7 +511,7 @@ index 522d92f5..8354825c 100755
  
  basename="pihole"
 -PIHOLE_COMMAND="/usr/local/bin/${basename}"
-+PIHOLE_COMMAND="/opt/sbin/${basename}"
++PIHOLE_COMMAND="/opt/bin/${basename}"
  
 -piholeDir="/etc/${basename}"
 +piholeDir="/opt/etc/${basename}"
@@ -574,7 +574,7 @@ index 7c84771c..143654d4 100755
  # they might get set again when the installer is sourced. This causes an
  # error due to modifying a readonly variable.
 -PI_HOLE_BIN_DIR="/usr/local/bin"
-+PI_HOLE_BIN_DIR="/opt/sbin"
++PI_HOLE_BIN_DIR="/opt/bin"
  
  readonly colfile="${PI_HOLE_SCRIPT_DIR}/COL_TABLE"
  source "${colfile}"

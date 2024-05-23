@@ -29,7 +29,7 @@ case $1 in
 
             if [ -n "$ROOT_USER" ]; then # if this is empty then this can indicate absence of 'id' command
                 if [ "$(id -u pihole 2> /dev/null)" != "" ]; then
-                    if setcap CAP_NET_BIND_SERVICE,CAP_NET_RAW,CAP_NET_ADMIN,CAP_SYS_NICE,CAP_IPC_LOCK,CAP_CHOWN+eip "/opt/sbin/pihole-FTL"; then
+                    if setcap CAP_NET_BIND_SERVICE,CAP_NET_RAW,CAP_NET_ADMIN,CAP_SYS_NICE,CAP_IPC_LOCK,CAP_CHOWN+eip "/opt/bin/pihole-FTL"; then
                         PREARGS="su -s sh -c"
                         ARGS="pihole"
                     fi

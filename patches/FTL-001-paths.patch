@@ -7,7 +7,7 @@ index 138c1c6c..f87028e0 100644
  int api_action_gravity(struct ftl_conn *api)
  {
 -	return run_and_stream_command(api, "/usr/local/bin/pihole", (const char *const []){ "pihole", "-g", NULL });
-+	return run_and_stream_command(api, "/opt/sbin/pihole", (const char *const []){ "pihole", "-g", NULL });
++	return run_and_stream_command(api, "/opt/bin/pihole", (const char *const []){ "pihole", "-g", NULL });
  }
  
  int api_action_restartDNS(struct ftl_conn *api)
