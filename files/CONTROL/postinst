@@ -1,6 +1,69 @@
 #!/bin/sh
 
-# Link to system files if they don't exist in /opt
+# Check if this is an interactive console session
+STDIN_FD="$(readlink -f /proc/$$/fd/0 2> /dev/null)"
+[ -n "$STDIN_FD" ] && [ "$STDIN_FD" != "/dev/null" ] && INTERACTIVE=y
+
+# If the UID 0 is not called root then we must add it to sudoers.d
+ROOT_USER="$(id -nu 0 2> /dev/null)"
+if [ -n "$ROOT_USER" ] && [ "$ROOT_USER" != "root" ]; then
+    [ ! -d "/opt/etc/sudoers.d" ] && mkdir -p "/opt/etc/sudoers.d"
+    cat <<EOT > "/opt/etc/sudoers.d/${ROOT_USER}_is_root"
+# Created by pi-hole package's postinst script
+$ROOT_USER ALL=(ALL) ALL
+EOT
+    chmod 600 "/opt/etc/sudoers.d/${ROOT_USER}_is_root"
+fi
+
+# Add 'pihole' user if it does not exist
+if ! id "pihole" > /dev/null 2>&1; then
+    if ! useradd -r -s /dev/null -d /dev/null pihole; then
+        cat << EOF
+Failed to add user 'pihole' using adduser command.
+Some functionality might not be available without 'pihole' user in the system.
+EOF
+
+        if [ -n "$INTERACTIVE" ]; then
+            cat << EOF
+
+Retry by writing to the system files directly?
+
+The following files will be APPENDED into:
+ /opt/etc/passwd, /opt/etc/group, /opt/etc/shadow, /opt/etc/gshadow
+Writing to these files directly is usually not recommended.
+
+EOF
+
+            printf "Do you wish to continue? [y/N]: "
+
+            #shellcheck disable=SC2034
+            read -r reply
+
+            case "$reply" in
+                [yY]*)
+                    [ ! -f /opt/etc/passwd ] && { echo "/opt/etc/passwd is missing"; exit 1; }
+                    [ ! -f /opt/etc/group ] && { echo "/opt/etc/group is missing"; exit 1; }
+                    [ ! -f /opt/etc/shadow ] && { echo "/opt/etc/shadow is missing"; exit 1; }
+                    [ ! -f /opt/etc/gshadow ] && { echo "/opt/etc/gshadow is missing"; exit 1; }
+
+                    HIGHEST_UID=$(awk -F: '$3 >= 1000 {print $3}' /opt/etc/passwd | sort -n | tail -1)
+                    NEXT_UID=1000
+
+                    if [ -n "$HIGHEST_UID" ]; then
+                        NEXT_UID="$(bash -c "echo \$(($HIGHEST_UID + 1))")"
+                    fi
+
+                    echo "pihole:x:$NEXT_UID:$NEXT_UID::/dev/null:/dev/null" >> /opt/etc/passwd
+                    echo "pihole:x:$NEXT_UID:" >> /opt/etc/group
+                    echo "pihole:*:0:0:99999:7:::" >> /opt/etc/shadow
+                    echo "pihole:*::" >> /opt/etc/gshadow
+                ;;
+            esac
+        fi
+    fi
+fi
+
+# Make links to system files if they don't exist in /opt/etc
 [ ! -f "/opt/etc/hosts" ] && [ -f "/etc/hosts" ] && ln -s "/etc/hosts" "/opt/etc/hosts"
 [ ! -f "/opt/etc/ethers" ] && [ -f "/etc/ethers" ] && ln -s "/etc/ethers" "/opt/etc/ethers"
 [ ! -f "/opt/etc/resolv.conf" ] && [ -f "/etc/resolv.conf" ] && ln -s "/etc/resolv.conf" "/opt/etc/resolv.conf"
@@ -18,7 +81,7 @@ if [ -f "/opt/etc/cron.d/pihole" ]; then
     fi
 fi
 
-# Set user and group used for rotating the logs
+# Set user and group used for rotating the logs by logrotate
 if [ -f "/opt/etc/pihole/logrotate" ]; then
     #shellcheck disable=SC2010
     LOG_USER_GROUP="$(ls -al "/opt/var/log" | grep ' \.$' | awk '{print $3 " " $4}')"
@@ -31,6 +94,9 @@ if [ -f "/opt/etc/pihole/logrotate" ]; then
         fi
     fi
 fi
+
+# Run updatechecker to update /opt/etc/pihole/versions
+pihole updatechecker > /dev/null 2>&1
 
 # Some of these commands might be missing depending on the system
 # so we check if they exist and then prompt the user to install them
@@ -83,18 +149,14 @@ Install them by running the following command:
 
 EOF
 
-        # Check if this is interactive console session
-        STDIN_FD="$(readlink -f /proc/$$/fd/0 2> /dev/null)"
-
-        if [ -n "$STDIN_FD" ] && [ "$STDIN_FD" != "/dev/null" ]; then
-            #printf "Press any key to continue..."
+        if [ -n "$INTERACTIVE" ]; then
             printf "Do you want to install them automatically? [Y/n]: "
 
             #shellcheck disable=SC2034
             read -r reply
 
             case "$reply" in
-                [yY]*)
+                [yY]*|"")
                     SCRIPT_BASE="/opt/tmp/pi-hole-install-deps"
 
                     cat <<EOT > "$SCRIPT_BASE.sh"
@@ -114,13 +176,14 @@ echo "Done!"
 
 rm -f "\$0"
 EOT
-                    echo "Running install in the background... ('tail -f $SCRIPT_BASE.log' for output)"
-                    sh "$SCRIPT_BASE.sh" > "$SCRIPT_BASE.log" 2>&1 & 
+                    echo "Running install script in the background... ('tail -f $SCRIPT_BASE.log' for output)"
+                    sh "$SCRIPT_BASE.sh" > "$SCRIPT_BASE.log" 2>&1 &
                 ;;
             esac
         fi
     fi
 else
-    echo "Warning: Unable to check for missing dependencies - 'type' and 'which' commands are not found!"
+    echo "Warning: Unable to check for missing dependencies - 'type' and 'which' commands not found!"
 fi
 
+exit 0
