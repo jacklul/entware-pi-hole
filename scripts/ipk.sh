@@ -60,7 +60,7 @@ if [ ! -d "$PACKAGE_DIR/CONTROL" ]; then
     exit 1
 fi
 
-for FIELD in Package Version Depends Section URL Maintainer Architecture Installed-Size Description; do
+for FIELD in Package Version Architecture Installed-Size; do
     if ! grep -q "^$FIELD" < "$PACKAGE_DIR/CONTROL/control"; then
         echo "Error: Missing '$FIELD' field in control file"
         exit 1
@@ -70,42 +70,48 @@ done
 #shellcheck disable=SC2164
 cd "$PACKAGE_DIR"
 
-TMP_DIR="$DESTINATION_DIR/IPKG_BUILD.$$"
-mkdir -vp "$TMP_DIR"
-
-sudo chown -R 0:0 "$PACKAGE_DIR/opt"
-tar --exclude CONTROL --format=gnu --numeric-owner --sort=name -cpf - --mtime="$TIMESTAMP" . | gzip -n - > "$TMP_DIR/data.tar.gz"
-
-INSTALLED_SIZE=$(zcat < "$TMP_DIR"/data.tar.gz | wc -c)
-
-sed -e "s/^Version:.*/Version: $PACKAGE_VERSION/" -i "$PACKAGE_DIR/CONTROL/control"
-sed -e "s/^Architecture:.*/Architecture: $PACKAGE_ARCHITECTURE/" -i "$PACKAGE_DIR/CONTROL/control"
-sed -e "s/^Installed-Size:.*/Installed-Size: $INSTALLED_SIZE/" -i "$PACKAGE_DIR/CONTROL/control"
-
-[ -f "$PACKAGE_DIR/CONTROL/preinst" ] && chmod 0755 "$PACKAGE_DIR/CONTROL/preinst"
-[ -f "$PACKAGE_DIR/CONTROL/postinst" ] && chmod 0755 "$PACKAGE_DIR/CONTROL/postinst"
-[ -f "$PACKAGE_DIR/CONTROL/prerm" ] && chmod 0755 "$PACKAGE_DIR/CONTROL/prerm"
-[ -f "$PACKAGE_DIR/CONTROL/postrm" ] && chmod 0755 "$PACKAGE_DIR/CONTROL/postrm"
-
-sudo chown -R 0:0 "$PACKAGE_DIR/CONTROL"
-( cd "$PACKAGE_DIR/CONTROL" && tar --format=gnu --numeric-owner --sort=name -cf - --mtime="$TIMESTAMP" . | gzip -n - > "$TMP_DIR/control.tar.gz" )
-
-echo "2.0" > "$TMP_DIR/debian-binary"
-
+# validate package name and set output package file
 PACKAGE_NAME="$(grep "^Package:" < "$PACKAGE_DIR/CONTROL/control" | sed -e "s/^[^:]*:[[:space:]]*//")"
+PACKAGE_FILE="$DESTINATION_DIR/${PACKAGE_NAME}_${PACKAGE_VERSION}_${PACKAGE_ARCHITECTURE}.ipk"
 
 if ! echo "$PACKAGE_NAME" | grep -Eq '^[a-zA-Z0-9_-]+$'; then
     echo "Error: Package name contains illegal characters"
     exit 1
 fi
 
-PACKAGE_FILE="$DESTINATION_DIR/${PACKAGE_NAME}_${PACKAGE_VERSION}_${PACKAGE_ARCHITECTURE}.ipk"
+# work in temporary dir
+TMP_DIR="$DESTINATION_DIR/IPKG_BUILD.$$"
+mkdir -vp "$TMP_DIR"
 
+# create data archive
+sudo chown -R 0:0 "$PACKAGE_DIR/opt"
+tar --exclude CONTROL --format=gnu --numeric-owner --sort=name -cpf - --mtime="$TIMESTAMP" . | gzip -n - > "$TMP_DIR/data.tar.gz"
+
+# update/set variables in control file
+INSTALLED_SIZE=$(zcat < "$TMP_DIR"/data.tar.gz | wc -c)
+sed -e "s/^Version:.*/Version: $PACKAGE_VERSION/" -i "$PACKAGE_DIR/CONTROL/control"
+sed -e "s/^Architecture:.*/Architecture: $PACKAGE_ARCHITECTURE/" -i "$PACKAGE_DIR/CONTROL/control"
+sed -e "s/^Installed-Size:.*/Installed-Size: $INSTALLED_SIZE/" -i "$PACKAGE_DIR/CONTROL/control"
+
+# if these scripts exist make sure they are executable
+[ -f "$PACKAGE_DIR/CONTROL/preinst" ] && chmod 0755 "$PACKAGE_DIR/CONTROL/preinst"
+[ -f "$PACKAGE_DIR/CONTROL/postinst" ] && chmod 0755 "$PACKAGE_DIR/CONTROL/postinst"
+[ -f "$PACKAGE_DIR/CONTROL/prerm" ] && chmod 0755 "$PACKAGE_DIR/CONTROL/prerm"
+[ -f "$PACKAGE_DIR/CONTROL/postrm" ] && chmod 0755 "$PACKAGE_DIR/CONTROL/postrm"
+
+# create control archive
+sudo chown -R 0:0 "$PACKAGE_DIR/CONTROL"
+( cd "$PACKAGE_DIR/CONTROL" && tar --format=gnu --numeric-owner --sort=name -cf - --mtime="$TIMESTAMP" . | gzip -n - > "$TMP_DIR/control.tar.gz" )
+
+# package format version
+echo "2.0" > "$TMP_DIR/debian-binary"
+
+# package everything into single ipk archive
 rm -f "$PACKAGE_FILE"
-
 sudo chown 0:0 "$TMP_DIR/"*
 ( cd "$TMP_DIR" && tar --format=gnu --numeric-owner --sort=name -cf - --mtime="$TIMESTAMP" ./debian-binary ./data.tar.gz ./control.tar.gz | gzip -n - > "$PACKAGE_FILE" )
 
+# cleanup
 rm -fr "$TMP_DIR"
 
 echo "Packaged $PACKAGE_DIR into $PACKAGE_FILE"
