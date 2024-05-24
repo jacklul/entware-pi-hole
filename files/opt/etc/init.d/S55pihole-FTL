@@ -9,26 +9,14 @@ PREARGS=""
 DESC=$PROCS
 PATH=/opt/sbin:/opt/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
-logecho() {
-    logger "$@"
-    echo "$@"
-}
-
 case $1 in
     start | restart)
-        # Make sure gravity database exists
-        PI_HOLE_GRAVITYDB_FILE="$(pihole-FTL --config -q files.gravity)"
-        if [ -n "$PI_HOLE_GRAVITYDB_FILE" ] && [ ! -f "$PI_HOLE_GRAVITYDB_FILE" ]; then
-            logecho "Creating gravity database $PI_HOLE_GRAVITYDB_FILE..."
-            pihole -g || exit 1
-        fi
-
         # Attempt to start using setcap and su or as 'pihole' user
         if [ -z "$ARGS" ] && [ -z "$PREARGS" ]; then
             ROOT_USER="$(id -nu 0 2> /dev/null)"
 
             if [ -n "$ROOT_USER" ]; then # if this is empty then this can indicate absence of 'id' command
-                if [ "$(id -u pihole 2> /dev/null)" != "" ]; then
+                if [ -n "$(id -u pihole 2> /dev/null)" ]; then
                     if setcap CAP_NET_BIND_SERVICE,CAP_NET_RAW,CAP_NET_ADMIN,CAP_SYS_NICE,CAP_IPC_LOCK,CAP_CHOWN+eip "/opt/bin/pihole-FTL"; then
                         PREARGS="su -s sh -c"
                         ARGS="pihole"
@@ -36,11 +24,11 @@ case $1 in
 
                     if [ -z "$ARGS" ]; then # setcap not supported - start as root user but then change to pihole
                         ARGS="-- -u pihole"
-                        logecho "Starting pihole-FTL as '$ROOT_USER' (then dropping to 'pihole') because setting capabilities is not supported on this system"
+                        echo "Warning: Starting pihole-FTL as '$ROOT_USER' (then dropping to 'pihole') because setting capabilities is not supported on this system"
                     fi
                 else # start as root user
                     ARGS="-- -u $ROOT_USER"
-                    logecho "Starting pihole-FTL as '$ROOT_USER' because 'pihole' user does not exist"
+                    echo "Warning: Starting pihole-FTL as '$ROOT_USER' because 'pihole' user does not exist"
                 fi
             fi
         fi
