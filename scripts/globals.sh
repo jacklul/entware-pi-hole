@@ -17,10 +17,10 @@ if [[ "$GITHUB_REF" =~ ^refs/tags/.* ]]; then
 elif [[ "$GITHUB_REF" =~ ^refs/pull/.* ]]; then
     VERSION="$GITHUB_REF_NAME-$(date +%s)"
 elif [[ "$GITHUB_REF" =~ ^refs/heads/.* ]]; then
+    VERSION="$(date +%Y.%m.%d)-$(date +%H%M%S)"
+
     if git rev-parse --is-inside-work-tree &>/dev/null; then
-        VERSION="$(date +%Y.%m.%d)-$(git describe --always --abbrev=8)-$(date +%H%M%S)"
-    else
-        VERSION="$(date +%Y.%m.%d)-$(date +%H%M%S)"
+        VERSION="${VERSION}-$(git describe --always --abbrev=8)"
     fi
 
     # Special case for master branch
