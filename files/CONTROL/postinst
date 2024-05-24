@@ -151,6 +151,6 @@ if [ -n "$GRAVITYDB_FILE" ] && [ ! -f "$GRAVITYDB_FILE" ]; then
 fi
 
 # Update remote versions via updatechecker
-bash /opt/share/pihole/updatechecker.sh
+bash /opt/share/pihole/updatecheck.sh
 
 exit 0
