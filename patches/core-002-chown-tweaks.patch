@@ -1,26 +1,37 @@
 diff --git a/advanced/Scripts/piholeDebug.sh b/advanced/Scripts/piholeDebug.sh
-index 7c558127..6f335aed 100755
+index 7c55812..05eb93d 100755
 --- a/advanced/Scripts/piholeDebug.sh
 +++ b/advanced/Scripts/piholeDebug.sh
-@@ -1296,7 +1296,7 @@ upload_to_tricorder() {
+@@ -1296,7 +1296,12 @@ upload_to_tricorder() {
      local username="pihole"
      # Set the permissions and owner
      chmod 640 ${PIHOLE_DEBUG_LOG}
 -    chown "$USER":"${username}" ${PIHOLE_DEBUG_LOG}
-+    chown "$USER":"${username}" ${PIHOLE_DEBUG_LOG} 2> /dev/null
++
++    if [ -n "$(id -u pihole 2> /dev/null)" ]; then
++        chown "$USER":"${username}" ${PIHOLE_DEBUG_LOG}
++    else
++        chown "$USER":"$USER" ${PIHOLE_DEBUG_LOG}
++    fi
  
      # Let the user know debugging is complete with something strikingly visual
      log_write ""
 diff --git a/advanced/Templates/pihole-FTL-prestart.sh b/advanced/Templates/pihole-FTL-prestart.sh
-index c6817828..b585d7ef 100755
+index c681782..1443a90 100755
 --- a/advanced/Templates/pihole-FTL-prestart.sh
 +++ b/advanced/Templates/pihole-FTL-prestart.sh
-@@ -12,12 +12,12 @@ FTL_PID_FILE="$(getFTLPIDFile)"
+@@ -9,16 +9,19 @@ utilsfile="${PI_HOLE_SCRIPT_DIR}/utils.sh"
+ # Get file paths
+ FTL_PID_FILE="$(getFTLPIDFile)"
+ 
++# In Entware user pihole might not exist
++[ -f /opt/etc/opkg.conf ] && [ -z "$(id -u pihole 2> /dev/null)" ] && NO_PIHOLE_USER=y
++
  # Ensure that permissions are set so that pihole-FTL can edit all necessary files
  # shellcheck disable=SC2174
  mkdir -pm 0640 /opt/var/log/pihole
 -chown -R pihole:pihole /opt/etc/pihole /opt/var/log/pihole
-+[ "$(id -u pihole 2> /dev/null)" != "" ] && chown -R pihole:pihole /opt/etc/pihole /opt/var/log/pihole
++[ -z "$NO_PIHOLE_USER" ] && chown -R pihole:pihole /opt/etc/pihole /opt/var/log/pihole
  chmod -R 0640 /opt/var/log/pihole
  chmod -R 0660 /opt/etc/pihole
  
@@ -30,37 +41,68 @@ index c6817828..b585d7ef 100755
  chmod 0644 /opt/etc/pihole/logrotate
  
  # allow all users to enter the directories
-@@ -38,9 +38,9 @@ find /opt/etc/pihole -type d -exec chmod 0755 {} \;
+ chmod 0755 /opt/etc/pihole /opt/var/log/pihole
+@@ -28,19 +31,26 @@ chmod 0755 /opt/etc/pihole /opt/var/log/pihole
+ find /opt/etc/pihole -type d -exec chmod 0755 {} \;
+ 
+ # Touch files to ensure they exist (create if non-existing, preserve if existing)
+-[ -f "${FTL_PID_FILE}" ] || install -D -m 644 -o pihole -g pihole /dev/null "${FTL_PID_FILE}"
+-[ -f /opt/var/log/pihole/FTL.log ] || install -m 640 -o pihole -g pihole /dev/null /opt/var/log/pihole/FTL.log
+-[ -f /opt/var/log/pihole/pihole.log ] || install -m 640 -o pihole -g pihole /dev/null /opt/var/log/pihole/pihole.log
+-[ -f /opt/etc/pihole/dhcp.leases ] || install -m 644 -o pihole -g pihole /dev/null /opt/etc/pihole/dhcp.leases
++if [ -z "$NO_PIHOLE_USER" ]; then
++    [ -f "${FTL_PID_FILE}" ] || install -D -m 644 -o pihole -g pihole /dev/null "${FTL_PID_FILE}"
++    [ -f /opt/var/log/pihole/FTL.log ] || install -m 640 -o pihole -g pihole /dev/null /opt/var/log/pihole/FTL.log
++    [ -f /opt/var/log/pihole/pihole.log ] || install -m 640 -o pihole -g pihole /dev/null /opt/var/log/pihole/pihole.log
++    [ -f /opt/etc/pihole/dhcp.leases ] || install -m 644 -o pihole -g pihole /dev/null /opt/etc/pihole/dhcp.leases
++else
++    [ -f "${FTL_PID_FILE}" ] || install -D -m 644 /dev/null "${FTL_PID_FILE}"
++    [ -f /opt/var/log/pihole/FTL.log ] || install -m 640 /dev/null /opt/var/log/pihole/FTL.log
++    [ -f /opt/var/log/pihole/pihole.log ] || install -m 640 /dev/null /opt/var/log/pihole/pihole.log
++    [ -f /opt/etc/pihole/dhcp.leases ] || install -m 644 /dev/null /opt/etc/pihole/dhcp.leases
++fi
+ 
+ 
+ # Backward compatibility for user-scripts that still expect log files in /var/log instead of /var/log/pihole
  # Should be removed with Pi-hole v6.0
  if [ ! -f /opt/var/log/pihole.log ]; then
      ln -sf /opt/var/log/pihole/pihole.log /opt/var/log/pihole.log
 -    chown -h pihole:pihole /opt/var/log/pihole.log
-+    [ "$(id -u pihole 2> /dev/null)" != "" ] && chown -h pihole:pihole /opt/var/log/pihole.log
++    [ -z "$NO_PIHOLE_USER" ] && chown -h pihole:pihole /opt/var/log/pihole.log
  fi
  if [ ! -f /opt/var/log/pihole-FTL.log ]; then
      ln -sf /opt/var/log/pihole/FTL.log /opt/var/log/pihole-FTL.log
 -    chown -h pihole:pihole /opt/var/log/pihole-FTL.log
-+    [ "$(id -u pihole 2> /dev/null)" != "" ] && chown -h pihole:pihole /opt/var/log/pihole-FTL.log
++    [ -z "$NO_PIHOLE_USER" ] && chown -h pihole:pihole /opt/var/log/pihole-FTL.log
  fi
 diff --git a/gravity.sh b/gravity.sh
-index 522d92f5..3a63c6f0 100755
+index 522d92f..bb8f35b 100755
 --- a/gravity.sh
 +++ b/gravity.sh
-@@ -65,7 +65,7 @@ generate_gravity_database() {
+@@ -59,13 +59,16 @@ gravityTEMPfile="${GRAVITYDB}_temp"
+ gravityDIR="$(dirname -- "${gravityDBfile}")"
+ gravityOLDfile="${gravityDIR}/gravity_old.db"
+ 
++# In Entware user pihole might not exist
++[ -f /opt/etc/opkg.conf ] && [ -z "$(id -u pihole 2> /dev/null)" ] && NO_PIHOLE_USER=y
++
+ # Generate new SQLite3 file from schema template
+ generate_gravity_database() {
+   if ! pihole-FTL sqlite3 -ni "${gravityDBfile}" <"${gravityDBschema}"; then
      echo -e "   ${CROSS} Unable to create ${gravityDBfile}"
      return 1
    fi
 -  chown pihole:pihole "${gravityDBfile}"
-+  [ "$(id -u pihole 2> /dev/null)" != "" ] && chown pihole:pihole "${gravityDBfile}"
++  [ -z "$NO_PIHOLE_USER" ] && chown pihole:pihole "${gravityDBfile}"
    chmod g+w "${piholeDir}" "${gravityDBfile}"
  }
  
-@@ -959,7 +959,7 @@ fi
+@@ -959,7 +962,7 @@ fi
  update_gravity_timestamp
  
  # Ensure proper permissions are set for the database
 -chown pihole:pihole "${gravityTEMPfile}"
-+[ "$(id -u pihole 2> /dev/null)" != "" ] && chown pihole:pihole "${gravityTEMPfile}"
++[ -z "$NO_PIHOLE_USER" ] && chown pihole:pihole "${gravityTEMPfile}"
  chmod g+w "${piholeDir}" "${gravityTEMPfile}"
  
  # Build the tree

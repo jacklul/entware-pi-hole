@@ -1,29 +1,44 @@
 diff --git a/advanced/Scripts/updatecheck.sh b/advanced/Scripts/updatecheck.sh
-index eda6c40..a12db47 100755
+index eda6c40..291f43e 100755
 --- a/advanced/Scripts/updatecheck.sh
 +++ b/advanced/Scripts/updatecheck.sh
-@@ -34,6 +34,20 @@ function get_remote_version() {
+@@ -34,6 +34,35 @@ function get_remote_version() {
      fi
  }
  
-+function get_remote_entware_version() {
-+    # shellcheck disable=SC2155
-+    local repo="$(curl -s "https://api.github.com/repos/jacklul/entware-pi-hole/releases/latest" | jq --raw-output .tag_name 2> /dev/null)"
++function get_remote_version_entware() {
++    local package="pi-hole"
++    [ -n "$(opkg list-installed pi-hole-dev)" ] && package="pi-hole-dev"
 +
-+    if [ -n "${repo}" ] && [ "${repo}" != "null" ]; then
-+        echo "${repo}"
-+    else # fallback - fetch version directly from Packages file
++    if [ "${package}" = "pi-hole" ]; then
 +        # shellcheck disable=SC2155
-+        local arch="$(opkg print-architecture | grep -v " all " | awk '{print $2}')"
++        local latest_release="$(curl -s "https://api.github.com/repos/jacklul/entware-pi-hole/releases/latest" | jq --raw-output .tag_name)"
 +
-+        curl -s "https://jacklul.github.io/entware-pi-hole/${arch}/Packages" 2>/dev/null | grep "^Version:" | sed -e "s/^[^:]*:[[:space:]]*//" || return 1
++        if [ -n "${latest_release}" ] && [ "${latest_release}" != "null" ]; then
++            echo "${latest_release}"
++            return
++        fi
 +    fi
++
++    # shellcheck disable=SC2155
++    local architecture="$(opkg print-architecture | grep -v " all " | awk '{print $2}')"
++    # shellcheck disable=SC2155
++    local packages_index="$(curl -s "https://jacklul.github.io/entware-pi-hole/${architecture}/Packages")"
++    # shellcheck disable=SC2155
++    local latest_package="$(echo "${packages_index}" | awk -v pkg="${package}" '$0 ~ "^Package: " pkg "$", $0 ~ "Version:" {if ($0 ~ "Version:") print $2}')"
++
++    if [ -n "${latest_package}" ]; then
++        echo "${latest_package}"
++        return
++    fi
++
++    echo "null"
 +}
 +
  function get_remote_hash() {
      git ls-remote "https://github.com/pi-hole/${1}" --tags "${2}" | awk '{print substr($0, 1,8);}' || return 1
  }
-@@ -60,21 +74,32 @@ if [[ ! "${DOCKER_TAG}" =~ $regex ]]; then
+@@ -60,21 +68,32 @@ if [[ ! "${DOCKER_TAG}" =~ $regex ]]; then
      unset DOCKER_TAG
  fi
  
@@ -62,7 +77,7 @@ index eda6c40..a12db47 100755
  
  GITHUB_CORE_VERSION="$(get_remote_version pi-hole "${CORE_BRANCH}")"
  addOrEditKeyValPair "${VERSION_FILE}" "GITHUB_CORE_VERSION" "${GITHUB_CORE_VERSION}"
-@@ -84,14 +109,16 @@ addOrEditKeyValPair "${VERSION_FILE}" "GITHUB_CORE_HASH" "${GITHUB_CORE_HASH}"
+@@ -84,14 +103,16 @@ addOrEditKeyValPair "${VERSION_FILE}" "GITHUB_CORE_HASH" "${GITHUB_CORE_HASH}"
  
  # get Web versions
  
@@ -85,29 +100,6 @@ index eda6c40..a12db47 100755
  
  GITHUB_WEB_VERSION="$(get_remote_version web "${WEB_BRANCH}")"
  addOrEditKeyValPair "${VERSION_FILE}" "GITHUB_WEB_VERSION" "${GITHUB_WEB_VERSION}"
-@@ -101,14 +128,16 @@ addOrEditKeyValPair "${VERSION_FILE}" "GITHUB_WEB_HASH" "${GITHUB_WEB_HASH}"
- 
- # get FTL versions
- 
--FTL_VERSION="$(pihole-FTL version)"
--addOrEditKeyValPair "${VERSION_FILE}" "FTL_VERSION" "${FTL_VERSION}"
-+if ! $IS_ENTWARE; then
-+    FTL_VERSION="$(pihole-FTL version)"
-+    addOrEditKeyValPair "${VERSION_FILE}" "FTL_VERSION" "${FTL_VERSION}"
- 
--FTL_BRANCH="$(pihole-FTL branch)"
--addOrEditKeyValPair "${VERSION_FILE}" "FTL_BRANCH" "${FTL_BRANCH}"
-+    FTL_BRANCH="$(pihole-FTL branch)"
-+    addOrEditKeyValPair "${VERSION_FILE}" "FTL_BRANCH" "${FTL_BRANCH}"
- 
--FTL_HASH="$(pihole-FTL --hash)"
--addOrEditKeyValPair "${VERSION_FILE}" "FTL_HASH" "${FTL_HASH}"
-+    FTL_HASH="$(pihole-FTL --hash)"
-+    addOrEditKeyValPair "${VERSION_FILE}" "FTL_HASH" "${FTL_HASH}"
-+fi
- 
- GITHUB_FTL_VERSION="$(get_remote_version FTL "${FTL_BRANCH}")"
- addOrEditKeyValPair "${VERSION_FILE}" "GITHUB_FTL_VERSION" "${GITHUB_FTL_VERSION}"
 @@ -124,3 +153,13 @@ if [[ "${DOCKER_TAG}" ]]; then
      GITHUB_DOCKER_VERSION="$(get_remote_version docker-pi-hole)"
      addOrEditKeyValPair "${VERSION_FILE}" "GITHUB_DOCKER_VERSION" "${GITHUB_DOCKER_VERSION}"
@@ -119,6 +111,6 @@ index eda6c40..a12db47 100755
 +    ENTWARE_VERSION="$(opkg list-installed pi-hole | awk '{print $3}')"
 +    addOrEditKeyValPair "${VERSION_FILE}" "ENTWARE_VERSION" "${ENTWARE_VERSION}"
 +
-+    GITHUB_ENTWARE_VERSION="$(get_remote_entware_version)"
++    GITHUB_ENTWARE_VERSION="$(get_remote_version_entware)"
 +    addOrEditKeyValPair "${VERSION_FILE}" "GITHUB_ENTWARE_VERSION" "${GITHUB_ENTWARE_VERSION}"
 +fi
