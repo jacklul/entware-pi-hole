@@ -43,7 +43,7 @@ index 65726b0..00f9fe4 100644
        );
 +    else if (entwareUpdate)
 +      $("#update-hint").html(
-+        'To install updates, run <code><a href="https://github.com/jacklul/entware-pi-hole/" rel="noopener" target="_blank">opkg update && opkg upgrade pi-hole</a></code>.'
++        'To install updates, run <code><a href="https://github.com/jacklul/entware-pi-hole/" rel="noopener" target="_blank">opkg update && opkg upgrade</a></code>.'
 +      );
      else if (updateAvailable)
        $("#update-hint").html(
