@@ -1,0 +1,108 @@
+diff --git a/src/api/docs/content/specs/info.yaml b/src/api/docs/content/specs/info.yaml
+index dadaee27..75c0dbdd 100644
+--- a/src/api/docs/content/specs/info.yaml
++++ b/src/api/docs/content/specs/info.yaml
+@@ -1051,6 +1051,19 @@ components:
+                   nullable: true
+                   description: Remote (Docker Hub) Pi-hole Docker image version (`null` if not running in Docker)
+                   example: "v6.1"
++            entware:
++              type: object
++              properties:
++                local:
++                  type: string
++                  nullable: true
++                  description: Local Pi-hole Entware package version (`null` if not running Entware)
++                  example: "v6.1"
++                remote:
++                  type: string
++                  nullable: true
++                  description: Remote Pi-hole Entware package version (`null` if not running Entware)
++                  example: "v6.1"
+     messages:
+       type: object
+       properties:
+diff --git a/test/opt.sh b/test/opt.sh
+new file mode 100644
+index 00000000..3364c495
+--- /dev/null
++++ b/test/opt.sh
+@@ -0,0 +1,28 @@
++#!/bin/bash
++
++declare -A LINKS=(
++    ["/etc/pihole"]="/opt/etc/pihole"
++    ["/var/log/pihole"]="/opt/var/log/pihole"
++    ["/var/www/html"]="/opt/share/pihole/www"
++    ["/run"]="/opt/var/run"
++    ["/tmp"]="/opt/tmp"
++    ["/etc/resolv.conf"]="/opt/etc/resolv.conf"
++    ["/etc/hosts"]="/opt/etc/hosts"
++    ["/etc/ethers"]="/opt/etc/ethers"
++    ["/etc/dnsmasq.d"]="/opt/etc/dnsmasq.d"
++    ["/var/lib/misc/dnsmasq.leases"]="/opt/var/lib/misc/dnsmasq.leases"
++    ["/etc/dnsmasq.conf"]="/opt/etc/dnsmasq.conf"
++    ["/var/run/dnsmasq.pid"]="/opt/var/run/dnsmasq.pid"
++)
++
++for KEY in "${!LINKS[@]}"; do
++    DIR="$(dirname "${LINKS[$KEY]}")"
++
++    if [ ! -d "$DIR" ]; then
++        mkdir -pvm 0777 "$DIR"
++    fi
++
++    if [ -e "$KEY" ] && [ ! -L "${LINKS[$KEY]}" ]; then
++        ln -sv "$KEY" "${LINKS[$KEY]}"
++    fi
++done
+diff --git a/test/run.sh b/test/run.sh
+index 5f34e9d6..32a023c2 100755
+--- a/test/run.sh
++++ b/test/run.sh
+@@ -73,6 +73,9 @@ export FTLCONF_misc_nice="-11"
+ export FTLCONF_dns_upstrrr="-11"
+ export FTLCONF_debug_api="not_a_bool"
+ 
++# Set up virtual /opt directories
++bash test/opt.sh
++
+ # Start FTL
+ if ! su pihole -s /bin/sh -c /home/pihole/pihole-FTL; then
+   echo "pihole-FTL failed to start"
+diff --git a/test/test_suite.bats b/test/test_suite.bats
+index 94c04019..51bb0b1a 100644
+--- a/test/test_suite.bats
++++ b/test/test_suite.bats
+@@ -1522,7 +1522,7 @@
+ 
+   run bash -c './pihole-FTL --config dns.revServers "[\"true,1.1.1.1,def,ghi\"]"'
+   printf "%s\n" "${lines[@]}"
+-  [[ ${lines[0]} == 'New dnsmasq configuration is not valid ('*'resolve at line '*' of /etc/pihole/dnsmasq.conf.temp: "rev-server=1.1.1.1,def"), config remains unchanged' ]]
++  [[ ${lines[0]} == 'New dnsmasq configuration is not valid ('*'resolve at line '*' of /opt/etc/pihole/dnsmasq.conf.temp: "rev-server=1.1.1.1,def"), config remains unchanged' ]]
+   [[ $status == 3 ]]
+ 
+   run bash -c './pihole-FTL --config webserver.api.excludeClients "[\".*\",\"$$$\",\"[[[\"]"'
+@@ -1790,19 +1790,19 @@
+ }
+ 
+ @test "Expected number of config file rotations" {
+-  run bash -c 'grep -c "INFO: Config file written to /etc/pihole/pihole.toml" /var/log/pihole/FTL.log'
++  run bash -c 'grep -c "INFO: Config file written to /opt/etc/pihole/pihole.toml" /var/log/pihole/FTL.log'
+   printf "%s\n" "${lines[@]}"
+   [[ ${lines[0]} == "3" ]]
+   run bash -c 'grep -c "DEBUG_CONFIG: pihole.toml unchanged" /var/log/pihole/FTL.log'
+   printf "%s\n" "${lines[@]}"
+   [[ ${lines[0]} == "3" ]]
+-  run bash -c 'grep -c "DEBUG_CONFIG: Config file written to /etc/pihole/dnsmasq.conf" /var/log/pihole/FTL.log'
++  run bash -c 'grep -c "DEBUG_CONFIG: Config file written to /opt/etc/pihole/dnsmasq.conf" /var/log/pihole/FTL.log'
+   printf "%s\n" "${lines[@]}"
+   [[ ${lines[0]} == "1" ]]
+   run bash -c 'grep -c "DEBUG_CONFIG: dnsmasq.conf unchanged" /var/log/pihole/FTL.log'
+   printf "%s\n" "${lines[@]}"
+   [[ ${lines[0]} == "2" ]]
+-  run bash -c 'grep -c "DEBUG_CONFIG: HOSTS file written to /etc/pihole/hosts/custom.list" /var/log/pihole/FTL.log'
++  run bash -c 'grep -c "DEBUG_CONFIG: HOSTS file written to /opt/etc/pihole/hosts/custom.list" /var/log/pihole/FTL.log'
+   printf "%s\n" "${lines[@]}"
+   [[ ${lines[0]} == "1" ]]
+   run bash -c 'grep -c "DEBUG_CONFIG: custom.list unchanged" /var/log/pihole/FTL.log'

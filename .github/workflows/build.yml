@@ -205,14 +205,14 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         uses: ./.github/actions/version
 
-      - name: Fetch pi-hole/FTL repository infos
+      - name: Set required variables
         if: steps.cache.outputs.cache-hit != 'true'
-        id: version_infos
+        id: variables
         working-directory: ./stage
         run: |
-          echo "GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD)" >> $GITHUB_OUTPUT
-          echo "GIT_TAG=$(git describe --tags --always 2> /dev/null)" >> $GITHUB_OUTPUT
-          echo "GIT_HASH=$(git rev-parse --short=8 HEAD)" >> $GITHUB_OUTPUT
+          GIT_TAG=$(git describe --tags --abbrev=0 2> /dev/null || echo "")
+          echo "GIT_BRANCH=$([ -n "${GIT_TAG}" ] && echo "master" || git rev-parse --abbrev-ref HEAD)" >> $GITHUB_OUTPUT
+          echo "GIT_TAG=$GIT_TAG" >> $GITHUB_OUTPUT
 
       - name: Set up Docker Buildx
         if: steps.cache.outputs.cache-hit != 'true'
@@ -232,8 +232,8 @@ jobs:
             type=tar,dest=stage/build.tar
           build-args: |
             "CI_ARCH=${{ matrix.platform }}"
-            "GIT_BRANCH=${{ steps.version_infos.outputs.GIT_BRANCH }}"
-            "GIT_TAG=${{ steps.version_infos.outputs.GIT_TAG }}"
+            "GIT_BRANCH=${{ steps.variables.outputs.GIT_BRANCH }}"
+            "GIT_TAG=${{ steps.variables.outputs.GIT_TAG }}"
 
       - name: Extract FTL binary and generate checksum file
         if: steps.cache.outputs.cache-hit != 'true'
