@@ -104,7 +104,7 @@ if [ -f /opt/etc/cron.d/pihole ] && grep -q "59 1 \|59 17 " /opt/etc/cron.d/piho
     HOUR_GRAVITY="$(bash -c "echo \$((3 + RANDOM % 2))")"
     HOUR_UPDATECHECK="$(bash -c "echo \$((12 + RANDOM % 8))")"
 
-    echo "Setting random gravity update ($HOUR_GRAVITY:$MINUTE_GRAVITY) and updatechecker ($HOUR_UPDATECHECK:$MINUTE_UPDATECHECK) times..."
+    echo "Setting random gravity update and updatechecker times..."
 
     if [ -n "$MINUTE_GRAVITY" ] && [ -n "$MINUTE_UPDATECHECK" ] && [ -n "$HOUR_GRAVITY" ] && [ -n "$HOUR_UPDATECHECK" ]; then
         sed "s/59 1 /$MINUTE_GRAVITY $HOUR_GRAVITY /" -i /opt/etc/cron.d/pihole
@@ -118,7 +118,7 @@ if [ -f /opt/etc/pihole/logrotate ]; then
     LOG_USER_GROUP="$(ls -al "/opt/var/log" | grep ' \.$' | awk '{print $3 " " $4}')"
 
     if [ -n "$LOG_USER_GROUP" ]; then
-        echo "Setting user and group in logrotate file ($LOG_USER_GROUP)..."
+        echo "Setting user and group in logrotate file..."
 
         if grep -q "# su #" /opt/etc/pihole/logrotate; then
             sed "s/# su #/su $LOG_USER_GROUP/g;" -i /opt/etc/pihole/logrotate
