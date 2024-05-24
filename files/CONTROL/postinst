@@ -150,4 +150,7 @@ if [ -n "$GRAVITYDB_FILE" ] && [ ! -f "$GRAVITYDB_FILE" ]; then
     bash /opt/share/pihole/gravity.sh --force
 fi
 
+# Update remote versions via updatechecker
+bash /opt/share/pihole/updatechecker.sh
+
 exit 0
