@@ -55,20 +55,38 @@ if [ ! -d "$SCRIPT_DIR/../dev" ]; then
     mkdir -pv "$SCRIPT_DIR/../dev"
 fi
 
+case $BRANCH in
+    "dev")
+        CORE_BRANCH=development
+        WEB_BRANCH=devel
+        FTL_BRANCH=development
+    ;;
+    "dev-v6")
+        CORE_BRANCH=development-v6
+        WEB_BRANCH=development-v6
+        FTL_BRANCH=development-v6
+    ;;
+    *)
+        CORE_BRANCH=$BRANCH
+        WEB_BRANCH=$BRANCH
+        FTL_BRANCH=$BRANCH
+    ;;
+esac
+
 case $REPO in
     all)
-        install_or_update_repository "$REPO_CORE" "$SCRIPT_DIR/../dev/core" "$BRANCH"
-        install_or_update_repository "$REPO_WEB" "$SCRIPT_DIR/../dev/web" "$BRANCH"
-        install_or_update_repository "$REPO_FTL" "$SCRIPT_DIR/../dev/FTL" "$BRANCH"
+        install_or_update_repository "$REPO_CORE" "$SCRIPT_DIR/../dev/core" "$CORE_BRANCH"
+        install_or_update_repository "$REPO_WEB" "$SCRIPT_DIR/../dev/web" "$WEB_BRANCH"
+        install_or_update_repository "$REPO_FTL" "$SCRIPT_DIR/../dev/FTL" "$FTL_BRANCH"
     ;;
     core)
-        install_or_update_repository "$REPO_CORE" "$SCRIPT_DIR/../dev/core" "$BRANCH"
+        install_or_update_repository "$REPO_CORE" "$SCRIPT_DIR/../dev/core" "$CORE_BRANCH"
     ;;
     web)
-        install_or_update_repository "$REPO_WEB" "$SCRIPT_DIR/../dev/web" "$BRANCH"
+        install_or_update_repository "$REPO_WEB" "$SCRIPT_DIR/../dev/web" "$WEB_BRANCH"
     ;;
     FTL)
-        install_or_update_repository "$REPO_FTL" "$SCRIPT_DIR/../dev/FTL" "$BRANCH"
+        install_or_update_repository "$REPO_FTL" "$SCRIPT_DIR/../dev/FTL" "$FTL_BRANCH"
     ;;
     *)
         echo "Invalid repo selected, valid values: all, core, web, FTL"

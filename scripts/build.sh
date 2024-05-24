@@ -10,17 +10,8 @@ SEARCH_DIR="$2"
 
 set -e
 
-[ -z "$PIHOLE_REF" ] && PIHOLE_REF=master
-
-if [ -z "$DESTINATION_DIR" ]; then
-    echo "Error: Destination directory not provided"
-    exit 1
-fi
-
-if [ ! -d "$DESTINATION_DIR" ]; then
-    echo "Error: Directory $DESTINATION_DIR does not exist"
-    exit 1
-fi
+[ -z "$DESTINATION_DIR" ] && { echo "Error: Destination directory not provided"; exit 1; }
+[ ! -d "$DESTINATION_DIR" ] && { echo "Error: Directory $DESTINATION_DIR does not exist"; exit 1; }
 
 [ -z "$SEARCH_DIR" ] && SEARCH_DIR="$(dirname "$SCRIPT_DIR")"
 
@@ -31,20 +22,9 @@ CORE_PATH="$(find "$SEARCH_DIR" -name "gravity.sh" -print -quit)"
 WEB_PATH="$(find "$SEARCH_DIR" -name "index.lp" -print -quit)"
 FTL_PATH="$(find "$SEARCH_DIR" -name "pihole-FTL" -print -quit)"
 
-if [ -z "$CORE_PATH" ]; then
-    echo "Error: Could not find Pi-hole's core directory"
-    exit 1
-fi
-
-if [ -z "$WEB_PATH" ]; then
-    echo "Error: Could not find Pi-hole's web directory"
-    exit 1
-fi
-
-if [ -z "$FTL_PATH" ]; then
-    echo "Error: Could not find Pi-hole's FTL binary"
-    exit 1
-fi
+[ -z "$CORE_PATH" ] && { echo "Error: Could not find Pi-hole's core directory"; exit 1; }
+[ -z "$WEB_PATH" ] && { echo "Error: Could not find Pi-hole's web directory"; exit 1; }
+[ -z "$FTL_PATH" ] && { echo "Error: Could not find Pi-hole's FTL binary"; exit 1; }
 
 ROOT_PATH="$(readlink -f "$(dirname "$SCRIPT_DIR")")"
 CORE_PATH="$(readlink -f "$(dirname "$CORE_PATH")")"
@@ -68,8 +48,8 @@ echo "Copying configuration files..."
 
 echo "Copying web files..."
 cp -frv "$WEB_PATH"/* "$DESTINATION_DIR/opt/share/pihole/www/admin"
-rm -f "$DESTINATION_DIR/opt/share/pihole/www/admin/"*.md
-rm -f "$DESTINATION_DIR/opt/share/pihole/www/admin/"*.json
+rm -f "$DESTINATION_DIR/opt/share/pihole/www/admin"/*.md
+rm -f "$DESTINATION_DIR/opt/share/pihole/www/admin"/*.json
 
 echo "Copying FTL binary..."
 cp -fv "$FTL_PATH/pihole-FTL" "$DESTINATION_DIR/opt/bin/pihole-FTL"

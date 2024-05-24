@@ -14,25 +14,10 @@ DESTINATION_DIR="$4"
 
 set -e
 
-if [ -z "$PACKAGE_DIR" ]; then
-    echo "Error: Package directory not provided"
-    exit 1
-fi
-
-if [ ! -d "$PACKAGE_DIR" ]; then
-    echo "Error: Directory $PACKAGE_DIR does not exist"
-    exit 1
-fi
-
-if [ -z "$PACKAGE_VERSION" ]; then
-    echo "Error: Package version not provided"
-    exit 1
-fi
-
-if [ -z "$PACKAGE_ARCHITECTURE" ]; then
-    echo "Error: Package architecture not provided"
-    exit 1
-fi
+[ -z "$PACKAGE_DIR" ] && { echo "Error: Package directory not provided"; exit 1; }
+[ ! -d "$PACKAGE_DIR" ] && { echo "Error: Directory $PACKAGE_DIR does not exist"; exit 1; }
+[ -z "$PACKAGE_VERSION" ] && { echo "Error: Package version not provided"; exit 1; }
+[ -z "$PACKAGE_ARCHITECTURE" ] && { echo "Error: Package architecture not provided"; exit 1; }
 
 if [ -z "$DESTINATION_DIR" ]; then
     DESTINATION_DIR="$(dirname "$SCRIPT_DIR")"
@@ -55,10 +40,7 @@ fi
 PACKAGE_DIR="$(realpath "$PACKAGE_DIR")"
 DESTINATION_DIR="$(realpath "$DESTINATION_DIR")"
 
-if [ ! -d "$PACKAGE_DIR/CONTROL" ]; then
-    echo "Error: Directory $PACKAGE_DIR has no CONTROL subdirectory"
-    exit 1
-fi
+[ ! -d "$PACKAGE_DIR/CONTROL" ] && { echo "Error: Directory $PACKAGE_DIR has no CONTROL subdirectory"; exit 1; }
 
 for FIELD in Package Version Architecture Installed-Size; do
     if ! grep -q "^$FIELD" < "$PACKAGE_DIR/CONTROL/control"; then
