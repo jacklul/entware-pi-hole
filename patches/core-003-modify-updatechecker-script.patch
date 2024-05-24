@@ -25,7 +25,7 @@ index eda6c40..291f43e 100755
 +    # shellcheck disable=SC2155
 +    local packages_index="$(curl -s "https://jacklul.github.io/entware-pi-hole/${architecture}/Packages")"
 +    # shellcheck disable=SC2155
-+    local latest_package="$(echo "${packages_index}" | awk -v pkg="${package}" '$0 ~ "^Package: " pkg "$", $0 ~ "Version:" {if ($0 ~ "Version:") print $2}')"
++    local latest_package="$(echo "${packages_index}" | awk -v pkg="${package}" '$0 ~ "^Package: " pkg "$", $0 ~ "Version:" {if ($0 ~ "Version:") print $2}' | tr -d '[:space:]')"
 +
 +    if [ -n "${latest_package}" ]; then
 +        echo "${latest_package}"
