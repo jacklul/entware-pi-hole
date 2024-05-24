@@ -133,7 +133,7 @@ GRAVITYDB_FILE="$(pihole-FTL --config -q files.gravity)"
 
 # Upgrade gravity database without rebuilding gravity
 if [ -f "$GRAVITYDB_FILE" ]; then
-    bash /opt/pihole/gravity.sh --upgrade
+    bash /opt/share/pihole/gravity.sh --upgrade
 fi
 
 # Restart the service when it is already running
@@ -147,7 +147,7 @@ fi
 # Make sure gravity database exists
 if [ -n "$GRAVITYDB_FILE" ] && [ ! -f "$GRAVITYDB_FILE" ]; then
     echo "Creating gravity database ($GRAVITYDB_FILE)..."
-    bash /opt/pihole/gravity.sh --force
+    bash /opt/share/pihole/gravity.sh --force
 fi
 
 exit 0
