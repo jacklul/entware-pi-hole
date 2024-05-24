@@ -1,102 +1,13 @@
 #!/bin/sh
 
+# Make links to system files if they don't exist in /opt/etc
+[ ! -f /opt/etc/hosts ] && [ -f /etc/hosts ] && ln -s /etc/hosts /opt/etc/hosts
+[ ! -f /opt/etc/ethers ] && [ -f /etc/ethers ] && ln -s /etc/ethers /opt/etc/ethers
+[ ! -f /opt/etc/resolv.conf ] && [ -f /etc/resolv.conf ] && ln -s /etc/resolv.conf /opt/etc/resolv.conf
+
 # Check if this is an interactive console session
 STDIN_FD="$(readlink -f /proc/$$/fd/0 2> /dev/null)"
 [ -n "$STDIN_FD" ] && [ "$STDIN_FD" != "/dev/null" ] && INTERACTIVE=y
-
-# If the UID 0 is not called root then we must add it to sudoers.d
-ROOT_USER="$(id -nu 0 2> /dev/null)"
-if [ -n "$ROOT_USER" ] && [ "$ROOT_USER" != "root" ]; then
-    [ ! -d "/opt/etc/sudoers.d" ] && mkdir -p "/opt/etc/sudoers.d"
-    cat <<EOT > "/opt/etc/sudoers.d/${ROOT_USER}_is_root"
-# Created by pi-hole package's postinst script
-$ROOT_USER ALL=(ALL) ALL
-EOT
-    chmod 600 "/opt/etc/sudoers.d/${ROOT_USER}_is_root"
-fi
-
-# Add 'pihole' user if it does not exist
-if ! id "pihole" > /dev/null 2>&1; then
-    if ! useradd -r -s /dev/null -d /dev/null pihole; then
-        cat << EOF
-Failed to add user 'pihole' using adduser command.
-Some functionality might not be available without 'pihole' user in the system.
-EOF
-
-        if [ -n "$INTERACTIVE" ]; then
-            cat << EOF
-
-Retry by writing to the system files directly?
-
-The following files will be APPENDED into:
- /opt/etc/passwd, /opt/etc/group, /opt/etc/shadow, /opt/etc/gshadow
-Writing to these files directly is usually not recommended.
-
-EOF
-
-            printf "Do you wish to continue? [y/N]: "
-
-            #shellcheck disable=SC2034
-            read -r reply
-
-            case "$reply" in
-                [yY]*)
-                    [ ! -f /opt/etc/passwd ] && { echo "/opt/etc/passwd is missing"; exit 1; }
-                    [ ! -f /opt/etc/group ] && { echo "/opt/etc/group is missing"; exit 1; }
-                    [ ! -f /opt/etc/shadow ] && { echo "/opt/etc/shadow is missing"; exit 1; }
-                    [ ! -f /opt/etc/gshadow ] && { echo "/opt/etc/gshadow is missing"; exit 1; }
-
-                    HIGHEST_UID=$(awk -F: '$3 >= 1000 {print $3}' /opt/etc/passwd | sort -n | tail -1)
-                    NEXT_UID=1000
-
-                    if [ -n "$HIGHEST_UID" ]; then
-                        NEXT_UID="$(bash -c "echo \$(($HIGHEST_UID + 1))")"
-                    fi
-
-                    echo "pihole:x:$NEXT_UID:$NEXT_UID::/dev/null:/dev/null" >> /opt/etc/passwd
-                    echo "pihole:x:$NEXT_UID:" >> /opt/etc/group
-                    echo "pihole:*:0:0:99999:7:::" >> /opt/etc/shadow
-                    echo "pihole:*::" >> /opt/etc/gshadow
-                ;;
-            esac
-        fi
-    fi
-fi
-
-# Make links to system files if they don't exist in /opt/etc
-[ ! -f "/opt/etc/hosts" ] && [ -f "/etc/hosts" ] && ln -s "/etc/hosts" "/opt/etc/hosts"
-[ ! -f "/opt/etc/ethers" ] && [ -f "/etc/ethers" ] && ln -s "/etc/ethers" "/opt/etc/ethers"
-[ ! -f "/opt/etc/resolv.conf" ] && [ -f "/etc/resolv.conf" ] && ln -s "/etc/resolv.conf" "/opt/etc/resolv.conf"
-
-# Set random gravity update and updatechecker times
-if [ -f "/opt/etc/cron.d/pihole" ]; then
-    MINUTE_GRAVITY="$(bash -c "echo \$((1 + RANDOM % 58))")"
-    MINUTE_UPDATECHECK="$(bash -c "echo \$((1 + RANDOM % 58))")"
-    HOUR_GRAVITY="$(bash -c "echo \$((3 + RANDOM % 2))")"
-    HOUR_UPDATECHECK="$(bash -c "echo \$((12 + RANDOM % 8))")"
-
-    if [ -n "$MINUTE_GRAVITY" ] && [ -n "$MINUTE_UPDATECHECK" ] && [ -n "$HOUR_GRAVITY" ] && [ -n "$HOUR_UPDATECHECK" ]; then
-        sed "s/59 1 /$MINUTE_GRAVITY $HOUR_GRAVITY /" -i "/opt/etc/cron.d/pihole"
-        sed "s/59 17 /$MINUTE_UPDATECHECK $HOUR_UPDATECHECK /" -i "/opt/etc/cron.d/pihole"
-    fi
-fi
-
-# Set user and group used for rotating the logs by logrotate
-if [ -f "/opt/etc/pihole/logrotate" ]; then
-    #shellcheck disable=SC2010
-    LOG_USER_GROUP="$(ls -al "/opt/var/log" | grep ' \.$' | awk '{print $3 " " $4}')"
-
-    if [ -n "$LOG_USER_GROUP" ]; then
-        if grep -q "# su #" "/opt/etc/pihole/logrotate"; then
-            sed "s/# su #/su $LOG_USER_GROUP/g;" -i "/opt/etc/pihole/logrotate"
-        else
-            sed "s/su.*$/su $LOG_USER_GROUP/g;" -i "/opt/etc/pihole/logrotate"
-        fi
-    fi
-fi
-
-# Run updatechecker to update /opt/etc/pihole/versions
-pihole updatechecker > /dev/null 2>&1
 
 # Some of these commands might be missing depending on the system
 # so we check if they exist and then prompt the user to install them
@@ -185,5 +96,56 @@ EOT
 else
     echo "Warning: Unable to check for missing dependencies - 'type' and 'which' commands not found!"
 fi
+
+# Set random gravity update and updatechecker times
+if [ -f /opt/etc/cron.d/pihole ] && grep -q "59 1 \|59 17 " /opt/etc/cron.d/pihole; then
+    MINUTE_GRAVITY="$(bash -c "echo \$((1 + RANDOM % 58))")"
+    MINUTE_UPDATECHECK="$(bash -c "echo \$((1 + RANDOM % 58))")"
+    HOUR_GRAVITY="$(bash -c "echo \$((3 + RANDOM % 2))")"
+    HOUR_UPDATECHECK="$(bash -c "echo \$((12 + RANDOM % 8))")"
+
+    echo "Setting random gravity update ($HOUR_GRAVITY:$MINUTE_GRAVITY) and updatechecker ($HOUR_UPDATECHECK:$MINUTE_UPDATECHECK) times..."
+
+    if [ -n "$MINUTE_GRAVITY" ] && [ -n "$MINUTE_UPDATECHECK" ] && [ -n "$HOUR_GRAVITY" ] && [ -n "$HOUR_UPDATECHECK" ]; then
+        sed "s/59 1 /$MINUTE_GRAVITY $HOUR_GRAVITY /" -i /opt/etc/cron.d/pihole
+        sed "s/59 17 /$MINUTE_UPDATECHECK $HOUR_UPDATECHECK /" -i /opt/etc/cron.d/pihole
+    fi
+fi
+
+# Set user and group used for rotating the logs by logrotate
+if [ -f /opt/etc/pihole/logrotate ]; then
+    #shellcheck disable=SC2010
+    LOG_USER_GROUP="$(ls -al "/opt/var/log" | grep ' \.$' | awk '{print $3 " " $4}')"
+
+    if [ -n "$LOG_USER_GROUP" ]; then
+        echo "Setting user and group in logrotate file ($LOG_USER_GROUP)..."
+
+        if grep -q "# su #" /opt/etc/pihole/logrotate; then
+            sed "s/# su #/su $LOG_USER_GROUP/g;" -i /opt/etc/pihole/logrotate
+        else
+            sed "s/su.*$/su $LOG_USER_GROUP/g;" -i /opt/etc/pihole/logrotate
+        fi
+    fi
+fi
+
+# Restart the service when it is already running
+if /opt/etc/init.d/S55pihole-FTL check | grep 'alive' > /dev/null 2>&1; then
+    echo "Restarting pihole-FTL service..."
+    /opt/etc/init.d/S55pihole-FTL restart
+else # Otherwise just run the prestart script to set required permissions
+    bash /opt/share/pihole/pihole-FTL-prestart.sh
+fi
+
+# Make sure gravity database exists
+PI_HOLE_GRAVITYDB_FILE="$(pihole-FTL --config -q files.gravity)"
+if [ -n "$PI_HOLE_GRAVITYDB_FILE" ] && [ ! -f "$PI_HOLE_GRAVITYDB_FILE" ]; then
+    echo "Creating gravity database ($PI_HOLE_GRAVITYDB_FILE)..."
+    bash /opt/pihole/gravity.sh --force
+else # Upgrade database without rebuilding gravity
+    bash /opt/pihole/gravity.sh --upgrade
+fi
+
+# Update remote versions via updatechecker
+bash /opt/pihole/updatechecker.sh
 
 exit 0
