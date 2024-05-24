@@ -1,32 +1,26 @@
 name: Build and Upload
 
 on:
-  #schedule:
-  #  - cron: "0 0 * * *"
-  # @TODO when v6 is released this should be uncommented
+  schedule:
+    - cron: "0 2 * * *"
   push:
-    #branches-ignore:
-    #  - 'master'
-    # @TODO when v6 is released this should be uncommented
+    branches-ignore:
+      - 'gh-pages'
   pull_request:
   release:
     types: [published]
   workflow_dispatch:
 
 env:
-  #CORE_HASH: 
-  #WEB_HASH: 
-  #FTL_HASH: 
-  CORE_BRANCH: development-v6
-  WEB_BRANCH: development-v6
-  FTL_BRANCH: development-v6
-# @TODO when v6 is released *_HASH should be set to release commit hashes and *_BRANCH to release branches
+  SELF_REF: ${{ github.event_name == 'schedule' && 'develop' || github.ref_name }}
 
 jobs:
   globals:
     concurrency: globals-${{ github.ref_name || github.run_id }}
     runs-on: ubuntu-latest
-    if: ${{ !contains(github.head_ref, 'gh-pages') }}
+
+    env:
+      ENV_FILE: ./build.env
 
     outputs:
       VERSION: ${{ steps.globals.outputs.VERSION }}
@@ -37,10 +31,15 @@ jobs:
     steps:
       - name: Checkout own repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ env.SELF_REF }}
 
       - name: Set outputs
         id: globals
-        run: bash ./scripts/globals.sh
+        run: |
+          export $(grep -v '^#' ${{ env.ENV_FILE }} | xargs -d '\n')
+          bash ./scripts/globals.sh
+          cat $GITHUB_OUTPUT
 
   build-core:
     concurrency: build-core-${{ github.ref_name || github.run_id }}
@@ -53,6 +52,8 @@ jobs:
     steps:
       - name: Checkout own repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ env.SELF_REF }}
 
       - name: Checkout pi-hole/pi-hole repository
         uses: actions/checkout@v4
@@ -99,6 +100,8 @@ jobs:
     steps:
       - name: Checkout own repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ env.SELF_REF }}
 
       - name: Checkout pi-hole/web repository
         uses: actions/checkout@v4
@@ -170,12 +173,10 @@ jobs:
         #    allow-failure: false
 
     steps:
-      - name: Fail this job
-        if: ${{ matrix.allow-failure && github.ref_name != 'master' && !startsWith(github.ref, 'refs/tags/') }}
-        run: exit 1
-
       - name: Checkout own repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ env.SELF_REF }}
 
       - name: Checkout pi-hole/FTL repository
         uses: actions/checkout@v4
@@ -295,12 +296,10 @@ jobs:
       FTL_VERSION: ${{ steps.versions.outputs.FTL }}
 
     steps:
-      - name: Fail this job
-        if: ${{ matrix.allow-failure && github.ref_name != 'master' && !startsWith(github.ref, 'refs/tags/') }}
-        run: exit 1
-
       - name: Checkout own repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ env.SELF_REF }}
 
       - name: Download core artifact
         uses: actions/download-artifact@v4
@@ -320,9 +319,11 @@ jobs:
           name: binary-${{ matrix.arch }}
           path: ./artifacts/binary
 
-      - name: Add '-dev' postfix to package name
+      - name: Add '-dev' to package name
         if: ${{ github.ref_name == 'develop' }}
-        run: sed '/^Package:/ s/$/-dev/' -i ./files/CONTROL/control
+        run: |
+          sed '/^Package:/ s/$/-dev/' -i ./files/CONTROL/control
+          grep -q "\-dev$" ./files/CONTROL/control || exit 1
 
       - name: Build package
         run: |
@@ -392,7 +393,7 @@ jobs:
   upload:
     concurrency: upload
     needs: [build-package]
-    if: ${{ startsWith(github.ref, 'refs/tags/') || github.ref_name == 'develop' || github.ref_name == 'master' }}
+    if: ${{ startsWith(github.ref, 'refs/tags/') || github.ref_name == 'develop' || github.event_name == 'schedule' || github.ref_name == 'master' }}
     # @TODO when v6 is released master should not trigger this job
     runs-on: ubuntu-latest
 
@@ -403,6 +404,7 @@ jobs:
       - name: Checkout own repository
         uses: actions/checkout@v4
         with:
+          ref: ${{ env.SELF_REF }}
           fetch-depth: 0
           sparse-checkout: /.github/*
           sparse-checkout-cone-mode: false
@@ -426,6 +428,7 @@ jobs:
           find ./artifacts -mindepth 1 -maxdepth 1 -type d -name 'ipk-*' -exec bash -c 'mv -v "$1" "${1//ipk-}"' bash {} \;
           ls ./artifacts/ipk-* 2> /dev/null && { echo "Found directory starting with ipk-"; exit 1; } 
           find ./artifacts -mindepth 1 -maxdepth 1 -type d -name "*-*.*" -exec bash -c '
+            [ -z "$(ls -A "$1")" ] && exit
             ARCH=$(basename "$1")
             echo "Removing old packages for $ARCH"
             if [ "$(find "$1" -maxdepth 1 -type f -name "*-dev_*.ipk" -print -quit)" ]; then
@@ -482,11 +485,3 @@ jobs:
           commit-message: Upload
           single-commit: true
           force: true
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: upload
-          path: |
-            ./index.html
-            ./*-*.*/*

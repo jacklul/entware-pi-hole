@@ -6,10 +6,7 @@ on:
   workflow_dispatch:
 
 env:
-  CORE_BRANCH: development-v6
-  WEB_BRANCH: development-v6
-  FTL_BRANCH: development-v6
-# @TODO when v6 is released these should be set to release branches
+  ENV_FILE: ./build.env
 
 jobs:
   check:
@@ -26,41 +23,50 @@ jobs:
       - name: Checkout own repository
         uses: actions/checkout@v4
 
+      - name: Set branches to pull
+        id: branches
+        run: |
+          export $(grep -v '^#' ${{ env.ENV_FILE }} | xargs -d '\n')
+          echo "CORE=$CORE_BRANCH" >> $GITHUB_OUTPUT
+          echo "WEB=$WEB_BRANCH" >> $GITHUB_OUTPUT
+          echo "FTL=$FTL_BRANCH" >> $GITHUB_OUTPUT
+          cat $GITHUB_OUTPUT
+
       - name: Checkout pi-hole/pi-hole repository
         uses: actions/checkout@v4
         with:
           repository: pi-hole/pi-hole
-          ref: ${{ env.CORE_BRANCH || '' }}
+          ref: ${{ steps.branches.outputs.CORE }}
           path: ./dev/core
 
       - name: Checkout pi-hole/web repository
         uses: actions/checkout@v4
         with:
           repository: pi-hole/web
-          ref: ${{ env.WEB_BRANCH || '' }}
+          ref: ${{ steps.branches.outputs.WEB }}
           path: ./dev/web
 
       - name: Checkout pi-hole/FTL repository
         uses: actions/checkout@v4
         with:
           repository: pi-hole/FTL
-          ref: ${{ env.FTL_BRANCH || '' }}
+          ref: ${{ steps.branches.outputs.FTL }}
           path: ./dev/FTL
 
       - name: Set old hashes
         id: old-hashes
         run: |
-          echo "CORE_HASH=$(sed -n "s/^  CORE_HASH: \([[:alnum:]]*\)\s*$/\1/p" ./.github/workflows/build.yml)" >> $GITHUB_OUTPUT
-          echo "WEB_HASH=$(sed -n "s/^  WEB_HASH: \([[:alnum:]]*\)\s*$/\1/p" ./.github/workflows/build.yml)" >> $GITHUB_OUTPUT
-          echo "FTL_HASH=$(sed -n "s/^  FTL_HASH: \([[:alnum:]]*\)\s*$/\1/p" ./.github/workflows/build.yml)" >> $GITHUB_OUTPUT
+          echo "CORE_HASH=$(sed -n 's/^CORE_REF=\([[:alnum:]]*\)\s*$/\1/p' ${{ env.ENV_FILE }})" >> $GITHUB_OUTPUT
+          echo "WEB_HASH=$(sed -n 's/^WEB_REF=\([[:alnum:]]*\)\s*$/\1/p' ${{ env.ENV_FILE }})" >> $GITHUB_OUTPUT
+          echo "FTL_HASH=$(sed -n 's/^FTL_REF=\([[:alnum:]]*\)\s*$/\1/p' ${{ env.ENV_FILE }})" >> $GITHUB_OUTPUT
           cat $GITHUB_OUTPUT
 
       - name: Set new hashes
         id: new-hashes
         run: |
-          echo "CORE_HASH=$(git -C "./dev/core" rev-parse HEAD)" >> $GITHUB_OUTPUT
-          echo "WEB_HASH=$(git -C "./dev/web" rev-parse HEAD)" >> $GITHUB_OUTPUT
-          echo "FTL_HASH=$(git -C "./dev/FTL" rev-parse HEAD)" >> $GITHUB_OUTPUT
+          echo "CORE_HASH=$(git -C ./dev/core rev-parse HEAD)" >> $GITHUB_OUTPUT
+          echo "WEB_HASH=$(git -C ./dev/web rev-parse HEAD)" >> $GITHUB_OUTPUT
+          echo "FTL_HASH=$(git -C ./dev/FTL rev-parse HEAD)" >> $GITHUB_OUTPUT
           cat $GITHUB_OUTPUT
 
       - name: Old hashes are not empty
@@ -97,7 +103,7 @@ jobs:
           patches_prefix: FTL
           git_path: ./dev/FTL
 
-      - name: Set status
+      - name: Set ok status
         if: ${{ steps.hashes-different.outputs.RESULT == 'ok' }}
         id: status
         run: echo "RESULT=ok" >> $GITHUB_OUTPUT
@@ -115,25 +121,20 @@ jobs:
       - name: Checkout own repository
         uses: actions/checkout@v4
 
-      - name: Replace hashes in build workflow
+      - name: Replace hashes in env file
         run: |
-          sed 's/  CORE_HASH:.*$/  CORE_HASH: ${{ needs.check.outputs.CORE_HASH }}/' -i ./.github/workflows/build.yml
-          sed 's/  WEB_HASH:.*$/  WEB_HASH: ${{ needs.check.outputs.WEB_HASH }}/' -i ./.github/workflows/build.yml
-          sed 's/  FTL_HASH:.*$/  FTL_HASH: ${{ needs.check.outputs.FTL_HASH }}/' -i ./.github/workflows/build.yml
+          sed 's/CORE_REF=.*$/CORE_REF=${{ needs.check.outputs.CORE_HASH }}/' -i ${{ env.ENV_FILE }}
+          sed 's/WEB_REF=.*$/WEB_REF=${{ needs.check.outputs.WEB_HASH }}/' -i ${{ env.ENV_FILE }}
+          sed 's/FTL_REF=.*$/FTL_REF=${{ needs.check.outputs.FTL_HASH }}/' -i ${{ env.ENV_FILE }}
 
       - name: Is repository modified?
         id: modified
-        run: echo "RESULT=$([ "git diff" != "" ] && echo yes || echo no)" >> $GITHUB_OUTPUT
+        run: echo "RESULT=$([ "$(git diff)" != "" ] && echo yes || echo no)" >> $GITHUB_OUTPUT
 
-      - name: Create tag
+      - name: Create suggested tag name
         if: ${{ steps.modified.outputs.RESULT == 'yes' }}
         id: tag
         run: echo "RESULT=$(bash ./scripts/tag.sh)" >> $GITHUB_OUTPUT
-
-      - name: Print new tag and git diff
-        run: |
-          echo "New tag: ${{ steps.tag.outputs.RESULT }}"
-          git diff
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
