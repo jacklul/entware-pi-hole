@@ -29,7 +29,7 @@ index 65726b0..00f9fe4 100644
            dockerUpdate = true;
          }
  
-+        if (v.name === "Entware package" && versionCompare(v.local, v.remote) === -1) {
++        if (v.name === "Entware package" && versionCompare(v.local.replace(/[^a-zA-Z0-9]/g, "."), v.remote.replace(/[^a-zA-Z0-9]/g, ".")) === -1) {
 +          updateComponentAvailable = true;
 +          entwareUpdate = true;
 +        }
