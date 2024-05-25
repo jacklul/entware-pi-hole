@@ -152,22 +152,13 @@ fi
 
 # Update remote versions via updatechecker
 # We cannot execute it now because opkg is running
-UPDATECHECKER_TMP="/opt/tmp/pi-hole-updatechecker.sh"
-cat <<EOT > "$UPDATECHECKER_TMP"
-#!/bin/sh
+{
+    start_time=$(date +%s)
+    while [ -f /opt/tmp/opkg.lock ] && [ $(( $(date +%s) - start_time )) -le 60 ]; do
+        sleep 1
+    done
 
-printf "Waiting for opkg to finish..."
-
-start_time=\$(date +%s)
-while [ -f /opt/tmp/opkg.lock ] && [ \$(( \$(date +%s) - start_time )) -le 60 ]; do
-    printf "."
-    sleep 1
-done
-
-bash /opt/share/pihole/updatecheck.sh
-
-rm -f "\$0"
-EOT
-sh "$UPDATECHECKER_TMP" > /dev/null 2>&1 &
+    bash /opt/share/pihole/updatecheck.sh
+} > /dev/null 2>&1 &
 
 exit 0
