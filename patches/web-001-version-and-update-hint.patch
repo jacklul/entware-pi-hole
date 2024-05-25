@@ -1,16 +1,17 @@
 diff --git a/scripts/pi-hole/js/footer.js b/scripts/pi-hole/js/footer.js
-index 65726b0..00f9fe4 100644
+index 65726b0b..1265ff21 100644
 --- a/scripts/pi-hole/js/footer.js
 +++ b/scripts/pi-hole/js/footer.js
-@@ -485,6 +485,7 @@ function updateVersionInfo() {
+@@ -485,6 +485,8 @@ function updateVersionInfo() {
      var version = data.version;
      var updateAvailable = false;
      var dockerUpdate = false;
 +    var entwareUpdate = false;
++    var packaged = version.docker.local || version.entware.local;
      $("#versions").empty();
  
      var versions = [
-@@ -496,6 +497,14 @@ function updateVersionInfo() {
+@@ -496,6 +498,14 @@ function updateVersionInfo() {
          hash: null,
          url: "https://github.com/pi-hole/docker-pi-hole/releases",
        },
@@ -25,11 +26,11 @@ index 65726b0..00f9fe4 100644
        {
          name: "Core",
          local: version.core.local.version,
-@@ -562,6 +571,11 @@ function updateVersionInfo() {
+@@ -562,6 +572,11 @@ function updateVersionInfo() {
            dockerUpdate = true;
          }
  
-+        if (v.name === "Entware package" && versionCompare(v.local.replace(/[^a-zA-Z0-9]/g, "."), v.remote.replace(/[^a-zA-Z0-9]/g, ".")) === -1) {
++        if (v.name === "Entware package" && versionCompare(v.local, v.remote) === -1) {
 +          updateComponentAvailable = true;
 +          entwareUpdate = true;
 +        }
@@ -37,14 +38,16 @@ index 65726b0..00f9fe4 100644
          if (updateComponentAvailable) {
            $("#versions").append(
              "<li><strong>" +
-@@ -584,6 +598,10 @@ function updateVersionInfo() {
+@@ -584,7 +599,11 @@ function updateVersionInfo() {
        $("#update-hint").html(
          'To install updates, <a href="https://github.com/pi-hole/docker-pi-hole#upgrading-persistence-and-customizations" rel="noopener" target="_blank">replace this old container with a fresh upgraded image</a>.'
        );
+-    else if (updateAvailable)
 +    else if (entwareUpdate)
 +      $("#update-hint").html(
-+        'To install updates, run <code><a href="https://github.com/jacklul/entware-pi-hole/" rel="noopener" target="_blank">opkg update && opkg upgrade</a></code>.'
++        'To install updates, run <code><a href="https://github.com/jacklul/entware-pi-hole/" rel="noopener" target="_blank">opkg update && opkg upgrade pi-hole</a></code>.'
 +      );
-     else if (updateAvailable)
++    else if (updateAvailable && !packaged)
        $("#update-hint").html(
          'To install updates, run <code><a href="https://docs.pi-hole.net/main/update/" rel="noopener" target="_blank">pihole -up</a></code>.'
+       );
