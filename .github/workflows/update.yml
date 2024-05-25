@@ -103,6 +103,29 @@ jobs:
           patches_prefix: FTL
           git_path: ./dev/FTL
 
+      - name: Set up Docker Buildx
+        if: ${{ steps.patch-FTL.outputs.RESULT == 'ok' }}
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and test FTL
+        if: ${{ steps.patch-FTL.outputs.RESULT == 'ok' }}
+        uses: docker/build-push-action@v5
+        env:
+          platform: linux/amd64
+        with:
+          platforms: ${{ env.platform }}
+          pull: true
+          push: false
+          context: ./dev/FTL
+          target: result
+          file: ./dev/FTL/.github/Dockerfile
+          outputs: |
+            type=tar,dest=./dev/FTL/build.tar
+          build-args: |
+            "CI_ARCH=${{ env.platform }}"
+            "GIT_BRANCH=${{ steps.branches.outputs.FTL }}"
+            "GIT_TAG="
+
       - name: Set ok status
         if: ${{ steps.hashes-different.outputs.RESULT == 'ok' }}
         id: status

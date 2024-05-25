@@ -229,7 +229,7 @@ jobs:
           target: result
           file: ./stage/.github/Dockerfile
           outputs: |
-            type=tar,dest=stage/build.tar
+            type=tar,dest=./stage/build.tar
           build-args: |
             "CI_ARCH=${{ matrix.platform }}"
             "GIT_BRANCH=${{ steps.variables.outputs.GIT_BRANCH }}"
