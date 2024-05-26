@@ -291,7 +291,7 @@ jobs:
           path: ./artifacts/binary
 
       - name: Add '-dev' to package name
-        if: ${{ github.ref_name == 'develop' }}
+        if: ${{ github.ref_name == 'develop' || github.event_name == 'schedule' }}
         run: sed '/^Package:/ s/$/-dev/' -i ./files/CONTROL/control
 
       - name: Build packages
