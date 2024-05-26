@@ -80,27 +80,22 @@ EOF
 
             case "$answer" in
                 [yY]*|"")
-                    SCRIPT_BASE="/opt/tmp/pi-hole-install-deps"
+                    INSTALLER_LOG="/opt/tmp/pi-hole-install-deps.log"
+                    echo "  ${INFO} Running install script in the background... (${COL_CYAN}'tail -f $INSTALLER_LOG' for output${COL_NC})"
 
-                    cat <<EOT > "$SCRIPT_BASE.sh"
-#!/bin/sh
+                    {
+                        printf "Waiting for opkg to finish..."
 
-printf "Waiting for opkg to finish..."
+                        start_time=$(date +%s)
+                        while [ -f /opt/tmp/opkg.lock ] && [ $(( $(date +%s) - start_time )) -le 60 ]; do
+                            printf "."
+                            sleep 1
+                        done
 
-start_time=\$(date +%s)
-while [ -f /opt/tmp/opkg.lock ] && [ \$(( \$(date +%s) - start_time )) -le 60 ]; do
-    printf "."
-    sleep 1
-done
-
-echo
-opkg install $MISSING_PKGS
-echo "Done!"
-
-rm -f "\$0"
-EOT
-                    echo "  ${INFO} Running install script in the background... (${COL_CYAN}'tail -f $SCRIPT_BASE.log' for output${COL_NC})"
-                    sh "$SCRIPT_BASE.sh" > "$SCRIPT_BASE.log" 2>&1 &
+                        echo
+                        #shellcheck disable=SC2086
+                        opkg install $MISSING_PKGS
+                    } > "$INSTALLER_LOG" 2>&1 &
                 ;;
             esac
         fi
