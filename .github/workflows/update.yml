@@ -157,7 +157,19 @@ jobs:
       - name: Create suggested tag name
         if: ${{ steps.modified.outputs.RESULT == 'yes' }}
         id: tag
-        run: echo "RESULT=$(bash ./scripts/tag.sh)" >> $GITHUB_OUTPUT
+        run: |
+          bash -c '
+            REVISION=0
+            TAG=""
+            LIMIT=100
+            while [ "$TAG" = "" ] || git tag | grep -q "$TAG"; do
+                REVISION=$((REVISION+1))
+                TAG=$(date +%Y.%m.%d)-$REVISION
+                LIMIT=$((LIMIT-1))
+                [ $LIMIT -le 0 ] && exit 1
+            done
+            echo "RESULT=$TAG" >> $GITHUB_OUTPUT
+          '
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
