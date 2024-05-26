@@ -1,5 +1,18 @@
 #!/bin/sh
 
+if [ -f /opt/share/pihole/COL_TABLE ]; then
+    # shellcheck disable=SC1091
+    . "/opt/share/pihole/COL_TABLE"
+else
+    TICK="[✓]"
+    CROSS="[✗]"
+    INFO="[i]"
+    QST="[?]"
+    OVER="\\r[K"
+fi
+
+echo "  ${INFO} Running install/upgrade script..."
+
 # Make links to system files if they don't exist in /opt/etc
 [ ! -f /opt/etc/hosts ] && [ -f /etc/hosts ] && ln -s /etc/hosts /opt/etc/hosts
 [ ! -f /opt/etc/ethers ] && [ -f /etc/ethers ] && ln -s /etc/ethers /opt/etc/ethers
@@ -52,21 +65,20 @@ if [ -n "$CHECK_COMMAND" ]; then
         MISSING_PKGS="$(echo "$MISSING_PKGS" | awk '{$1=$1};1')"
 
         cat << EOF
-Your system is missing required commands:
- $MISSING_CMDS
+  ${CROSS} ${COL_RED}Your system is missing required commands:${COL_NC} ${COL_YELLOW}$MISSING_CMDS${COL_NC}
 
-Install them by running the following command:
- opkg install $MISSING_PKGS
+      ${COL_CYAN}Install them by running the following command:
+       opkg install $MISSING_PKGS${COL_NC}
 
 EOF
 
         if [ -n "$INTERACTIVE" ]; then
-            printf "Do you want to install them automatically? [Y/n]: "
+            printf "  %s Do you wish to install them automatically? [Y/n] " "${QST}"
 
             #shellcheck disable=SC2034
-            read -r reply
+            read -r answer
 
-            case "$reply" in
+            case "$answer" in
                 [yY]*|"")
                     SCRIPT_BASE="/opt/tmp/pi-hole-install-deps"
 
@@ -87,14 +99,16 @@ echo "Done!"
 
 rm -f "\$0"
 EOT
-                    echo "Running install script in the background... ('tail -f $SCRIPT_BASE.log' for output)"
+                    echo "  ${INFO} Running install script in the background... (${COL_CYAN}'tail -f $SCRIPT_BASE.log' for output${COL_NC})"
                     sh "$SCRIPT_BASE.sh" > "$SCRIPT_BASE.log" 2>&1 &
                 ;;
             esac
         fi
+    else
+        echo "  ${TICK} ${COL_GREEN}All required commands are available.${COL_NC}"
     fi
 else
-    echo "Warning: Unable to check for missing dependencies - 'type' and 'which' commands not found!"
+    echo "  ${CROSS} Unable to check for missing dependencies - 'type' and 'which' commands not found!"
 fi
 
 # Set random gravity update and updatechecker times
@@ -104,7 +118,7 @@ if [ -f /opt/etc/cron.d/pihole ] && grep -q "59 1 \|59 17 " /opt/etc/cron.d/piho
     HOUR_GRAVITY="$(bash -c "echo \$((3 + RANDOM % 2))")"
     HOUR_UPDATECHECK="$(bash -c "echo \$((12 + RANDOM % 8))")"
 
-    echo "Setting random gravity update and updatechecker times..."
+    echo "  ${INFO} Setting random gravity update and updatechecker times..."
 
     if [ -n "$MINUTE_GRAVITY" ] && [ -n "$MINUTE_UPDATECHECK" ] && [ -n "$HOUR_GRAVITY" ] && [ -n "$HOUR_UPDATECHECK" ]; then
         sed "s/59 1 /$MINUTE_GRAVITY $HOUR_GRAVITY /" -i /opt/etc/cron.d/pihole
@@ -118,7 +132,7 @@ if [ -f /opt/etc/pihole/logrotate ]; then
     LOG_USER_GROUP="$(ls -al "/opt/var/log" | grep ' \.$' | awk '{print $3 " " $4}')"
 
     if [ -n "$LOG_USER_GROUP" ]; then
-        echo "Setting user and group in logrotate file..."
+        echo "  ${INFO} Setting user and group in logrotate file..."
 
         if grep -q "# su #" /opt/etc/pihole/logrotate; then
             sed "s/# su #/su $LOG_USER_GROUP/g;" -i /opt/etc/pihole/logrotate
@@ -137,16 +151,22 @@ if [ -f "$GRAVITYDB_FILE" ]; then
 fi
 
 # Restart the service when it is already running
-if /opt/etc/init.d/S55pihole-FTL check | grep 'alive' > /dev/null 2>&1; then
-    echo "Restarting pihole-FTL service..."
-    /opt/etc/init.d/S55pihole-FTL restart
+if /opt/etc/init.d/S55pihole-FTL check | grep -q 'alive'; then
+    str="Restarting pihole-FTL service"
+    printf "  %s %s..." "${INFO}" "$str"
+
+    if /opt/etc/init.d/S55pihole-FTL restart > /dev/null; then
+        printf "%b  %b %s...\\n" "${OVER}" "${TICK}" "${str}"
+    else
+        printf "%b  %b %s...\\n" "${OVER}" "${CROSS}" "${str}"
+    fi
 else # Otherwise just run the prestart script to set required permissions
     bash /opt/share/pihole/pihole-FTL-prestart.sh
 fi
 
 # Make sure gravity database exists
 if [ -n "$GRAVITYDB_FILE" ] && [ ! -f "$GRAVITYDB_FILE" ]; then
-    echo "Creating gravity database ($GRAVITYDB_FILE)..."
+    echo "  ${INFO} Creating gravity database (${COL_CYAN}$GRAVITYDB_FILE${COL_NC})..."
     bash /opt/share/pihole/gravity.sh --force
 fi
 
