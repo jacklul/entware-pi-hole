@@ -18,14 +18,8 @@ set -e
 [ ! -d "$PACKAGE_DIR" ] && { echo "Error: Directory $PACKAGE_DIR does not exist"; exit 1; }
 [ -z "$PACKAGE_VERSION" ] && { echo "Error: Package version not provided"; exit 1; }
 [ -z "$PACKAGE_ARCHITECTURE" ] && { echo "Error: Package architecture not provided"; exit 1; }
-
-if [ -z "$DESTINATION_DIR" ]; then
-    DESTINATION_DIR="$(dirname "$SCRIPT_DIR")"
-else
-    if [ ! -d "$DESTINATION_DIR" ]; then
-        mkdir -pv "$DESTINATION_DIR"
-    fi
-fi
+[ -z "$DESTINATION_DIR" ] && DESTINATION_DIR="$(dirname "$SCRIPT_DIR")"
+[ ! -d "$DESTINATION_DIR" ] && { echo "Error: Directory $DESTINATION_DIR does not exist"; exit 1; }
 
 # If version string is a branch name then append a timestamp to it
 if echo "$PACKAGE_VERSION" | grep -Eq '^\w+$'; then
@@ -62,12 +56,13 @@ if ! echo "$PACKAGE_NAME" | grep -Eq '^[a-zA-Z0-9_-]+$'; then
 fi
 
 # work in temporary dir
-TMP_DIR="$DESTINATION_DIR/IPKG_BUILD.$$"
-mkdir -vp "$TMP_DIR"
+TMP_DIR="/tmp/IPKG_BUILD.$$"
+[ ! -w /tmp ] && TMP_DIR="$(dirname "$SCRIPT_DIR")/tmp/IPKG_BUILD.$$"
+mkdir -p "$TMP_DIR"
 
 # create data archive
 sudo chown -R 0:0 "$PACKAGE_DIR/opt"
-tar --exclude CONTROL --format=gnu --numeric-owner --sort=name -cpf - --mtime="$TIMESTAMP" . | gzip -n - > "$TMP_DIR/data.tar.gz"
+tar --exclude CONTROL --exclude '*.ipk' --format=gnu --numeric-owner --sort=name -cpf - --mtime="$TIMESTAMP" . | gzip -n - > "$TMP_DIR/data.tar.gz"
 
 # update/set variables in control file
 INSTALLED_SIZE=$(zcat < "$TMP_DIR"/data.tar.gz | wc -c)

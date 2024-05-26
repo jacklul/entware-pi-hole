@@ -138,7 +138,7 @@ jobs:
           retention-days: 1
 
   build-binary:
-    concurrency: build-binary-${{ github.ref_name || github.run_id }}-${{ matrix.arch }}
+    concurrency: build-binary-${{ github.ref_name || github.run_id }}-${{ matrix.architecture }}
     needs: [globals]
     runs-on: ubuntu-latest
     continue-on-error: ${{ matrix.allow-failure }}
@@ -150,26 +150,26 @@ jobs:
       fail-fast: false
       matrix:
         include:
-        #  - arch: aarch64
-        #    platform: linux/aarch64
+        #  - architecture: aarch64
+        #    docker_platform: linux/aarch64
         #    allow-failure: false
-        #  - arch: armv5
-        #    platform: linux/arm/v5 # EOS by Entware team
+        #  - architecture: armv5
+        #    docker_platform: linux/arm/v5 # EOS by Entware team
         #    allow-failure: true
-          - arch: armv7
-            platform: linux/arm/v7
+          - architecture: armv7
+            docker_platform: linux/arm/v7
             allow-failure: false
-        #  - arch: mipsel
-        #    platform: linux/mipsel # Not supported by Pi-hole
+        #  - architecture: mipsel
+        #    docker_platform: linux/mipsel # Not supported by Pi-hole
         #    allow-failure: true
-        #  - arch: mips
-        #    platform: linux/mips # Not supported by Pi-hole
+        #  - architecture: mips
+        #    docker_platform: linux/mips # Not supported by Pi-hole
         #    allow-failure: true
-        #  - arch: amd64
-        #    platform: linux/amd64
+        #  - architecture: amd64
+        #    docker_platform: linux/amd64
         #    allow-failure: false
-        #  - arch: 386
-        #    platform: linux/386 # EOS by Entware team
+        #  - architecture: i386
+        #    docker_platform: linux/386 # EOS by Entware team
         #    allow-failure: false
 
     steps:
@@ -189,10 +189,10 @@ jobs:
         id: cache
         uses: ./.github/actions/cache
         with:
-          key_prefix: binary-${{ matrix.arch }}-
+          key_prefix: binary-${{ matrix.architecture }}-
           patches_prefix: FTL
           files: |
-            ./stage/pihole-FTL
+            ./stage/pihole-FTL-*
             ./stage/.version
 
       - name: Apply patches
@@ -222,7 +222,7 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         uses: docker/build-push-action@v5
         with:
-          platforms: ${{ matrix.platform }}
+          platforms: ${{ matrix.docker_platform }}
           pull: true
           push: false
           context: ./stage
@@ -231,7 +231,7 @@ jobs:
           outputs: |
             type=tar,dest=./stage/build.tar
           build-args: |
-            "CI_ARCH=${{ matrix.platform }}"
+            "CI_ARCH=${{ matrix.docker_platform }}"
             "GIT_BRANCH=${{ steps.variables.outputs.GIT_BRANCH }}"
             "GIT_TAG=${{ steps.variables.outputs.GIT_TAG }}"
 
@@ -240,7 +240,8 @@ jobs:
         working-directory: ./stage
         run: |
           tar -xf ./build.tar pihole-FTL
-          sha1sum pihole-FTL > pihole-FTL.sha1
+          mv pihole-FTL "pihole-FTL-${{ matrix.architecture }}"
+          sha1sum pihole-FTL-* > "pihole-FTL-${{ matrix.architecture }}.sha1"
 
       - name: Remove .git directory
         run: rm -fr ./stage/.git
@@ -248,46 +249,16 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: binary-${{ matrix.arch }}
+          name: binary-${{ matrix.architecture }}
           path: |
-            ./stage/pihole-FTL
+            ./stage/pihole-FTL-*
             ./stage/.version
           retention-days: 1
 
-  build-package:
-    concurrency: build-package-${{ github.ref_name || github.run_id }}-${{ matrix.arch }}
+  build-packages:
+    concurrency: build-packages-${{ github.ref_name || github.run_id }}
     needs: [globals, build-core, build-web, build-binary]
     runs-on: ubuntu-latest
-    continue-on-error: ${{ matrix.allow-failure }}
-
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          #- arch: aarch64
-          #  entware_arch: aarch64-3.10
-          #  allow-failure: false
-          #- arch: armv5
-          #  entware_arch: armv5-3.2 # EOS by Entware team
-          #  allow-failure: true
-          #- arch: armv7
-          #  entware_arch: armv7-2.6 # EOS by Entware team
-          #  allow-failure: true
-          - arch: armv7
-            entware_arch: armv7-3.2
-            allow-failure: false
-          #- arch: mipsel
-          #  entware_arch: mipselsf-3.4 # Not supported by Pi-hole
-          #  allow-failure: true
-          #- arch: mips
-          #  entware_arch: mipssf-3.4 # Not supported by Pi-hole
-          #  allow-failure: true
-          #- arch: amd64
-          #  entware_arch: x64-3.2
-          #  allow-failure: false
-          #- arch: 386
-          #  entware_arch: x86-2.6 # EOS by Entware team
-          #  allow-failure: false
 
     outputs:
       IPK_VERSION: ${{ steps.versions.outputs.IPK }}
@@ -313,29 +284,25 @@ jobs:
           name: web
           path: ./artifacts/web
 
-      - name: Download binary artifact
+      - name: Download binary artifacts
         uses: actions/download-artifact@v4
         with:
-          name: binary-${{ matrix.arch }}
+          pattern: binary-*
           path: ./artifacts/binary
 
       - name: Add '-dev' to package name
         if: ${{ github.ref_name == 'develop' }}
-        run: |
-          sed '/^Package:/ s/$/-dev/' -i ./files/CONTROL/control
-          grep -q "\-dev$" ./files/CONTROL/control || exit 1
+        run: sed '/^Package:/ s/$/-dev/' -i ./files/CONTROL/control
 
-      - name: Build package
+      - name: Build packages
         run: |
-          mkdir -pv ./build ./packages
-          bash ./scripts/build.sh ./build
-          bash ./scripts/ipk.sh ./build "${{ needs.globals.outputs.VERSION }}" ${{ matrix.entware_arch }}
-          mv -fv ./*.ipk ./packages
+          mkdir -p ./build ./packages
+          sudo -E bash ./scripts/multibuild.sh ./build "${{ needs.globals.outputs.VERSION }}" ./artifacts ./packages
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ipk-${{ matrix.entware_arch }}
+          name: packages
           path: ./packages/*
 
       - name: Set versions
@@ -351,7 +318,7 @@ jobs:
 
   release:
     concurrency: release-${{ github.ref_name || github.run_id }}
-    needs: [build-package]
+    needs: [build-packages]
     if: ${{ startsWith(github.ref, 'refs/tags/') }}
     runs-on: ubuntu-latest
 
@@ -362,7 +329,7 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
-          pattern: ipk-*
+          name: packages
           path: ./artifacts
 
       - name: Create changelog file
@@ -392,7 +359,7 @@ jobs:
 
   upload:
     concurrency: upload
-    needs: [build-package]
+    needs: [build-packages]
     if: ${{ startsWith(github.ref, 'refs/tags/') || github.ref_name == 'develop' || github.event_name == 'schedule' || github.ref_name == 'master' }}
     # @TODO when v6 is released master should not trigger this job
     runs-on: ubuntu-latest
@@ -419,22 +386,20 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
-          pattern: ipk-*
+          name: packages
           path: ./artifacts
 
       - name: Collect new packages
         run: |
           mkdir -p ./gh-pages
-          find ./artifacts -mindepth 1 -maxdepth 1 -type d -name 'ipk-*' -exec bash -c 'mv -v "$1" "${1//ipk-}"' bash {} \;
-          ls ./artifacts/ipk-* 2> /dev/null && { echo "Found directory starting with ipk-"; exit 1; } 
           find ./artifacts -mindepth 1 -maxdepth 1 -type d -name "*-*.*" -exec bash -c '
             [ -z "$(ls -A "$1")" ] && exit
-            ARCH=$(basename "$1")
-            echo "Removing old packages for $ARCH"
+            ARCHITECTURE=$(basename "$1")
+            echo "Removing old packages for $ARCHITECTURE"
             if [ "$(find "$1" -maxdepth 1 -type f -name "*-dev_*.ipk" -print -quit)" ]; then
-              find "./gh-pages/$ARCH" -maxdepth 2 -type f -name "*-dev_*.ipk" -delete -print
+              find "./gh-pages/$ARCHITECTURE" -maxdepth 2 -type f -name "*-dev_*.ipk" -delete -print
             else
-              find "./gh-pages/$ARCH" -maxdepth 2 -type f \( -name "*.ipk" ! -name "*-dev_*.ipk" \) -delete -print
+              find "./gh-pages/$ARCHITECTURE" -maxdepth 2 -type f \( -name "*.ipk" ! -name "*-dev_*.ipk" \) -delete -print
             fi
           ' bash {} \;
           cp -rv ./artifacts/* ./gh-pages
@@ -447,12 +412,12 @@ jobs:
 
       - name: Run ipk-html-indexer
         run: |
-          sudo ln -sv "$(readlink -f ./ipk-html-indexer/mkindex.py)" /usr/local/bin/mkindex.py
-          sudo ln -sv "$(readlink -f ./ipk-html-indexer/mkhtml.py)" /usr/local/bin/mkhtml.py
+          sudo ln -s "$(readlink -f ./ipk-html-indexer/mkindex.py)" /usr/local/bin/mkindex.py
+          sudo ln -s "$(readlink -f ./ipk-html-indexer/mkhtml.py)" /usr/local/bin/mkhtml.py
           find ./gh-pages -mindepth 1 -maxdepth 1 -type d -name "*-*.*" -exec bash -c '
             bash ./ipk-html-indexer/index_feed.sh -h -f "$1"
             sed "s#href=\"/css#href=\"css#" -i "$1/Packages.html"
-            cp -frv ./ipk-html-indexer/css "$1"
+            cp -fr ./ipk-html-indexer/css "$1"
           ' bash {} \;
 
       - name: Cleanup gh-pages directory
