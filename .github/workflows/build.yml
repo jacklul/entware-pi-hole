@@ -150,9 +150,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-        #  - architecture: aarch64
-        #    docker_platform: linux/aarch64
-        #    allow-failure: false
+          - architecture: aarch64
+            docker_platform: linux/aarch64
+            allow-failure: false
         #  - architecture: armv5
         #    docker_platform: linux/arm/v5 # EOS by Entware team
         #    allow-failure: true
@@ -165,9 +165,9 @@ jobs:
         #  - architecture: mips
         #    docker_platform: linux/mips # Not supported by Pi-hole
         #    allow-failure: true
-        #  - architecture: amd64
-        #    docker_platform: linux/amd64
-        #    allow-failure: false
+          - architecture: amd64
+            docker_platform: linux/amd64
+            allow-failure: false
         #  - architecture: i386
         #    docker_platform: linux/386 # EOS by Entware team
         #    allow-failure: false
