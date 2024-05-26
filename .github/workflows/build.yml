@@ -150,14 +150,23 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - architecture: aarch64
-            docker_platform: linux/aarch64
+          - architecture: amd64
+            docker_platform: linux/amd64
             allow-failure: false
+        #  - architecture: 386
+        #    docker_platform: linux/386 # EOS by Entware team
+        #    allow-failure: true
         #  - architecture: armv5
-        #    docker_platform: linux/arm/v5 # EOS by Entware team
+        #    docker_platform: linux/arm/v5 # EOS by Entware team / Not supported by Pi-hole
+        #    allow-failure: true
+        #  - architecture: armv6
+        #    docker_platform: linux/arm/v6 # Not supported by Entware
         #    allow-failure: true
           - architecture: armv7
             docker_platform: linux/arm/v7
+            allow-failure: false
+          - architecture: arm64
+            docker_platform: linux/arm64/v8
             allow-failure: false
         #  - architecture: mipsel
         #    docker_platform: linux/mipsel # Not supported by Pi-hole
@@ -165,12 +174,6 @@ jobs:
         #  - architecture: mips
         #    docker_platform: linux/mips # Not supported by Pi-hole
         #    allow-failure: true
-          - architecture: amd64
-            docker_platform: linux/amd64
-            allow-failure: false
-        #  - architecture: i386
-        #    docker_platform: linux/386 # EOS by Entware team
-        #    allow-failure: false
 
     steps:
       - name: Checkout own repository
@@ -421,7 +424,7 @@ jobs:
           ' bash {} \;
 
       - name: Cleanup gh-pages directory
-        run: find ./gh-pages -mindepth 1 -maxdepth 1 -type d -regextype sed \( ! -regex '.*/[[:alnum:]]*-[0-9]\.[0-9]$' ! -name ".git" \) -exec rm -frv "{}" \;
+        run: find ./gh-pages -mindepth 1 -maxdepth 1 -type d -regextype sed \( ! -regex '.*/[[:alnum:]]*-[0-9]*\.[0-9]*$' ! -name ".git" \) -exec rm -frv "{}" \;
 
       - name: Create directory listings
         uses: ./.github/actions/index

@@ -8,14 +8,14 @@ OUTPUT_DIR="$4"
 
 # This array maps Entware architectures to FTL binary architectures
 declare -A ARCHITECTURES=(
-    ["aarch64-3.10"]="aarch64"
+    ["aarch64-3.10"]="arm64"
     #["armv5-3.2"]="armv5" # EOS by Entware team
     #["armv7-2.6"]="armv7" # EOS by Entware team
     ["armv7-3.2"]="armv7"
     ["mipselsf-3.4"]="mipsel"
     ["mipssf-3.4"]="mips"
     ["x64-3.2"]="amd64"
-    #["x86-2.6"]="i386" # EOS by Entware team
+    #["x86-2.6"]="386" # EOS by Entware team
 )
 
 ################
