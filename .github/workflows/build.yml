@@ -2,11 +2,25 @@ name: Build and Upload
 
 on:
   schedule:
-    - cron: "0 2 * * *"
+    - cron: "0 1 * * *"
   push:
     branches-ignore:
       - 'gh-pages'
+    paths:
+      - '.github/**/*.yml'
+      - 'scripts/**'
+      - 'patches/**'
+      - 'tests/**'
+      - 'files/**'
+      - 'build.env'
   pull_request:
+    paths:
+      - '.github/**/*.yml'
+      - 'scripts/**'
+      - 'patches/**'
+      - 'tests/**'
+      - 'files/**'
+      - 'build.env'
   release:
     types: [published]
   workflow_dispatch:
