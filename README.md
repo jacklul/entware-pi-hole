@@ -1,7 +1,9 @@
 # Pi-hole for Entware
 
-Run [Pi-hole](https://pi-hole.net)® directly on your [Entware](https://github.com/Entware/Entware) supported device.  
-**Releases here are unofficial and not supported by the Pi-hole developers.**
+Run [Pi-hole](https://pi-hole.net) directly on your [Entware](https://github.com/Entware/Entware) supported device.  
+
+> [!IMPORTANT]
+> **Releases here are unofficial and not supported by the Pi-hole developers.**
 
 > [!WARNING]
 > This project is a **proof-of-concept-alpha™** and was tested only on **Asus RT-AX58U v2** running official **388.2** firmware with **BusyBox v1.24.1**.
@@ -15,18 +17,9 @@ src/gz pi-hole https://jacklul.github.io/entware-pi-hole/[architecture]
 # replace [architecture] with one of the supported architectures
 ```
 
-- Install the package:
+- Install the package: `opkg update && opkg install pi-hole`
 
-```bash
-opkg update
-opkg install pi-hole
-```
-
-- Start `pihole-FTL` daemon:
-
-```bash
-/opt/etc/init.d/S55pihole-FTL start
-```
+- Start `pihole-FTL` daemon: `/opt/etc/init.d/S55pihole-FTL start`
 
 > [!IMPORTANT]
 > The service might initially not start due to ports being in use - make adjustements in `/opt/etc/pihole/pihole.toml` when necessary.  
