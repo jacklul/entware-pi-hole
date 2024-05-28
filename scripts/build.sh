@@ -57,7 +57,7 @@ rm -f "$DESTINATION_DIR/opt/share/pihole/www/admin"/*.json
 echo "Copying FTL binary..."
 cp -f "$FTL_PATH/pihole-FTL" "$DESTINATION_DIR/opt/bin/pihole-FTL"
 
-echo "Copying $ROOT_PATH/files/* to $DESTINATION_DIR"
+echo "Copying files/*"
 cp -fr "$ROOT_PATH/files"/* "$DESTINATION_DIR"
 
 if [ ! -f "$DESTINATION_DIR/opt/etc/pihole/macvendor.db" ]; then

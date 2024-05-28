@@ -70,11 +70,8 @@ sed -e "s/^Version:.*/Version: $PACKAGE_VERSION/" -i "$PACKAGE_DIR/CONTROL/contr
 sed -e "s/^Architecture:.*/Architecture: $PACKAGE_ARCHITECTURE/" -i "$PACKAGE_DIR/CONTROL/control"
 sed -e "s/^Installed-Size:.*/Installed-Size: $INSTALLED_SIZE/" -i "$PACKAGE_DIR/CONTROL/control"
 
-# if these scripts exist make sure they are executable
-[ -f "$PACKAGE_DIR/CONTROL/preinst" ] && chmod 0755 "$PACKAGE_DIR/CONTROL/preinst"
-[ -f "$PACKAGE_DIR/CONTROL/postinst" ] && chmod 0755 "$PACKAGE_DIR/CONTROL/postinst"
-[ -f "$PACKAGE_DIR/CONTROL/prerm" ] && chmod 0755 "$PACKAGE_DIR/CONTROL/prerm"
-[ -f "$PACKAGE_DIR/CONTROL/postrm" ] && chmod 0755 "$PACKAGE_DIR/CONTROL/postrm"
+# if these pre/post scripts exist make sure they are executable
+find "$PACKAGE_DIR/CONTROL" -type f \( -name "post*" -o -name "pre*" \) -exec chmod 0755 {} \;
 
 # create control archive
 sudo chown -R 0:0 "$PACKAGE_DIR/CONTROL"
