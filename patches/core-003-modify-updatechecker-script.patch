@@ -99,7 +99,7 @@ index eda6c40..291f43e 100755
  GITHUB_WEB_VERSION="$(get_remote_version web "${WEB_BRANCH}")"
  addOrEditKeyValPair "${VERSION_FILE}" "GITHUB_WEB_VERSION" "${GITHUB_WEB_VERSION}"
 @@ -124,3 +151,27 @@ if [[ "${DOCKER_TAG}" ]]; then
-     GITHUB_DOCKER_VERSION="$(get_remote_version docker-pi-hole)"
+     GITHUB_DOCKER_VERSION="$(get_remote_version docker-pi-hole "${docker_branch}")"
      addOrEditKeyValPair "${VERSION_FILE}" "GITHUB_DOCKER_VERSION" "${GITHUB_DOCKER_VERSION}"
  fi
 +
