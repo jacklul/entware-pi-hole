@@ -2,7 +2,7 @@ name: Build and Upload
 
 on:
   schedule:
-    - cron: "0 1 * * *"
+    - cron: '0 1 * * *'
   push:
     branches-ignore:
       - 'gh-pages'
