@@ -7,25 +7,16 @@ else
     TICK="[✓]"
     CROSS="[✗]"
     INFO="[i]"
-    QST="[?]"
     OVER="\\r[K"
 fi
 
-echo "  ${INFO} Running install/upgrade script..."
-
-# Make links to system files if they don't exist in /opt/etc
-[ ! -f /opt/etc/hosts ] && [ -f /etc/hosts ] && ln -s /etc/hosts /opt/etc/hosts
-[ ! -f /opt/etc/ethers ] && [ -f /etc/ethers ] && ln -s /etc/ethers /opt/etc/ethers
-[ ! -f /opt/etc/resolv.conf ] && [ -f /etc/resolv.conf ] && ln -s /etc/resolv.conf /opt/etc/resolv.conf
-
-# Check if this is an interactive console session
-STDIN_FD="$(readlink -f /proc/$$/fd/0 2> /dev/null)"
-[ -n "$STDIN_FD" ] && [ "$STDIN_FD" != "/dev/null" ] && INTERACTIVE=y
+echo "  ${INFO} Running Pi-hole install/upgrade tasks..."
 
 # Some of these commands might be missing depending on the system
 # so we check if they exist and then prompt the user to install them
-COMMAND_DEPS="su:shadow-su setcap:libcap-bin killall:psmisc pgrep:procps-ng-pgrep tput:libncurses-dev rev lscpu"
-COREUTILS_DEPS="basename cat chmod chown cp cut date df dirname echo expr false head id install kill ln ls mkdir mktemp mv nohup printf pwd rm sha1sum sleep stat stty tail tee test timeout touch tr true tty uptime whoami"
+#COMMAND_DEPS="bash cron curl git:git-http dig:bind-dig ping:iputils-ping netstat:net-tools find:findutils grep sed jq setcap:libcap-bin su:shadow-su killall:psmisc pgrep:procps-ng-pgrep tput:libncurses-dev rev lscpu"
+COREUTILS_DEPS="basename cat chmod chown cp date df dirname echo false head kill ln ls mkdir mv pwd rm tail test touch true uptime"
+#COREUTILS_DEPS="$COREUTILS_DEPS cut expr id install mktemp nohup printf sha1sum sleep stat stty tee timeout tr tty whoami"
 
 CHECK_COMMAND=""
 type 2> /dev/null && CHECK_COMMAND="type"
@@ -72,39 +63,20 @@ if [ -n "$CHECK_COMMAND" ]; then
 
 EOF
 
-        if [ -n "$INTERACTIVE" ]; then
-            printf "  %s Do you wish to install them automatically? [Y/n] " "${QST}"
-
-            #shellcheck disable=SC2034
-            read -r answer
-
-            case "$answer" in
-                [yY]*|"")
-                    INSTALLER_LOG="/opt/tmp/pi-hole-install-deps.log"
-                    echo "  ${INFO} Running install script in the background... (${COL_CYAN}'tail -f $INSTALLER_LOG' for output${COL_NC})"
-
-                    {
-                        printf "Waiting for opkg to finish..."
-
-                        start_time=$(date +%s)
-                        while [ -f /opt/tmp/opkg.lock ] && [ $(( $(date +%s) - start_time )) -le 60 ]; do
-                            printf "."
-                            sleep 1
-                        done
-
-                        echo
-                        #shellcheck disable=SC2086
-                        opkg install $MISSING_PKGS
-                    } > "$INSTALLER_LOG" 2>&1 &
-                ;;
-            esac
-        fi
+        exit 1
     else
         echo "  ${TICK} ${COL_GREEN}All required commands are available.${COL_NC}"
     fi
 else
     echo "  ${CROSS} Unable to check for missing dependencies - 'type' and 'which' commands not found!"
 fi
+
+# Make links to system files if they don't exist in /opt/etc
+SYMLINKS=""
+[ ! -f /opt/etc/hosts ] && [ -f /etc/hosts ] && ln -s /etc/hosts /opt/etc/hosts && SYMLINKS="$SYMLINKS /opt/etc/hosts"
+[ ! -f /opt/etc/ethers ] && [ -f /etc/ethers ] && ln -s /etc/ethers /opt/etc/ethers && SYMLINKS="$SYMLINKS /opt/etc/ethers"
+[ ! -f /opt/etc/resolv.conf ] && [ -f /etc/resolv.conf ] && ln -s /etc/resolv.conf /opt/etc/resolv.conf && SYMLINKS="$SYMLINKS /opt/etc/resolv.conf"
+[ -n "$SYMLINKS" ] && echo "  ${INFO} Created symlinks:$SYMLINKS"
 
 # Set random gravity update and updatechecker times
 if [ -f /opt/etc/cron.d/pihole ] && grep -q "59 1 \|59 17 " /opt/etc/cron.d/pihole; then
@@ -141,11 +113,11 @@ fi
 GRAVITYDB_FILE="$(pihole-FTL --config -q files.gravity)"
 
 # Upgrade gravity database without rebuilding gravity
-if [ -f "$GRAVITYDB_FILE" ]; then
+if [ -n "$GRAVITYDB_FILE" ] && [ -f "$GRAVITYDB_FILE" ]; then
     bash /opt/share/pihole/gravity.sh --upgrade
 fi
 
-# Restart the service when it is already running
+# Restart the service if it's already running
 if /opt/etc/init.d/S55pihole-FTL check | grep -q 'alive'; then
     str="Restarting pihole-FTL service"
     printf "  %s %s..." "${INFO}" "$str"
@@ -161,7 +133,6 @@ fi
 
 # Make sure gravity database exists
 if [ -n "$GRAVITYDB_FILE" ] && [ ! -f "$GRAVITYDB_FILE" ]; then
-    echo "  ${INFO} Creating gravity database (${COL_CYAN}$GRAVITYDB_FILE${COL_NC})..."
     bash /opt/share/pihole/gravity.sh --force
 fi
 
