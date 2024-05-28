@@ -47,6 +47,8 @@ function install_or_update_repository() {
 
 ##############
 
+set -e
+
 BRANCH="$1"
 REPO=all
 [ -n "$2" ] && REPO="$2"
