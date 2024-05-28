@@ -16,6 +16,7 @@ declare -A ARCHITECTURES=(
     ["mipssf-3.4"]="mips"
     ["x64-3.2"]="amd64"
     #["x86-2.6"]="386" # EOS by Entware team
+    ["generic"]="generic" # Package without FTL binary
 )
 
 ################
@@ -41,6 +42,7 @@ for KEY in "${!ARCHITECTURES[@]}"; do
         echo "Skipping $ENTWARE_ARCHITECTURE as binary (pihole-FTL-$BINARY_ARCHITECTURE) was not found"
         continue
     fi
+    BINARY_VERSION_FILE="$(dirname "$BINARY_FILE")/.version"
 
     #shellcheck disable=SC2115
     #rm -fr "$PACKAGE_DIR"/*
@@ -49,10 +51,11 @@ for KEY in "${!ARCHITECTURES[@]}"; do
 
     rm -f "$PACKAGE_DIR/opt/etc/pihole/versions"
     cp -f "$BINARY_FILE" "$BINARY_DIR/pihole-FTL"
-    cp -f "$(dirname "$BINARY_FILE")/.version" "$BINARY_DIR/.version"
+    [ -f "$BINARY_VERSION_FILE" ] && cp -f "$BINARY_VERSION_FILE" "$BINARY_DIR/.version"
 
     mkdir -p "$OUTPUT_DIR/$ENTWARE_ARCHITECTURE"
 
     bash ./scripts/build.sh "$PACKAGE_DIR" "$SEARCH_DIR"
+    [ "$ENTWARE_ARCHITECTURE" = "generic" ] && rm -f "$PACKAGE_DIR/opt/bin/pihole-FTL"
     bash ./scripts/ipk.sh "$PACKAGE_DIR" "$PACKAGE_VERSION" "$ENTWARE_ARCHITECTURE" "$OUTPUT_DIR/$ENTWARE_ARCHITECTURE"
 done
