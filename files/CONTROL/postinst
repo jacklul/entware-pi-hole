@@ -55,13 +55,13 @@ if [ -n "$CHECK_COMMAND" ]; then
         MISSING_CMDS="$(echo "$MISSING_CMDS" | awk '{$1=$1};1')"
         MISSING_PKGS="$(echo "$MISSING_PKGS" | awk '{$1=$1};1')"
 
-        cat << EOF
+        cat <<EOT
   ${CROSS} ${COL_RED}Your system is missing required commands:${COL_NC} ${COL_YELLOW}$MISSING_CMDS${COL_NC}
 
       ${COL_CYAN}Install them by running the following command:
        opkg install $MISSING_PKGS${COL_NC}
 
-EOF
+EOT
 
         exit 1
     else

@@ -9,7 +9,7 @@ fi
 readonly TARGET_DIR="$(readlink -f "$1")"
 
 #shellcheck disable=SC2162,SC2034
-read -d '\n' FILES << EOF
+read -d '\n' FILES <<EOT
 $(find "$TARGET_DIR" \
     -type f \
     -name "*" \
@@ -18,4 +18,4 @@ $(find "$TARGET_DIR" \
     -not -path "$TARGET_DIR/automated install/*" \
     -not -name "pihole-FTL.service" \
 | sort)
-EOF
+EOT
