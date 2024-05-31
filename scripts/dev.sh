@@ -87,7 +87,7 @@ case $REPO in
     web)
         install_or_update_repository "$REPO_WEB" "$SCRIPT_DIR/../dev/web" "$WEB_BRANCH"
     ;;
-    FTL)
+    ftl|FTL)
         install_or_update_repository "$REPO_FTL" "$SCRIPT_DIR/../dev/FTL" "$FTL_BRANCH"
     ;;
     *)

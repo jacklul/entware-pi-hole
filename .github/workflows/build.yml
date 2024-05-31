@@ -29,18 +29,18 @@ env:
   SELF_REF: ${{ github.event_name == 'schedule' && 'develop' || github.ref_name }}
 
 jobs:
-  globals:
-    concurrency: globals-${{ github.ref_name || github.run_id }}
+  variables:
+    concurrency: variables-${{ github.ref_name || github.run_id }}
     runs-on: ubuntu-latest
 
     env:
       ENV_FILE: ./build.env
 
     outputs:
-      VERSION: ${{ steps.globals.outputs.VERSION }}
-      CORE_REF: ${{ steps.globals.outputs.CORE_REF }}
-      WEB_REF: ${{ steps.globals.outputs.WEB_REF }}
-      FTL_REF: ${{ steps.globals.outputs.FTL_REF }}
+      VERSION: ${{ steps.variables.outputs.VERSION }}
+      CORE_REF: ${{ steps.variables.outputs.CORE_REF }}
+      WEB_REF: ${{ steps.variables.outputs.WEB_REF }}
+      FTL_REF: ${{ steps.variables.outputs.FTL_REF }}
 
     steps:
       - name: Checkout own repository
@@ -49,15 +49,15 @@ jobs:
           ref: ${{ env.SELF_REF }}
 
       - name: Set outputs
-        id: globals
+        id: variables
         run: |
           export $(grep -v '^#' ${{ env.ENV_FILE }} | xargs -d '\n')
-          bash ./scripts/globals.sh
+          bash ./.github/variables.sh
           cat $GITHUB_OUTPUT
 
   build-core:
     concurrency: build-core-${{ github.ref_name || github.run_id }}
-    needs: [globals]
+    needs: [variables]
     runs-on: ubuntu-latest
 
     outputs:
@@ -73,7 +73,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: pi-hole/pi-hole
-          ref: ${{ needs.globals.outputs.CORE_REF }}
+          ref: ${{ needs.variables.outputs.CORE_REF }}
           path: ./stage
 
       - name: Cache result
@@ -105,7 +105,7 @@ jobs:
 
   build-web:
     concurrency: build-web-${{ github.ref_name || github.run_id }}
-    needs: [globals]
+    needs: [variables]
     runs-on: ubuntu-latest
 
     outputs:
@@ -121,7 +121,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: pi-hole/web
-          ref: ${{ needs.globals.outputs.WEB_REF }}
+          ref: ${{ needs.variables.outputs.WEB_REF }}
           path: ./stage
 
       - name: Cache result
@@ -153,7 +153,7 @@ jobs:
 
   build-binary:
     concurrency: build-binary-${{ github.ref_name || github.run_id }}-${{ matrix.architecture }}
-    needs: [globals]
+    needs: [variables]
     runs-on: ubuntu-latest
     continue-on-error: ${{ matrix.allow-failure }}
 
@@ -199,7 +199,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: pi-hole/FTL
-          ref: ${{ needs.globals.outputs.FTL_REF }}
+          ref: ${{ needs.variables.outputs.FTL_REF }}
           path: ./stage
 
       - name: Cache result
@@ -207,7 +207,7 @@ jobs:
         uses: ./.github/actions/cache
         with:
           key_prefix: binary-${{ matrix.architecture }}-
-          patches_prefix: FTL
+          patches_prefix: ftl
           files: |
             ./stage/pihole-FTL-*
             ./stage/.version
@@ -216,7 +216,7 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         uses: ./.github/actions/patch
         with:
-          patches_prefix: FTL
+          patches_prefix: ftl
 
       - name: Save repository version infos
         if: steps.cache.outputs.cache-hit != 'true'
@@ -237,20 +237,24 @@ jobs:
 
       - name: Build and test FTL
         if: steps.cache.outputs.cache-hit != 'true'
-        uses: docker/build-push-action@v5
+        uses: Wandalen/wretry.action@v3
         with:
-          platforms: ${{ matrix.docker_platform }}
-          pull: true
-          push: false
-          context: ./stage
-          target: result
-          file: ./stage/.github/Dockerfile
-          outputs: |
-            type=tar,dest=./stage/build.tar
-          build-args: |
-            "CI_ARCH=${{ matrix.docker_platform }}"
-            "GIT_BRANCH=${{ steps.variables.outputs.GIT_BRANCH }}"
-            "GIT_TAG=${{ steps.variables.outputs.GIT_TAG }}"
+          action: docker/build-push-action@v5
+          attempt_limit: 3
+          retry_condition: ${{ startsWith(github.ref, 'refs/tags/') || github.event_name == 'schedule' }}
+          with: |
+            platforms: ${{ matrix.docker_platform }}
+            pull: true
+            push: false
+            context: ./stage
+            target: result
+            file: ./stage/.github/Dockerfile
+            outputs: |
+              type=tar,dest=./stage/build.tar
+            build-args: |
+              "CI_ARCH=${{ matrix.docker_platform }}"
+              "GIT_BRANCH=${{ steps.variables.outputs.GIT_BRANCH }}"
+              "GIT_TAG=${{ steps.variables.outputs.GIT_TAG }}"
 
       - name: Extract FTL binary and generate checksum file
         if: steps.cache.outputs.cache-hit != 'true'
@@ -274,7 +278,7 @@ jobs:
 
   build-packages:
     concurrency: build-packages-${{ github.ref_name || github.run_id }}
-    needs: [globals, build-core, build-web, build-binary]
+    needs: [variables, build-core, build-web, build-binary]
     runs-on: ubuntu-latest
 
     outputs:
@@ -314,7 +318,7 @@ jobs:
       - name: Build packages
         run: |
           mkdir -p ./build ./packages
-          sudo -E bash ./scripts/multibuild.sh ./build "${{ needs.globals.outputs.VERSION }}" ./artifacts ./packages
+          sudo -E bash ./scripts/multibuild.sh ./build "${{ needs.variables.outputs.VERSION }}" ./artifacts ./packages
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -325,7 +329,7 @@ jobs:
       - name: Set versions
         id: versions
         run: |
-          echo "IPK=${{ needs.globals.outputs.VERSION }}" >> $GITHUB_OUTPUT
+          echo "IPK=${{ needs.variables.outputs.VERSION }}" >> $GITHUB_OUTPUT
           . ./artifacts/core/.version
           echo "CORE=$VERSION" >> $GITHUB_OUTPUT
           . ./artifacts/web/.version

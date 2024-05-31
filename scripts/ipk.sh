@@ -82,7 +82,7 @@ echo "2.0" > "$TMP_DIR/debian-binary"
 
 # package everything into single ipk archive
 rm -f "$PACKAGE_FILE"
-sudo chown 0:0 "$TMP_DIR/"*
+sudo chown 0:0 "$TMP_DIR"/*
 ( cd "$TMP_DIR" && tar --format=gnu --numeric-owner --sort=name -cf - --mtime="$TIMESTAMP" ./debian-binary ./data.tar.gz ./control.tar.gz | gzip -n - > "$PACKAGE_FILE" )
 
 # cleanup

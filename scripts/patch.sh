@@ -3,7 +3,7 @@
 
 #shellcheck disable=SC2155
 readonly SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
-readonly PREFIX="$1"
+PREFIX="$1"
 TARGET="$2"
 
 if [ -z "$PREFIX" ] || [ -z "$TARGET" ] || [ ! -d "$TARGET" ]; then
@@ -12,6 +12,7 @@ if [ -z "$PREFIX" ] || [ -z "$TARGET" ] || [ ! -d "$TARGET" ]; then
 fi
 
 TARGET="$(realpath "$TARGET")"
+PREFIX="${PREFIX,,}" # Force prefix to be lowercase
 
 FILES="$(find "$(readlink -f "$SCRIPT_DIR/../patches")" -type f \( -name "$PREFIX-*.patch" -or -name "$PREFIX-*.diff" \) | sort)"
 for FILE in $FILES; do

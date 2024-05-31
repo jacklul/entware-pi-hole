@@ -30,35 +30,50 @@ CORE_PATH="$(readlink -f "$(dirname "$CORE_PATH")")"
 WEB_PATH="$(readlink -f "$(dirname "$WEB_PATH")")"
 FTL_PATH="$(readlink -f "$(dirname "$FTL_PATH")")"
 
-echo "Creating directories..."
-mkdir -p "$DESTINATION_DIR/opt/etc/pihole" \
-         "$DESTINATION_DIR/opt/share/pihole/www/admin" \
-         "$DESTINATION_DIR/opt/var/log/pihole" \
-         "$DESTINATION_DIR/opt/bin" \
-         "$DESTINATION_DIR/opt/etc/cron.d"
+mkdir -p "$DESTINATION_DIR/opt/bin" "$DESTINATION_DIR/opt/etc" "$DESTINATION_DIR/opt/share" "$DESTINATION_DIR/opt/var"
 
-echo "Copying scripts and other essential files..."
-cp -fr "$CORE_PATH/advanced/Scripts"/* "$DESTINATION_DIR/opt/share/pihole"
-cp -f "$CORE_PATH/advanced/Templates"/*.sh "$DESTINATION_DIR/opt/share/pihole"
-cp -f "$CORE_PATH/advanced/Templates"/*.sql "$DESTINATION_DIR/opt/share/pihole"
-cp -f "$CORE_PATH/gravity.sh" "$DESTINATION_DIR/opt/share/pihole/gravity.sh"
-cp -f "$CORE_PATH/pihole" "$DESTINATION_DIR/opt/bin/pihole"
+if [ ! -d "$DESTINATION_DIR/opt/share/pihole" ]; then
+    echo "Copying scripts and other essential files..."
+    mkdir -p "$DESTINATION_DIR/opt/share/pihole"
+    cp -nr "$CORE_PATH/advanced/Scripts"/* "$DESTINATION_DIR/opt/share/pihole"
+    cp -n "$CORE_PATH/advanced/Templates"/*.sh "$DESTINATION_DIR/opt/share/pihole"
+    cp -n "$CORE_PATH/advanced/Templates"/*.sql "$DESTINATION_DIR/opt/share/pihole"
+    cp -n "$CORE_PATH/gravity.sh" "$DESTINATION_DIR/opt/share/pihole/gravity.sh"
+fi
 
-echo "Copying configuration files..."
-[ -f "$CORE_PATH/advanced/Templates/pihole-FTL.conf" ] && cp -f "$CORE_PATH/advanced/Templates/pihole-FTL.conf" "$DESTINATION_DIR/opt/etc/pihole/pihole-FTL.conf"
-[ -f "$CORE_PATH/advanced/Templates/pihole.cron" ] && cp -f "$CORE_PATH/advanced/Templates/pihole.cron" "$DESTINATION_DIR/opt/etc/cron.d/pihole"
-[ -f "$CORE_PATH/advanced/Templates/logrotate" ] && cp -f "$CORE_PATH/advanced/Templates/logrotate" "$DESTINATION_DIR/opt/etc/pihole"
+if [ ! -d "$DESTINATION_DIR/opt/etc/pihole" ] || [ ! -d "$DESTINATION_DIR/opt/etc/cron.d" ]; then
+    echo "Copying configuration files..."
+    mkdir -p "$DESTINATION_DIR/opt/etc/pihole" "$DESTINATION_DIR/opt/etc/cron.d"
+    [ -f "$CORE_PATH/advanced/Templates/pihole-FTL.conf" ] && cp -n "$CORE_PATH/advanced/Templates/pihole-FTL.conf" "$DESTINATION_DIR/opt/etc/pihole/pihole-FTL.conf"
+    [ -f "$CORE_PATH/advanced/Templates/pihole.cron" ] && cp -n "$CORE_PATH/advanced/Templates/pihole.cron" "$DESTINATION_DIR/opt/etc/cron.d/pihole"
+    [ -f "$CORE_PATH/advanced/Templates/logrotate" ] && cp -n "$CORE_PATH/advanced/Templates/logrotate" "$DESTINATION_DIR/opt/etc/pihole"
+fi
 
-echo "Copying web files..."
-cp -fr "$WEB_PATH"/* "$DESTINATION_DIR/opt/share/pihole/www/admin"
-rm -f "$DESTINATION_DIR/opt/share/pihole/www/admin"/*.md
-rm -f "$DESTINATION_DIR/opt/share/pihole/www/admin"/*.json
+if [ ! -d "$DESTINATION_DIR/opt/share/pihole/www/admin" ]; then
+    echo "Copying web files..."
+    mkdir -p "$DESTINATION_DIR/opt/share/pihole/www/admin"
+    cp -nr "$WEB_PATH"/* "$DESTINATION_DIR/opt/share/pihole/www/admin"
+    rm -f "$DESTINATION_DIR/opt/share/pihole/www/admin"/*.md
+    rm -f "$DESTINATION_DIR/opt/share/pihole/www/admin"/*.json
+fi
 
-echo "Copying FTL binary..."
-cp -f "$FTL_PATH/pihole-FTL" "$DESTINATION_DIR/opt/bin/pihole-FTL"
+if [ ! -d "$DESTINATION_DIR/opt/var/log/pihole" ]; then
+    echo "Creating log directory..."
+    mkdir -p "$DESTINATION_DIR/opt/var/log/pihole"
+fi
 
-echo "Copying files/*"
-cp -fr "$ROOT_PATH/files"/* "$DESTINATION_DIR"
+if [ ! -f "$DESTINATION_DIR/opt/bin/pihole" ]; then
+    echo "Copying 'pihole' script..."
+    cp -n "$CORE_PATH/pihole" "$DESTINATION_DIR/opt/bin/pihole"
+fi
+
+if [ ! -f "$DESTINATION_DIR/opt/bin/pihole-FTL" ]; then
+    echo "Copying FTL binary..."
+    cp -n "$FTL_PATH/pihole-FTL" "$DESTINATION_DIR/opt/bin/pihole-FTL"
+fi
+
+echo "Copying files from 'files' directory..."
+cp -nr "$ROOT_PATH/files"/* "$DESTINATION_DIR"
 
 if [ ! -f "$DESTINATION_DIR/opt/etc/pihole/macvendor.db" ]; then
     echo "Downloading macvendor.db..."
@@ -119,7 +134,7 @@ fi
 echo "Setting permissions..."
 find "$DESTINATION_DIR" -type f -exec chmod 0644 {} \;
 find "$DESTINATION_DIR" -type d -exec chmod 0755 {} \;
-chmod 755 "$DESTINATION_DIR/opt/bin/"* "$DESTINATION_DIR/opt/etc/init.d/"*
+chmod 755 "$DESTINATION_DIR/opt/bin"/* "$DESTINATION_DIR/opt/etc/init.d"/*
 find "$DESTINATION_DIR/opt/share/pihole" -type f \( -name "*.sh" -o -name "COL_TABLE" \) -exec chmod 0755 {} \;
 
 echo "Package created in $DESTINATION_DIR"
