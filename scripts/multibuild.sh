@@ -49,7 +49,7 @@ for KEY in "${!ARCHITECTURES[@]}"; do
     #rm -fr "$PACKAGE_DIR"/* # This is currently not necessary
     rm -f "$PACKAGE_DIR/bin/pihole-FTL" "$PACKAGE_DIR/opt/etc/pihole/versions"
 
-    echo "Building IPK package for $ENTWARE_ARCHITECTURE..."
+    echo "Building for $ENTWARE_ARCHITECTURE..."
 
     cp -f "$BINARY_FILE" "$BINARY_DIR/pihole-FTL"
     cp -f "$BINARY_VERSION_FILE" "$BINARY_DIR/.version"

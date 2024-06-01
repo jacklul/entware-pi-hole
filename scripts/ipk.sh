@@ -88,4 +88,4 @@ sudo chown 0:0 "$TMP_DIR"/*
 # cleanup
 rm -fr "$TMP_DIR"
 
-echo "Packaged $PACKAGE_DIR into $PACKAGE_FILE"
+echo "Created IPK package $PACKAGE_FILE"

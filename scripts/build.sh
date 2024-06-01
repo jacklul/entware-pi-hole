@@ -30,20 +30,22 @@ CORE_PATH="$(readlink -f "$(dirname "$CORE_PATH")")"
 WEB_PATH="$(readlink -f "$(dirname "$WEB_PATH")")"
 FTL_PATH="$(readlink -f "$(dirname "$FTL_PATH")")"
 
-mkdir -p "$DESTINATION_DIR/opt/bin" "$DESTINATION_DIR/opt/etc" "$DESTINATION_DIR/opt/share" "$DESTINATION_DIR/opt/var"
+mkdir -p "$DESTINATION_DIR/opt/bin" \
+         "$DESTINATION_DIR/opt/etc/pihole" \
+         "$DESTINATION_DIR/opt/etc/cron.d" \
+         "$DESTINATION_DIR/opt/share/pihole" \
+         "$DESTINATION_DIR/opt/var/log/pihole"
 
-if [ ! -d "$DESTINATION_DIR/opt/share/pihole" ]; then
+if [ -z "$(ls -A "$DESTINATION_DIR/opt/share/pihole")" ]; then
     echo "Copying scripts and other essential files..."
-    mkdir -p "$DESTINATION_DIR/opt/share/pihole"
     cp -nr "$CORE_PATH/advanced/Scripts"/* "$DESTINATION_DIR/opt/share/pihole"
     cp -n "$CORE_PATH/advanced/Templates"/*.sh "$DESTINATION_DIR/opt/share/pihole"
     cp -n "$CORE_PATH/advanced/Templates"/*.sql "$DESTINATION_DIR/opt/share/pihole"
     cp -n "$CORE_PATH/gravity.sh" "$DESTINATION_DIR/opt/share/pihole/gravity.sh"
 fi
 
-if [ ! -d "$DESTINATION_DIR/opt/etc/pihole" ] || [ ! -d "$DESTINATION_DIR/opt/etc/cron.d" ]; then
+if [ -z "$(ls -A "$DESTINATION_DIR/opt/etc/pihole")" ] || [ -z "$(ls -A "$DESTINATION_DIR/opt/etc/cron.d")" ]; then
     echo "Copying configuration files..."
-    mkdir -p "$DESTINATION_DIR/opt/etc/pihole" "$DESTINATION_DIR/opt/etc/cron.d"
     [ -f "$CORE_PATH/advanced/Templates/pihole-FTL.conf" ] && cp -n "$CORE_PATH/advanced/Templates/pihole-FTL.conf" "$DESTINATION_DIR/opt/etc/pihole/pihole-FTL.conf"
     [ -f "$CORE_PATH/advanced/Templates/pihole.cron" ] && cp -n "$CORE_PATH/advanced/Templates/pihole.cron" "$DESTINATION_DIR/opt/etc/cron.d/pihole"
     [ -f "$CORE_PATH/advanced/Templates/logrotate" ] && cp -n "$CORE_PATH/advanced/Templates/logrotate" "$DESTINATION_DIR/opt/etc/pihole"
@@ -55,11 +57,6 @@ if [ ! -d "$DESTINATION_DIR/opt/share/pihole/www/admin" ]; then
     cp -nr "$WEB_PATH"/* "$DESTINATION_DIR/opt/share/pihole/www/admin"
     rm -f "$DESTINATION_DIR/opt/share/pihole/www/admin"/*.md
     rm -f "$DESTINATION_DIR/opt/share/pihole/www/admin"/*.json
-fi
-
-if [ ! -d "$DESTINATION_DIR/opt/var/log/pihole" ]; then
-    echo "Creating log directory..."
-    mkdir -p "$DESTINATION_DIR/opt/var/log/pihole"
 fi
 
 if [ ! -f "$DESTINATION_DIR/opt/bin/pihole" ]; then
@@ -137,4 +134,4 @@ find "$DESTINATION_DIR" -type d -exec chmod 0755 {} \;
 chmod 755 "$DESTINATION_DIR/opt/bin"/* "$DESTINATION_DIR/opt/etc/init.d"/*
 find "$DESTINATION_DIR/opt/share/pihole" -type f \( -name "*.sh" -o -name "COL_TABLE" \) -exec chmod 0755 {} \;
 
-echo "Package created in $DESTINATION_DIR"
+echo "Created package files in $DESTINATION_DIR"

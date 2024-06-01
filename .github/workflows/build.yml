@@ -8,6 +8,7 @@ on:
       - 'gh-pages'
     paths:
       - '.github/**/*.yml'
+      - '.github/*.sh'
       - 'scripts/**'
       - 'patches/**'
       - 'tests/**'
@@ -16,6 +17,7 @@ on:
   pull_request:
     paths:
       - '.github/**/*.yml'
+      - '.github/*.sh'
       - 'scripts/**'
       - 'patches/**'
       - 'tests/**'
@@ -236,12 +238,13 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       #- name: Do not run tests
+      #  if: steps.cache.outputs.cache-hit != 'true'
       #  continue-on-error: true
       #  run: sed '/build.sh/ s/ test / /' -i ./stage/.github/Dockerfile
 
       - name: Build and test FTL
         if: steps.cache.outputs.cache-hit != 'true'
-        uses: Wandalen/wretry.action@v3
+        uses: Wandalen/wretry.action/main@v3
         with:
           action: docker/build-push-action@v5
           attempt_limit: 3
