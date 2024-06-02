@@ -34,6 +34,8 @@ function install_or_update_repository() {
             NEW_BRANCH="$(git -C "$DESTINATION" remote show "$REPOSITORY" | grep 'HEAD branch' | cut -d':' -f2 | tr -d ' ')"
         fi
 
+        git -C "$DESTINATION" clean -fd
+
         if [ "$CURRENT_BRANCH" = "$NEW_BRANCH" ]; then
             git -C "$DESTINATION" fetch
             git -C "$DESTINATION" reset --hard HEAD
