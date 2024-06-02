@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "preinst": "shellscript",
+        "postinst": "shellscript",
+        "prerm": "shellscript",
+        "postrm": "shellscript",
+        "control": "yaml",
+        "S55pihole-FTL": "shellscript",
+    },
+}
