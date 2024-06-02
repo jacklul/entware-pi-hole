@@ -1,12 +1,7 @@
 #!/bin/bash
 
-if [ -z "$1" ]; then
-    echo "TARGET_DIR is not set"
-    exit 1
-fi
-
-#shellcheck disable=SC2155,SC2034
-readonly TARGET_DIR="$(readlink -f "$1")"
+#shellcheck disable=SC1091
+. "$(dirname "$(readlink -f "$0")")/common.sh"
 
 #shellcheck disable=SC2162,SC2034
 read -d '\n' FILES <<EOT
