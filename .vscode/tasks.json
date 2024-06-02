@@ -1,0 +1,128 @@
+{
+    "version": "2.0.0",
+    "windows": {
+        "options": {
+            "shell": {
+                "executable": "cmd.exe",
+                "args": ["/d", "/c"]
+            }
+        }
+    },
+    "tasks": [
+        {
+            "label": "Clone Pi-hole repositories (release)",
+            "type": "shell",
+            "command": "bash scripts/dev.sh dev-v6",
+            "problemMatcher": [],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        },
+        {
+            "label": "Clone Pi-hole repositories (development)",
+            "type": "shell",
+            "command": "bash scripts/dev.sh dev-v6",
+            "problemMatcher": [],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        },
+        {
+            "label": "Save dev/core patch to dev/patch.diff",
+            "type": "shell",
+            "command": "git -C dev/core diff --cached > dev/patch.diff && code dev/patch.diff",
+            "problemMatcher": [],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        },
+        {
+            "label": "Save dev/web patch to dev/patch.diff",
+            "type": "shell",
+            "command": "git -C dev/web diff --cached > dev/patch.diff && code dev/patch.diff",
+            "problemMatcher": [],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        },
+        {
+            "label": "Save dev/FTL patch to dev/patch.diff",
+            "type": "shell",
+            "command": "git -C dev/FTL diff --cached > dev/patch.diff && code dev/patch.diff",
+            "problemMatcher": [],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        },
+        {
+            "label": "Patch and test dev/core",
+            "type": "shell",
+            "command": "bash scripts/patch.sh core dev/core && bash scripts/test.sh core dev/core",
+            "problemMatcher": [],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        },
+        {
+            "label": "Patch and test dev/web",
+            "type": "shell",
+            "command": "bash scripts/patch.sh web dev/web && bash scripts/test.sh web dev/web",
+            "problemMatcher": [],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        },
+        {
+            "label": "Patch and test dev/FTL",
+            "type": "shell",
+            "command": "bash scripts/patch.sh FTL dev/FTL && bash scripts/test.sh FTL dev/FTL",
+            "problemMatcher": [],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        },
+        {
+            "label": "Patch and test all repositories",
+            "dependsOn": [
+                "Patch and test dev/core",
+                "Patch and test dev/web",
+                "Patch and test dev/FTL"
+            ]
+        },
+        {
+            "label": "Reset dev/core",
+            "type": "shell",
+            "command": "git -C dev/core reset --hard && git -C dev/core clean -fd",
+            "problemMatcher": [],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        },
+        {
+            "label": "Reset dev/web",
+            "type": "shell",
+            "command": "git -C dev/web reset --hard && git -C dev/web clean -fd",
+            "problemMatcher": [],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        },
+        {
+            "label": "Reset dev/FTL",
+            "type": "shell",
+            "command": "git -C dev/FTL reset --hard && git -C dev/FTL clean -fd",
+            "problemMatcher": [],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        },
+        {
+            "label": "Reset all repositories",
+            "dependsOn": [
+                "Reset dev/core",
+                "Reset dev/web",
+                "Reset dev/FTL"
+            ]
+        }
+    ]
+}
