@@ -103,7 +103,6 @@ jobs:
         with:
           name: core
           path: ./stage/*
-          retention-days: 1
 
   build-web:
     concurrency: build-web-${{ github.ref_name || github.run_id }}
@@ -151,7 +150,6 @@ jobs:
         with:
           name: web
           path: ./stage/*
-          retention-days: 1
 
   build-binary:
     concurrency: build-binary-${{ github.ref_name || github.run_id }}-${{ matrix.architecture }}
@@ -281,7 +279,6 @@ jobs:
           path: |
             ./stage/pihole-FTL-*
             ./stage/.version
-          retention-days: 1
 
   build-packages:
     concurrency: build-packages-${{ github.ref_name || github.run_id }}
