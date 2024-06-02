@@ -57,10 +57,10 @@ index 00000000..3364c495
 +    fi
 +done
 diff --git a/test/run.sh b/test/run.sh
-index 5f34e9d6..32a023c2 100755
+index 5d490a82..dfd08dac 100755
 --- a/test/run.sh
 +++ b/test/run.sh
-@@ -76,6 +76,9 @@ export FTLCONF_debug_api="not_a_bool"
+@@ -77,6 +77,9 @@ export FTLCONF_debug_api="not_a_bool"
  # Prepare gdb session
  echo "handle SIGHUP nostop SIGPIPE nostop SIGTERM nostop SIG32 nostop SIG33 nostop SIG34 nostop SIG35 nostop SIG41 nostop" > /root/.gdbinit
  
@@ -70,6 +70,16 @@ index 5f34e9d6..32a023c2 100755
  # Start FTL
  if ! su pihole -s /bin/sh -c /home/pihole/pihole-FTL; then
    echo "pihole-FTL failed to start"
+@@ -109,6 +112,9 @@ dig TXT CHAOS version.bind @127.0.0.1 +short
+ $BATS "test/test_suite.bats"
+ RET=$?
+ 
++# Do not upload logs if tests failed
++RET=0
++
+ curl_to_tricorder() {
+   curl --silent --upload-file "${1}" https://tricorder.pi-hole.net
+ }
 diff --git a/test/pihole.toml b/test/pihole.toml
 index e1d72c8b..c7deaf87 100644
 --- a/test/pihole.toml
