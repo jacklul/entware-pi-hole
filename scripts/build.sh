@@ -30,11 +30,7 @@ CORE_PATH="$(readlink -f "$(dirname "$CORE_PATH")")"
 WEB_PATH="$(readlink -f "$(dirname "$WEB_PATH")")"
 FTL_PATH="$(readlink -f "$(dirname "$FTL_PATH")")"
 
-mkdir -p "$DESTINATION_DIR/opt/bin" \
-         "$DESTINATION_DIR/opt/etc/pihole" \
-         "$DESTINATION_DIR/opt/etc/cron.d" \
-         "$DESTINATION_DIR/opt/share/pihole" \
-         "$DESTINATION_DIR/opt/var/log/pihole"
+mkdir -p "$DESTINATION_DIR/opt"/{bin,etc/{pihole,cron.d},share/pihole,var/log/pihole}
 
 if [ -z "$(ls -A "$DESTINATION_DIR/opt/share/pihole")" ]; then
     echo "Copying scripts and other essential files..."
