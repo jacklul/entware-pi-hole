@@ -10,69 +10,22 @@ else
     OVER="\\r[K"
 fi
 
+random_number() {
+    _BASE=$1
+    _MAX=$2
+
+    bash -c "echo \$(($_BASE + RANDOM % $_MAX))"
+}
+
+gravitydb_version() {
+    pihole-FTL sqlite3 -ni "$1" "SELECT \"value\" FROM \"info\" WHERE \"property\" = 'version';" || echo 0
+}
+
+##########
+
 echo "  ${INFO} Running Pi-hole install/upgrade tasks..."
 
-# Some of these commands might be missing depending on the system
-# so we check if they exist and then prompt the user to install them
-#COMMAND_DEPS="bash cron curl git:git-http dig:bind-dig ping:iputils-ping netstat:net-tools find:findutils grep sed jq setcap:libcap-bin su:shadow-su killall:psmisc pgrep:procps-ng-pgrep tput:libncurses-dev rev lscpu"
-COREUTILS_DEPS="basename cat chmod chown cp date df dirname echo false head kill ln ls mkdir mv pwd rm tail test touch true uptime"
-#COREUTILS_DEPS="$COREUTILS_DEPS cut expr id install mktemp nohup printf sha1sum sleep stat stty tee timeout tr tty whoami"
-
-CHECK_COMMAND=""
-type 2> /dev/null && CHECK_COMMAND="type"
-which --help > /dev/null 2>&1 && CHECK_COMMAND="which"
-
-if [ -n "$CHECK_COMMAND" ]; then
-    MISSING_CMDS=""
-    MISSING_PKGS=""
-
-    for COMMAND in $COMMAND_DEPS; do
-        if echo "$COMMAND" | grep -q ":"; then
-            PACKAGE="$(echo "$COMMAND" | cut -d ':' -f 2 2> /dev/null)"
-            COMMAND="$(echo "$COMMAND" | cut -d ':' -f 1 2> /dev/null)"
-
-            echo "$COMMAND" | grep -q ":" && continue # no 'cut' command?
-        else
-            PACKAGE="$COMMAND"
-        fi
-
-        #shellcheck disable=SC2086
-        if ! $CHECK_COMMAND $COMMAND > /dev/null 2>&1; then
-            MISSING_CMDS="$MISSING_CMDS $COMMAND"
-            MISSING_PKGS="$MISSING_PKGS $PACKAGE"
-        fi
-    done
-
-    for COMMAND in $COREUTILS_DEPS; do
-        #shellcheck disable=SC2086
-        if ! $CHECK_COMMAND $COMMAND > /dev/null 2>&1; then
-            MISSING_CMDS="$MISSING_CMDS $COMMAND"
-            MISSING_PKGS="$MISSING_PKGS coreutils-$COMMAND"
-        fi
-    done
-
-    if [ -n "$MISSING_CMDS" ]; then
-        MISSING_CMDS="$(echo "$MISSING_CMDS" | awk '{$1=$1};1')"
-        MISSING_PKGS="$(echo "$MISSING_PKGS" | awk '{$1=$1};1')"
-
-        cat <<EOT
-  ${CROSS} ${COL_RED}Your system is missing required commands:${COL_NC} ${COL_YELLOW}$MISSING_CMDS${COL_NC}
-
-      ${COL_CYAN}Install them by running the following command:
-       opkg install $MISSING_PKGS${COL_NC}
-
-EOT
-
-        exit 1
-    else
-        echo "  ${TICK} ${COL_GREEN}All required commands are available.${COL_NC}"
-    fi
-else
-    echo "  ${CROSS} Unable to check for missing dependencies - 'type' and 'which' commands not found!"
-fi
-
 # Make links to system files if they don't exist in /opt/etc
-SYMLINKS=""
 [ ! -f /opt/etc/hosts ] && [ -f /etc/hosts ] && ln -s /etc/hosts /opt/etc/hosts && SYMLINKS="$SYMLINKS /opt/etc/hosts"
 [ ! -f /opt/etc/ethers ] && [ -f /etc/ethers ] && ln -s /etc/ethers /opt/etc/ethers && SYMLINKS="$SYMLINKS /opt/etc/ethers"
 [ ! -f /opt/etc/resolv.conf ] && [ -f /etc/resolv.conf ] && ln -s /etc/resolv.conf /opt/etc/resolv.conf && SYMLINKS="$SYMLINKS /opt/etc/resolv.conf"
@@ -80,17 +33,10 @@ SYMLINKS=""
 
 # Set random gravity update and updatechecker times
 if [ -f /opt/etc/cron.d/pihole ] && grep -q "59 1 \|59 17 " /opt/etc/cron.d/pihole; then
-    MINUTE_GRAVITY="$(bash -c "echo \$((1 + RANDOM % 58))")"
-    MINUTE_UPDATECHECK="$(bash -c "echo \$((1 + RANDOM % 58))")"
-    HOUR_GRAVITY="$(bash -c "echo \$((3 + RANDOM % 2))")"
-    HOUR_UPDATECHECK="$(bash -c "echo \$((12 + RANDOM % 8))")"
-
     echo "  ${INFO} Setting random gravity update and updatechecker times..."
 
-    if [ -n "$MINUTE_GRAVITY" ] && [ -n "$MINUTE_UPDATECHECK" ] && [ -n "$HOUR_GRAVITY" ] && [ -n "$HOUR_UPDATECHECK" ]; then
-        sed "s/59 1 /$MINUTE_GRAVITY $HOUR_GRAVITY /" -i /opt/etc/cron.d/pihole
-        sed "s/59 17 /$MINUTE_UPDATECHECK $HOUR_UPDATECHECK /" -i /opt/etc/cron.d/pihole
-    fi
+    sed "s/59 1 /$(random_number 1 58) $(random_number 3 2) /" -i /opt/etc/cron.d/pihole
+    sed "s/59 17 /$(random_number 1 58) $(random_number 12 8) /" -i /opt/etc/cron.d/pihole
 fi
 
 # Set user and group used for rotating the logs by logrotate
@@ -112,9 +58,12 @@ fi
 # Gravity database file path
 GRAVITYDB_FILE="$(pihole-FTL --config -q files.gravity)"
 
-# Upgrade gravity database without rebuilding gravity
+# Upgrade existing gravity database
 if [ -n "$GRAVITYDB_FILE" ] && [ -f "$GRAVITYDB_FILE" ]; then
+    GRAVITYDB_VERSION="$(gravitydb_version "$GRAVITYDB_FILE")"
     bash /opt/share/pihole/gravity.sh --upgrade
+
+    [ "$(gravitydb_version "$GRAVITYDB_FILE")" != "$GRAVITYDB_VERSION" ] && RUN_GRAVITY=true
 fi
 
 # Restart the service if it's already running
@@ -131,8 +80,9 @@ else # Otherwise just run the prestart script to set required permissions
     bash /opt/share/pihole/pihole-FTL-prestart.sh
 fi
 
-# Make sure gravity database exists
-if [ -n "$GRAVITYDB_FILE" ] && [ ! -f "$GRAVITYDB_FILE" ]; then
+# Make sure gravity database exists and that
+# gravity is rebuilt after database upgrade
+if [ -n "$RUN_GRAVITY" ] || { [ -n "$GRAVITYDB_FILE" ] && [ ! -f "$GRAVITYDB_FILE" ] ; }; then
     bash /opt/share/pihole/gravity.sh --force
 fi
 
