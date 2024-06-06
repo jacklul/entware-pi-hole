@@ -75,7 +75,7 @@
         {
             "label": "Patch and test dev/FTL",
             "type": "shell",
-            "command": "bash scripts/patch.sh FTL dev/FTL && bash scripts/test.sh FTL dev/FTL",
+            "command": "bash scripts/patch.sh ftl dev/FTL && bash scripts/test.sh ftl dev/FTL",
             "problemMatcher": [],
             "options": {
                 "cwd": "${workspaceFolder}"
