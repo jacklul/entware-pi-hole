@@ -1,6 +1,6 @@
 #!/bin/sh
 
 # Stop the service if it's running
-if /opt/etc/init.d/S55pihole-FTL check | grep -q 'alive'; then
+if /opt/etc/init.d/S55pihole-FTL check > /dev/null 2>&1; then
     /opt/etc/init.d/S55pihole-FTL stop
 fi

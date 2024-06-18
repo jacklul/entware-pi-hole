@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# Prioritize /opt binaries
+PATH="/opt/sbin:/opt/bin:$PATH"
+
 # Some of these commands might be missing depending on the system
 # so we check if they exist and then prompt the user to install them
 #COMMAND_DEPS="" # Format: command or command:package

@@ -10,6 +10,9 @@ else
     OVER="\\r[K"
 fi
 
+# Prioritize /opt binaries
+PATH="/opt/sbin:/opt/bin:$PATH"
+
 random_number() {
     _BASE=$1
     _MAX=$2
