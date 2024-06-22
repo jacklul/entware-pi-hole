@@ -8,6 +8,17 @@ Run [Pi-hole](https://pi-hole.net) directly on your [Entware](https://github.com
 > [!WARNING]
 > This project is a **proof-of-concept-alpha™** and was tested only on **Asus RT-AX58U v2** running official **388.2** firmware with **BusyBox v1.24.1**.
 
+## Requirements
+
+Currently, only **aarch64, armv7 and x64** architectures are supported.  
+You will need at least 100 MB of free memory on the device to be able to update the gravity database without running out of memory.  
+Use swap file if you're short on the memory.  
+**As you add more blocklists the memory requirements grow rapidly!**
+
+> [!NOTE]
+> MIPS architecture is currently not supported by Pi-hole's builder images.  
+> Architectures which are EOL by Entware team will not be supported.
+
 ## Installation
 
 - Add this repository to your `opkg.conf` configuration:
