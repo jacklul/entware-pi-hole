@@ -10,10 +10,9 @@ Run [Pi-hole](https://pi-hole.net) directly on your [Entware](https://github.com
 
 ## Requirements
 
-Currently, only **aarch64, armv7 and x64** architectures are supported.  
-You will need at least 100 MB of free memory on the device to be able to update the gravity database without running out of memory.  
-Use swap file if you're short on the memory.  
-**As you add more blocklists the memory requirements grow rapidly!**
+Only **aarch64-k3.10, armv7sf-k3.2 and x64-k3.2** architectures are supported.  
+You will need at least **50-100 MB** of free memory on the device to be able to update the gravity database without running out of memory.  
+Swap file is **recommended**.  
 
 > [!NOTE]
 > MIPS architecture is currently not supported by Pi-hole's builder images.  
