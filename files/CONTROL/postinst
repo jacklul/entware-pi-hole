@@ -26,7 +26,7 @@ gravitydb_version() {
 
 ##########
 
-echo "  ${INFO} Running Pi-hole install/upgrade tasks..."
+echo "  ${INFO} ${COL_BOLD}Running Pi-hole install/upgrade tasks...${COL_NC}"
 
 # Make links to system files if they don't exist in /opt/etc
 [ ! -f /opt/etc/hosts ] && [ -f /etc/hosts ] && ln -s /etc/hosts /opt/etc/hosts && SYMLINKS="$SYMLINKS /opt/etc/hosts"
@@ -58,6 +58,19 @@ if [ -f /opt/etc/pihole/logrotate ]; then
     fi
 fi
 
+# Add a password for the web interface if the config file doesn't exist (new install)
+if [ ! -f /opt/etc/pihole/pihole.toml ]; then
+    # same code as in Pi-hole's basic-install.sh
+    PASSWORD=$(tr -dc _A-Z-a-z-0-9 </dev/urandom | head -c 8)
+    pihole setpassword "$PASSWORD"
+
+    echo "  ${INFO} ${COL_LIGHT_GREEN}Generated password for the web interface: $PASSWORD${COL_NC}"
+    echo "  ${INFO} ${COL_BOLD}It can be changed using 'pihole setpassword' command.${COL_NC}"
+elif [ -z "$(pihole-FTL --config webserver.api.pwhash)" ]; then # Shown a warning if the password is not set
+    echo "  ${INFO} ${COL_LIGHT_RED}Password for the web interface is not set - this is a security risk!${COL_NC}"
+    echo "  ${INFO} ${COL_BOLD}Please set it using 'pihole setpassword' command.${COL_NC}"
+fi
+
 # Gravity database file path
 GRAVITYDB_FILE="$(pihole-FTL --config -q files.gravity)"
 
@@ -70,7 +83,7 @@ if [ -n "$GRAVITYDB_FILE" ] && [ -f "$GRAVITYDB_FILE" ]; then
 fi
 
 # Restart the service if it's already running
-if /opt/etc/init.d/S55pihole-FTL check | grep -q 'alive'; then
+if /opt/etc/init.d/S55pihole-FTL check > /dev/null 2>&1 | grep -q 'alive'; then
     str="Restarting pihole-FTL service"
     printf "  %s %s..." "${INFO}" "$str"
 
