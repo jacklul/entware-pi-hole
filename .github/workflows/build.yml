@@ -324,6 +324,9 @@ jobs:
           mkdir -p ./build ./packages
           sudo -E bash ./scripts/multibuild.sh ./build "${{ needs.variables.outputs.VERSION }}" ./artifacts ./packages
 
+      - name: Rename directories
+        run: sudo bash ./.github/entware_dirs.sh ./packages
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -414,6 +417,9 @@ jobs:
           name: packages
           path: ./artifacts
 
+      - name: Rename directories in ./gh-pages
+        run: sudo bash ./.github/entware_dirs.sh ./gh-pages
+
       - name: Collect new packages
         run: |
           mkdir -p ./gh-pages
@@ -454,7 +460,7 @@ jobs:
 
       - name: Cleanup gh-pages directory
         run: |
-          find ./gh-pages -mindepth 1 -maxdepth 1 -type d -regextype sed \( ! -regex '.*/[[:alnum:]]*-[0-9]*\.[0-9]*$' ! -name ".git" ! -name "css" \) -exec rm -frv "{}" \;
+          find ./gh-pages -mindepth 1 -maxdepth 1 -type d -regextype sed \( ! -regex '.*/[[:alnum:]]*-k[0-9]*\.[0-9]*$' ! -name ".git" ! -name "css" \) -exec rm -frv "{}" \;
           find ./gh-pages -mindepth 1 -maxdepth 1 -type f ! -name "Packages*" -exec rm -fv "{}" \;
 
       - name: Create directory listings
