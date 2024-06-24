@@ -62,7 +62,7 @@ fi
 if [ ! -f /opt/etc/pihole/pihole.toml ]; then
     # same code as in Pi-hole's basic-install.sh
     PASSWORD=$(tr -dc _A-Z-a-z-0-9 </dev/urandom | head -c 8)
-    pihole setpassword "$PASSWORD"
+    pihole setpassword "$PASSWORD" > /dev/null
 
     echo "  ${INFO} ${COL_LIGHT_GREEN}Generated password for the web interface: $PASSWORD${COL_NC}"
     echo "  ${INFO} ${COL_BOLD}It can be changed using 'pihole setpassword' command.${COL_NC}"
