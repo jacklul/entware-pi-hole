@@ -222,9 +222,9 @@ index e1d72c8b..c7deaf87 100644
    all = true ### CHANGED, default = false
  
  # Configuration statistics:
--# 136 total entries out of which 82 entries are default
+-# 137 total entries out of which 83 entries are default
 -# --> 54 entries are modified
-+# 136 total entries out of which 72 entries are default
++# 137 total entries out of which 73 entries are default
 +# --> 64 entries are modified
  # 2 entries are forced through environment:
  #   - misc.nice
