@@ -324,9 +324,6 @@ jobs:
           mkdir -p ./build ./packages
           sudo -E bash ./scripts/multibuild.sh ./build "${{ needs.variables.outputs.VERSION }}" ./artifacts ./packages
 
-      - name: Rename directories
-        run: sudo bash ./.github/entware_dirs.sh ./packages
-
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -416,9 +413,6 @@ jobs:
         with:
           name: packages
           path: ./artifacts
-
-      - name: Rename directories in ./gh-pages
-        run: sudo bash ./.github/entware_dirs.sh ./gh-pages
 
       - name: Collect new packages
         run: |

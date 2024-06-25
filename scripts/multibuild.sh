@@ -19,6 +19,18 @@ declare -A ARCHITECTURES=(
     ["generic"]="generic" # Package without FTL binary
 )
 
+# This array maps Entware architectures to target directory names
+declare -A DIRECTORIES=(
+    ["aarch64-3.10"]="aarch64-k3.10"
+    ["armv5-3.2"]="armv5sf-k3.2"
+    ["armv7-2.6"]="armv7sf-k2.6"
+    ["armv7-3.2"]="armv7sf-k3.2"
+    ["mipsel-3.4"]="mipselsf-k3.4"
+    ["mips-3.4"]="mipssf-k3.4"
+    ["x64-3.2"]="x64-k3.2"
+    ["x86-2.6"]="x86-k2.6"
+)
+
 ################
 
 set -e
@@ -44,6 +56,9 @@ for KEY in "${!ARCHITECTURES[@]}"; do
     fi
     BINARY_VERSION_FILE="$(dirname "$BINARY_FILE")/.version"
 
+    TARGET_DIR="$ENTWARE_ARCHITECTURE"
+    [ -n "${DIRECTORIES[$KEY]}" ] && TARGET_DIR="${DIRECTORIES[$KEY]}"
+
     # Cleanup after previous build
     #shellcheck disable=SC2115
     #rm -fr "$PACKAGE_DIR"/* # This is currently not necessary
@@ -54,9 +69,9 @@ for KEY in "${!ARCHITECTURES[@]}"; do
     cp -f "$BINARY_FILE" "$BINARY_DIR/pihole-FTL"
     cp -f "$BINARY_VERSION_FILE" "$BINARY_DIR/.version"
 
-    mkdir -p "$OUTPUT_DIR/$ENTWARE_ARCHITECTURE"
+    mkdir -p "$OUTPUT_DIR/$TARGET_DIR"
 
     bash ./scripts/build.sh "$PACKAGE_DIR" "$SEARCH_DIR"
     [ "$ENTWARE_ARCHITECTURE" = "generic" ] && rm -f "$PACKAGE_DIR/opt/bin/pihole-FTL"
-    bash ./scripts/ipk.sh "$PACKAGE_DIR" "$PACKAGE_VERSION" "$ENTWARE_ARCHITECTURE" "$OUTPUT_DIR/$ENTWARE_ARCHITECTURE"
+    bash ./scripts/ipk.sh "$PACKAGE_DIR" "$PACKAGE_VERSION" "$ENTWARE_ARCHITECTURE" "$OUTPUT_DIR/$TARGET_DIR"
 done
