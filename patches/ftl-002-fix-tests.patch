@@ -128,7 +128,7 @@ index e1d72c8b..c7deaf87 100644
      # Possible values are:
      #     <valid path>
 -    webroot = "/var/www/html"
-+    webroot = "/var/www/html" ### CHANGED, default = "/opt/share/pihole/www"
++    webroot = "/opt/share/pihole/www"
  
      # Sub-directory of the root containing the web interface
      #
@@ -137,21 +137,21 @@ index e1d72c8b..c7deaf87 100644
    # Possible values are:
    #     <any writable file>
 -  pid = "/run/pihole-FTL.pid"
-+  pid = "/run/pihole-FTL.pid" ### CHANGED, default = "/opt/var/run/pihole-FTL.pid"
++  pid = "/opt/var/run/pihole-FTL.pid"
  
    # The location of FTL's long-term database
    #
    # Possible values are:
    #     <any FTL database>
 -  database = "/etc/pihole/pihole-FTL.db"
-+  database = "/etc/pihole/pihole-FTL.db" ### CHANGED, default = "/opt/etc/pihole/pihole-FTL.db"
++  database = "/opt/etc/pihole/pihole-FTL.db"
  
    # The location of Pi-hole's gravity database
    #
    # Possible values are:
    #     <any Pi-hole gravity database>
 -  gravity = "/etc/pihole/gravity.db"
-+  gravity = "/etc/pihole/gravity.db" ### CHANGED, default = "/opt/etc/pihole/gravity.db"
++  gravity = "/opt/etc/pihole/gravity.db"
  
    # A temporary directory where Pi-hole can store files during gravity updates. This
    # directory must be writable by the user running gravity (typically pihole).
@@ -159,21 +159,21 @@ index e1d72c8b..c7deaf87 100644
    # Possible values are:
    #     <any existing world-writable writable directory>
 -  gravity_tmp = "/tmp"
-+  gravity_tmp = "/tmp" ### CHANGED, default = "/opt/tmp"
++  gravity_tmp = "/opt/tmp"
  
    # The database containing MAC -> Vendor information for the network table
    #
    # Possible values are:
    #     <any Pi-hole macvendor database>
 -  macvendor = "/etc/pihole/macvendor.db"
-+  macvendor = "/etc/pihole/macvendor.db" ### CHANGED, default = "/opt/etc/pihole/macvendor.db"
++  macvendor = "/opt/etc/pihole/macvendor.db"
  
    # The old config file of Pi-hole used before v6.0
    #
    # Possible values are:
    #     <any Pi-hole setupVars file>
 -  setupVars = "/etc/pihole/setupVars.conf"
-+  setupVars = "/etc/pihole/setupVars.conf" ### CHANGED, default = "/opt/etc/pihole/setupVars.conf"
++  setupVars = "/opt/etc/pihole/setupVars.conf"
  
    # An optional file containing a pcap capture of the network traffic. This file is used
    # for debugging purposes only. If you don't know what this is, you don't need it.
@@ -182,21 +182,21 @@ index e1d72c8b..c7deaf87 100644
      # Possible values are:
      #     <any writable file>
 -    ftl = "/var/log/pihole/FTL.log"
-+    ftl = "/var/log/pihole/FTL.log" ### CHANGED, default = "/opt/var/log/pihole/FTL.log"
++    ftl = "/opt/var/log/pihole/FTL.log"
  
      # The log file used by the embedded dnsmasq DNS server
      #
      # Possible values are:
      #     <any writable file>
 -    dnsmasq = "/var/log/pihole/pihole.log"
-+    dnsmasq = "/var/log/pihole/pihole.log" ### CHANGED, default = "/opt/var/log/pihole/pihole.log"
++    dnsmasq = "/opt/var/log/pihole/pihole.log"
  
      # The log file used by the webserver
      #
      # Possible values are:
      #     <any writable file>
 -    webserver = "/var/log/pihole/webserver.log"
-+    webserver = "/var/log/pihole/webserver.log" ### CHANGED, default = "/opt/var/log/pihole/webserver.log"
++    webserver = "/opt/var/log/pihole/webserver.log"
  
  [misc]
    # Using privacy levels you can specify which level of detail you want to see in your
@@ -218,17 +218,6 @@ index e1d72c8b..c7deaf87 100644
    inotify = true ### CHANGED, default = false
  
    # Debug monitoring of the webserver (CivetWeb) events
-@@ -1039,8 +1039,8 @@
-   all = true ### CHANGED, default = false
- 
- # Configuration statistics:
--# 137 total entries out of which 83 entries are default
--# --> 54 entries are modified
-+# 137 total entries out of which 73 entries are default
-+# --> 64 entries are modified
- # 2 entries are forced through environment:
- #   - misc.nice
- #   - debug.api
 diff --git a/test/test_suite.bats b/test/test_suite.bats
 index 94c04019..51bb0b1a 100644
 --- a/test/test_suite.bats

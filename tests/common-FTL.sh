@@ -5,15 +5,21 @@
 
 #shellcheck disable=SC2162,SC2034
 read -d '\n' FILES <<EOT
-$(find "$TARGET_DIR/src" \
+$(find "$TARGET_DIR" \
     -type f \
     \( \
-        -name "*.c" \
-        -o -name "*.h" \
-        -o -name "*.sh" \
-        -o -name "*.txt" \
+        -path "$TARGET_DIR/src/*" \
+        -a \( \
+            -name "*.c" \
+            -o -name "*.h" \
+            -o -name "*.txt" \
+            -o -name "*.sh" \
+        \) \
+        -o -path "$TARGET_DIR/test/*" \
+        -a \( \
+            -name "pihole.toml" \
+        \) \
     \) \
-    -not -path "$TARGET_DIR/src/test/*" \
     -not -path "$TARGET_DIR/src/api/docs/*" \
 | sort)
 EOT
