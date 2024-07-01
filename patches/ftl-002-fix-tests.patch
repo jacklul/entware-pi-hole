@@ -81,7 +81,7 @@ index 5d490a82..dfd08dac 100755
    curl --silent --upload-file "${1}" https://tricorder.pi-hole.net
  }
 diff --git a/test/pihole.toml b/test/pihole.toml
-index e1d72c8b..c7deaf87 100644
+index 0b433266..85d8a45c 100644
 --- a/test/pihole.toml
 +++ b/test/pihole.toml
 @@ -108,8 +108,8 @@
@@ -115,7 +115,7 @@ index e1d72c8b..c7deaf87 100644
      # seconds. If the client continues to send queries while being blocked already and
      # this number of queries during the blocking exceeds the limit the client will
      # continue to be blocked until the end of the next interval (FTL.log will contain
-@@ -617,14 +617,14 @@
+@@ -665,14 +665,14 @@
      #
      # Possible values are:
      #     <valid TLS certificate file (*.pem)>
@@ -132,7 +132,16 @@ index e1d72c8b..c7deaf87 100644
  
      # Sub-directory of the root containing the web interface
      #
-@@ -768,38 +768,38 @@
+@@ -749,7 +749,7 @@
+     app_sudo = false
+ 
+     # Should FTL create a temporary CLI password? This password is stored in clear in
+-    # /etc/pihole and can be used by the CLI (pihole ...  commands) to authenticate
++    # /opt/etc/pihole and can be used by the CLI (pihole ...  commands) to authenticate
+     # against the API. Note that the password is only valid for the current session and
+     # regenerated on each FTL restart. Sessions initiated with this password cannot modify
+     # the Pi-hole configuration (change passwords, etc.) for security reasons but can
+@@ -822,38 +822,38 @@
    #
    # Possible values are:
    #     <any writable file>
@@ -177,7 +186,7 @@ index e1d72c8b..c7deaf87 100644
  
    # An optional file containing a pcap capture of the network traffic. This file is used
    # for debugging purposes only. If you don't know what this is, you don't need it.
-@@ -817,19 +817,19 @@
+@@ -871,19 +871,19 @@
      #
      # Possible values are:
      #     <any writable file>
@@ -200,7 +209,7 @@ index e1d72c8b..c7deaf87 100644
  
  [misc]
    # Using privacy levels you can specify which level of detail you want to see in your
-@@ -871,7 +871,7 @@
+@@ -925,7 +925,7 @@
    # malfunctioning addr2line can prevent from generating any backtrace at all.
    addr2line = true
  
@@ -209,7 +218,7 @@ index e1d72c8b..c7deaf87 100644
    etc_dnsmasq_d = true ### CHANGED, default = false
  
    # Additional lines to inject into the generated dnsmasq configuration.
-@@ -1019,7 +1019,7 @@
+@@ -1079,7 +1079,7 @@
    # Print config parsing details
    config = true ### CHANGED, default = false
  
