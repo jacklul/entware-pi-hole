@@ -1,0 +1,90 @@
+Package: pi-hole
+Version: 2024.07.01-194530-d6cf9c4e
+Depends: bash, cron, curl, git-http, ca-bundle, bind-dig, iputils-ping, net-tools, findutils, grep, sed, jq, libcap-bin, shadow-su, psmisc, procps-ng-pgrep, libncurses-dev, rev, lscpu, coreutils-cut, coreutils-expr, coreutils-id, coreutils-install, coreutils-mktemp, coreutils-nohup, coreutils-printf, coreutils-sha1sum, coreutils-sleep, coreutils-stat, coreutils-stty, coreutils-tee, coreutils-timeout, coreutils-tr, coreutils-tty, coreutils-whoami
+Suggests: logrotate, sudo
+License: EUPL-1.2
+Section: net
+URL: https://github.com/pi-hole/pi-hole
+Architecture: armv7-3.2
+Installed-Size: 32266240
+Filename: armv7sf-k3.2/pi-hole_2024.07.01-194530-d6cf9c4e_armv7-3.2.ipk
+Size: 13820858
+SHA256sum: 645031f4d32150d43bab7c21d053e9dad1f17365a05bd34d88ef84f8d895ebf8
+Description:  The Pi-hole is a DNS sinkhole that protects your devices from unwanted content without installing any client-side software.
+ This is an unofficial package not supported by the Pi-hole developers!
+
+Package: pi-hole-dev
+Version: 2024.07.02-015917-d6cf9c4e
+Depends: bash, cron, curl, git-http, ca-bundle, bind-dig, iputils-ping, net-tools, findutils, grep, sed, jq, libcap-bin, shadow-su, psmisc, procps-ng-pgrep, libncurses-dev, rev, lscpu, coreutils-cut, coreutils-expr, coreutils-id, coreutils-install, coreutils-mktemp, coreutils-nohup, coreutils-printf, coreutils-sha1sum, coreutils-sleep, coreutils-stat, coreutils-stty, coreutils-tee, coreutils-timeout, coreutils-tr, coreutils-tty, coreutils-whoami
+Suggests: logrotate, sudo
+License: EUPL-1.2
+Section: net
+URL: https://github.com/pi-hole/pi-hole
+Architecture: armv7-3.2
+Installed-Size: 32266240
+Filename: armv7sf-k3.2/pi-hole-dev_2024.07.02-015917-d6cf9c4e_armv7-3.2.ipk
+Size: 13820869
+SHA256sum: f6a9c61c11eddf9ca8ff700b63f5283b40d6a4750cb5911e0dce5b31d1007eb6
+Description:  The Pi-hole is a DNS sinkhole that protects your devices from unwanted content without installing any client-side software.
+ This is an unofficial package not supported by the Pi-hole developers!
+
+Package: pi-hole
+Version: 2024.07.01-194530-d6cf9c4e
+Depends: bash, cron, curl, git-http, ca-bundle, bind-dig, iputils-ping, net-tools, findutils, grep, sed, jq, libcap-bin, shadow-su, psmisc, procps-ng-pgrep, libncurses-dev, rev, lscpu, coreutils-cut, coreutils-expr, coreutils-id, coreutils-install, coreutils-mktemp, coreutils-nohup, coreutils-printf, coreutils-sha1sum, coreutils-sleep, coreutils-stat, coreutils-stty, coreutils-tee, coreutils-timeout, coreutils-tr, coreutils-tty, coreutils-whoami
+Suggests: logrotate, sudo
+License: EUPL-1.2
+Section: net
+URL: https://github.com/pi-hole/pi-hole
+Architecture: aarch64-3.10
+Installed-Size: 32266240
+Filename: aarch64-k3.10/pi-hole_2024.07.01-194530-d6cf9c4e_aarch64-3.10.ipk
+Size: 13821228
+SHA256sum: 52c8611cf34b7da9d22bcc1de0500686eb2e7faa21fcfe6417001a71683bca46
+Description:  The Pi-hole is a DNS sinkhole that protects your devices from unwanted content without installing any client-side software.
+ This is an unofficial package not supported by the Pi-hole developers!
+
+Package: pi-hole-dev
+Version: 2024.07.02-015917-d6cf9c4e
+Depends: bash, cron, curl, git-http, ca-bundle, bind-dig, iputils-ping, net-tools, findutils, grep, sed, jq, libcap-bin, shadow-su, psmisc, procps-ng-pgrep, libncurses-dev, rev, lscpu, coreutils-cut, coreutils-expr, coreutils-id, coreutils-install, coreutils-mktemp, coreutils-nohup, coreutils-printf, coreutils-sha1sum, coreutils-sleep, coreutils-stat, coreutils-stty, coreutils-tee, coreutils-timeout, coreutils-tr, coreutils-tty, coreutils-whoami
+Suggests: logrotate, sudo
+License: EUPL-1.2
+Section: net
+URL: https://github.com/pi-hole/pi-hole
+Architecture: aarch64-3.10
+Installed-Size: 32266240
+Filename: aarch64-k3.10/pi-hole-dev_2024.07.02-015917-d6cf9c4e_aarch64-3.10.ipk
+Size: 13821018
+SHA256sum: 6d1557088bb5824575b47a2b18a6dc5c3f873f7b96fe7be84aa6cd9ff76d5907
+Description:  The Pi-hole is a DNS sinkhole that protects your devices from unwanted content without installing any client-side software.
+ This is an unofficial package not supported by the Pi-hole developers!
+
+Package: pi-hole
+Version: 2024.07.01-194530-d6cf9c4e
+Depends: bash, cron, curl, git-http, ca-bundle, bind-dig, iputils-ping, net-tools, findutils, grep, sed, jq, libcap-bin, shadow-su, psmisc, procps-ng-pgrep, libncurses-dev, rev, lscpu, coreutils-cut, coreutils-expr, coreutils-id, coreutils-install, coreutils-mktemp, coreutils-nohup, coreutils-printf, coreutils-sha1sum, coreutils-sleep, coreutils-stat, coreutils-stty, coreutils-tee, coreutils-timeout, coreutils-tr, coreutils-tty, coreutils-whoami
+Suggests: logrotate, sudo
+License: EUPL-1.2
+Section: net
+URL: https://github.com/pi-hole/pi-hole
+Architecture: x64-3.2
+Installed-Size: 32266240
+Filename: x64-k3.2/pi-hole_2024.07.01-194530-d6cf9c4e_x64-3.2.ipk
+Size: 13820945
+SHA256sum: e424fd6f32db059acc68086f19e6dcb94a3ff626b81c0e9ac680cd1669dafc5e
+Description:  The Pi-hole is a DNS sinkhole that protects your devices from unwanted content without installing any client-side software.
+ This is an unofficial package not supported by the Pi-hole developers!
+
+Package: pi-hole-dev
+Version: 2024.07.02-015917-d6cf9c4e
+Depends: bash, cron, curl, git-http, ca-bundle, bind-dig, iputils-ping, net-tools, findutils, grep, sed, jq, libcap-bin, shadow-su, psmisc, procps-ng-pgrep, libncurses-dev, rev, lscpu, coreutils-cut, coreutils-expr, coreutils-id, coreutils-install, coreutils-mktemp, coreutils-nohup, coreutils-printf, coreutils-sha1sum, coreutils-sleep, coreutils-stat, coreutils-stty, coreutils-tee, coreutils-timeout, coreutils-tr, coreutils-tty, coreutils-whoami
+Suggests: logrotate, sudo
+License: EUPL-1.2
+Section: net
+URL: https://github.com/pi-hole/pi-hole
+Architecture: x64-3.2
+Installed-Size: 32266240
+Filename: x64-k3.2/pi-hole-dev_2024.07.02-015917-d6cf9c4e_x64-3.2.ipk
+Size: 13820841
+SHA256sum: eb74b9b89568a4c7a4edd6cd30bfec9044edfa6228eff46dfe01e57bd03cf84e
+Description:  The Pi-hole is a DNS sinkhole that protects your devices from unwanted content without installing any client-side software.
+ This is an unofficial package not supported by the Pi-hole developers!
+
