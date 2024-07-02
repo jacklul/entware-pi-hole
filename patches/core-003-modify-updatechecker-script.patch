@@ -2,12 +2,12 @@ diff --git a/advanced/Scripts/updatecheck.sh b/advanced/Scripts/updatecheck.sh
 index eda6c40..291f43e 100755
 --- a/advanced/Scripts/updatecheck.sh
 +++ b/advanced/Scripts/updatecheck.sh
-@@ -34,6 +34,33 @@ function get_remote_version() {
+@@ -34,6 +34,50 @@ function get_remote_version() {
      fi
  }
  
 +function get_remote_version_entware() {
-+    if [[ "${1}" == "master" ]]; then
++    if [[ "${1}" == "pi-hole" ]]; then
 +        # shellcheck disable=SC2155
 +        local latest_release="$(curl -s "https://api.github.com/repos/jacklul/entware-pi-hole/releases/latest" | jq --raw-output .tag_name)"
 +
@@ -16,13 +16,30 @@ index eda6c40..291f43e 100755
 +            return
 +        fi
 +
-+        # @TODO remove the following code once v6 is released
++        # @TODO uncomment this once v6 is released
++        #echo "null"
++    fi
++
++    declare -A architecture_to_directory=(
++        ["aarch64-3.10"]="aarch64-k3.10"
++        ["armv5-3.2"]="armv5sf-k3.2"
++        ["armv7-2.6"]="armv7sf-k2.6"
++        ["armv7-3.2"]="armv7sf-k3.2"
++        ["mipsel-3.4"]="mipselsf-k3.4"
++        ["mips-3.4"]="mipssf-k3.4"
++        ["x64-3.2"]="x64-k3.2"
++        ["x86-2.6"]="x86-k2.6"
++    )
++
++    # shellcheck disable=SC2155
++    local architecture="$(opkg print-architecture | grep -v " all " | awk '{print $2}')"
++
++    if [ -n "${architecture_to_directory[$architecture]}" ]; then
 +        # shellcheck disable=SC2155
-+        local architecture="$(opkg print-architecture | grep -v " all " | awk '{print $2}')"
++        local packages_index="$(curl -s "https://jacklul.github.io/entware-pi-hole/${architecture_to_directory[$architecture]}/Packages")"
++
 +        # shellcheck disable=SC2155
-+        local packages_index="$(curl -s "https://jacklul.github.io/entware-pi-hole/${architecture}/Packages")"
-+        # shellcheck disable=SC2155
-+        local latest_package="$(echo "${packages_index}" | awk '$0 ~ "^Package: pi-hole$", $0 ~ "Version:" {if ($0 ~ "Version:") print $2}')"
++        local latest_package="$(echo "${packages_index}" | awk -v pkg="$1" '$0 ~ "^Package: " pkg "$", $0 ~ "Version:" {if ($0 ~ "Version:") print $2}')"
 +
 +        if [ -n "${latest_package}" ]; then
 +            echo "${latest_package}"
@@ -98,7 +115,7 @@ index eda6c40..291f43e 100755
  
  GITHUB_WEB_VERSION="$(get_remote_version web "${WEB_BRANCH}")"
  addOrEditKeyValPair "${VERSION_FILE}" "GITHUB_WEB_VERSION" "${GITHUB_WEB_VERSION}"
-@@ -124,3 +151,27 @@ if [[ "${DOCKER_TAG}" ]]; then
+@@ -131,3 +188,22 @@ if [[ "${DOCKER_TAG}" ]]; then
      GITHUB_DOCKER_VERSION="$(get_remote_version docker-pi-hole "${docker_branch}")"
      addOrEditKeyValPair "${VERSION_FILE}" "GITHUB_DOCKER_VERSION" "${GITHUB_DOCKER_VERSION}"
  fi
@@ -114,15 +131,10 @@ index eda6c40..291f43e 100755
 +
 +    # Check if the version is in the release version format
 +    #regex='^([0-9]+\.){1,2}(\*|[0-9]+)(-.*)?$'
-+    #if [[ ! "${ENTWARE_VERSION}" =~ $regex ]]; then
++    #if [ "$ENTWARE_PACKAGE" = "pi-hole" ] && [[ ! "${ENTWARE_VERSION}" =~ $regex ]]; then
 +    #    unset ENTWARE_PACKAGE
 +    #fi
 +
-+    entware_branch=""
-+    if [ "$ENTWARE_PACKAGE" = "pi-hole" ]; then
-+        entware_branch="master"
-+    fi
-+
-+    GITHUB_ENTWARE_VERSION="$(get_remote_version_entware "$entware_branch")"
++    GITHUB_ENTWARE_VERSION="$(get_remote_version_entware "$ENTWARE_PACKAGE")"
 +    addOrEditKeyValPair "${VERSION_FILE}" "GITHUB_ENTWARE_VERSION" "${GITHUB_ENTWARE_VERSION}"
 +fi
