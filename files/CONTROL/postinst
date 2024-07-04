@@ -28,12 +28,6 @@ gravitydb_version() {
 
 echo "  ${INFO} ${COL_BOLD}Running Pi-hole install/upgrade tasks...${COL_NC}"
 
-# Inform about potential issues with crond when root user is not called 'root'
-ROOT_USER="$(id -nu 0 2> /dev/null)"
-if [ "$ROOT_USER" != "root" ]; then
-    echo "  ${INFO} ${COL_YELLOW}It looks like the root user is not called 'root' - this can cause issues!${COL_NC}"
-fi
-
 # Make links to system files if they don't exist in /opt/etc
 [ ! -f /opt/etc/hosts ] && [ -f /etc/hosts ] && ln -s /etc/hosts /opt/etc/hosts && SYMLINKS="$SYMLINKS /opt/etc/hosts"
 [ ! -f /opt/etc/ethers ] && [ -f /etc/ethers ] && ln -s /etc/ethers /opt/etc/ethers && SYMLINKS="$SYMLINKS /opt/etc/ethers"
@@ -61,6 +55,52 @@ if [ -f /opt/etc/pihole/logrotate ]; then
         else
             sed "s/su.*$/su $LOG_USER_GROUP/g;" -i /opt/etc/pihole/logrotate
         fi
+    fi
+fi
+
+# Apply possible workarounds
+ROOT_USER="$(id -nu 0 2> /dev/null)"
+if [ "$ROOT_USER" != "root" ]; then
+    echo "  ${INFO} ${COL_YELLOW}It looks like the root user is not called 'root' - this can cause issues!${COL_NC}"
+
+    if ! grep -q "^#*\s*pi-hole-no-crontab-workaround" "/opt/var/spool/cron/crontabs/$ROOT_USER" 2> /dev/null; then
+        echo "  ${INFO} ${COL_BOLD}Applying crontab workaround...${COL_NC}"
+
+        if [ ! -f "/opt/var/spool/cron/crontabs/$ROOT_USER" ]; then
+            echo "  ${INFO} Creating /opt/var/spool/cron/crontabs/$ROOT_USER"
+            mkdir -p /opt/var/spool/cron/crontabs
+            touch "/opt/var/spool/cron/crontabs/$ROOT_USER"
+        else
+            echo "  ${INFO} Modifying /opt/var/spool/cron/crontabs/$ROOT_USER"
+        fi
+
+        SEPARATOR="### Pi-hole crontab - do not modify ###"
+        sed "/$SEPARATOR/,/$SEPARATOR/d" -i "/opt/var/spool/cron/crontabs/$ROOT_USER"
+        {
+            echo "$SEPARATOR"
+
+            cat <<EOF
+# Everything between the marked lines will be automatically modified by install/upgrade script.
+# You can prevent modification of this file by adding '# pi-hole-no-crontab-workaround' somewhere in this file.
+EOF
+
+            grep -Ev "^#|^\s*$" /opt/etc/cron.d/pihole | sed "s/ root / /g"
+
+            echo "$SEPARATOR"
+        } >> "/opt/var/spool/cron/crontabs/$ROOT_USER"
+
+        if [ ! -f /opt/var/spool/cron/cron.allow ] && ! grep -q "$ROOT_USER" /opt/var/spool/cron/cron.allow 2> /dev/null; then
+            echo "  ${INFO} Adding $ROOT_USER to /opt/var/spool/cron/cron.allow"
+            echo "$ROOT_USER" >> /opt/var/spool/cron/cron.allow
+        fi
+    fi
+
+    if [ -f /opt/bin/sudo ] && [ ! -f "/opt/etc/sudoers.d/${ROOT_USER}_is_root" ]; then
+        echo "  ${INFO} ${COL_BOLD}Applying sudo workaround...${COL_NC}"
+        echo "  ${INFO} Creating /opt/etc/sudoers.d/${ROOT_USER}_is_root."
+
+        echo "$ROOT_USER ALL=(ALL) ALL" > "/opt/etc/sudoers.d/${ROOT_USER}_is_root"
+        chmod 600 "/opt/etc/sudoers.d/${ROOT_USER}_is_root"
     fi
 fi
 
@@ -118,41 +158,5 @@ fi
 
     bash /opt/share/pihole/updatecheck.sh
 } > /dev/null 2>&1 &
-
-# Apply workarounds - not by default - must be explicitly enabled by the user
-if [ "$ROOT_USER" != "root" ]; then
-    if [ -n "$SUDO_WORKAROUND" ]; then
-        echo "  ${INFO} ${COL_BOLD}Applying sudo workaround...${COL_NC}"
-
-        if [ ! -f "/opt/etc/sudoers.d/${ROOT_USER}_is_root" ]; then
-            echo "  ${INFO} Creating /opt/etc/sudoers.d/${ROOT_USER}_is_root."
-
-            echo "$ROOT_USER ALL=(ALL) ALL" > "/opt/etc/sudoers.d/${ROOT_USER}_is_root"
-            chmod 600 "/opt/etc/sudoers.d/${ROOT_USER}_is_root"
-        fi
-    fi
-
-    if [ -n "$CRONTAB_WORKAROUND" ]; then
-        echo "  ${INFO} ${COL_BOLD}Applying crontab workaround...${COL_NC}"
-
-        SEPARATOR="### Pi-hole crontab - do not modify ###"
-        mkdir -p /opt/var/spool/cron/crontabs
-        touch "/opt/var/spool/cron/crontabs/$ROOT_USER"
-
-        echo "  ${INFO} Modyfing /opt/var/spool/cron/crontabs/$ROOT_USER."
-        
-        sed "/$SEPARATOR/,/$SEPARATOR/d" -i "/opt/var/spool/cron/crontabs/$ROOT_USER"
-        {
-            echo "$SEPARATOR"
-            grep -Ev "^#" /opt/etc/cron.d/pihole | sed "s/ root / /g"
-            echo "$SEPARATOR"
-        } >> "/opt/var/spool/cron/crontabs/$ROOT_USER"
-
-        if [ ! -f /opt/var/spool/cron/cron.allow ] && ! grep -q "$ROOT_USER" /opt/var/spool/cron/cron.allow; then
-            echo "  ${INFO} Adding $ROOT_USER to /opt/var/spool/cron/cron.allow."
-            echo "$ROOT_USER" >> /opt/var/spool/cron/cron.allow
-        fi
-    fi
-fi
 
 exit 0
