@@ -10,7 +10,7 @@ index e99f1df..1de3117 100755
 +readonly scriptPath="/opt/share/pihole/database_migration/gravity"
  
  upgrade_gravityDB(){
- 	local database piholeDir auditFile version
+     local database piholeDir auditFile version
 diff --git a/advanced/Scripts/list.sh b/advanced/Scripts/list.sh
 index 76558e5..a9592bf 100755
 --- a/advanced/Scripts/list.sh
@@ -463,27 +463,27 @@ index 5f609e0..36203f7 100644
 @@ -1,4 +1,4 @@
 -/var/log/pihole/pihole.log {
 +/opt/var/log/pihole/pihole.log {
- 	# su #
- 	daily
- 	copytruncate
+     # su #
+     daily
+     copytruncate
 @@ -9,7 +9,7 @@
- 	nomail
+     nomail
  }
  
 -/var/log/pihole/FTL.log {
 +/opt/var/log/pihole/FTL.log {
- 	# su #
- 	weekly
- 	copytruncate
+     # su #
+     weekly
+     copytruncate
 @@ -20,7 +20,7 @@
- 	nomail
+     nomail
  }
  
 -/var/log/pihole/webserver.log {
 +/opt/var/log/pihole/webserver.log {
- 	# su #
- 	weekly
- 	copytruncate
+     # su #
+     weekly
+     copytruncate
 diff --git a/advanced/Templates/pihole-FTL-poststop.sh b/advanced/Templates/pihole-FTL-poststop.sh
 index ac3898d..5abfc86 100755
 --- a/advanced/Templates/pihole-FTL-poststop.sh
