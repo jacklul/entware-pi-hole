@@ -330,21 +330,31 @@ jobs:
           name: packages
           path: ./packages/*
 
+      - name: Save current module versions
+        run: |
+          . ./artifacts/core/.version
+          echo "CORE=$VERSION" >> ./.versions
+          . ./artifacts/web/.version
+          echo "WEB=$VERSION" >> ./.versions
+          . ./artifacts/binary/.version
+          echo "FTL=$VERSION" >> ./.versions
+
+      - name: Check if same dev package was already build
+        if: ${{ github.event_name == 'schedule' }}
+        uses: ./.github/actions/devcheck
+
       - name: Set versions
         id: versions
         run: |
-          echo "IPK=${{ needs.variables.outputs.VERSION }}" >> $GITHUB_OUTPUT
-          . ./artifacts/core/.version
-          echo "CORE=$VERSION" >> $GITHUB_OUTPUT
-          . ./artifacts/web/.version
-          echo "WEB=$VERSION" >> $GITHUB_OUTPUT
-          . ./artifacts/binary/.version
-          echo "FTL=$VERSION" >> $GITHUB_OUTPUT
+          if [ -f ./.versions ]; then
+            echo "IPK=${{ needs.variables.outputs.VERSION }}" >> $GITHUB_OUTPUT
+            cat ./.versions >> $GITHUB_OUTPUT
+          fi
 
   release:
     concurrency: release-${{ github.ref_name || github.run_id }}
     needs: [build-packages]
-    if: ${{ startsWith(github.ref, 'refs/tags/') }}
+    if: ${{ startsWith(github.ref, 'refs/tags/') && needs.build-packages.outputs.IPK_VERSION != '' }}
     runs-on: ubuntu-latest
 
     permissions:
@@ -359,9 +369,9 @@ jobs:
 
       - name: Create changelog file
         env:
-          CORE_VERSION: ${{ needs.build-package.outputs.CORE_VERSION }}
-          WEB_VERSION: ${{ needs.build-package.outputs.WEB_VERSION }}
-          FTL_VERSION: ${{ needs.build-package.outputs.FTL_VERSION }}
+          CORE_VERSION: ${{ needs.build-packages.outputs.CORE_VERSION }}
+          WEB_VERSION: ${{ needs.build-packages.outputs.WEB_VERSION }}
+          FTL_VERSION: ${{ needs.build-packages.outputs.FTL_VERSION }}
         run: |
           CORE_VERSION_OUT="[$CORE_VERSION](https://github.com/pi-hole/pi-hole/releases/tag/$CORE_VERSION)"
           WEB_VERSION_OUT="[$WEB_VERSION](https://github.com/pi-hole/web/releases/tag/$WEB_VERSION)"
@@ -377,7 +387,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: ./artifacts/*/*.ipk
-          tag_name: ${{ needs.build-package.outputs.IPK_VERSION }}
+          tag_name: ${{ needs.build-packages.outputs.IPK_VERSION }}
           body_path: changelog.md
           append_body: true
           generate_release_notes: true
@@ -385,7 +395,7 @@ jobs:
   upload:
     concurrency: upload
     needs: [build-packages]
-    if: ${{ startsWith(github.ref, 'refs/tags/') || github.ref_name == 'develop' || github.event_name == 'schedule' || github.ref_name == 'master' }}
+    if: ${{ needs.build-packages.outputs.IPK_VERSION != '' && (startsWith(github.ref, 'refs/tags/') || github.ref_name == 'develop' || github.event_name == 'schedule' || github.ref_name == 'master') }}
     # @TODO when v6 is released master should not trigger this job
     runs-on: ubuntu-latest
 

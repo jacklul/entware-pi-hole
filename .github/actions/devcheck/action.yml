@@ -1,0 +1,26 @@
+name: Check if same dev package was already built
+
+runs:
+  using: composite
+
+  steps:
+    - uses: actions/cache/restore@v4
+      id: versions_last
+      with:
+        path: .versions_last
+        key: last_dev_versions
+        fail-on-cache-miss: false
+
+    - name: Compare versions
+      shell: bash
+      run: |
+        if [ -f ./.versions_last ] && cmp --silent ./.versions_last ./.versions; then
+          rm ./.versions
+        else
+          cp ./.versions ./.versions_last
+        fi
+
+    - uses: actions/cache/save@v4
+      with:
+        path: .versions_last
+        key: last_dev_versions
