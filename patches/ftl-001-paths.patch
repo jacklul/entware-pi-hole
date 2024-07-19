@@ -524,7 +524,7 @@ index 742e8d9a..ae24ff4a 100644
 --- a/src/files.h
 +++ b/src/files.h
 @@ -18,7 +18,7 @@
- #include <nettle/sha2.h>
+ #include <pwd.h>
  
  #define MAX_ROTATIONS 15
 -#define BACKUP_DIR "/etc/pihole/config_backups"
