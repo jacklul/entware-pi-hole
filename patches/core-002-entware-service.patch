@@ -1,0 +1,52 @@
+diff --git a/advanced/Scripts/piholeDebug.sh b/advanced/Scripts/piholeDebug.sh
+index 7c55812..24e0b3f 100755
+--- a/advanced/Scripts/piholeDebug.sh
++++ b/advanced/Scripts/piholeDebug.sh
+@@ -826,6 +826,13 @@ process_status(){
+                 else
+                     status_of_process="inactive"
+                 fi
++            elif [ -f /opt/etc/opkg.conf ]; then
++            # Entware package
++                if /opt/etc/init.d/S55pihole-FTL check | grep 'alive' &> /dev/null; then
++                    status_of_process="active"
++                else
++                    status_of_process="inactive"
++                fi
+             else
+             # non-Docker system
+                 if service "${i}" status | grep -E 'is\srunning' &> /dev/null; then
+diff --git a/advanced/Scripts/piholeLogFlush.sh b/advanced/Scripts/piholeLogFlush.sh
+index 34d96318..54dc7fe5 100755
+--- a/advanced/Scripts/piholeLogFlush.sh
++++ b/advanced/Scripts/piholeLogFlush.sh
+@@ -108,13 +108,14 @@ else
+     fi
+ 
+     # Stop FTL to make sure it doesn't write to the database while we're deleting data
+-    service pihole-FTL stop
++    /opt/etc/init.d/S55pihole-FTL stop
+ 
+     # Delete most recent 24 hours from FTL's database, leave even older data intact (don't wipe out all history)
+     deleted=$(pihole-FTL sqlite3 -ni "${DBFILE}" "DELETE FROM query_storage WHERE timestamp >= strftime('%s','now')-86400; select changes() from query_storage limit 1")
+ 
+     # Restart FTL
+-    service pihole-FTL restart
++    /opt/etc/init.d/S55pihole-FTL restart
++
+     if [[ "$*" != *"quiet"* ]]; then
+         echo -e "${OVER}  ${TICK} Deleted ${deleted} queries from long-term query database"
+     fi
+diff --git a/pihole b/pihole
+index 08ff5b76..d859c881 100755
+--- a/pihole
++++ b/pihole
+@@ -186,7 +186,7 @@ restartDNS() {
+     fi
+   else
+     # A full restart has been requested
+-    svc="service pihole-FTL restart"
++    svc="/opt/etc/init.d/S55pihole-FTL restart"
+     str="Restarting DNS server"
+     icon="${TICK}"
+   fi

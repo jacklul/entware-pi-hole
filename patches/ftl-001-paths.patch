@@ -53,7 +53,7 @@ index a261d3be..2b0cda3a 100644
  		}
  
 diff --git a/src/config/config.c b/src/config/config.c
-index 8054e83d..8cc1d154 100644
+index eee5a8c0..51c882cd 100644
 --- a/src/config/config.c
 +++ b/src/config/config.c
 @@ -481,7 +481,7 @@ void initConfig(struct config *conf)
@@ -83,7 +83,7 @@ index 8054e83d..8cc1d154 100644
  	conf->dns.rateLimit.count.t = CONF_UINT;
  	conf->dns.rateLimit.count.d.ui = 1000;
  	conf->dns.rateLimit.count.c = validate_stub; // Only type-based checking
-@@ -976,7 +976,7 @@ void initConfig(struct config *conf)
+@@ -983,7 +983,7 @@ void initConfig(struct config *conf)
  	conf->webserver.tls.cert.a = cJSON_CreateStringReference("<valid TLS certificate file (*.pem)>");
  	conf->webserver.tls.cert.f = FLAG_RESTART_FTL;
  	conf->webserver.tls.cert.t = CONF_STRING;
@@ -92,7 +92,7 @@ index 8054e83d..8cc1d154 100644
  	conf->webserver.tls.cert.c = validate_filepath;
  
  	conf->webserver.session.timeout.k = "webserver.session.timeout";
-@@ -997,7 +997,7 @@ void initConfig(struct config *conf)
+@@ -1004,7 +1004,7 @@ void initConfig(struct config *conf)
  	conf->webserver.paths.webroot.a = cJSON_CreateStringReference("<valid path>");
  	conf->webserver.paths.webroot.t = CONF_STRING;
  	conf->webserver.paths.webroot.f = FLAG_RESTART_FTL;
@@ -101,7 +101,7 @@ index 8054e83d..8cc1d154 100644
  	conf->webserver.paths.webroot.c = validate_filepath;
  
  	conf->webserver.paths.webhome.k = "webserver.paths.webhome";
-@@ -1083,7 +1083,7 @@ void initConfig(struct config *conf)
+@@ -1090,7 +1090,7 @@ void initConfig(struct config *conf)
  	conf->webserver.api.app_sudo.c = validate_stub; // Only type-based checking
  
  	conf->webserver.api.cli_pw.k = "webserver.api.cli_pw";
@@ -110,7 +110,7 @@ index 8054e83d..8cc1d154 100644
  	conf->webserver.api.cli_pw.t = CONF_BOOL;
  	conf->webserver.api.cli_pw.d.b = true;
  	conf->webserver.api.cli_pw.c = validate_stub; // Only type-based checking
-@@ -1154,14 +1154,14 @@ void initConfig(struct config *conf)
+@@ -1161,14 +1161,14 @@ void initConfig(struct config *conf)
  	conf->files.pid.a = cJSON_CreateStringReference("<any writable file>");
  	conf->files.pid.t = CONF_STRING;
  	conf->files.pid.f = FLAG_RESTART_FTL;
@@ -127,7 +127,7 @@ index 8054e83d..8cc1d154 100644
  	conf->files.database.c = validate_filepath;
  
  	conf->files.gravity.k = "files.gravity";
-@@ -1169,7 +1169,7 @@ void initConfig(struct config *conf)
+@@ -1176,7 +1176,7 @@ void initConfig(struct config *conf)
  	conf->files.gravity.a = cJSON_CreateStringReference("<any Pi-hole gravity database>");
  	conf->files.gravity.t = CONF_STRING;
  	conf->files.gravity.f = FLAG_RESTART_FTL;
@@ -136,7 +136,7 @@ index 8054e83d..8cc1d154 100644
  	conf->files.gravity.c = validate_filepath;
  
  	conf->files.gravity_tmp.k = "files.gravity_tmp";
-@@ -1177,21 +1177,21 @@ void initConfig(struct config *conf)
+@@ -1184,21 +1184,21 @@ void initConfig(struct config *conf)
  	conf->files.gravity_tmp.a = cJSON_CreateStringReference("<any existing world-writable writable directory>");
  	conf->files.gravity_tmp.t = CONF_STRING;
  	conf->files.gravity_tmp.f = FLAG_RESTART_FTL;
@@ -161,7 +161,7 @@ index 8054e83d..8cc1d154 100644
  	conf->files.setupVars.c = validate_filepath;
  
  	conf->files.pcap.k = "files.pcap";
-@@ -1210,7 +1210,7 @@ void initConfig(struct config *conf)
+@@ -1217,7 +1217,7 @@ void initConfig(struct config *conf)
  	conf->files.log.webserver.a = cJSON_CreateStringReference("<any writable file>");
  	conf->files.log.webserver.t = CONF_STRING;
  	conf->files.log.webserver.f = FLAG_RESTART_FTL;
@@ -170,7 +170,7 @@ index 8054e83d..8cc1d154 100644
  	conf->files.log.webserver.c = validate_filepath;
  
  	conf->files.log.dnsmasq.k = "files.log.dnsmasq";
-@@ -1218,7 +1218,7 @@ void initConfig(struct config *conf)
+@@ -1225,7 +1225,7 @@ void initConfig(struct config *conf)
  	conf->files.log.dnsmasq.a = cJSON_CreateStringReference("<any writable file>");
  	conf->files.log.dnsmasq.t = CONF_STRING;
  	conf->files.log.dnsmasq.f = FLAG_RESTART_FTL;
@@ -179,7 +179,7 @@ index 8054e83d..8cc1d154 100644
  	conf->files.log.dnsmasq.c = validate_filepath_dash;
  
  
-@@ -1259,7 +1259,7 @@ void initConfig(struct config *conf)
+@@ -1266,7 +1266,7 @@ void initConfig(struct config *conf)
  	conf->misc.addr2line.c = validate_stub; // Only type-based checking
  
  	conf->misc.etc_dnsmasq_d.k = "misc.etc_dnsmasq_d";
@@ -188,7 +188,7 @@ index 8054e83d..8cc1d154 100644
  	conf->misc.etc_dnsmasq_d.t = CONF_BOOL;
  	conf->misc.etc_dnsmasq_d.f = FLAG_RESTART_FTL;
  	conf->misc.etc_dnsmasq_d.d.b = false;
-@@ -1447,7 +1447,7 @@ void initConfig(struct config *conf)
+@@ -1454,7 +1454,7 @@ void initConfig(struct config *conf)
  	conf->debug.config.c = validate_stub; // Only type-based checking
  
  	conf->debug.inotify.k = "debug.inotify";
@@ -197,7 +197,7 @@ index 8054e83d..8cc1d154 100644
  	conf->debug.inotify.t = CONF_BOOL;
  	conf->debug.inotify.d.b = false;
  	conf->debug.inotify.c = validate_stub; // Only type-based checking
-@@ -1605,7 +1605,7 @@ bool readFTLconf(struct config *conf, const bool rewrite)
+@@ -1612,7 +1612,7 @@ bool readFTLconf(struct config *conf, const bool rewrite)
  	const char *path = "";
  	if((path = readFTLlegacy(conf)) != NULL)
  	{
@@ -206,7 +206,7 @@ index 8054e83d..8cc1d154 100644
  		log_info("Moving %s to %s", path, target);
  		if(rename(path, target) != 0)
  			log_warn("Unable to move %s to %s: %s", path, target, strerror(errno));
-@@ -1682,7 +1682,7 @@ bool getLogFilePath(void)
+@@ -1689,7 +1689,7 @@ bool getLogFilePath(void)
  	config.files.log.ftl.h = "The location of FTL's log file";
  	config.files.log.ftl.a = cJSON_CreateStringReference("<any writable file>");
  	config.files.log.ftl.t = CONF_STRING;
@@ -216,7 +216,7 @@ index 8054e83d..8cc1d154 100644
  	config.files.log.ftl.c = validate_filepath;
  
 diff --git a/src/config/config.h b/src/config/config.h
-index 069217d3..5d02e8fe 100644
+index 81d4a15f..86c0a75f 100644
 --- a/src/config/config.h
 +++ b/src/config/config.h
 @@ -28,7 +28,7 @@
@@ -238,7 +238,7 @@ index 069217d3..5d02e8fe 100644
  union conf_value {
  	bool b;                                     // boolean value
 diff --git a/src/config/dnsmasq_config.c b/src/config/dnsmasq_config.c
-index 6b8cbc82..a9d88dea 100644
+index c50223b1..8e0700f9 100644
 --- a/src/config/dnsmasq_config.c
 +++ b/src/config/dnsmasq_config.c
 @@ -207,12 +207,12 @@ static void write_config_header(FILE *fp, const char *description)
@@ -293,16 +293,25 @@ index 6b8cbc82..a9d88dea 100644
  		fputs("# the same way as for DHCP-derived names\n", pihole_conf);
  		fputs("domain-needed\n", pihole_conf);
  		fputs("\n", pihole_conf);
-@@ -505,7 +505,7 @@ bool __attribute__((const)) write_dnsmasq_config(struct config *conf, bool test_
+@@ -512,7 +512,7 @@ bool __attribute__((const)) write_dnsmasq_config(struct config *conf, bool test_
  	{
  		fputs("# Never forward A or AAAA queries for plain names, without\n",pihole_conf);
  		fputs("# dots or domain parts, to upstream nameservers. If the name\n", pihole_conf);
--		fputs("# is not known from /etc/hosts or DHCP a NXDOMAIN is returned\n", pihole_conf);
-+		fputs("# is not known from /opt/etc/hosts or DHCP a NXDOMAIN is returned\n", pihole_conf);
- 		if(strlen(conf->dns.domain.v.s))
+-		fputs("# is not known from /etc/hosts or DHCP, NXDOMAIN is returned\n", pihole_conf);
++		fputs("# is not known from /opt/etc/hosts or DHCP, NXDOMAIN is returned\n", pihole_conf);
+ 		fputs("local=//\n\n", pihole_conf);
+ 	}
+ 
+@@ -524,7 +524,7 @@ bool __attribute__((const)) write_dnsmasq_config(struct config *conf, bool test_
+ 		if(!domain_revServer)
+ 		{
+ 			fputs("# This DNS domain in purely local. FTL may answer queries from\n", pihole_conf);
+-			fputs("# /etc/hosts or DHCP but should never forward queries on that\n", pihole_conf);
++			fputs("# /opt/etc/hosts or DHCP but should never forward queries on that\n", pihole_conf);
+ 			fputs("# domain to any upstream servers\n", pihole_conf);
+ 			fprintf(pihole_conf, "domain=%s\n", conf->dns.domain.v.s);
  			fprintf(pihole_conf, "local=/%s/\n\n", conf->dns.domain.v.s);
- 		else
-@@ -653,12 +653,12 @@ bool __attribute__((const)) write_dnsmasq_config(struct config *conf, bool test_
+@@ -670,12 +670,12 @@ bool __attribute__((const)) write_dnsmasq_config(struct config *conf, bool test_
  	fputs("server=/onion/\n", pihole_conf);
  	fputs("\n", pihole_conf);
  
@@ -498,7 +507,7 @@ index b04f964f..7e161a74 100644
  #endif
  
 diff --git a/src/dnsmasq/option.c b/src/dnsmasq/option.c
-index 8e7377dc..1ee2a8b4 100644
+index d075ad0a..ac064e09 100644
 --- a/src/dnsmasq/option.c
 +++ b/src/dnsmasq/option.c
 @@ -417,7 +417,7 @@ static struct {
@@ -520,10 +529,10 @@ index 8e7377dc..1ee2a8b4 100644
    { LOPT_MAXTTL, ARG_ONE, "<integer>", gettext_noop("Specify time-to-live in seconds for maximum TTL to send to clients."), NULL },
    { LOPT_MAXCTTL, ARG_ONE, "<integer>", gettext_noop("Specify time-to-live ceiling for cache."), NULL },
 diff --git a/src/files.h b/src/files.h
-index 742e8d9a..ae24ff4a 100644
+index fc10ad23..839cde69 100644
 --- a/src/files.h
 +++ b/src/files.h
-@@ -18,7 +18,7 @@
+@@ -20,7 +20,7 @@
  #include <pwd.h>
  
  #define MAX_ROTATIONS 15

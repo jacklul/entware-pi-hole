@@ -1,20 +1,3 @@
-diff --git a/advanced/Scripts/piholeLogFlush.sh b/advanced/Scripts/piholeLogFlush.sh
-index 4d97fec..9d12308 100755
---- a/advanced/Scripts/piholeLogFlush.sh
-+++ b/advanced/Scripts/piholeLogFlush.sh
-@@ -66,7 +66,11 @@ else
-     deleted=$(pihole-FTL sqlite3 -ni "${DBFILE}" "DELETE FROM query_storage WHERE timestamp >= strftime('%s','now')-86400; select changes() from query_storage limit 1")
- 
-     # Restart pihole-FTL to force reloading history
--    sudo pihole restartdns
-+    if [[ ${EUID} -ne 0 ]]; then
-+        pihole restartdns
-+    else # Run with sudo only if we are not root already
-+        sudo pihole restartdns
-+    fi
- fi
- 
- if [[ "$*" != *"quiet"* ]]; then
 diff --git a/pihole b/pihole
 index 7c84771..68b2f04 100755
 --- a/pihole
@@ -28,6 +11,6 @@ index 7c84771..68b2f04 100755
 +    need_root=1
 +fi
 +
- # Can also be user pihole for other functions
- if [[ ${USER} != "pihole" && need_root -eq 0 ]];then
-   if [[ -x "$(command -v sudo)" ]]; then
+ # Check if the current user is neither root nor pihole and if the command
+ # requires root. If so, exit with an error message.
+ if [[ $EUID -ne 0 && ${USER} != "pihole" && need_root -eq 1 ]];then
