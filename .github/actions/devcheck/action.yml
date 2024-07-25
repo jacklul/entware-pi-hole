@@ -1,26 +1,27 @@
 name: Check if same dev package was already built
 
+outputs:
+  cache-hit:
+    value: ${{ steps.versions_last.outputs.cache-hit }}
+
 runs:
   using: composite
 
   steps:
+    - name: Create hash of .versions file
+      id: versions_hash
+      run: |
+        echo "HASH=$(sha1sum ./.versions | awk '{print $1}')" >> $GITHUB_OUTPUT
+
     - uses: actions/cache/restore@v4
       id: versions_last
       with:
-        path: .versions_last
-        key: last_dev_versions
+        path: ./.versions_last
+        key: last-dev-versions-${{ steps.versions_hash.outputs.HASH }}
         fail-on-cache-miss: false
 
-    - name: Compare versions
-      shell: bash
-      run: |
-        if [ -f ./.versions_last ] && cmp --silent ./.versions_last ./.versions; then
-          rm ./.versions
-        else
-          cp ./.versions ./.versions_last
-        fi
-
     - uses: actions/cache/save@v4
+      if: steps.versions_last.outputs.cache-hit != 'true'
       with:
-        path: .versions_last
-        key: last_dev_versions
+        path: ./.versions
+        key: last-dev-versions-${{ steps.versions_hash.outputs.HASH }}

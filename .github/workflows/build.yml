@@ -340,10 +340,12 @@ jobs:
           echo "FTL=$VERSION" >> ./.versions
 
       - name: Check if same dev package was already build
+        id: devcheck
         if: ${{ github.event_name == 'schedule' }}
         uses: ./.github/actions/devcheck
 
       - name: Set versions
+        if: ${{ github.event_name != 'schedule' || steps.devcheck.outputs.cache-hit != 'true' }}
         id: versions
         run: |
           if [ -f ./.versions ]; then
