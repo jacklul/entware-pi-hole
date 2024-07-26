@@ -10,6 +10,7 @@ runs:
   steps:
     - name: Create hash of .versions file
       id: versions_hash
+      shell: bash
       run: |
         echo "HASH=$(sha1sum ./.versions | awk '{print $1}')" >> $GITHUB_OUTPUT
 
