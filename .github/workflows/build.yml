@@ -455,13 +455,7 @@ jobs:
           find ./gh-pages -mindepth 1 -maxdepth 1 -type d -name "*-*.*" -exec bash -c '
             bash ./ipk-html-indexer/index_feed.sh -h -f "$1"
             sed "s#href=\"/css#href=\"../css#" -i "$1/Packages.html"
-            cat "$1/Packages" >> ./gh-pages/Packages
-            cat "$1/Packages.manifest" >> ./gh-pages/Packages.manifest
-            for FILE in ./gh-pages/Packages ./gh-pages/Packages.manifest; do
-              sed -e "s/^Filename: pi-hole/Filename: $(basename "$1")\/pi-hole/" -i "$FILE"
-            done
           ' bash {} \;
-          gzip -c ./gh-pages/Packages > ./gh-pages/Packages.gz
           cp -fr ./ipk-html-indexer/css ./gh-pages
 
       - name: Cleanup gh-pages directory
