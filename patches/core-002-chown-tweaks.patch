@@ -22,7 +22,7 @@ index c681782..1443a90 100755
 +++ b/advanced/Templates/pihole-FTL-prestart.sh
 @@ -9,16 +9,19 @@ utilsfile="${PI_HOLE_SCRIPT_DIR}/utils.sh"
  # Get file paths
- FTL_PID_FILE="$(getFTLPIDFile)"
+ FTL_PID_FILE="$(getFTLConfigValue files.pid)"
  
 +# In Entware user pihole might not exist
 +[ -f /opt/etc/opkg.conf ] && [ -z "$(id -u pihole 2> /dev/null)" ] && NO_PIHOLE_USER=y
@@ -42,7 +42,7 @@ index c681782..1443a90 100755
  
  # allow all users to enter the directories
  chmod 0755 /opt/etc/pihole /opt/var/log/pihole
-@@ -28,19 +31,26 @@ chmod 0755 /opt/etc/pihole /opt/var/log/pihole
+@@ -28,7 +28,14 @@ chmod 0755 /etc/pihole /var/log/pihole
  find /opt/etc/pihole -type d -exec chmod 0755 {} \;
  
  # Touch files to ensure they exist (create if non-existing, preserve if existing)
@@ -61,20 +61,7 @@ index c681782..1443a90 100755
 +    [ -f /opt/var/log/pihole/pihole.log ] || install -m 640 /dev/null /opt/var/log/pihole/pihole.log
 +    [ -f /opt/etc/pihole/dhcp.leases ] || install -m 644 /dev/null /opt/etc/pihole/dhcp.leases
 +fi
- 
- 
- # Backward compatibility for user-scripts that still expect log files in /var/log instead of /var/log/pihole
- # Should be removed with Pi-hole v6.0
- if [ ! -f /opt/var/log/pihole.log ]; then
-     ln -sf /opt/var/log/pihole/pihole.log /opt/var/log/pihole.log
--    chown -h pihole:pihole /opt/var/log/pihole.log
-+    [ -z "$NO_PIHOLE_USER" ] && chown -h pihole:pihole /opt/var/log/pihole.log
- fi
- if [ ! -f /opt/var/log/pihole-FTL.log ]; then
-     ln -sf /opt/var/log/pihole/FTL.log /opt/var/log/pihole-FTL.log
--    chown -h pihole:pihole /opt/var/log/pihole-FTL.log
-+    [ -z "$NO_PIHOLE_USER" ] && chown -h pihole:pihole /opt/var/log/pihole-FTL.log
- fi
+
 diff --git a/gravity.sh b/gravity.sh
 index 522d92f..bb8f35b 100755
 --- a/gravity.sh
