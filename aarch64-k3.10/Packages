@@ -1,0 +1,30 @@
+Package: pi-hole
+Version: 2024.08.06-134720-c6ff1d52
+Depends: bash, cron, curl, git-http, ca-bundle, bind-dig, iputils-ping, net-tools, findutils, grep, sed, jq, libcap-bin, shadow-su, psmisc, procps-ng-pgrep, libncurses-dev, rev, lscpu, coreutils-cut, coreutils-expr, coreutils-id, coreutils-install, coreutils-mktemp, coreutils-nohup, coreutils-printf, coreutils-sha1sum, coreutils-sleep, coreutils-stat, coreutils-stty, coreutils-tee, coreutils-timeout, coreutils-tr, coreutils-tty, coreutils-whoami
+Suggests: logrotate, sudo
+License: EUPL-1.2
+Section: net
+URL: https://github.com/pi-hole/pi-hole
+Architecture: aarch64-3.10
+Installed-Size: 32368640
+Filename: pi-hole_2024.08.06-134720-c6ff1d52_aarch64-3.10.ipk
+Size: 13869936
+SHA256sum: 7baa1a2c6e2db96fef6ffe2beeda3974e00c3aa1b03011ae093bb69a9abe666d
+Description:  The Pi-hole is a DNS sinkhole that protects your devices from unwanted content without installing any client-side software.
+ This is an unofficial package not supported by the Pi-hole developers!
+
+Package: pi-hole-dev
+Version: 2024.08.09-020348-c6ff1d52
+Depends: bash, cron, curl, git-http, ca-bundle, bind-dig, iputils-ping, net-tools, findutils, grep, sed, jq, libcap-bin, shadow-su, psmisc, procps-ng-pgrep, libncurses-dev, rev, lscpu, coreutils-cut, coreutils-expr, coreutils-id, coreutils-install, coreutils-mktemp, coreutils-nohup, coreutils-printf, coreutils-sha1sum, coreutils-sleep, coreutils-stat, coreutils-stty, coreutils-tee, coreutils-timeout, coreutils-tr, coreutils-tty, coreutils-whoami
+Suggests: logrotate, sudo
+License: EUPL-1.2
+Section: net
+URL: https://github.com/pi-hole/pi-hole
+Architecture: aarch64-3.10
+Installed-Size: 32368640
+Filename: pi-hole-dev_2024.08.09-020348-c6ff1d52_aarch64-3.10.ipk
+Size: 13870251
+SHA256sum: 81a3d42cd6ff92a51a080e28d069501ed6f36eccf7ba668cd28d47887bdc0509
+Description:  The Pi-hole is a DNS sinkhole that protects your devices from unwanted content without installing any client-side software.
+ This is an unofficial package not supported by the Pi-hole developers!
+
