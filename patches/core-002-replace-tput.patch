@@ -5,7 +5,7 @@ index 4344c7b8..defa0e56 100644
 @@ -1,5 +1,5 @@
  # Determine if terminal is capable of showing colors
 -if ([ -t 1 ] && [ $(tput colors) -ge 8 ]) || [ "${WEBCALL}" ]; then
-+if ([ -t 1 ] && [ $(tput colors) -ge 8 ]) 2> /dev/null || [ "${WEBCALL}" ]; then
++if ([ -t 1 ] && [ $(/opt/share/pihole/tput.sh colors) -ge 8 ]) || [ "${WEBCALL}" ]; then
    # Bold and underline may not show up on all clients
    # If something MUST be emphasized, use both
    COL_BOLD='[1m'
