@@ -30,6 +30,6 @@ index 581fc0b..c0068bb 100644
 +	JSON_ADD_NULL_IF_NOT_EXISTS(entware, "remote");
 +	JSON_ADD_ITEM_TO_OBJECT(version, "entware", entware);
 +
- 	// Send reply
- 	cJSON *json = JSON_NEW_OBJECT();
- 	JSON_ADD_ITEM_TO_OBJECT(json, "version", version);
+ 	return 0;
+ }
+ 
