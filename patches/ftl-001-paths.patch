@@ -369,8 +369,8 @@ index 8e64cfed..1e2441cb 100644
 --- a/src/config/legacy_reader.c
 +++ b/src/config/legacy_reader.c
 @@ -67,7 +67,7 @@ bool getLogFilePathLegacy(struct config *conf, FILE *fp)
- 	if(buffer == NULL)
- 	{
+ 			free(conf->files.log.ftl.v.s);
+ 
  		// Use standard path if no custom path was obtained from the config file
 -		conf->files.log.ftl.v.s = strdup("/var/log/pihole/FTL.log");
 +		conf->files.log.ftl.v.s = strdup("/opt/var/log/pihole/FTL.log");
