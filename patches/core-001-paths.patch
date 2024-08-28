@@ -11,8 +11,8 @@ index 5843c585..32628042 100755
 +    if [ -r /opt/etc/pihole/cli_pw ]; then
 +        password=$(cat /opt/etc/pihole/cli_pw)
  
-         # Try to authenticate using the CLI password
-         Authentication
+         if [ "${1}" = "verbose" ]; then
+             echo "API Authentication: Trying to use CLI password"
 diff --git a/advanced/Scripts/database_migration/gravity-db.sh b/advanced/Scripts/database_migration/gravity-db.sh
 index 8f84e2b0..fec93047 100755
 --- a/advanced/Scripts/database_migration/gravity-db.sh
@@ -91,68 +91,6 @@ index c04c5b33..ecf5365e 100755
  fi
  
  flushARP(){
-diff --git a/advanced/Scripts/piholeCheckout.sh b/advanced/Scripts/piholeCheckout.sh
-index 41fd8606..6c4226d7 100755
---- a/advanced/Scripts/piholeCheckout.sh
-+++ b/advanced/Scripts/piholeCheckout.sh
-@@ -8,7 +8,7 @@
- # This file is copyright under the latest version of the EUPL.
- # Please see LICENSE file for your rights under this license.
- 
--readonly PI_HOLE_FILES_DIR="/etc/.pihole"
-+readonly PI_HOLE_FILES_DIR="/opt/etc/.pihole"
- SKIP_INSTALL="true"
- source "${PI_HOLE_FILES_DIR}/automated install/basic-install.sh"
- 
-@@ -88,8 +88,8 @@ checkout() {
- 
-         local path
-         path="development/${binary}"
--        echo "development" > /etc/pihole/ftlbranch
--        chmod 644 /etc/pihole/ftlbranch
-+        echo "development" > /opt/etc/pihole/ftlbranch
-+        chmod 644 /opt/etc/pihole/ftlbranch
-     elif [[ "${1}" == "master" ]] ; then
-         # Shortcut to check out master branches
-         echo -e "  ${INFO} Shortcut \"master\" detected - checking out master branches..."
-@@ -100,8 +100,8 @@ checkout() {
-         #echo -e "  ${TICK} Web Interface"
-         local path
-         path="master/${binary}"
--        echo "master" > /etc/pihole/ftlbranch
--        chmod 644 /etc/pihole/ftlbranch
-+        echo "master" > /opt/etc/pihole/ftlbranch
-+        chmod 644 /opt/etc/pihole/ftlbranch
-     elif [[ "${1}" == "core" ]] ; then
-         str="Fetching branches from ${piholeGitUrl}"
-         echo -ne "  ${INFO} $str"
-@@ -157,7 +157,7 @@ checkout() {
-         fi
-         checkout_pull_branch "${webInterfaceDir}" "${2}"
-         # Update local and remote versions via updatechecker
--        /opt/pihole/updatecheck.sh
-+        /opt/share/pihole/updatecheck.sh
-     elif [[ "${1}" == "ftl" ]] ; then
-         local path
-         local oldbranch
-@@ -168,14 +168,14 @@ checkout() {
-         local ret=$?
-         if [ $ret -eq 0 ]; then
-             echo "  ${TICK} Branch ${2} exists"
--            echo "${2}" > /etc/pihole/ftlbranch
--            chmod 644 /etc/pihole/ftlbranch
-+            echo "${2}" > /opt/etc/pihole/ftlbranch
-+            chmod 644 /opt/etc/pihole/ftlbranch
-             echo -e "  ${INFO} Switching to branch: \"${2}\" from \"${oldbranch}\""
-             FTLinstall "${binary}"
-             restart_service pihole-FTL
-             enable_service pihole-FTL
-             # Update local and remote versions via updatechecker
--            /opt/pihole/updatecheck.sh
-+            /opt/share/pihole/updatecheck.sh
-         else
-             if [[ $ret -eq 1 ]]; then
-                 echo "  ${CROSS} Requested branch \"${2}\" is not available"
 diff --git a/advanced/Scripts/piholeDebug.sh b/advanced/Scripts/piholeDebug.sh
 index 7c558127..d2942f01 100755
 --- a/advanced/Scripts/piholeDebug.sh
@@ -289,51 +227,6 @@ index 3340bdd2..a2b5802d 100755
  . "${colfile}"
  
  # Source api functions
-diff --git a/advanced/Scripts/update.sh b/advanced/Scripts/update.sh
-index 8a35ef2e..23ddf69a 100755
---- a/advanced/Scripts/update.sh
-+++ b/advanced/Scripts/update.sh
-@@ -12,9 +12,9 @@
- 
- # Variables
- readonly ADMIN_INTERFACE_GIT_URL="https://github.com/pi-hole/web.git"
--readonly ADMIN_INTERFACE_DIR="/var/www/html/admin"
-+readonly ADMIN_INTERFACE_DIR="/opt/share/pihole/www/admin"
- readonly PI_HOLE_GIT_URL="https://github.com/pi-hole/pi-hole.git"
--readonly PI_HOLE_FILES_DIR="/etc/.pihole"
-+readonly PI_HOLE_FILES_DIR="/opt/etc/.pihole"
- 
- # shellcheck disable=SC2034
- SKIP_INSTALL=true
-@@ -25,7 +25,7 @@ CHECK_ONLY=false
- # shellcheck disable=SC1090
- source "${PI_HOLE_FILES_DIR}/automated install/basic-install.sh"
- # shellcheck disable=SC1091
--source "/opt/pihole/COL_TABLE"
-+source "/opt/share/pihole/COL_TABLE"
- 
- # is_repo() sourced from basic-install.sh
- # make_repo() sourced from basic-install.sh
-@@ -168,8 +168,8 @@ main() {
- 
-     # Determine FTL branch
-     local ftlBranch
--    if [[ -f "/etc/pihole/ftlbranch" ]]; then
--        ftlBranch=$(</etc/pihole/ftlbranch)
-+    if [[ -f "/opt/etc/pihole/ftlbranch" ]]; then
-+        ftlBranch=$(</opt/etc/pihole/ftlbranch)
-     else
-         ftlBranch="master"
-     fi
-@@ -217,7 +217,7 @@ main() {
- 
-     if [[ "${FTL_update}" == true || "${core_update}" == true || "${web_update}" == true ]]; then
-         # Update local and remote versions via updatechecker
--        /opt/pihole/updatecheck.sh
-+        /opt/share/pihole/updatecheck.sh
-         echo -e "  ${INFO} Local version file information updated."
-     fi
- 
 diff --git a/advanced/Scripts/updatecheck.sh b/advanced/Scripts/updatecheck.sh
 index b325ee9c..c1efe13b 100755
 --- a/advanced/Scripts/updatecheck.sh
