@@ -17,9 +17,10 @@ runs:
     - uses: actions/cache/restore@v4
       id: versions_last
       with:
-        path: ./.versions_last
+        path: ./.versions
         key: last-dev-versions-${{ steps.versions_hash.outputs.HASH }}
         fail-on-cache-miss: false
+        lookup-only: true
 
     - uses: actions/cache/save@v4
       if: steps.versions_last.outputs.cache-hit != 'true'
