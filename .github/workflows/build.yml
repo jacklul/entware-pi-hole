@@ -103,6 +103,7 @@ jobs:
         with:
           name: core
           path: ./stage/*
+          include-hidden-files: true
 
   build-web:
     concurrency: build-web-${{ github.ref_name || github.run_id }}
@@ -150,6 +151,7 @@ jobs:
         with:
           name: web
           path: ./stage/*
+          include-hidden-files: true
 
   build-binary:
     concurrency: build-binary-${{ github.ref_name || github.run_id }}-${{ matrix.architecture }}
@@ -279,6 +281,7 @@ jobs:
           path: |
             ./stage/pihole-FTL-*
             ./stage/.version
+          include-hidden-files: true
 
   build-packages:
     concurrency: build-packages-${{ github.ref_name || github.run_id }}
@@ -329,6 +332,7 @@ jobs:
         with:
           name: packages
           path: ./packages/*
+          include-hidden-files: true
 
       - name: Save current module versions
         run: |
