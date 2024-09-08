@@ -62,13 +62,8 @@ fi
 case $BRANCH in
     "dev")
         CORE_BRANCH=development
-        WEB_BRANCH=devel
+        WEB_BRANCH=development
         FTL_BRANCH=development
-    ;;
-    "dev-v6")
-        CORE_BRANCH=development-v6
-        WEB_BRANCH=development-v6
-        FTL_BRANCH=development-v6
     ;;
     *)
         CORE_BRANCH=$BRANCH
