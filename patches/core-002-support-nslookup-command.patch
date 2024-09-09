@@ -1,0 +1,56 @@
+diff --git a/gravity.sh b/gravity.sh
+index 1ac0e282..f91b5a84 100755
+--- a/gravity.sh
++++ b/gravity.sh
+@@ -297,20 +297,39 @@ gravity_CheckDNSResolutionAvailable() {
+   local lookupDomain="raw.githubusercontent.com"
+ 
+   # Determine if $lookupDomain is resolvable
+-  if timeout 4 getent hosts "${lookupDomain}" &>/dev/null; then
+-    echo -e "${OVER}  ${TICK} DNS resolution is available\\n"
+-    return 0
++  if command -v getent > /dev/null; then
++    if timeout 4 getent hosts "${lookupDomain}" &>/dev/null; then
++      echo -e "${OVER}  ${TICK} DNS resolution is available\\n"
++      return 0
++    else
++      echo -e "  ${CROSS} DNS resolution is currently unavailable"
++    fi
++
++    str="Waiting until DNS resolution is available..."
++    echo -ne "  ${INFO} ${str}"
++    until getent hosts github.com &> /dev/null; do
++    # Append one dot for each second waiting
++      str="${str}."
++      echo -ne "  ${OVER}  ${INFO} ${str}"
++      sleep 1
++    done
+   else
+-    echo -e "  ${CROSS} DNS resolution is currently unavailable"
+-  fi
++    if timeout 4 nslookup "${lookupDomain}" &>/dev/null; then
++      echo -e "${OVER}  ${TICK} DNS resolution is available\\n"
++      return 0
++    else
++      echo -e "  ${CROSS} DNS resolution is currently unavailable"
++    fi
+ 
+-  echo -e "  ${INFO} Waiting until DNS resolution is available..."
+-  until getent hosts github.com &> /dev/null; do
+-  # Append one dot for each second waiting
+-    str="${str}."
+-    echo -ne "  ${OVER}  ${INFO} ${str}"
+-    sleep 1
+-  done
++    str="Waiting until DNS resolution is available..."
++    echo -ne "  ${INFO} ${str}"
++    until nslookup github.com &> /dev/null; do
++    # Append one dot for each second waiting
++      str="${str}."
++      echo -ne "  ${OVER}  ${INFO} ${str}"
++      sleep 1
++    done
++  fi
+ 
+   # If we reach this point, DNS resolution is available
+   echo -e "${OVER}  ${TICK} DNS resolution is available"

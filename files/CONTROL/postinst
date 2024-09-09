@@ -145,7 +145,9 @@ fi
 # Make sure gravity database exists and that
 # gravity is rebuilt after database upgrade
 if [ -n "$RUN_GRAVITY" ] || { [ -n "$GRAVITYDB_FILE" ] && [ ! -f "$GRAVITYDB_FILE" ] ; }; then
-    bash /opt/share/pihole/gravity.sh --force
+    if ! timeout 3600 bash /opt/share/pihole/gravity.sh --force; then
+        echo "  ${CROSS} ${COL_LIGHT_RED}Gravity database rebuild failed - waited 1 hour for it to complete!${COL_NC}"
+    fi
 fi
 
 # Update remote versions via updatechecker
