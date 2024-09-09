@@ -1,7 +1,7 @@
 #!/bin/sh
 
 if bash -c "command -v tput" > /dev/null 2>&1; then
-    tput "$*"
+    tput "$@"
 elif [ "$1" = "colors" ]; then
     case "$TERM" in
         xterm-256color|screen-256color|tmux-256color|rxvt-unicode-256color)
