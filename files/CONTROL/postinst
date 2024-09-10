@@ -112,7 +112,7 @@ if [ ! -f /opt/etc/pihole/pihole.toml ]; then
 
     echo "  ${INFO} ${COL_LIGHT_GREEN}Generated password for the web interface: $PASSWORD${COL_NC}"
     echo "  ${INFO} ${COL_BOLD}It can be changed using 'pihole setpassword' command.${COL_NC}"
-elif [ -z "$(pihole-FTL --config webserver.api.pwhash)" ]; then # Shown a warning if the password is not set
+elif [ -z "$(pihole-FTL --config webserver.api.pwhash)" ]; then # Show a warning if the password is not set
     echo "  ${INFO} ${COL_LIGHT_RED}Password for the web interface is not set - this is a security risk!${COL_NC}"
     echo "  ${INFO} ${COL_BOLD}Please set it using 'pihole setpassword' command.${COL_NC}"
 fi
