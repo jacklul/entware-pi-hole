@@ -154,7 +154,7 @@ fi
 # We cannot execute it now because opkg is running
 {
     start_time=$(date +%s)
-    while [ -f /opt/tmp/opkg.lock ] && [ $(( $(date +%s) - start_time )) -le 60 ]; do
+    while [ -f /opt/tmp/opkg.lock ] && [ $(( $(date +%s) - start_time )) -le 300 ]; do
         sleep 1
     done
 
