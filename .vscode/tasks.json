@@ -30,7 +30,7 @@
         {
             "label": "Save dev/core patch to dev/patch.diff",
             "type": "shell",
-            "command": "git -C dev/core diff --cached > dev/patch.diff && code dev/patch.diff",
+            "command": "git -C dev/core diff --cached --abbrev=8 > dev/patch.diff && code dev/patch.diff",
             "problemMatcher": [],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -39,7 +39,7 @@
         {
             "label": "Save dev/web patch to dev/patch.diff",
             "type": "shell",
-            "command": "git -C dev/web diff --cached > dev/patch.diff && code dev/patch.diff",
+            "command": "git -C dev/web diff --cached --abbrev=8 > dev/patch.diff && code dev/patch.diff",
             "problemMatcher": [],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -48,7 +48,7 @@
         {
             "label": "Save dev/FTL patch to dev/patch.diff",
             "type": "shell",
-            "command": "git -C dev/FTL diff --cached > dev/patch.diff && code dev/patch.diff",
+            "command": "git -C dev/FTL diff --cached --abbrev=8 > dev/patch.diff && code dev/patch.diff",
             "problemMatcher": [],
             "options": {
                 "cwd": "${workspaceFolder}"
