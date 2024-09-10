@@ -14,9 +14,9 @@ index 7c55812..0116ad3 100755
 +        [ -n "${entware_installed_package}" ] && log_write "${INFO} Pi-hole Entware package: ${entware_installed_package}"
 +
 +        # Print informations about Entware release
-+        if [ -f /opt/etc/entware-release ];then
++        if [ -f /opt/etc/entware_release ];then
 +            log_write "${INFO} Entware release details:"
-+            make_array_from_file "/opt/etc/entware-release"
++            make_array_from_file "/opt/etc/entware_release"
 +        fi
 +    fi
 +
