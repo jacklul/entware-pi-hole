@@ -201,8 +201,8 @@ index eee5a8c0..51c882cd 100644
  	const char *path = "";
  	if((path = readFTLlegacy(conf)) != NULL)
  	{
--		const char *target = "/etc/pihole/pihole-FTL.conf.bck";
-+		const char *target = "/opt/etc/pihole/pihole-FTL.conf.bck";
+-		const char *target = "/etc/pihole/migration_backup_v6/pihole-FTL.conf";
++		const char *target = "/opt/etc/pihole/migration_backup_v6/pihole-FTL.conf";
  		log_info("Moving %s to %s", path, target);
  		if(rename(path, target) != 0)
  			log_warn("Unable to move %s to %s: %s", path, target, strerror(errno));
@@ -330,7 +330,7 @@ diff --git a/src/config/dnsmasq_config.h b/src/config/dnsmasq_config.h
 index 4a9d9fad..1942dc5a 100644
 --- a/src/config/dnsmasq_config.h
 +++ b/src/config/dnsmasq_config.h
-@@ -22,13 +22,13 @@ bool read_legacy_cnames_config(void);
+@@ -22,14 +22,14 @@ bool read_legacy_cnames_config(void);
  bool read_legacy_custom_hosts_config(void);
  bool write_custom_list(void);
  
@@ -346,8 +346,10 @@ index 4a9d9fad..1942dc5a 100644
 +#define DNSMASQ_HOSTSDIR "/opt/etc/pihole/hosts"
  #define DNSMASQ_CUSTOM_LIST DNSMASQ_HOSTSDIR"/custom.list"
 -#define DNSMASQ_CUSTOM_LIST_LEGACY "/etc/pihole/custom.list"
+-#define DNSMASQ_CUSTOM_LIST_LEGACY_TARGET "/etc/pihole/migration_backup_v6/custom.list"
 -#define DHCPLEASESFILE "/etc/pihole/dhcp.leases"
 +#define DNSMASQ_CUSTOM_LIST_LEGACY "/opt/etc/pihole/custom.list"
++#define DNSMASQ_CUSTOM_LIST_LEGACY_TARGET "/opt/etc/pihole/migration_backup_v6/custom.list"
 +#define DHCPLEASESFILE "/opt/etc/pihole/dhcp.leases"
  
  #endif //DNSMASQ_CONFIG_H
@@ -390,6 +392,19 @@ index f90bc4ad..9c1eb759 100644
  static char *cli_password = NULL;
  
  // Convert RAW data into hex representation
+diff --git a/src/config/setupVars.c b/src/config/setupVars.c
+index cd5df0ea..3e3ee9fb 100644
+--- a/src/config/setupVars.c
++++ b/src/config/setupVars.c
+@@ -592,7 +592,7 @@ void importsetupVarsConf(void)
+ 	get_conf_string_from_setupVars("WEB_PORTS", &config.webserver.port);
+ 
+ 	// Move the setupVars.conf file to the migration directory
+-	const char *setupVars_target = "/etc/pihole/migration_backup_v6/setupVars.conf";
++	const char *setupVars_target = "/opt/etc/pihole/migration_backup_v6/setupVars.conf";
+ 	if(rename(config.files.setupVars.v.s, setupVars_target) != 0)
+ 		log_warn("Could not move %s to %s", config.files.setupVars.v.s, setupVars_target);
+ 	else
 diff --git a/src/database/shell.c b/src/database/shell.c
 index fc6bf5e6..73b12858 100644
 --- a/src/database/shell.c
