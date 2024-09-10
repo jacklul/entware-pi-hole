@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Made by Jack'lul <jacklul.github.io>
 # Based on https://github.com/Entware/Entware/blob/master/scripts/ipkg-build
 

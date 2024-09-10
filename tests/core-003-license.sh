@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Make sure the license version is correct
 
 #shellcheck disable=SC1091

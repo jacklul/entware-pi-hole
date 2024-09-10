@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Make sure there is no call to "service pihole-FTL" or "systemctl action pihole-FTL"
 
 #shellcheck disable=SC1091

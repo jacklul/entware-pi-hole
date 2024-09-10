@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Made by Jack'lul <jacklul.github.io>
 
 PACKAGE_DIR="$1"

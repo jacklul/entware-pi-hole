@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 #shellcheck disable=SC1091
 . "$(dirname "$(readlink -f "$0")")/common.sh"

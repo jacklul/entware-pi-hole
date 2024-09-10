@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Make sure all referenced paths are not pointing to non-/opt directories
 
 #shellcheck disable=SC1091

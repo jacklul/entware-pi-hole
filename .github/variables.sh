@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Made by Jack'lul <jacklul.github.io>
 
 [ -z "$GITHUB_OUTPUT" ] && { echo "GITHUB_OUTPUT is not set"; exit 1; }
