@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+if command -v locale.new &>/dev/null; then
+    locale.new "$@"
+else
+    echo "'locale.new' - command not found" >&2
+    exit 1
+fi

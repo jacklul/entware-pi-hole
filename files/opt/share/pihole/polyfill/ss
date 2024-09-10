@@ -1,0 +1,111 @@
+#!/usr/bin/env bash
+
+args="$*"
+pargs=()
+ipv4=
+ipv6=
+listening=
+numeric=
+tcp=
+udp=
+processes=
+no_header=
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --ipv4)
+            ipv4=y
+            shift
+            ;;
+        --ipv6)
+            ipv6=y
+            shift
+            ;;
+        --listening)
+            listening=y
+            shift
+            ;;
+        --numeric)
+            numeric=y
+            shift
+            ;;
+        --tcp)
+            tcp=y
+            shift
+            ;;
+        --udp)
+            udp=y
+            shift
+            ;;
+        --processes)
+            processes=y
+            shift
+            ;;
+        --no-header)
+            no_header=y
+            shift
+            ;;
+        *)
+            pargs+=("$1")
+            shift
+            ;;
+    esac
+done
+
+if
+    [ "${pargs[0]}" = "src" ] &&
+    [ -n "$listening" ] &&
+    [ -n "$numeric" ] &&
+    [ -n "$tcp" ] &&
+    [ -n "$udp" ] ;
+then
+    if [ -n "$ipv4" ]; then
+        netstat -tuln -4 | grep "${pargs[1]} "
+    elif [ -n "$ipv6" ]; then
+        netstat -tuln -6 | grep "${pargs[1]} "
+    else
+        echo "'--ipv4' or '--ipv6' argument must be provided" >&2
+        exit 1
+    fi
+
+    exit 0
+fi
+
+if
+    [ "${pargs[0]}" = "" ] &&
+    [ -n "$listening" ] &&
+    [ -n "$numeric" ] &&
+    [ -n "$tcp" ] &&
+    [ -n "$udp" ] &&
+    [ -n "$processes" ] &&
+    [ -n "$no_header" ] ;
+then
+    netstat -tulnp | grep "tcp \|udp " | while IFS= read -r line; do
+        proto=$(echo "$line" | awk '{print $1}')
+        laddr=$(echo "$line" | awk '{print $4}')
+        raddr=$(echo "$line" | awk '{print $5}')
+
+        listen=$(echo "$line" | awk '{print $6}')
+        if [ "$listen" = "LISTEN" ]; then
+            process=$(echo "$line" | awk '{for(i=7;i<=NF;i++) printf $i " "; print ""}' | sed 's/[[:space:]]*$//')
+        else
+            listen="UNCONN"
+            process=$(echo "$line" | awk '{for(i=6;i<=NF;i++) printf $i " "; print ""}' | sed 's/[[:space:]]*$//')
+        fi
+
+        pid="$(echo "$process" | cut -d '/' -f 1)"
+        pname="$(echo "$process" | cut -d '/' -f 2)"
+
+        if [ "$pid" = "-" ]; then
+            pid="?"
+            pname="unknown"
+        fi
+
+        echo "$proto  $listen  0  0  $laddr  $raddr  users:((\"$pname\",pid=$pid))"
+    done
+
+    exit 0
+fi
+
+echo "'ss $args' - polyfill not implemented" >&2
+exit 1

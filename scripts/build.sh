@@ -129,5 +129,6 @@ find "$DESTINATION_DIR" -type f -exec chmod 0644 {} \;
 find "$DESTINATION_DIR" -type d -exec chmod 0755 {} \;
 chmod 755 "$DESTINATION_DIR/opt/bin"/* "$DESTINATION_DIR/opt/etc/init.d"/*
 find "$DESTINATION_DIR/opt/share/pihole" -type f \( -name "*.sh" -o -name "COL_TABLE" \) -exec chmod 0755 {} \;
+find "$DESTINATION_DIR/opt/share/pihole/polyfill" -type f -exec chmod 0755 {} \;
 
 echo "Created package files in $DESTINATION_DIR"

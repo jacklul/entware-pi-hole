@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+case "$1" in
+    hosts)
+        nslookup "$2" && exit 0
+        exit 1
+    ;;
+    group)
+        id -gn "$2" && exit 0
+        exit 1
+    ;;
+esac
+
+echo "'getent $1' - polyfill not implemented" >&2
+exit 1

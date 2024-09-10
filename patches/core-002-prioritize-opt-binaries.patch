@@ -1,16 +1,14 @@
 diff --git a/pihole b/pihole
-index 7c84771..dc56552 100755
+index 98f478a3..8eb89d39 100755
 --- a/pihole
 +++ b/pihole
-@@ -9,7 +9,10 @@
+@@ -9,6 +9,9 @@
  # This file is copyright under the latest version of the EUPL.
  # Please see LICENSE file for your rights under this license.
  
--readonly PI_HOLE_SCRIPT_DIR="/opt/share/pihole"
 +# Prioritize /opt binaries
-+PATH="/opt/sbin:/opt/bin:$PATH"
++PATH="/opt/sbin:/opt/bin:$PATH:/opt/share/pihole/polyfill"
 +
-+readonly PI_HOLE_SCRIPT_DIR="/opt/share/pihole"
+ readonly PI_HOLE_SCRIPT_DIR="/opt/share/pihole"
  
  # PI_HOLE_BIN_DIR is not readonly here because in some functions (checkout),
- # they might get set again when the installer is sourced. This causes an

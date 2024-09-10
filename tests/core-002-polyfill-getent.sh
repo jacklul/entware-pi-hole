@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
-# Make sure there is no call to "service pihole-FTL" or "systemctl action pihole-FTL"
+# Make sure sockstat calls have not changed
 
 #shellcheck disable=SC1091
 . "$(dirname "$(readlink -f "$0")")/common-core.sh"
+
+find1="getent hosts"
+found1=false
 
 [ -z "$FILES" ] && exit 1
 for FILE in $FILES; do
@@ -13,10 +16,18 @@ for FILE in $FILES; do
     # No comments
     CONTENTS="$(grep -o "^[^#]*" < "$FILE"))"
 
+    foundhere=false
+
     # Checks
-    echo "$CONTENTS" | grep -aE "service pihole-FTL" && exit 1
-    echo "$CONTENTS" | grep -aE "service \"[[:alnum:]_]+\" status" && exit 1
-    echo "$CONTENTS" | grep -aE "systemctl [[:alnum:]_]+ pihole-FTL" && exit 1
+    echo "$CONTENTS" | grep -qaE "$find1" && found1=true && foundhere=true
+
+    [ "$foundhere" = true ] && continue
+    echo "$CONTENTS" | grep -aE "getent [[:alnum:]_]+ " && exit 1
 done
+
+if [ "$found1" = false ]; then
+    echo "'$find1' = $found1"
+    exit 1
+fi
 
 exit 0

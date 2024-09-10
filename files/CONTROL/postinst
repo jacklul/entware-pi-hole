@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# Prioritize /opt binaries
+PATH="/opt/sbin:/opt/bin:$PATH:/opt/share/pihole/polyfill"
+
+# Fancy console output
 if [ -f /opt/share/pihole/COL_TABLE ]; then
     # shellcheck disable=SC1091
     . "/opt/share/pihole/COL_TABLE"
@@ -9,9 +13,6 @@ else
     INFO="[i]"
     OVER="\\r[K"
 fi
-
-# Prioritize /opt binaries
-PATH="/opt/sbin:/opt/bin:$PATH"
 
 random_number() {
     _BASE=$1

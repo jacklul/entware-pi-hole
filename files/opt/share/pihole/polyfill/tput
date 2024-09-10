@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+case "$1" in
+    colors)
+        case "$TERM" in
+            xterm-256color|screen-256color|tmux-256color|rxvt-unicode-256color)
+                echo 256
+                ;;
+            xterm-color|screen|tmux|rxvt|xterm|linux)
+                echo 8
+                ;;
+            vt100|vt220|vt102|dumb)
+                echo 2
+                ;;
+            *)
+                echo 0
+            ;;
+        esac
+    ;;
+    civis)
+        echo -e "\e[?25l"
+    ;;
+    cnorm)
+        echo -e "\e[?25h"
+    ;;
+    *)
+        echo "'tput $1' - polyfill not implemented" >&2
+        exit 1
+    ;;
+esac

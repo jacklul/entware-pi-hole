@@ -23,13 +23,3 @@ index 7c55812..0116ad3 100755
      # If there is a /etc/*release file, it's probably a supported operating system, so we can
      if ls /etc/*release 1> /dev/null 2>&1; then
          # display the attributes to the user from the function made earlier
-@@ -521,6 +535,9 @@ parse_locale() {
-     local pihole_locale
-     echo_current_diagnostic "Locale"
-     pihole_locale="$(locale)"
-+    if [ -f /opt/etc/opkg.conf ] && [ -f "$(command -v locale.new)" ]; then
-+        pihole_locale="$(locale.new)"
-+    fi
-     parse_file "${pihole_locale}"
- }
- 
