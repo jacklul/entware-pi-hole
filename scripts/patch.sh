@@ -18,12 +18,14 @@ FILES="$(find "$(readlink -f "$SCRIPT_DIR/../patches")" -type f \( -name "$PREFI
 for FILE in $FILES; do
     echo "Applying patch file: $FILE"
     git -C "$TARGET" apply -v "$FILE" || exit 1
+    echo ""
 done
 
 FILES="$(find "$(readlink -f "$SCRIPT_DIR/../patches")" -type f -name "$PREFIX-*.sh" | sort)"
 for FILE in $FILES; do
     echo "Running patch script: $FILE"
     bash "$FILE" "$TARGET" || exit 1
+    echo ""
 done
 
 echo "All patches applied"

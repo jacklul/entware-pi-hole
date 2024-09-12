@@ -18,6 +18,7 @@ FILES="$(find "$(readlink -f "$SCRIPT_DIR/../tests")" -type f -name "$PREFIX-*.s
 for FILE in $FILES; do
     echo "Running test: $FILE"
     bash "$FILE" "$TARGET" || exit 1
+    echo ""
 done
 
 echo "All tests passed"
