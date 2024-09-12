@@ -20,15 +20,23 @@ for FILE in $FILES; do
     # No comments
     CONTENTS="$(grep -o "^[^#]*" < "$FILE"))"
 
-    foundhere=false
-
     # Checks
-    echo "$CONTENTS" | grep -qaE "$find1" && found1=true && foundhere=true
-    echo "$CONTENTS" | grep -qaE "$find2" && found2=true && foundhere=true
-    echo "$CONTENTS" | grep -qaE "$find3" && found3=true && foundhere=true
+    if echo "$CONTENTS" | grep -qaE "$find1"; then
+        found1=true
+        CONTENTS="$(echo "$CONTENTS" | grep -av "$find1")" # /advanced/Scripts/COL_TABLE
+    fi
 
-    [ "$foundhere" = true ] && continue
-    echo "$CONTENTS" | grep -aE "\s+tput [[:alnum:]_]+" && exit 1
+    if echo "$CONTENTS" | grep -qaE "$find2"; then
+        found2=true
+        CONTENTS="$(echo "$CONTENTS" | grep -av "$find2")" # /advanced/Scripts/piholeDebug.sh
+    fi
+
+    if echo "$CONTENTS" | grep -qaE "$find3"; then
+        found3=true
+        CONTENTS="$(echo "$CONTENTS" | grep -av "$find3")" # /advanced/Scripts/piholeDebug.sh
+    fi
+
+    echo "$CONTENTS" | grep -aEn "\s+tput [[:alnum:]_]+" && exit 1
 done
 
 if [ "$found1" = false ] || [ "$found2" = false ] || [ "$found3" = false ]; then

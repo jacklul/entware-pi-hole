@@ -16,13 +16,13 @@ for FILE in $FILES; do
     # No comments
     CONTENTS="$(grep -o "^[^#]*" < "$FILE"))"
 
-    foundhere=false
-
     # Checks
-    echo "$CONTENTS" | grep -qaE "$find1" && found1=true && foundhere=true
+    if echo "$CONTENTS" | grep -qaE "$find1"; then
+        found1=true
+        CONTENTS="$(echo "$CONTENTS" | grep -av "$find1")" # /gravity.sh
+    fi
 
-    [ "$foundhere" = true ] && continue
-    echo "$CONTENTS" | grep -aE "getent [[:alnum:]_]+ " && exit 1
+    echo "$CONTENTS" | grep -aEn "getent [[:alnum:]_]+ " && exit 1
 done
 
 if [ "$found1" = false ]; then
