@@ -197,15 +197,6 @@ index eee5a8c0..51c882cd 100644
  	conf->debug.inotify.t = CONF_BOOL;
  	conf->debug.inotify.d.b = false;
  	conf->debug.inotify.c = validate_stub; // Only type-based checking
-@@ -1612,7 +1612,7 @@ bool readFTLconf(struct config *conf, const bool rewrite)
- 	const char *path = "";
- 	if((path = readFTLlegacy(conf)) != NULL)
- 	{
--		const char *target = "/etc/pihole/migration_backup_v6/pihole-FTL.conf";
-+		const char *target = "/opt/etc/pihole/migration_backup_v6/pihole-FTL.conf";
- 		log_info("Moving %s to %s", path, target);
- 		if(rename(path, target) != 0)
- 			log_warn("Unable to move %s to %s: %s", path, target, strerror(errno));
 @@ -1689,7 +1689,7 @@ bool getLogFilePath(void)
  	config.files.log.ftl.h = "The location of FTL's log file";
  	config.files.log.ftl.a = cJSON_CreateStringReference("<any writable file>");
@@ -228,12 +219,16 @@ index 81d4a15f..86c0a75f 100644
  
  // This static string represents an unchanged password
  #define PASSWORD_VALUE "********"
-@@ -37,7 +37,7 @@
+@@ -37,10 +37,10 @@
  #define VALIDATOR_ERRBUF_LEN 256
  
  // Location of the legacy (pre-v6.0) config file
 -#define GLOBALCONFFILE_LEGACY "/etc/pihole/pihole-FTL.conf"
 +#define GLOBALCONFFILE_LEGACY "/opt/etc/pihole/pihole-FTL.conf"
+ 
+ // Migration target for the legacy (pre-v6.0) config file
+-#define MIGRATION_TARGET_V6 "/etc/pihole/migration_backup_v6"
++#define MIGRATION_TARGET_V6 "/opt/etc/pihole/migration_backup_v6"
  
  union conf_value {
  	bool b;                                     // boolean value
@@ -327,7 +322,7 @@ index c50223b1..8e0700f9 100644
  	}
  
 diff --git a/src/config/dnsmasq_config.h b/src/config/dnsmasq_config.h
-index 4a9d9fad..1942dc5a 100644
+index df660790..d3866bac 100644
 --- a/src/config/dnsmasq_config.h
 +++ b/src/config/dnsmasq_config.h
 @@ -22,14 +22,14 @@ bool read_legacy_cnames_config(void);
@@ -336,20 +331,17 @@ index 4a9d9fad..1942dc5a 100644
  
 -#define DNSMASQ_PH_CONFIG "/etc/pihole/dnsmasq.conf"
 -#define DNSMASQ_TEMP_CONF "/etc/pihole/dnsmasq.conf.temp"
--#define DNSMASQ_STATIC_LEASES "/etc/pihole/migration_backup_v6/04-pihole-static-dhcp.conf"
--#define DNSMASQ_CNAMES "/etc/pihole/migration_backup_v6/05-pihole-custom-cname.conf"
--#define DNSMASQ_HOSTSDIR "/etc/pihole/hosts"
 +#define DNSMASQ_PH_CONFIG "/opt/etc/pihole/dnsmasq.conf"
 +#define DNSMASQ_TEMP_CONF "/opt/etc/pihole/dnsmasq.conf.temp"
-+#define DNSMASQ_STATIC_LEASES "/opt/etc/pihole/migration_backup_v6/04-pihole-static-dhcp.conf"
-+#define DNSMASQ_CNAMES "/opt/etc/pihole/migration_backup_v6/05-pihole-custom-cname.conf"
+ #define DNSMASQ_STATIC_LEASES MIGRATION_TARGET_V6"/04-pihole-static-dhcp.conf"
+ #define DNSMASQ_CNAMES MIGRATION_TARGET_V6"/05-pihole-custom-cname.conf"
+-#define DNSMASQ_HOSTSDIR "/etc/pihole/hosts"
 +#define DNSMASQ_HOSTSDIR "/opt/etc/pihole/hosts"
  #define DNSMASQ_CUSTOM_LIST DNSMASQ_HOSTSDIR"/custom.list"
 -#define DNSMASQ_CUSTOM_LIST_LEGACY "/etc/pihole/custom.list"
--#define DNSMASQ_CUSTOM_LIST_LEGACY_TARGET "/etc/pihole/migration_backup_v6/custom.list"
--#define DHCPLEASESFILE "/etc/pihole/dhcp.leases"
 +#define DNSMASQ_CUSTOM_LIST_LEGACY "/opt/etc/pihole/custom.list"
-+#define DNSMASQ_CUSTOM_LIST_LEGACY_TARGET "/opt/etc/pihole/migration_backup_v6/custom.list"
+ #define DNSMASQ_CUSTOM_LIST_LEGACY_TARGET MIGRATION_TARGET_V6"/custom.list"
+-#define DHCPLEASESFILE "/etc/pihole/dhcp.leases"
 +#define DHCPLEASESFILE "/opt/etc/pihole/dhcp.leases"
  
  #endif //DNSMASQ_CONFIG_H
@@ -392,19 +384,6 @@ index f90bc4ad..9c1eb759 100644
  static char *cli_password = NULL;
  
  // Convert RAW data into hex representation
-diff --git a/src/config/setupVars.c b/src/config/setupVars.c
-index cd5df0ea..3e3ee9fb 100644
---- a/src/config/setupVars.c
-+++ b/src/config/setupVars.c
-@@ -592,7 +592,7 @@ void importsetupVarsConf(void)
- 	get_conf_string_from_setupVars("WEB_PORTS", &config.webserver.port);
- 
- 	// Move the setupVars.conf file to the migration directory
--	const char *setupVars_target = "/etc/pihole/migration_backup_v6/setupVars.conf";
-+	const char *setupVars_target = "/opt/etc/pihole/migration_backup_v6/setupVars.conf";
- 	if(rename(config.files.setupVars.v.s, setupVars_target) != 0)
- 		log_warn("Could not move %s to %s", config.files.setupVars.v.s, setupVars_target);
- 	else
 diff --git a/src/database/shell.c b/src/database/shell.c
 index fc6bf5e6..73b12858 100644
 --- a/src/database/shell.c
