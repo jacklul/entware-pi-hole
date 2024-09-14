@@ -57,7 +57,7 @@
         {
             "label": "Patch and test dev/core",
             "type": "shell",
-            "command": "bash scripts/patch.sh core dev/core && echo '' && bash scripts/test.sh core dev/core",
+            "command": "bash scripts/patch.sh core dev/core && echo && bash scripts/test.sh core dev/core",
             "problemMatcher": [],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -66,7 +66,7 @@
         {
             "label": "Patch and test dev/web",
             "type": "shell",
-            "command": "bash scripts/patch.sh web dev/web && echo '' && bash scripts/test.sh web dev/web",
+            "command": "bash scripts/patch.sh web dev/web && echo && bash scripts/test.sh web dev/web",
             "problemMatcher": [],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -75,7 +75,7 @@
         {
             "label": "Patch and test dev/FTL",
             "type": "shell",
-            "command": "bash scripts/patch.sh ftl dev/FTL && echo '' && bash scripts/test.sh ftl dev/FTL",
+            "command": "bash scripts/patch.sh ftl dev/FTL && echo && bash scripts/test.sh ftl dev/FTL",
             "problemMatcher": [],
             "options": {
                 "cwd": "${workspaceFolder}"
