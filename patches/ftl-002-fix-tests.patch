@@ -70,8 +70,8 @@ index 5d490a82..dfd08dac 100755
  # Start FTL
  if ! su pihole -s /bin/sh -c /home/pihole/pihole-FTL; then
    echo "pihole-FTL failed to start"
-@@ -109,6 +112,9 @@ dig TXT CHAOS version.bind @127.0.0.1 +short
- $BATS "test/test_suite.bats"
+@@ -109,6 +109,9 @@ dig TXT CHAOS version.bind @127.0.0.1 +short
+ $BATS -p "test/test_suite.bats"
  RET=$?
  
 +# Do not upload logs if tests failed
