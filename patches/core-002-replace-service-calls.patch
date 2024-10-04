@@ -47,16 +47,3 @@ index 34d96318..54dc7fe5 100755
      if [[ "$*" != *"quiet"* ]]; then
          echo -e "${OVER}  ${TICK} Deleted ${deleted} queries from long-term query database"
      fi
-diff --git a/pihole b/pihole
-index 08ff5b76..d859c881 100755
---- a/pihole
-+++ b/pihole
-@@ -186,7 +186,7 @@ restartDNS() {
-     fi
-   else
-     # A full restart has been requested
--    svc="service pihole-FTL restart"
-+    svc="/opt/etc/init.d/S55pihole-FTL restart"
-     str="Restarting DNS server"
-     icon="${TICK}"
-   fi
