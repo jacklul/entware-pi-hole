@@ -29,4 +29,5 @@ for FILE in $FILES; do
 done
 
 echo "All patches applied"
+echo ""
 exit 0

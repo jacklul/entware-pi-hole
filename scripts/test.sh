@@ -22,4 +22,5 @@ for FILE in $FILES; do
 done
 
 echo "All tests passed"
+echo ""
 exit 0
