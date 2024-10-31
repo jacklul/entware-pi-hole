@@ -12,7 +12,7 @@
         {
             "label": "Clone Pi-hole repositories (release)",
             "type": "shell",
-            "command": "bash scripts/dev.sh dev-v6",
+            "command": "bash scripts/dev.sh master",
             "problemMatcher": [],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -21,7 +21,7 @@
         {
             "label": "Clone Pi-hole repositories (development)",
             "type": "shell",
-            "command": "bash scripts/dev.sh dev-v6",
+            "command": "bash scripts/dev.sh dev",
             "problemMatcher": [],
             "options": {
                 "cwd": "${workspaceFolder}"
