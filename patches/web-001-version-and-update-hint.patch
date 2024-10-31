@@ -1,7 +1,7 @@
-diff --git a/scripts/pi-hole/js/footer.js b/scripts/pi-hole/js/footer.js
+diff --git a/scripts/js/footer.js b/scripts/js/footer.js
 index 65726b0b..1265ff21 100644
---- a/scripts/pi-hole/js/footer.js
-+++ b/scripts/pi-hole/js/footer.js
+--- a/scripts/js/footer.js
++++ b/scripts/js/footer.js
 @@ -485,6 +485,8 @@ function updateVersionInfo() {
      var version = data.version;
      var updateAvailable = false;
