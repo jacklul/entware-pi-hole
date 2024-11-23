@@ -25,7 +25,7 @@ index 8f84e2b0..fec93047 100755
 +readonly scriptPath="/opt/share/pihole/database_migration/gravity"
  
  upgrade_gravityDB(){
-     local database piholeDir auditFile version
+     local database piholeDir version
 diff --git a/advanced/Scripts/list.sh b/advanced/Scripts/list.sh
 index 8c930f04..efb9dab1 100755
 --- a/advanced/Scripts/list.sh
