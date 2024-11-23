@@ -8,9 +8,9 @@ index 65726b0b..1265ff21 100644
      var dockerUpdate = false;
 +    var entwareUpdate = false;
 +    var packaged = version.docker.local || version.entware.local;
+     var isDocker = false;
      $("#versions").empty();
  
-     var versions = [
 @@ -496,6 +498,14 @@ function updateVersionInfo() {
          hash: null,
          url: "https://github.com/pi-hole/docker-pi-hole/releases",
@@ -35,9 +35,9 @@ index 65726b0b..1265ff21 100644
 +          entwareUpdate = true;
 +        }
 +
-         if (updateComponentAvailable) {
+         // Display update information of individual components only if we are not running in a Docker container
+         if ((!isDocker || (isDocker && v.name === "Docker Tag")) && updateComponentAvailable) {
            $("#versions").append(
-             "<li><strong>" +
 @@ -584,7 +599,11 @@ function updateVersionInfo() {
        $("#update-hint").html(
          'To install updates, <a href="https://github.com/pi-hole/docker-pi-hole#upgrading-persistence-and-customizations" rel="noopener" target="_blank">replace this old container with a fresh upgraded image</a>.'
