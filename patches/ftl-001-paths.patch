@@ -594,3 +594,16 @@ index 47f2edc3..48410465 100644
  	if(directory_exists(directory))
  	{
  		// Loop over all files and add them to the ZIP archive
+diff --git a/src/shmem.c b/src/shmem.c
+index e1569f34..dd58d88d 100644
+--- a/src/shmem.c
++++ b/src/shmem.c
+@@ -1495,7 +1495,7 @@ void print_recycle_list_fullness(void)
+  *
+  * If the file cannot be opened for writing, an error message is logged.
+  */
+-#define STRING_DUMPFILE "/tmp/stringdump.txt"
++#define STRING_DUMPFILE "/opt/tmp/stringdump.txt"
+ void dump_strings(void)
+ {
+ 	// Dump string table to temporary file
