@@ -66,30 +66,19 @@ diff --git a/gravity.sh b/gravity.sh
 index 522d92f..bb8f35b 100755
 --- a/gravity.sh
 +++ b/gravity.sh
-@@ -59,13 +59,16 @@ gravityTEMPfile="${GRAVITYDB}_temp"
+@@ -59,11 +59,14 @@ gravityTEMPfile="${GRAVITYDB}_temp"
  gravityDIR="$(dirname -- "${gravityDBfile}")"
  gravityOLDfile="${gravityDIR}/gravity_old.db"
  
 +# In Entware user pihole might not exist
 +[ -f /opt/etc/opkg.conf ] && [ -z "$(id -u pihole 2> /dev/null)" ] && NO_PIHOLE_USER=y
 +
- # Generate new SQLite3 file from schema template
- generate_gravity_database() {
-   if ! pihole-FTL sqlite3 -ni "${gravityDBfile}" <"${gravityDBschema}"; then
-     echo -e "   ${CROSS} Unable to create ${gravityDBfile}"
-     return 1
-   fi
--  chown pihole:pihole "${gravityDBfile}"
-+  [ -z "$NO_PIHOLE_USER" ] && chown pihole:pihole "${gravityDBfile}"
-   chmod g+w "${piholeDir}" "${gravityDBfile}"
- }
+ fix_owner_permissions() {
+   # Fix ownership and permissions for the specified file
+   # User and group are set to pihole:pihole
+   # Permissions are set to 664 (rw-rw-r--)
+-  chown pihole:pihole "${1}"
++  [ -z "$NO_PIHOLE_USER" ] && chown pihole:pihole "${1}"
+   chmod 664 "${1}"
  
-@@ -959,7 +962,7 @@ fi
- update_gravity_timestamp
- 
- # Ensure proper permissions are set for the database
--chown pihole:pihole "${gravityTEMPfile}"
-+[ -z "$NO_PIHOLE_USER" ] && chown pihole:pihole "${gravityTEMPfile}"
- chmod g+w "${piholeDir}" "${gravityTEMPfile}"
- 
- # Build the tree
+   # Ensure the containing directory is group writable
