@@ -47,3 +47,25 @@ index 34d96318..54dc7fe5 100755
      if [[ "$*" != *"quiet"* ]]; then
          echo -e "${OVER}  ${TICK} Deleted ${deleted} queries from long-term query database"
      fi
+diff --git a/advanced/Scripts/piholeARPTable.sh b/advanced/Scripts/piholeARPTable.sh
+index f55b1320..64561645 100755
+--- a/advanced/Scripts/piholeARPTable.sh
++++ b/advanced/Scripts/piholeARPTable.sh
+@@ -32,7 +32,7 @@ flushARP(){
+     fi
+ 
+     # Stop FTL to prevent database access
+-    if ! output=$(service pihole-FTL stop 2>&1); then
++    if ! output=$(/opt/etc/init.d/S55pihole-FTL pihole-FTL stop 2>&1); then
+         echo -e "${OVER}  ${CROSS} Failed to stop FTL"
+         echo "  Output: ${output}"
+         return 1
+@@ -64,7 +64,7 @@ flushARP(){
+     fi
+ 
+     # Start FTL again
+-    if ! output=$(service pihole-FTL restart 2>&1); then
++    if ! output=$(/opt/etc/init.d/S55pihole-FTL pihole-FTL restart 2>&1); then
+         echo -e "${OVER}  ${CROSS} Failed to restart FTL"
+         echo "  Output: ${output}"
+         return 1
