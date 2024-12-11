@@ -1,0 +1,30 @@
+Package: pi-hole
+Version: 2024.12.08-081004-7241335c
+Depends: bash, cron, curl, git-http, ca-bundle, bind-dig, bind-nslookup, iputils-ping, net-tools, findutils, grep, sed, jq, libcap-bin, shadow-su, psmisc, procps-ng-pgrep, libncurses-dev, rev, lscpu, coreutils-cut, coreutils-expr, coreutils-id, coreutils-install, coreutils-mktemp, coreutils-nohup, coreutils-printf, coreutils-sha1sum, coreutils-sleep, coreutils-stat, coreutils-stty, coreutils-tee, coreutils-timeout, coreutils-tr, coreutils-tty, coreutils-whoami
+Suggests: logrotate, sudo
+License: EUPL-1.2
+Section: net
+URL: https://github.com/pi-hole/pi-hole
+Architecture: armv7-3.2
+Installed-Size: 33013760
+Filename: pi-hole_2024.12.08-081004-7241335c_armv7-3.2.ipk
+Size: 14094084
+SHA256sum: 9d6eb4f0d4aaf7cc95290927895fa4a0615a16b753ae78e59faed4c095abf729
+Description:  The Pi-hole is a DNS sinkhole that protects your devices from unwanted content without installing any client-side software.
+ This is an unofficial package not supported by the Pi-hole developers!
+
+Package: pi-hole-dev
+Version: 2024.12.11-022432-7241335c
+Depends: bash, cron, curl, git-http, ca-bundle, bind-dig, bind-nslookup, iputils-ping, net-tools, findutils, grep, sed, jq, libcap-bin, shadow-su, psmisc, procps-ng-pgrep, libncurses-dev, rev, lscpu, coreutils-cut, coreutils-expr, coreutils-id, coreutils-install, coreutils-mktemp, coreutils-nohup, coreutils-printf, coreutils-sha1sum, coreutils-sleep, coreutils-stat, coreutils-stty, coreutils-tee, coreutils-timeout, coreutils-tr, coreutils-tty, coreutils-whoami
+Suggests: logrotate, sudo
+License: EUPL-1.2
+Section: net
+URL: https://github.com/pi-hole/pi-hole
+Architecture: armv7-3.2
+Installed-Size: 33208320
+Filename: pi-hole-dev_2024.12.11-022432-7241335c_armv7-3.2.ipk
+Size: 14174091
+SHA256sum: f833d9f82ed083bbb7c6e243d482e22292c04975452c1423899f691e5fd91a47
+Description:  The Pi-hole is a DNS sinkhole that protects your devices from unwanted content without installing any client-side software.
+ This is an unofficial package not supported by the Pi-hole developers!
+
