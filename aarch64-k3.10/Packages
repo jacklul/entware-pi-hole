@@ -1,0 +1,30 @@
+Package: pi-hole
+Version: 2024.12.15-123453-7241335c
+Depends: bash, cron, curl, git-http, ca-bundle, bind-dig, bind-nslookup, iputils-ping, net-tools, findutils, grep, sed, jq, libcap-bin, shadow-su, psmisc, procps-ng-pgrep, libncurses-dev, rev, lscpu, coreutils-cut, coreutils-expr, coreutils-id, coreutils-install, coreutils-mktemp, coreutils-nohup, coreutils-printf, coreutils-sha1sum, coreutils-sleep, coreutils-stat, coreutils-stty, coreutils-tee, coreutils-timeout, coreutils-tr, coreutils-tty, coreutils-whoami
+Suggests: logrotate, sudo
+License: EUPL-1.2
+Section: net
+URL: https://github.com/pi-hole/pi-hole
+Architecture: aarch64-3.10
+Installed-Size: 33208320
+Filename: pi-hole_2024.12.15-123453-7241335c_aarch64-3.10.ipk
+Size: 14174206
+SHA256sum: 86e773d34447cec87e71e5dfeea2f03e2eaf84dd12d5891e0836e58258878eb8
+Description:  The Pi-hole is a DNS sinkhole that protects your devices from unwanted content without installing any client-side software.
+ This is an unofficial package not supported by the Pi-hole developers!
+
+Package: pi-hole-dev
+Version: 2024.12.17-022403-7241335c
+Depends: bash, cron, curl, git-http, ca-bundle, bind-dig, bind-nslookup, iputils-ping, net-tools, findutils, grep, sed, jq, libcap-bin, shadow-su, psmisc, procps-ng-pgrep, libncurses-dev, rev, lscpu, coreutils-cut, coreutils-expr, coreutils-id, coreutils-install, coreutils-mktemp, coreutils-nohup, coreutils-printf, coreutils-sha1sum, coreutils-sleep, coreutils-stat, coreutils-stty, coreutils-tee, coreutils-timeout, coreutils-tr, coreutils-tty, coreutils-whoami
+Suggests: logrotate, sudo
+License: EUPL-1.2
+Section: net
+URL: https://github.com/pi-hole/pi-hole
+Architecture: aarch64-3.10
+Installed-Size: 33218560
+Filename: pi-hole-dev_2024.12.17-022403-7241335c_aarch64-3.10.ipk
+Size: 14176582
+SHA256sum: 7e2dc7b2a3e9afd2633dc768a867619676bd128c259ab53660644f4f2ff0b7e7
+Description:  The Pi-hole is a DNS sinkhole that protects your devices from unwanted content without installing any client-side software.
+ This is an unofficial package not supported by the Pi-hole developers!
+
