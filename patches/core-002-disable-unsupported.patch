@@ -14,7 +14,7 @@ index 7c55812..2150ba0 100755
      # Users can submit their debug logs using curl (encrypted)
      log_write "    * Using ${COL_GREEN}curl${COL_NC} for transmission."
      # transmit the log via TLS and store the token returned in a variable
-@@ -1312,7 +1317,7 @@ upload_to_tricorder() {
+@@ -1339,13 +1339,14 @@ upload_to_tricorder() {
          # let the user know
          log_write "${INFO} Debug script running in automated mode"
          # and then decide again which tool to use to submit it
@@ -22,17 +22,15 @@ index 7c55812..2150ba0 100755
 +        #curl_to_tricorder
          # If we're not running in automated mode,
      else
-         # if not being called from the web interface
-@@ -1320,7 +1325,8 @@ upload_to_tricorder() {
-             echo ""
-             # give the user a choice of uploading it or not
-             # Users can review the log file locally (or the output of the script since they are the same) and try to self-diagnose their problem
--            read -r -p "[?] Would you like to upload the log? [y/N] " response
-+            #read -r -p "[?] Would you like to upload the log? [y/N] " response
-+            response=n
-             case ${response} in
-                 # If they say yes, run our function for uploading the log
-                 [yY][eE][sS]|[yY]) curl_to_tricorder;;
+         echo ""
+         # give the user a choice of uploading it or not
+         # Users can review the log file locally (or the output of the script since they are the same) and try to self-diagnose their problem
+-        read -r -p "[?] Would you like to upload the log? [y/N] " response
++        #read -r -p "[?] Would you like to upload the log? [y/N] " response
++        response=n
+         case ${response} in
+             # If they say yes, run our function for uploading the log
+             [yY][eE][sS]|[yY]) curl_to_tricorder;;
 diff --git a/pihole b/pihole
 index 7c84771..f4125a9 100755
 --- a/pihole

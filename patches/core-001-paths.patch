@@ -111,9 +111,9 @@ index 7c558127..d2942f01 100755
 -. /etc/pihole/versions
 +. /opt/etc/pihole/versions
  
- # FAQ URLs for use in showing the debug log
- FAQ_HARDWARE_REQUIREMENTS="${COL_CYAN}https://docs.pi-hole.net/main/prerequisites/${COL_NC}"
-@@ -55,18 +55,18 @@ FORUMS_URL="${COL_CYAN}https://discourse.pi-hole.net${COL_NC}"
+ # Read the value of an FTL config key. The value is printed to stdout.
+ get_ftl_conf_value() {
+@@ -63,18 +63,18 @@ FORUMS_URL="${COL_CYAN}https://discourse.pi-hole.net${COL_NC}"
  
  # Directories required by Pi-hole
  # https://discourse.pi-hole.net/t/what-files-does-pi-hole-use/1684
@@ -123,19 +123,17 @@ index 7c558127..d2942f01 100755
 -PIHOLE_DIRECTORY="/etc/pihole"
 -PIHOLE_SCRIPTS_DIRECTORY="/opt/pihole"
 -BIN_DIRECTORY="/usr/local/bin"
--RUN_DIRECTORY="/run"
 -LOG_DIRECTORY="/var/log/pihole"
--HTML_DIRECTORY="/var/www/html"
 +CORE_GIT_DIRECTORY="/opt/etc/.pihole"
 +CRON_D_DIRECTORY="/opt/etc/cron.d"
 +DNSMASQ_D_DIRECTORY="/opt/etc/dnsmasq.d"
 +PIHOLE_DIRECTORY="/opt/etc/pihole"
 +PIHOLE_SCRIPTS_DIRECTORY="/opt/share/pihole"
 +BIN_DIRECTORY="/opt/sbin"
-+RUN_DIRECTORY="/opt/run"
 +LOG_DIRECTORY="/opt/var/log/pihole"
-+HTML_DIRECTORY="/opt/share/pihole/www"
- WEB_GIT_DIRECTORY="${HTML_DIRECTORY}/admin"
+ HTML_DIRECTORY="$(get_ftl_conf_value "webserver.paths.webroot")"
+ WEBHOME_PATH="$(get_ftl_conf_value "webserver.paths.webhome")"
+ WEB_GIT_DIRECTORY="${HTML_DIRECTORY}${WEBHOME_PATH}"
  SHM_DIRECTORY="/dev/shm"
 -ETC="/etc"
 +ETC="/opt/etc"
