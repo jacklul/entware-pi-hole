@@ -7,14 +7,14 @@ index 7c55812..0116ad3 100755
      [ -n "${DOCKER_VERSION}" ] && log_write "${INFO} Pi-hole Docker Container: ${DOCKER_VERSION}"
  
 +    # Existence of this file indicates Entware package is used
-+    if [ -f /opt/etc/opkg.conf ];then
++    if [ -f /opt/etc/opkg.conf ]; then
 +        # shellcheck disable=SC2155
 +        local entware_installed_package="$(opkg list-installed pi-hole)"
 +        [ -z "${entware_installed_package}" ] && entware_installed_package="$(opkg list-installed pi-hole-dev)"
 +        [ -n "${entware_installed_package}" ] && log_write "${INFO} Pi-hole Entware package: ${entware_installed_package}"
 +
 +        # Print informations about Entware release
-+        if [ -f /opt/etc/entware_release ];then
++        if [ -f /opt/etc/entware_release ]; then
 +            log_write "${INFO} Entware release details:"
 +            make_array_from_file "/opt/etc/entware_release"
 +        fi
@@ -23,3 +23,12 @@ index 7c55812..0116ad3 100755
      # If there is a /etc/*release file, it's probably a supported operating system, so we can
      if ls /etc/*release 1> /dev/null 2>&1; then
          # display the attributes to the user from the function made earlier
+@@ -505,6 +519,8 @@ hardware_check() {
+     echo_current_diagnostic "System hardware configuration"
+     if [ -n "${DOCKER_VERSION}" ]; then
+         log_write "${skip_msg}"
++    elif [ -f /opt/etc/opkg.conf ];then
++        log_write "Not supported in unofficial Entware package release"
+     else
+         # Store the output of the command in a variable
+         run_and_print_command "lshw -short"
