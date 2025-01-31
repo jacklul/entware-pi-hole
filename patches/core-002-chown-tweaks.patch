@@ -67,8 +67,8 @@ index 522d92f..bb8f35b 100755
 --- a/gravity.sh
 +++ b/gravity.sh
 @@ -59,11 +59,14 @@ gravityTEMPfile="${GRAVITYDB}_temp"
- gravityDIR="$(dirname -- "${gravityDBfile}")"
- gravityOLDfile="${gravityDIR}/gravity_old.db"
+ gravityBCKdir="${gravityDIR}/gravity_backups"
+ gravityBCKfile="${gravityBCKdir}/gravity.db"
  
 +# In Entware user pihole might not exist
 +[ -f /opt/etc/opkg.conf ] && [ -z "$(id -u pihole 2> /dev/null)" ] && NO_PIHOLE_USER=y
