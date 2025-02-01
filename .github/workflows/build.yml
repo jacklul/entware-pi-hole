@@ -156,7 +156,7 @@ jobs:
   build-binary:
     concurrency: build-binary-${{ github.ref_name || github.run_id }}-${{ matrix.architecture }}
     needs: [variables]
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.machine }}
     continue-on-error: ${{ matrix.allow-failure }}
 
     outputs:
@@ -169,21 +169,27 @@ jobs:
           - architecture: amd64
             docker_platform: linux/amd64
             allow-failure: false
+            machine: ubuntu-24.04
         #  - architecture: 386
         #    docker_platform: linux/386 # EOS by Entware team
         #    allow-failure: true
+        #    machine: ubuntu-24.04
         #  - architecture: armv5
         #    docker_platform: linux/arm/v5 # EOS by Entware team / Not supported by Pi-hole
         #    allow-failure: true
+        #    machine: ubuntu-24.04-arm
         #  - architecture: armv6
         #    docker_platform: linux/arm/v6 # Not supported by Entware
         #    allow-failure: true
+        #    machine: ubuntu-24.04-arm
           - architecture: armv7
             docker_platform: linux/arm/v7
+            machine: ubuntu-24.04-arm
             allow-failure: false
           - architecture: arm64
             docker_platform: linux/arm64/v8
             allow-failure: false
+            machine: ubuntu-24.04-arm
         #  - architecture: mipsel
         #    docker_platform: linux/mipsel # Not supported by Pi-hole
         #    allow-failure: true
