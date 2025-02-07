@@ -6,6 +6,7 @@ ENABLED=yes
 PROCS=pihole-FTL
 ARGS=""
 PREARGS=""
+#PRECMD="umask 0022"
 DESC=$PROCS
 PATH=/opt/sbin:/opt/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
@@ -26,32 +27,29 @@ case $1 in
                         ARGS="-- -u pihole"
                         echo "Warning: Starting pihole-FTL as '$ROOT_USER' (then dropping to 'pihole') because setting capabilities is not supported on this system"
                     fi
-
-                    chown pihole:pihole /opt/etc/pihole && chmod 775 /opt/etc/pihole
-                else # start as root user
+                else # start as root userr
                     ROOT_GROUP="$(id -ng 0 2> /dev/null)"
 
                     ARGS="-- -u $ROOT_USER"
                     echo "Warning: Starting pihole-FTL as '$ROOT_USER' because 'pihole' user does not exist"
 
-                    chown "$ROOT_USER":"$ROOT_GROUP" /opt/etc/pihole && chmod 775 /opt/etc/pihole
+                    chown -R "$ROOT_USER":"$ROOT_GROUP" /opt/etc/pihole && chmod 0660 /opt/etc/pihole
                 fi
             fi
         fi
+
+        # Run poststop and prestart scripts before start/restart
+        bash /opt/share/pihole/pihole-FTL-poststop.sh
+        bash /opt/share/pihole/pihole-FTL-prestart.sh
     ;;
 esac
-
-# Execute pre start script through rc.func's PRECMD, we have to run poststop here as well for potential cleanup
-if [ -z "$PRECMD" ]; then
-    PRECMD="bash /opt/share/pihole/pihole-FTL-poststop.sh ; bash /opt/share/pihole/pihole-FTL-prestart.sh"
-fi
 
 #shellcheck disable=SC1091
 . /opt/etc/init.d/rc.func
 
 case $1 in
     stop | kill)
-        # Run poststop after stop/kill
+        # Run poststop script after stop/kill
         bash /opt/share/pihole/pihole-FTL-poststop.sh
     ;;
 esac
