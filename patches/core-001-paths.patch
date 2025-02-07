@@ -465,9 +465,9 @@ index d1664394..a9adf9c0 100755
 -piholeDir="/etc/${basename}"
 +piholeDir="/opt/etc/${basename}"
  
- # Legacy (pre v5.0) list file locations
- whitelistFile="${piholeDir}/whitelist.txt"
-@@ -36,25 +36,25 @@ blacklistFile="${piholeDir}/blacklist.txt"
+ # Gravity aux files directory
+ listsCacheDir="${piholeDir}/listsCache"
+@@ -36,26 +36,26 @@ blacklistFile="${piholeDir}/blacklist.txt"
  regexFile="${piholeDir}/regex.list"
  adListFile="${piholeDir}/adlists.list"
  
@@ -482,6 +482,7 @@ index d1664394..a9adf9c0 100755
  
  domainsExtension="domains"
  curl_connect_timeout=10
+ etag_support=false
  
  # Check gravity temp directory
  if [ ! -d "${GRAVITY_TMPDIR}" ] || [ ! -w "${GRAVITY_TMPDIR}" ]; then
@@ -499,15 +500,6 @@ index d1664394..a9adf9c0 100755
  gravityTEMPfile="${GRAVITYDB}_temp"
  gravityDIR="$(dirname -- "${gravityDBfile}")"
  gravityOLDfile="${gravityDIR}/gravity_old.db"
-@@ -946,7 +946,7 @@ if [[ "${forceDelete:-}" == true ]]; then
-   str="Deleting existing list cache"
-   echo -ne "${INFO} ${str}..."
- 
--  rm /etc/pihole/list.* 2>/dev/null || true
-+  rm /opt/etc/pihole/list.* 2>/dev/null || true
-   echo -e "${OVER}  ${TICK} ${str}"
- fi
- 
 diff --git a/pihole b/pihole
 index 4bb7d5e5..fcc988ad 100755
 --- a/pihole
