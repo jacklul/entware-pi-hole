@@ -90,6 +90,8 @@ EOF
             echo "$SEPARATOR"
         } >> "/opt/var/spool/cron/crontabs/$ROOT_USER"
 
+        chmod 600 "/opt/var/spool/cron/crontabs/$ROOT_USER"
+
         if [ ! -f /opt/var/spool/cron/cron.allow ] && ! grep -q "$ROOT_USER" /opt/var/spool/cron/cron.allow 2> /dev/null; then
             echo "  ${INFO} Adding $ROOT_USER to /opt/var/spool/cron/cron.allow"
             echo "$ROOT_USER" >> /opt/var/spool/cron/cron.allow
