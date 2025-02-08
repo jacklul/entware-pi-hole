@@ -27,7 +27,7 @@ case $1 in
                         ARGS="-- -u pihole"
                         echo "Warning: Starting pihole-FTL as '$ROOT_USER' (then dropping to 'pihole') because setting capabilities is not supported on this system"
                     fi
-                else # start as root userr
+                else # start as root user
                     ROOT_GROUP="$(id -ng 0 2> /dev/null)"
 
                     ARGS="-- -u $ROOT_USER"
