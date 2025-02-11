@@ -15,26 +15,34 @@ case $1 in
         # Attempt to start using setcap and su or as 'pihole' user
         if [ -z "$ARGS" ] && [ -z "$PREARGS" ]; then
             ROOT_USER="$(id -nu 0 2> /dev/null)"
+            ROOT_GROUP="$(id -ng 0 2> /dev/null)"
 
-            if [ -n "$ROOT_USER" ]; then # if this is empty then this can indicate absence of 'id' command
+            if [ -n "$ROOT_USER" ] && [ -n "$ROOT_GROUP" ]; then # if this is empty then this can indicate absence of 'id' command
                 if [ -n "$(id -u pihole 2> /dev/null)" ]; then
-                    if setcap CAP_NET_BIND_SERVICE,CAP_NET_RAW,CAP_NET_ADMIN,CAP_SYS_NICE,CAP_IPC_LOCK,CAP_CHOWN+eip "/opt/bin/pihole-FTL"; then
-                        PREARGS="su -s sh -c"
-                        ARGS="pihole"
+                    ARGS="-- -u pihole -g pihole"
+
+                    # Update permissions of /dev/shm to allow pihole user to delete their own files and create new ones
+                    if [ "$(stat -c "%a" /dev/shm)" != "1777" ]; then
+                        if ! chmod 1777 /dev/shm; then
+                            echo "Warning: Failed to update permissions of /dev/shm" >&2
+                        fi
                     fi
 
-                    if [ -z "$ARGS" ]; then # setcap not supported - start as root user but then change to pihole
-                        ARGS="-- -u pihole"
-                        echo "Warning: Starting pihole-FTL as '$ROOT_USER' (then dropping to 'pihole') because setting capabilities is not supported on this system"
+                    # attempt to start the intended way
+                    if setcap CAP_NET_BIND_SERVICE,CAP_NET_RAW,CAP_NET_ADMIN,CAP_SYS_NICE,CAP_IPC_LOCK,CAP_CHOWN+eip "/opt/bin/pihole-FTL"; then
+                        PREARGS="sudo -u pihole"
+                    else
+                        echo "Warning: Starting pihole-FTL as '$ROOT_USER' (then dropping to 'pihole') because setting capabilities is not supported on this system" >&2
                     fi
                 else # start as root user
-                    ROOT_GROUP="$(id -ng 0 2> /dev/null)"
+                    ARGS="-- -u $ROOT_USER -g $ROOT_GROUP" # workaround for "[dnsmasq] unknown user or group: root" error
 
-                    ARGS="-- -u $ROOT_USER"
-                    echo "Warning: Starting pihole-FTL as '$ROOT_USER' because 'pihole' user does not exist"
+                    echo "Warning: Starting pihole-FTL as '$ROOT_USER' because 'pihole' user does not exist" >&2
 
                     chown -R "$ROOT_USER":"$ROOT_GROUP" /opt/etc/pihole /opt/var/log/pihole
                 fi
+            else
+                echo "Warning: Unable to determine root user" >&2
             fi
         fi
 
