@@ -2,19 +2,20 @@ diff --git a/advanced/Scripts/piholeDebug.sh b/advanced/Scripts/piholeDebug.sh
 index 7c55812..2150ba0 100755
 --- a/advanced/Scripts/piholeDebug.sh
 +++ b/advanced/Scripts/piholeDebug.sh
-@@ -1277,6 +1277,11 @@ analyze_pihole_log() {
+@@ -1277,6 +1277,12 @@ analyze_pihole_log() {
  }
  
  curl_to_tricorder() {
 +    if [ -f /opt/etc/opkg.conf ]; then
 +        echo "Upload not supported in unofficial Entware package release"
++        echo "You can upload the log manually when asked by official Pi-hole developer - ${COL_CYAN}'cat /opt/var/log/pihole/pihole_debug.log | pihole tricorder'${COL_NC}"
 +        return
 +    fi
 +
      # Users can submit their debug logs using curl (encrypted)
      log_write "    * Using ${COL_GREEN}curl${COL_NC} for transmission."
      # transmit the log via TLS and store the token returned in a variable
-@@ -1339,13 +1339,14 @@ upload_to_tricorder() {
+@@ -1339,7 +1339,7 @@ upload_to_tricorder() {
          # let the user know
          log_write "${INFO} Debug script running in automated mode"
          # and then decide again which tool to use to submit it
@@ -23,14 +24,6 @@ index 7c55812..2150ba0 100755
          # If we're not running in automated mode,
      else
          echo ""
-         # give the user a choice of uploading it or not
-         # Users can review the log file locally (or the output of the script since they are the same) and try to self-diagnose their problem
--        read -r -p "[?] Would you like to upload the log? [y/N] " response
-+        #read -r -p "[?] Would you like to upload the log? [y/N] " response
-+        response=n
-         case ${response} in
-             # If they say yes, run our function for uploading the log
-             [yY][eE][sS]|[yY]) curl_to_tricorder;;
 diff --git a/pihole b/pihole
 index 7c84771..f4125a9 100755
 --- a/pihole
@@ -71,17 +64,6 @@ index 7c84771..f4125a9 100755
      unsupportedFunc
    else
      if [[ "$2" == "-h" ]] || [[ "$2" == "--help" ]]; then
-@@ -439,6 +439,10 @@ piholeCheckoutFunc() {
- }
- 
- tricorderFunc() {
-+  if [ -f /opt/etc/opkg.conf ]; then
-+    unsupportedFunc
-+  fi
-+
-   local tricorder_token
-   if [[ ! -p "/dev/stdin" ]]; then
-     echo -e "  ${INFO} Please do not call Tricorder directly"
 @@ -465,7 +469,12 @@ updateCheckFunc() {
  }
  
