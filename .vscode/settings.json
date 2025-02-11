@@ -5,6 +5,6 @@
         "prerm": "shellscript",
         "postrm": "shellscript",
         "control": "yaml",
-        "S55pihole-FTL": "shellscript",
+        "S65pihole-FTL": "shellscript",
     },
 }

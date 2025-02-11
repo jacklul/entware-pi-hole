@@ -10,7 +10,7 @@ index 7c55812..24e0b3f 100755
 -        if command -v systemctl &> /dev/null; then
 -            # get its status via systemctl
 -            status_of_process=$(systemctl is-active "${i}")
-+        if /opt/etc/init.d/S55pihole-FTL check | grep 'alive' &> /dev/null; then
++        if /opt/etc/init.d/S65pihole-FTL check | grep 'alive' &> /dev/null; then
 +            status_of_process="active"
          else
 -            # Otherwise, use the service command and mock the output of `systemctl is-active`
@@ -39,14 +39,14 @@ index 34d96318..54dc7fe5 100755
  
      # Stop FTL to make sure it doesn't write to the database while we're deleting data
 -    service pihole-FTL stop
-+    /opt/etc/init.d/S55pihole-FTL stop
++    /opt/etc/init.d/S65pihole-FTL stop
  
      # Delete most recent 24 hours from FTL's database, leave even older data intact (don't wipe out all history)
      deleted=$(pihole-FTL sqlite3 -ni "${DBFILE}" "DELETE FROM query_storage WHERE timestamp >= strftime('%s','now')-86400; select changes() from query_storage limit 1")
  
      # Restart FTL
 -    service pihole-FTL restart
-+    /opt/etc/init.d/S55pihole-FTL restart
++    /opt/etc/init.d/S65pihole-FTL restart
 +
      if [[ "$*" != *"quiet"* ]]; then
          echo -e "${OVER}  ${TICK} Deleted ${deleted} queries from long-term query database"
@@ -60,7 +60,7 @@ index f55b1320..64561645 100755
  
      # Stop FTL to prevent database access
 -    if ! output=$(service pihole-FTL stop 2>&1); then
-+    if ! output=$(/opt/etc/init.d/S55pihole-FTL pihole-FTL stop 2>&1); then
++    if ! output=$(/opt/etc/init.d/S65pihole-FTL stop 2>&1); then
          echo -e "${OVER}  ${CROSS} Failed to stop FTL"
          echo "  Output: ${output}"
          return 1
@@ -69,7 +69,7 @@ index f55b1320..64561645 100755
  
      # Start FTL again
 -    if ! output=$(service pihole-FTL restart 2>&1); then
-+    if ! output=$(/opt/etc/init.d/S55pihole-FTL pihole-FTL restart 2>&1); then
++    if ! output=$(/opt/etc/init.d/S65pihole-FTL restart 2>&1); then
          echo -e "${OVER}  ${CROSS} Failed to restart FTL"
          echo "  Output: ${output}"
          return 1

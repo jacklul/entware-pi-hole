@@ -132,11 +132,11 @@ if [ -n "$GRAVITYDB_FILE" ] && [ -f "$GRAVITYDB_FILE" ]; then
 fi
 
 # Restart the service if it's already running
-if /opt/etc/init.d/S55pihole-FTL check | grep -q 'alive'; then
+if /opt/etc/init.d/S65pihole-FTL check | grep -q 'alive'; then
     str="Restarting pihole-FTL service"
     printf "  %s %s..." "${INFO}" "$str"
 
-    if /opt/etc/init.d/S55pihole-FTL restart > /dev/null; then
+    if /opt/etc/init.d/S65pihole-FTL restart > /dev/null; then
         printf "%b  %b %s...\\n" "${OVER}" "${TICK}" "${str}"
     else
         printf "%b  %b %s...\\n" "${OVER}" "${CROSS}" "${str}"

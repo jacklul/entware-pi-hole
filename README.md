@@ -29,7 +29,7 @@ src/gz pi-hole https://jacklul.github.io/entware-pi-hole/[architecture]
 
 - Install the package: `opkg update && opkg install pi-hole`
 
-- Start `pihole-FTL` daemon: `/opt/etc/init.d/S55pihole-FTL start`
+- Start `pihole-FTL` daemon: `/opt/etc/init.d/S65pihole-FTL start`
 
 > [!IMPORTANT]
 > The service might initially not start due to ports being in use - make adjustements in `/opt/etc/pihole/pihole.toml` when necessary.  
