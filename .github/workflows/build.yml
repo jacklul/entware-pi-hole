@@ -179,9 +179,6 @@ jobs:
         #    allow-failure: true
         #    machine: ubuntu-24.04-arm
         #  - architecture: armv6
-        #    docker_platform: linux/arm/v6 # Not supported by Entware
-        #    allow-failure: true
-        #    machine: ubuntu-24.04-arm
           - architecture: armv7
             docker_platform: linux/arm/v7
             machine: ubuntu-24.04-arm
