@@ -12,7 +12,6 @@ PATH=/opt/sbin:/opt/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:
 
 case $1 in
     start | restart)
-        # Attempt to start using setcap and su or as 'pihole' user
         if [ -z "$ARGS" ] && [ -z "$PREARGS" ]; then
             ROOT_USER="$(id -nu 0 2> /dev/null)"
             ROOT_GROUP="$(id -ng 0 2> /dev/null)"
