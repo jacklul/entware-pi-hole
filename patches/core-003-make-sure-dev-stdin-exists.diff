@@ -1,0 +1,17 @@
+diff --git a/pihole b/pihole
+index 6424c793..2cc9dddb 100755
+--- a/pihole
++++ b/pihole
+@@ -428,6 +428,12 @@ piholeCheckoutFunc() {
+ 
+ tricorderFunc() {
+   local tricorder_token
++
++  # make sure /dev/stdin is available
++  if [ ! -e /dev/stdin ] || [ "$(readlink /dev/stdin)" != "/proc/self/fd/0" ]; then
++      ln -s /proc/self/fd/0 /dev/stdin
++  fi
++
+   if [[ ! -p "/dev/stdin" ]]; then
+     echo -e "  ${INFO} Please do not call Tricorder directly"
+     exit 1
