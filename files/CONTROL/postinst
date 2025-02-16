@@ -97,14 +97,6 @@ EOF
             echo "$ROOT_USER" >> /opt/var/spool/cron/cron.allow
         fi
     fi
-
-    if [ -f /opt/bin/sudo ] && [ ! -f "/opt/etc/sudoers.d/${ROOT_USER}_is_root" ]; then
-        echo "  ${INFO} ${COL_BOLD}Applying sudo workaround...${COL_NC}"
-        echo "  ${INFO} Creating /opt/etc/sudoers.d/${ROOT_USER}_is_root."
-
-        echo "$ROOT_USER ALL=(ALL) ALL" > "/opt/etc/sudoers.d/${ROOT_USER}_is_root"
-        chmod 600 "/opt/etc/sudoers.d/${ROOT_USER}_is_root"
-    fi
 fi
 
 # Add a password for the web interface if the config file doesn't exist (new install)
