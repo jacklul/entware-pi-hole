@@ -2,13 +2,15 @@ diff --git a/advanced/Scripts/piholeDebug.sh b/advanced/Scripts/piholeDebug.sh
 index 7c55812..2150ba0 100755
 --- a/advanced/Scripts/piholeDebug.sh
 +++ b/advanced/Scripts/piholeDebug.sh
-@@ -1277,6 +1277,12 @@ analyze_pihole_log() {
+@@ -1277,6 +1277,14 @@ analyze_pihole_log() {
  }
  
  curl_to_tricorder() {
 +    if [ -f /opt/etc/opkg.conf ]; then
-+        echo "Upload not supported in unofficial Entware package release"
-+        echo "You can upload the log manually when asked by official Pi-hole developer - ${COL_CYAN}'cat /opt/var/log/pihole/pihole_debug.log | pihole tricorder'${COL_NC}"
++        log_write ""
++        log_write "   * ${COL_YELLOW}Upload is not supported in unofficial Entware package release!${COL_NC}"
++        log_write "   * You can manually upload the log when requested by an official Pi-hole developer: ${COL_CYAN}'cat /opt/var/log/pihole/pihole_debug.log | pihole tricorder'${COL_NC}"
++        log_write ""
 +        return
 +    fi
 +
