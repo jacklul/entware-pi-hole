@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Pi-hole's Discourse
+    url: https://discourse.pi-hole.net
+    about: Ask a question or get help on the official forum.
+  - name: Pi-hole's Documentation
+    url: https://docs.pi-hole.net
+    about: Official documentation and guides.
