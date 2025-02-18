@@ -1,0 +1,28 @@
+Package: pi-hole
+Version: 2025.02.16-100511-7922ca0a
+Depends: bash, cron, logrotate, curl, git-http, ca-bundle, bind-dig, bind-nslookup, iputils-ping, net-tools-netstat, findutils, grep, sed, jq, libcap-bin, nonroot, psmisc, procps-ng-pgrep, rev, lscpu, coreutils-cut, coreutils-expr, coreutils-id, coreutils-install, coreutils-mktemp, coreutils-nohup, coreutils-printf, coreutils-seq, coreutils-sha1sum, coreutils-sleep, coreutils-stat, coreutils-stty, coreutils-tee, coreutils-timeout, coreutils-tr, coreutils-tty, coreutils-whoami
+License: EUPL-1.2
+Section: net
+URL: https://github.com/pi-hole/pi-hole
+Architecture: aarch64-3.10
+Installed-Size: 33361920
+Filename: pi-hole_2025.02.16-100511-7922ca0a_aarch64-3.10.ipk
+Size: 14244201
+SHA256sum: 010896cc0d5a6eee83bfc69a9f475935fb39e0d760001f6b5342a3e571dc87f5
+Description:  The Pi-hole is a DNS sinkhole that protects your devices from unwanted content without installing any client-side software.
+ This is an unofficial package not supported by the Pi-hole developers!
+
+Package: pi-hole-dev
+Version: 2025.02.18-021226-7922ca0a
+Depends: bash, cron, logrotate, curl, git-http, ca-bundle, bind-dig, bind-nslookup, iputils-ping, net-tools-netstat, findutils, grep, sed, jq, libcap-bin, nonroot, psmisc, procps-ng-pgrep, rev, lscpu, coreutils-cut, coreutils-expr, coreutils-id, coreutils-install, coreutils-mktemp, coreutils-nohup, coreutils-printf, coreutils-seq, coreutils-sha1sum, coreutils-sleep, coreutils-stat, coreutils-stty, coreutils-tee, coreutils-timeout, coreutils-tr, coreutils-tty, coreutils-whoami
+License: EUPL-1.2
+Section: net
+URL: https://github.com/pi-hole/pi-hole
+Architecture: aarch64-3.10
+Installed-Size: 33361920
+Filename: pi-hole-dev_2025.02.18-021226-7922ca0a_aarch64-3.10.ipk
+Size: 14249462
+SHA256sum: 8dbadc5333d4d9feef8e6561ea98144f0b95df407e129ac523773656f704a1c5
+Description:  The Pi-hole is a DNS sinkhole that protects your devices from unwanted content without installing any client-side software.
+ This is an unofficial package not supported by the Pi-hole developers!
+
