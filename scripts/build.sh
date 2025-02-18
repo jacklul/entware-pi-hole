@@ -34,39 +34,39 @@ mkdir -p "$DESTINATION_DIR/opt"/{bin,etc/{pihole,cron.d,dnsmasq.d},share/pihole,
 
 if [ -z "$(ls -A "$DESTINATION_DIR/opt/share/pihole")" ]; then
     echo "Copying scripts and other essential files..."
-    cp -nr "$CORE_PATH/advanced/Scripts"/* "$DESTINATION_DIR/opt/share/pihole"
-    cp -n "$CORE_PATH/advanced/Templates"/*.sh "$DESTINATION_DIR/opt/share/pihole"
-    cp -n "$CORE_PATH/advanced/Templates"/*.sql "$DESTINATION_DIR/opt/share/pihole"
-    cp -n "$CORE_PATH/gravity.sh" "$DESTINATION_DIR/opt/share/pihole/gravity.sh"
+    cp -r --update=none "$CORE_PATH/advanced/Scripts"/* "$DESTINATION_DIR/opt/share/pihole"
+    cp --update=none "$CORE_PATH/advanced/Templates"/*.sh "$DESTINATION_DIR/opt/share/pihole"
+    cp --update=none "$CORE_PATH/advanced/Templates"/*.sql "$DESTINATION_DIR/opt/share/pihole"
+    cp --update=none "$CORE_PATH/gravity.sh" "$DESTINATION_DIR/opt/share/pihole/gravity.sh"
 fi
 
 if [ -z "$(ls -A "$DESTINATION_DIR/opt/etc/pihole")" ] || [ -z "$(ls -A "$DESTINATION_DIR/opt/etc/cron.d")" ]; then
     echo "Copying configuration files..."
-    [ -f "$CORE_PATH/advanced/Templates/pihole-FTL.conf" ] && cp -n "$CORE_PATH/advanced/Templates/pihole-FTL.conf" "$DESTINATION_DIR/opt/etc/pihole/pihole-FTL.conf"
-    [ -f "$CORE_PATH/advanced/Templates/pihole.cron" ] && cp -n "$CORE_PATH/advanced/Templates/pihole.cron" "$DESTINATION_DIR/opt/etc/cron.d/pihole"
-    [ -f "$CORE_PATH/advanced/Templates/logrotate" ] && cp -n "$CORE_PATH/advanced/Templates/logrotate" "$DESTINATION_DIR/opt/etc/pihole"
+    [ -f "$CORE_PATH/advanced/Templates/pihole-FTL.conf" ] && cp --update=none "$CORE_PATH/advanced/Templates/pihole-FTL.conf" "$DESTINATION_DIR/opt/etc/pihole/pihole-FTL.conf"
+    [ -f "$CORE_PATH/advanced/Templates/pihole.cron" ] && cp --update=none "$CORE_PATH/advanced/Templates/pihole.cron" "$DESTINATION_DIR/opt/etc/cron.d/pihole"
+    [ -f "$CORE_PATH/advanced/Templates/logrotate" ] && cp --update=none "$CORE_PATH/advanced/Templates/logrotate" "$DESTINATION_DIR/opt/etc/pihole"
 fi
 
 if [ ! -d "$DESTINATION_DIR/opt/share/pihole/www/admin" ]; then
     echo "Copying web files..."
     mkdir -p "$DESTINATION_DIR/opt/share/pihole/www/admin"
-    cp -nr "$WEB_PATH"/* "$DESTINATION_DIR/opt/share/pihole/www/admin"
+    cp -r --update=none "$WEB_PATH"/* "$DESTINATION_DIR/opt/share/pihole/www/admin"
     rm -f "$DESTINATION_DIR/opt/share/pihole/www/admin"/*.md
     rm -f "$DESTINATION_DIR/opt/share/pihole/www/admin"/*.json
 fi
 
 if [ ! -f "$DESTINATION_DIR/opt/bin/pihole" ]; then
     echo "Copying 'pihole' script..."
-    cp -n "$CORE_PATH/pihole" "$DESTINATION_DIR/opt/bin/pihole"
+    cp --update=none "$CORE_PATH/pihole" "$DESTINATION_DIR/opt/bin/pihole"
 fi
 
 if [ ! -f "$DESTINATION_DIR/opt/bin/pihole-FTL" ]; then
     echo "Copying FTL binary..."
-    cp -n "$FTL_PATH/pihole-FTL" "$DESTINATION_DIR/opt/bin/pihole-FTL"
+    cp --update=none "$FTL_PATH/pihole-FTL" "$DESTINATION_DIR/opt/bin/pihole-FTL"
 fi
 
 echo "Copying files from 'files' directory..."
-cp -nr "$ROOT_PATH/files"/* "$DESTINATION_DIR"
+cp -r --update=none "$ROOT_PATH/files"/* "$DESTINATION_DIR"
 
 if [ ! -f "$DESTINATION_DIR/opt/etc/pihole/macvendor.db" ]; then
     echo "Downloading macvendor.db..."

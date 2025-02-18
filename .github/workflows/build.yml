@@ -77,6 +77,8 @@ jobs:
           repository: pi-hole/pi-hole
           ref: ${{ needs.variables.outputs.CORE_REF }}
           path: ./stage
+          fetch-depth: 0
+          fetch-tags: true
 
       - name: Cache result
         id: cache
@@ -125,6 +127,8 @@ jobs:
           repository: pi-hole/web
           ref: ${{ needs.variables.outputs.WEB_REF }}
           path: ./stage
+          fetch-depth: 0
+          fetch-tags: true
 
       - name: Cache result
         id: cache
@@ -206,6 +210,8 @@ jobs:
           repository: pi-hole/FTL
           ref: ${{ needs.variables.outputs.FTL_REF }}
           path: ./stage
+          fetch-depth: 0
+          fetch-tags: true
 
       - name: Cache result
         id: cache
@@ -340,11 +346,11 @@ jobs:
       - name: Save current module versions
         run: |
           . ./artifacts/core/.version
-          echo "CORE=$VERSION" >> ./.versions
+          echo "CORE=$TAG" >> ./.versions
           . ./artifacts/web/.version
-          echo "WEB=$VERSION" >> ./.versions
+          echo "WEB=$TAG" >> ./.versions
           . ./artifacts/binary/.version
-          echo "FTL=$VERSION" >> ./.versions
+          echo "FTL=$TAG" >> ./.versions
 
       - name: Check if same dev package was already build
         id: devcheck
@@ -358,12 +364,13 @@ jobs:
           if [ -f ./.versions ]; then
             echo "IPK=${{ needs.variables.outputs.VERSION }}" >> $GITHUB_OUTPUT
             cat ./.versions >> $GITHUB_OUTPUT
+            cat ./.versions
           fi
 
   release:
     concurrency: release-${{ github.ref_name || github.run_id }}
     needs: [build-packages]
-    if: ${{ startsWith(github.ref, 'refs/tags/') && needs.build-packages.outputs.IPK_VERSION != '' }}
+    if: ${{ (startsWith(github.ref, 'refs/tags/') && needs.build-packages.outputs.IPK_VERSION != '') || github.ref_name == 'master' }}
     runs-on: ubuntu-latest
 
     permissions:
@@ -391,8 +398,10 @@ jobs:
           echo "Core version: $CORE_VERSION_OUT  " >> changelog.md
           echo "Web version: $WEB_VERSION_OUT  " >> changelog.md
           echo "FTL version: $FTL_VERSION_OUT  " >> changelog.md
+          cat changelog.md
 
       - name: Create or Edit a release
+        if: ${{ startsWith(github.ref, 'refs/tags/') }}
         uses: softprops/action-gh-release@v2
         with:
           files: ./artifacts/*/*.ipk
@@ -404,8 +413,7 @@ jobs:
   upload:
     concurrency: upload
     needs: [build-packages]
-    if: ${{ needs.build-packages.outputs.IPK_VERSION != '' && (startsWith(github.ref, 'refs/tags/') || github.ref_name == 'develop' || github.event_name == 'schedule' || github.ref_name == 'master') }}
-    # @TODO when v6 is released master should not trigger this job
+    if: ${{ needs.build-packages.outputs.IPK_VERSION != '' && (startsWith(github.ref, 'refs/tags/') || github.ref_name == 'develop' || github.ref_name == 'master' || github.event_name == 'schedule') }}
     runs-on: ubuntu-latest
 
     permissions:
@@ -482,15 +490,18 @@ jobs:
           paths: . ./artifacts ./gh-pages
 
       - name: Prepare for upload
+        if: ${{ github.ref_name != 'master' }}
         run: |
           find . -mindepth 1 -maxdepth 1 \( ! -name "gh-pages" -type d -exec rm -fr "{}" \; \) -o \( -type f -exec rm -f "{}" \; \)
           shopt -s dotglob && mv -v ./gh-pages/* .
 
       - name: Rename gh-pages branch
+        if: ${{ github.ref_name != 'master' }}
         continue-on-error: true
         run: git branch -m gh-pages gh-pages.old
 
       - name: Upload packages
+        if: ${{ github.ref_name != 'master' }}
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages

@@ -26,15 +26,21 @@ runs:
       id: hashes
       shell: bash
       run: |
-        echo "PATCHES=$((sha1sum "./patches/${{ inputs.patches_prefix }}-"*".patch" 2> /dev/null ; sha1sum "./patches/${{ inputs.patches_prefix }}-"*".sh" 2> /dev/null) | sha1sum | cut -c1-10)" >> $GITHUB_OUTPUT
-        echo "TESTS=$(sha1sum "./tests/${{ inputs.patches_prefix }}-"*".sh" 2> /dev/null | sha1sum | cut -c1-10)" >> $GITHUB_OUTPUT
-        echo "GIT=$((git -C "${{ inputs.git_path }}" rev-parse --abbrev-ref HEAD ; git -C "${{ inputs.git_path }}" rev-parse HEAD) | sha1sum | cut -c1-10)" >> $GITHUB_OUTPUT
+        echo "GIT_BRANCH=$(git -C "${{ inputs.git_path }}" rev-parse --abbrev-ref HEAD)" >> $GITHUB_OUTPUT
+        echo "GIT_HASH=$(git -C "${{ inputs.git_path }}" rev-parse HEAD | cut -c1-8)" >> $GITHUB_OUTPUT
+        echo "PATCHES=$((sha1sum "./patches/${{ inputs.patches_prefix }}-"*".patch" 2> /dev/null ; sha1sum "./patches/${{ inputs.patches_prefix }}-"*".sh" 2> /dev/null) | sha1sum | cut -c1-8)" >> $GITHUB_OUTPUT
+        echo "TESTS=$(sha1sum "./tests/${{ inputs.patches_prefix }}-"*".sh" 2> /dev/null | sha1sum | cut -c1-8)" >> $GITHUB_OUTPUT
+
+    - name: Build cache key
+      id: key
+      shell: bash
+      run: echo "CACHE_KEY=${{ inputs.key_prefix }}${{ steps.hashes.outputs.GIT_BRANCH }}-${{ steps.hashes.outputs.GIT_HASH }}-${{ steps.hashes.outputs.PATCHES }}-${{ steps.hashes.outputs.TESTS }}" >> $GITHUB_OUTPUT
 
     - name: Check if cache already exists
       id: cache-check
-      uses: actions/cache@v4
+      uses: actions/cache/restore@v4
       with:
-        key: ${{ inputs.key_prefix }}${{ steps.hashes.outputs.GIT }}-${{ steps.hashes.outputs.PATCHES }}-${{ steps.hashes.outputs.TESTS }}
+        key: ${{ steps.key.outputs.CACHE_KEY }}
         path: ${{ inputs.files }}
         lookup-only: true
 
@@ -47,5 +53,5 @@ runs:
     - name: Cache files
       uses: actions/cache@v4
       with:
-        key: ${{ inputs.key_prefix }}${{ steps.hashes.outputs.GIT }}-${{ steps.hashes.outputs.PATCHES }}-${{ steps.hashes.outputs.TESTS }}
+        key: ${{ steps.key.outputs.CACHE_KEY }}
         path: ${{ inputs.files }}

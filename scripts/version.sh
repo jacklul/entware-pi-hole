@@ -10,6 +10,8 @@ fi
 
 REPOSITORY="$(realpath "$REPOSITORY")"
 
-echo "VERSION=$(git -C "$REPOSITORY" describe --tags --always 2>/dev/null)" > "$REPOSITORY/.version"
+echo "TAG=$(git -C "$REPOSITORY" describe --tags --always 2>/dev/null)" > "$REPOSITORY/.version"
 echo "BRANCH=$(git -C "$REPOSITORY" rev-parse --abbrev-ref HEAD)" >> "$REPOSITORY/.version"
 echo "HASH=$(git -C "$REPOSITORY" rev-parse --short=8 HEAD)" >> "$REPOSITORY/.version"
+
+cat "$REPOSITORY/.version"
