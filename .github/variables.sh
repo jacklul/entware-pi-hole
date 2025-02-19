@@ -22,12 +22,6 @@ elif [[ "$GITHUB_REF" =~ ^refs/heads/.* ]]; then
     if git rev-parse --is-inside-work-tree &>/dev/null; then
         VERSION="${VERSION}-$(git describe --always --abbrev=8)"
     fi
-
-    # Special case for master branch
-    if [ "$GITHUB_REF_NAME" = "master" ]; then
-        LATEST_TAG="$(git ls-remote --tags --sort="v:refname" "https://github.com/$GITHUB_REPOSITORY" | tail -n1 | sed 's/.*\///; s/\^{}//')"
-        [ -n "$LATEST_TAG" ] && VERSION="$LATEST_TAG"
-    fi
 fi
 
 [ -z "$VERSION" ] && { echo "Package version not set"; exit 1; }
