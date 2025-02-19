@@ -238,9 +238,12 @@ jobs:
         id: variables
         working-directory: ./stage
         run: |
-          GIT_TAG=$(git describe --tags --abbrev=0 2> /dev/null || echo "")
+          if [[ "$GITHUB_REF" == refs/tags/* ]] || [[ "$GITHUB_REF" == "refs/heads/master" ]]; then
+            GIT_TAG=$(git describe --tags --abbrev=0 2> /dev/null || echo "")
+          fi
           echo "GIT_BRANCH=$([ -n "${GIT_TAG}" ] && echo "master" || git rev-parse --abbrev-ref HEAD)" >> $GITHUB_OUTPUT
           echo "GIT_TAG=$GIT_TAG" >> $GITHUB_OUTPUT
+          cat "$GITHUB_OUTPUT"
 
       - name: Set up Docker Buildx
         if: steps.cache.outputs.cache-hit != 'true'
@@ -364,8 +367,8 @@ jobs:
           if [ -f ./.versions ]; then
             echo "IPK=${{ needs.variables.outputs.VERSION }}" >> $GITHUB_OUTPUT
             cat ./.versions >> $GITHUB_OUTPUT
-            cat ./.versions
           fi
+          cat "$GITHUB_OUTPUT"
 
   release:
     concurrency: release-${{ github.ref_name || github.run_id }}
