@@ -7,7 +7,8 @@ on:
     branches-ignore:
       - 'gh-pages'
     paths:
-      - '.github/**/*.yml'
+      - '.github/actions/**/*.yml'
+      - '.github/workflows/build.yml'
       - '.github/*.sh'
       - 'scripts/**'
       - 'patches/**'
@@ -16,7 +17,8 @@ on:
       - 'build.env'
   pull_request:
     paths:
-      - '.github/**/*.yml'
+      - '.github/actions/**/*.yml'
+      - '.github/workflows/build.yml'
       - '.github/*.sh'
       - 'scripts/**'
       - 'patches/**'
