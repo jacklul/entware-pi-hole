@@ -27,6 +27,7 @@ function install_or_update_repository() {
         fi
 
         git -C "$DESTINATION" checkout "$MAIN_BRANCH"
+        git -C "$DESTINATION" branch --set-upstream-to="origin/$MAIN_BRANCH"
     else
         local CURRENT_BRANCH="$(git -C "$DESTINATION" rev-parse --abbrev-ref HEAD)"
 
@@ -43,6 +44,7 @@ function install_or_update_repository() {
         else
             git -C "$DESTINATION" fetch --depth 1
             git -C "$DESTINATION" checkout "$NEW_BRANCH"
+            git -C "$DESTINATION" branch --set-upstream-to="origin/$MAIN_BRANCH"
         fi
     fi
 }
