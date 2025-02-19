@@ -413,7 +413,7 @@ jobs:
   upload:
     concurrency: upload
     needs: [build-packages]
-    if: ${{ needs.build-packages.outputs.IPK_VERSION != '' && (startsWith(github.ref, 'refs/tags/') || github.event_name == 'schedule' || github.ref_name == 'develop' || github.ref_name == 'master') }}
+    if: ${{ needs.build-packages.outputs.IPK_VERSION != '' && (startsWith(github.ref, 'refs/tags/') || github.event_name == 'schedule' || github.ref_name == 'develop' || (github.ref_name == 'master' && github.event_name == 'workflow_dispatch')) }}
     runs-on: ubuntu-latest
 
     permissions:
