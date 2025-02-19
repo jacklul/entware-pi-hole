@@ -15,7 +15,7 @@ if [[ "$GITHUB_REF" == refs/tags/* ]] || [[ "$GITHUB_REF" == "refs/heads/master"
 fi
 
 #shellcheck disable=SC2015
-echo "TAG=$([ -n "$GIT_TAG" ] && echo "$GIT_TAG" || git -C "$REPOSITORY" describe --tags --always 2>/dev/null)" > "$REPOSITORY/.version"
+echo "VERSION=$([ -n "$GIT_TAG" ] && echo "$GIT_TAG" || git -C "$REPOSITORY" describe --tags --always 2>/dev/null)" > "$REPOSITORY/.version"
 
 #shellcheck disable=SC2015
 echo "BRANCH=$([ -n "$GIT_TAG" ] && echo "master" || git -C "$REPOSITORY" rev-parse --abbrev-ref HEAD)" >> "$REPOSITORY/.version"

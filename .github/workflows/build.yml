@@ -352,11 +352,11 @@ jobs:
       - name: Save current module versions
         run: |
           . ./artifacts/core/.version
-          echo "CORE=$TAG" >> ./.versions
+          echo "CORE=$VERSION" >> ./.versions
           . ./artifacts/web/.version
-          echo "WEB=$TAG" >> ./.versions
+          echo "WEB=$VERSION" >> ./.versions
           . ./artifacts/binary/.version
-          echo "FTL=$TAG" >> ./.versions
+          echo "FTL=$VERSION" >> ./.versions
 
       - name: Check if same dev package was already build
         id: devcheck
