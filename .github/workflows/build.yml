@@ -410,7 +410,6 @@ jobs:
           files: ./artifacts/*/*.ipk
           tag_name: ${{ needs.build-packages.outputs.IPK_VERSION }}
           body_path: changelog.md
-          append_body: true
           generate_release_notes: true
 
   upload:
