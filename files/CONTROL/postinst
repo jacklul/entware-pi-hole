@@ -138,7 +138,13 @@ else
     bash /opt/share/pihole/pihole-FTL-prestart.sh
 
     # This will initialize the config file
-    /opt/bin/pihole-FTL test > /dev/null 2>&1
+    if [ "$ROOT_USER" != "root" ]; then
+        ROOT_GROUP="$(id -ng 0 2> /dev/null)"
+
+        /opt/bin/pihole-FTL test -- -u "$ROOT_USER" -g "$ROOT_GROUP" > /dev/null 2>&1
+    else
+        /opt/bin/pihole-FTL test > /dev/null 2>&1
+    fi
 fi
 
 # Make sure gravity database exists and that
