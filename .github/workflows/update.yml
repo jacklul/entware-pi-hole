@@ -169,11 +169,12 @@ jobs:
                 [ $LIMIT -le 0 ] && exit 1
             done
             echo "RESULT=$TAG" >> $GITHUB_OUTPUT
+            echo "$TAG"
           '
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
-        if: ${{ steps.tag.outputs.RESULT != '' }}
+        if: ${{ steps.tag.outputs.RESULT != '' && (github.event_name == 'schedule' || github.ref_name == 'master') }}
         with:
           branch: auto-update-pull-request
           delete-branch: true
