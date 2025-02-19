@@ -81,6 +81,7 @@ jobs:
           fetch-tags: true
 
       - name: Cache result
+        if: ${{ !startsWith(github.ref, 'refs/tags/') && !(github.ref_name == 'master' && github.event_name == 'workflow_dispatch') }}
         id: cache
         uses: ./.github/actions/cache
         with:
@@ -131,6 +132,7 @@ jobs:
           fetch-tags: true
 
       - name: Cache result
+        if: ${{ !startsWith(github.ref, 'refs/tags/') && !(github.ref_name == 'master' && github.event_name == 'workflow_dispatch') }}
         id: cache
         uses: ./.github/actions/cache
         with:
@@ -214,6 +216,7 @@ jobs:
           fetch-tags: true
 
       - name: Cache result
+        if: ${{ !startsWith(github.ref, 'refs/tags/') && !(github.ref_name == 'master' && github.event_name == 'workflow_dispatch') }}
         id: cache
         uses: ./.github/actions/cache
         with:
@@ -331,7 +334,7 @@ jobs:
           path: ./artifacts/binary
 
       - name: Add '-dev' to package name
-        if: ${{ github.ref_name == 'develop' || github.event_name == 'schedule' }}
+        if: github.ref_name == 'develop' || github.event_name == 'schedule'
         run: sed '/^Package:/ s/$/-dev/' -i ./files/CONTROL/control
 
       - name: Build packages
@@ -357,11 +360,11 @@ jobs:
 
       - name: Check if same dev package was already build
         id: devcheck
-        if: ${{ github.event_name == 'schedule' }}
+        if: github.event_name == 'schedule'
         uses: ./.github/actions/devcheck
 
       - name: Set versions
-        if: ${{ github.event_name != 'schedule' || steps.devcheck.outputs.cache-hit != 'true' }}
+        if: github.event_name != 'schedule' || steps.devcheck.outputs.cache-hit != 'true'
         id: versions
         run: |
           if [ -f ./.versions ]; then
@@ -373,7 +376,7 @@ jobs:
   release:
     concurrency: release-${{ github.ref_name || github.run_id }}
     needs: [build-packages]
-    if: ${{ (startsWith(github.ref, 'refs/tags/') && needs.build-packages.outputs.IPK_VERSION != '') }}
+    if: startsWith(github.ref, 'refs/tags/') && needs.build-packages.outputs.IPK_VERSION != ''
     runs-on: ubuntu-latest
 
     permissions:
@@ -404,7 +407,7 @@ jobs:
           cat changelog.md
 
       - name: Create or Edit a release
-        if: ${{ startsWith(github.ref, 'refs/tags/') }}
+        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
           files: ./artifacts/*/*.ipk
@@ -415,7 +418,7 @@ jobs:
   upload:
     concurrency: upload
     needs: [build-packages]
-    if: ${{ needs.build-packages.outputs.IPK_VERSION != '' && (startsWith(github.ref, 'refs/tags/') || github.event_name == 'schedule' || github.ref_name == 'develop' || (github.ref_name == 'master' && github.event_name == 'workflow_dispatch')) }}
+    if: needs.build-packages.outputs.IPK_VERSION != '' && (startsWith(github.ref, 'refs/tags/') || github.event_name == 'schedule' || github.ref_name == 'develop' || (github.ref_name == 'master' && github.event_name == 'workflow_dispatch'))
     runs-on: ubuntu-latest
 
     permissions:
@@ -492,18 +495,18 @@ jobs:
           paths: . ./artifacts ./gh-pages
 
       - name: Prepare for upload
-        if: ${{ github.ref_name != 'master' || github.event_name == 'schedule' }}
+        if: github.ref_name != 'master' || github.event_name == 'schedule'
         run: |
           find . -mindepth 1 -maxdepth 1 \( ! -name "gh-pages" -type d -exec rm -fr "{}" \; \) -o \( -type f -exec rm -f "{}" \; \)
           shopt -s dotglob && mv -v ./gh-pages/* .
 
       - name: Rename gh-pages branch
-        if: ${{ github.ref_name != 'master' || github.event_name == 'schedule' }}
+        if: github.ref_name != 'master' || github.event_name == 'schedule'
         continue-on-error: true
         run: git branch -m gh-pages gh-pages.old
 
       - name: Upload packages
-        if: ${{ github.ref_name != 'master' || github.event_name == 'schedule' }}
+        if: github.ref_name != 'master' || github.event_name == 'schedule'
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages
