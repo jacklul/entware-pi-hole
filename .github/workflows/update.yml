@@ -104,11 +104,13 @@ jobs:
           git_path: ./dev/FTL
 
       - name: Set up Docker Buildx
-        if: ${{ steps.patch-FTL.outputs.RESULT == 'ok' }}
+        id: setup-docker-buildx
+        if: ${{ steps.patch-FTL.outcome == 'success' }}
         uses: docker/setup-buildx-action@v3
 
       - name: Build and test FTL
-        if: ${{ steps.patch-FTL.outputs.RESULT == 'ok' }}
+        id: build-FTL
+        if: ${{ steps.setup-docker-buildx.outcome == 'success' }}
         uses: docker/build-push-action@v5
         env:
           platform: linux/amd64
@@ -127,7 +129,7 @@ jobs:
             "GIT_TAG="
 
       - name: Set ok status
-        if: ${{ steps.hashes-different.outputs.RESULT == 'ok' }}
+        if: ${{ steps.hashes-different.outputs.RESULT == 'ok' && steps.patch-core.outcome == 'success' && steps.patch-web.outcome == 'success' && steps.patch-FTL.outcome == 'success' && steps.build-FTL.outcome == 'success' }}
         id: status
         run: echo "RESULT=ok" >> $GITHUB_OUTPUT
 
