@@ -200,10 +200,6 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v7
         if: ${{ steps.tag.outputs.RESULT != '' && (github.event_name == 'schedule' || github.ref_name == 'master') }}
-        env:
-          CORE_TAG: ${{ needs.check.outputs.CORE_TAG }}
-          WEB_TAG: ${{ needs.check.outputs.WEB_TAG }}
-          FTL_TAG: ${{ needs.check.outputs.FTL_TAG }}
         with:
           branch: auto-update-pull-request
           base: develop
@@ -211,7 +207,7 @@ jobs:
           commit-message: 'Update release build refs'
           title: 'Update package to ${{ steps.tag.outputs.RESULT }}'
           body: |
-            Suggested package release tag: `${{ steps.tag.outputs.RESULT }}`
-            Core version: [$CORE_TAG](https://github.com/pi-hole/pi-hole/releases/tag/$CORE_TAG)
-            Web version: [$WEB_TAG](https://github.com/pi-hole/web/releases/tag/$WEB_TAG)
-            FTL version: [$FTL_TAG](https://github.com/pi-hole/FTL/releases/tag/$FTL_TAG)
+            Release tag: `${{ steps.tag.outputs.RESULT }}`
+            Core version: [${{ needs.check.outputs.CORE_TAG }}](https://github.com/pi-hole/pi-hole/releases/tag/${{ needs.check.outputs.CORE_TAG }})
+            Web version: [${{ needs.check.outputs.WEB_TAG }}](https://github.com/pi-hole/web/releases/tag/${{ needs.check.outputs.WEB_TAG }})
+            FTL version: [${{ needs.check.outputs.FTL_TAG }}](https://github.com/pi-hole/FTL/releases/tag/${{ needs.check.outputs.FTL_TAG }})
