@@ -204,6 +204,7 @@ jobs:
           branch: auto-update-pull-request
           base: develop
           delete-branch: true
+          sign-commits: true
           commit-message: 'Update release build refs'
           title: 'Update package to ${{ steps.tag.outputs.RESULT }}'
           body: |
