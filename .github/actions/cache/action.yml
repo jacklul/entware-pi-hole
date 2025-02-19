@@ -26,7 +26,10 @@ runs:
       id: hashes
       shell: bash
       run: |
-        echo "GIT_BRANCH=$(git -C "${{ inputs.git_path }}" rev-parse --abbrev-ref HEAD)" >> $GITHUB_OUTPUT
+        if [[ "$GITHUB_REF" == refs/tags/* ]] || [[ "$GITHUB_REF" == "refs/heads/master" ]]; then
+          GIT_TAG=$(git -C "${{ inputs.git_path }}" describe --tags --abbrev=0 2> /dev/null || echo "")
+        fi
+        echo "GIT_BRANCH=$([ -n "$GIT_TAG" ] && echo "master" || git -C "${{ inputs.git_path }}" rev-parse --abbrev-ref HEAD)" >> $GITHUB_OUTPUT
         echo "GIT_HASH=$(git -C "${{ inputs.git_path }}" rev-parse HEAD | cut -c1-8)" >> $GITHUB_OUTPUT
         echo "PATCHES=$((sha1sum "./patches/${{ inputs.patches_prefix }}-"*".patch" 2> /dev/null ; sha1sum "./patches/${{ inputs.patches_prefix }}-"*".sh" 2> /dev/null) | sha1sum | cut -c1-8)" >> $GITHUB_OUTPUT
         echo "TESTS=$(sha1sum "./tests/${{ inputs.patches_prefix }}-"*".sh" 2> /dev/null | sha1sum | cut -c1-8)" >> $GITHUB_OUTPUT
