@@ -79,6 +79,29 @@ index eda6c40..291f43e 100755
  
  GITHUB_WEB_VERSION="$(get_remote_version web "${WEB_BRANCH}")"
  addOrEditKeyValPair "${VERSION_FILE}" "GITHUB_WEB_VERSION" "${GITHUB_WEB_VERSION}"
+@@ -102,14 +102,16 @@ addOrEditKeyValPair "${VERSION_FILE}" "GITHUB_WEB_HASH" "${GITHUB_WEB_HASH}"
+ 
+ # get FTL versions
+ 
+-FTL_VERSION="$(pihole-FTL version)"
+-addOrEditKeyValPair "${VERSION_FILE}" "FTL_VERSION" "${FTL_VERSION}"
++if ! $IS_ENTWARE; then
++    FTL_VERSION="$(pihole-FTL version)"
++    addOrEditKeyValPair "${VERSION_FILE}" "FTL_VERSION" "${FTL_VERSION}"
+ 
+-FTL_BRANCH="$(pihole-FTL branch)"
+-addOrEditKeyValPair "${VERSION_FILE}" "FTL_BRANCH" "${FTL_BRANCH}"
++    FTL_BRANCH="$(pihole-FTL branch)"
++    addOrEditKeyValPair "${VERSION_FILE}" "FTL_BRANCH" "${FTL_BRANCH}"
+ 
+-FTL_HASH="$(pihole-FTL --hash)"
+-addOrEditKeyValPair "${VERSION_FILE}" "FTL_HASH" "${FTL_HASH}"
++    FTL_HASH="$(pihole-FTL --hash)"
++    addOrEditKeyValPair "${VERSION_FILE}" "FTL_HASH" "${FTL_HASH}"
++fi
+ 
+ GITHUB_FTL_VERSION="$(get_remote_version FTL "${FTL_BRANCH}")"
+ addOrEditKeyValPair "${VERSION_FILE}" "GITHUB_FTL_VERSION" "${GITHUB_FTL_VERSION}"
 @@ -131,3 +188,21 @@ if [[ "${DOCKER_TAG}" ]]; then
      GITHUB_DOCKER_VERSION="$(get_remote_version docker-pi-hole "${docker_branch}")"
      addOrEditKeyValPair "${VERSION_FILE}" "GITHUB_DOCKER_VERSION" "${GITHUB_DOCKER_VERSION}"
