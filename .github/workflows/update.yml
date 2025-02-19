@@ -17,11 +17,16 @@ jobs:
       CORE_HASH: ${{ steps.new-hashes.outputs.CORE_HASH }}
       WEB_HASH: ${{ steps.new-hashes.outputs.WEB_HASH }}
       FTL_HASH: ${{ steps.new-hashes.outputs.FTL_HASH }}
+      CORE_TAG: ${{ steps.hashes-have-tags.outputs.CORE_TAG }}
+      WEB_TAG: ${{ steps.hashes-have-tags.outputs.WEB_TAG }}
+      FTL_TAG: ${{ steps.hashes-have-tags.outputs.FTL_TAG }}
       STATUS: ${{ steps.status.outputs.RESULT }}
 
     steps:
       - name: Checkout own repository
         uses: actions/checkout@v4
+        #with:
+        #  ref: develop
 
       - name: Set branches to pull
         id: branches
@@ -70,18 +75,33 @@ jobs:
           cat $GITHUB_OUTPUT
 
       - name: Old hashes are not empty
-        id: hashes-not-empty
+        id: hashes-are-not-empty
         if: ${{ steps.old-hashes.outputs.CORE_HASH != '' && steps.old-hashes.outputs.WEB_HASH != '' && steps.old-hashes.outputs.FTL_HASH != '' }}
         run: echo "RESULT=ok" >> $GITHUB_OUTPUT
 
       - name: At least one hash is different
-        id: hashes-different
-        if: ${{ steps.hashes-not-empty.outputs.RESULT == 'ok' && ( steps.old-hashes.outputs.CORE_HASH != steps.new-hashes.outputs.CORE_HASH || steps.old-hashes.outputs.WEB_HASH != steps.new-hashes.outputs.WEB_HASH || steps.old-hashes.outputs.FTL_HASH != steps.new-hashes.outputs.FTL_HASH ) }}
+        id: hashes-are-different
+        if: ${{ steps.hashes-are-not-empty.outputs.RESULT == 'ok' && ( steps.old-hashes.outputs.CORE_HASH != steps.new-hashes.outputs.CORE_HASH || steps.old-hashes.outputs.WEB_HASH != steps.new-hashes.outputs.WEB_HASH || steps.old-hashes.outputs.FTL_HASH != steps.new-hashes.outputs.FTL_HASH ) }}
         run: echo "RESULT=ok" >> $GITHUB_OUTPUT
+
+      - name: Check if each hash contains a tag
+        id: hashes-have-tags
+        if: ${{ steps.hashes-are-different.outputs.RESULT == 'ok' }}
+        run: |
+          CORE_TAG=$(git ls-remote --tags https://github.com/pi-hole/pi-hole | grep "${{ steps.new-hashes.outputs.CORE_HASH }}" | awk '{print $2}' | sed 's/refs\/tags\///')
+          WEB_TAG=$(git ls-remote --tags https://github.com/pi-hole/web | grep "${{ steps.new-hashes.outputs.WEB_HASH }}" | awk '{print $2}' | sed 's/refs\/tags\///')
+          FTL_TAG=$(git ls-remote --tags https://github.com/pi-hole/FTL | grep "${{ steps.new-hashes.outputs.FTL_HASH }}" | awk '{print $2}' | sed 's/refs\/tags\///')
+          if [ "$CORE_TAG" != "" ] && [ "$WEB_TAG" != "" ] && [ "$FTL_TAG" != "" ]; then
+            echo "CORE_TAG=$CORE_TAG" >> $GITHUB_OUTPUT
+            echo "WEB_TAG=$WEB_TAG" >> $GITHUB_OUTPUT
+            echo "FTL_TAG=$FTL_TAG" >> $GITHUB_OUTPUT
+            cat $GITHUB_OUTPUT
+            echo "RESULT=ok" >> $GITHUB_OUTPUT
+          fi
 
       - name: Apply patches (core)
         id: patch-core
-        if: ${{ steps.hashes-different.outputs.RESULT == 'ok' }}
+        if: ${{ steps.hashes-have-tags.outputs.RESULT == 'ok' }}
         uses: ./.github/actions/patch
         with:
           patches_prefix: core
@@ -89,7 +109,7 @@ jobs:
 
       - name: Apply patches (web)
         id: patch-web
-        if: ${{ steps.hashes-different.outputs.RESULT == 'ok' }}
+        if: ${{ steps.hashes-have-tags.outputs.RESULT == 'ok' }}
         uses: ./.github/actions/patch
         with:
           patches_prefix: web
@@ -97,7 +117,7 @@ jobs:
 
       - name: Apply patches (FTL)
         id: patch-FTL
-        if: ${{ steps.hashes-different.outputs.RESULT == 'ok' }}
+        if: ${{ steps.hashes-have-tags.outputs.RESULT == 'ok' }}
         uses: ./.github/actions/patch
         with:
           patches_prefix: FTL
@@ -129,7 +149,7 @@ jobs:
             "GIT_TAG="
 
       - name: Set ok status
-        if: ${{ steps.hashes-different.outputs.RESULT == 'ok' && steps.patch-core.outcome == 'success' && steps.patch-web.outcome == 'success' && steps.patch-FTL.outcome == 'success' && steps.build-FTL.outcome == 'success' }}
+        if: ${{ steps.patch-core.outcome == 'success' && steps.patch-web.outcome == 'success' && steps.patch-FTL.outcome == 'success' && steps.build-FTL.outcome == 'success' }}
         id: status
         run: echo "RESULT=ok" >> $GITHUB_OUTPUT
 
@@ -141,10 +161,13 @@ jobs:
 
     permissions:
       contents: write
+      pull-requests: write
 
     steps:
       - name: Checkout own repository
         uses: actions/checkout@v4
+        #with:
+        #  ref: develop
 
       - name: Replace hashes in env file
         run: |
@@ -175,11 +198,20 @@ jobs:
           '
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v7
         if: ${{ steps.tag.outputs.RESULT != '' && (github.event_name == 'schedule' || github.ref_name == 'master') }}
+        env:
+          CORE_TAG: ${{ needs.check.outputs.CORE_TAG }}
+          WEB_TAG: ${{ needs.check.outputs.WEB_TAG }}
+          FTL_TAG: ${{ needs.check.outputs.FTL_TAG }}
         with:
           branch: auto-update-pull-request
+          base: develop
           delete-branch: true
-          commit-message: 'Automatic update to ${{ steps.tag.outputs.RESULT }}'
-          title: 'Automatic update to ${{ steps.tag.outputs.RESULT }}'
-          body: ''
+          commit-message: 'Update release build refs'
+          title: 'Update package to ${{ steps.tag.outputs.RESULT }}'
+          body: |
+            Suggested package release tag: `${{ steps.tag.outputs.RESULT }}`
+            Core version: [$CORE_TAG](https://github.com/pi-hole/pi-hole/releases/tag/$CORE_TAG)
+            Web version: [$WEB_TAG](https://github.com/pi-hole/web/releases/tag/$WEB_TAG)
+            FTL version: [$FTL_TAG](https://github.com/pi-hole/FTL/releases/tag/$FTL_TAG)

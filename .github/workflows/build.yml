@@ -243,7 +243,7 @@ jobs:
           fi
           echo "GIT_BRANCH=$([ -n "${GIT_TAG}" ] && echo "master" || git rev-parse --abbrev-ref HEAD)" >> $GITHUB_OUTPUT
           echo "GIT_TAG=$GIT_TAG" >> $GITHUB_OUTPUT
-          cat "$GITHUB_OUTPUT"
+          cat $GITHUB_OUTPUT
 
       - name: Set up Docker Buildx
         if: steps.cache.outputs.cache-hit != 'true'
@@ -368,7 +368,7 @@ jobs:
             echo "IPK=${{ needs.variables.outputs.VERSION }}" >> $GITHUB_OUTPUT
             cat ./.versions >> $GITHUB_OUTPUT
           fi
-          cat "$GITHUB_OUTPUT"
+          cat $GITHUB_OUTPUT
 
   release:
     concurrency: release-${{ github.ref_name || github.run_id }}
