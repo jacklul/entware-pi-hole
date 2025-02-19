@@ -201,7 +201,7 @@ jobs:
         uses: peter-evans/create-pull-request@v7
         if: ${{ steps.tag.outputs.RESULT != '' && (github.event_name == 'schedule' || github.ref_name == 'master') }}
         with:
-          branch: auto-update-pull-request
+          branch: auto-update
           base: develop
           delete-branch: true
           sign-commits: true
