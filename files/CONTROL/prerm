@@ -1,5 +1,0 @@
-#!/bin/sh
-
-if [ -f /opt/etc/init.d/S65pihole-FTL ] && /opt/etc/init.d/S65pihole-FTL check | grep -q 'alive'; then
-    /opt/etc/init.d/S65pihole-FTL stop
-fi
