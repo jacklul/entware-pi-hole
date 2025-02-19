@@ -370,7 +370,7 @@ jobs:
   release:
     concurrency: release-${{ github.ref_name || github.run_id }}
     needs: [build-packages]
-    if: ${{ (startsWith(github.ref, 'refs/tags/') && needs.build-packages.outputs.IPK_VERSION != '') || github.ref_name == 'master' }}
+    if: ${{ (startsWith(github.ref, 'refs/tags/') && needs.build-packages.outputs.IPK_VERSION != '') }}
     runs-on: ubuntu-latest
 
     permissions:
@@ -413,7 +413,7 @@ jobs:
   upload:
     concurrency: upload
     needs: [build-packages]
-    if: ${{ needs.build-packages.outputs.IPK_VERSION != '' && (startsWith(github.ref, 'refs/tags/') || github.ref_name == 'develop' || github.ref_name == 'master' || github.event_name == 'schedule') }}
+    if: ${{ needs.build-packages.outputs.IPK_VERSION != '' && (startsWith(github.ref, 'refs/tags/') || github.event_name == 'schedule' || github.ref_name == 'develop' || github.ref_name == 'master') }}
     runs-on: ubuntu-latest
 
     permissions:
@@ -490,18 +490,18 @@ jobs:
           paths: . ./artifacts ./gh-pages
 
       - name: Prepare for upload
-        if: ${{ github.ref_name != 'master' }}
+        if: ${{ github.ref_name != 'master' || github.event_name == 'schedule' }}
         run: |
           find . -mindepth 1 -maxdepth 1 \( ! -name "gh-pages" -type d -exec rm -fr "{}" \; \) -o \( -type f -exec rm -f "{}" \; \)
           shopt -s dotglob && mv -v ./gh-pages/* .
 
       - name: Rename gh-pages branch
-        if: ${{ github.ref_name != 'master' }}
+        if: ${{ github.ref_name != 'master' || github.event_name == 'schedule' }}
         continue-on-error: true
         run: git branch -m gh-pages gh-pages.old
 
       - name: Upload packages
-        if: ${{ github.ref_name != 'master' }}
+        if: ${{ github.ref_name != 'master' || github.event_name == 'schedule' }}
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages
