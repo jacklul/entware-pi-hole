@@ -1,8 +1,8 @@
 diff --git a/src/api/info.c b/src/api/info.c
-index 581fc0b..c0068bb 100644
+index 693f1439..72563415 100644
 --- a/src/api/info.c
 +++ b/src/api/info.c
-@@ -726,6 +726,7 @@ int api_info_version(struct ftl_conn *api)
+@@ -751,6 +751,7 @@ int get_version_obj(struct ftl_conn *api, cJSON *version)
  	cJSON *web_remote = JSON_NEW_OBJECT();
  	cJSON *ftl_remote = JSON_NEW_OBJECT();
  	cJSON *docker = JSON_NEW_OBJECT();
@@ -10,7 +10,7 @@ index 581fc0b..c0068bb 100644
  
  	FILE *fp = fopen(VERSIONS_FILE, "r");
  	if(!fp)
-@@ -791,6 +792,10 @@ int api_info_version(struct ftl_conn *api)
+@@ -816,6 +817,12 @@ int get_version_obj(struct ftl_conn *api, cJSON *version)
  			JSON_COPY_STR_TO_OBJECT(docker, "local", value);
  		else if(strcmp(key, "GITHUB_DOCKER_VERSION") == 0)
  			JSON_COPY_STR_TO_OBJECT(docker, "remote", value);
@@ -18,16 +18,19 @@ index 581fc0b..c0068bb 100644
 +			JSON_COPY_STR_TO_OBJECT(entware, "local", value);
 +		else if(strcmp(key, "GITHUB_ENTWARE_VERSION") == 0)
 +			JSON_COPY_STR_TO_OBJECT(entware, "remote", value);
++		else if(strcmp(key, "ENTWARE_PACKAGE") == 0)
++			JSON_COPY_STR_TO_OBJECT(entware, "branch", value);
  	}
  
  	// Free allocated memory and release file pointer
-@@ -839,6 +844,11 @@ int api_info_version(struct ftl_conn *api)
+@@ -862,6 +869,12 @@ int get_version_obj(struct ftl_conn *api, cJSON *version)
  	JSON_ADD_NULL_IF_NOT_EXISTS(docker, "remote");
  	JSON_ADD_ITEM_TO_OBJECT(version, "docker", docker);
  
 +	// Add nulls to entware if we didn't find any version
 +	JSON_ADD_NULL_IF_NOT_EXISTS(entware, "local");
 +	JSON_ADD_NULL_IF_NOT_EXISTS(entware, "remote");
++	JSON_ADD_NULL_IF_NOT_EXISTS(entware, "branch");
 +	JSON_ADD_ITEM_TO_OBJECT(version, "entware", entware);
 +
  	return 0;
