@@ -12,6 +12,7 @@ jobs:
   check:
     concurrency: check
     runs-on: ubuntu-latest
+    continue-on-error: true
 
     outputs:
       CORE_HASH: ${{ steps.new-hashes.outputs.CORE_HASH }}
