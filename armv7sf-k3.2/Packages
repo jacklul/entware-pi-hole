@@ -1,0 +1,28 @@
+Package: pi-hole
+Version: 2025.02.21-1
+Depends: bash, cron, logrotate, curl, git-http, ca-bundle, bind-dig, bind-nslookup, iputils-ping, net-tools-netstat, findutils, grep, sed, jq, libcap-bin, nonroot, psmisc, procps-ng-pgrep, rev, lscpu, coreutils-cut, coreutils-expr, coreutils-id, coreutils-install, coreutils-mktemp, coreutils-nohup, coreutils-printf, coreutils-seq, coreutils-sha1sum, coreutils-sleep, coreutils-stat, coreutils-stty, coreutils-tee, coreutils-timeout, coreutils-tr, coreutils-tty, coreutils-whoami
+License: EUPL-1.2
+Section: net
+URL: https://github.com/pi-hole/pi-hole
+Architecture: armv7-3.2
+Installed-Size: 33361920
+Filename: pi-hole_2025.02.21-1_armv7-3.2.ipk
+Size: 14250250
+SHA256sum: beccb21da1b85a60e5d9fb6c5b9b9b7714c91a307665a870dc965ff62c44d392
+Description:  The Pi-hole is a DNS sinkhole that protects your devices from unwanted content without installing any client-side software.
+ This is an unofficial package not supported by the Pi-hole developers!
+
+Package: pi-hole-dev
+Version: 2025.02.21-172531-e625ef1d
+Depends: bash, cron, logrotate, curl, git-http, ca-bundle, bind-dig, bind-nslookup, iputils-ping, net-tools-netstat, findutils, grep, sed, jq, libcap-bin, nonroot, psmisc, procps-ng-pgrep, rev, lscpu, coreutils-cut, coreutils-expr, coreutils-id, coreutils-install, coreutils-mktemp, coreutils-nohup, coreutils-printf, coreutils-seq, coreutils-sha1sum, coreutils-sleep, coreutils-stat, coreutils-stty, coreutils-tee, coreutils-timeout, coreutils-tr, coreutils-tty, coreutils-whoami
+License: EUPL-1.2
+Section: net
+URL: https://github.com/pi-hole/pi-hole
+Architecture: armv7-3.2
+Installed-Size: 33361920
+Filename: pi-hole-dev_2025.02.21-172531-e625ef1d_armv7-3.2.ipk
+Size: 14249966
+SHA256sum: 2cb571663bab5e6edfd4aae611c9886a2cc64e46defc5ce60e50484c9b76ce64
+Description:  The Pi-hole is a DNS sinkhole that protects your devices from unwanted content without installing any client-side software.
+ This is an unofficial package not supported by the Pi-hole developers!
+
