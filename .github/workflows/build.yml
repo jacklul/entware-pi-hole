@@ -380,7 +380,7 @@ jobs:
   release:
     concurrency: release-${{ github.ref_name || github.run_id }}
     needs: [build-packages]
-    if: startsWith(github.ref, 'refs/tags/') && needs.build-packages.outputs.IPK_VERSION != ''
+    if: startsWith(github.ref, 'refs/tags/') && needs.build-packages.outputs.IPK_VERSION != '' || (github.ref_name == 'master' && github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
 
     permissions:
