@@ -1,4 +1,4 @@
-name: Build and Upload
+name: Build, Release and Upload
 
 on:
   schedule:

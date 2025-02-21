@@ -1,4 +1,4 @@
-name: Auto Update
+name: Check upstream for updates
 
 on:
   schedule:
