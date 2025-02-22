@@ -1,8 +1,8 @@
 diff --git a/src/api/docs/content/specs/info.yaml b/src/api/docs/content/specs/info.yaml
-index dadaee27..75c0dbdd 100644
+index 6be2b1ac..dab9526e 100644
 --- a/src/api/docs/content/specs/info.yaml
 +++ b/src/api/docs/content/specs/info.yaml
-@@ -1051,6 +1051,19 @@ components:
+@@ -1066,6 +1066,24 @@ components:
                    nullable: true
                    description: Remote (Docker Hub) Pi-hole Docker image version (`null` if not running in Docker)
                    example: "v6.1"
@@ -19,6 +19,11 @@ index dadaee27..75c0dbdd 100644
 +                  nullable: true
 +                  description: Remote Pi-hole Entware package version (`null` if not running Entware)
 +                  example: "v6.1"
++                branch:
++                  type: string
++                  nullable: true
++                  description: Local Pi-hole Entware package name
++                  example: "pi-hole"
      messages:
        type: object
        properties:
@@ -228,6 +233,28 @@ index 0b433266..85d8a45c 100644
  
    # Debug monitoring of the webserver (CivetWeb) events
 diff --git a/test/test_suite.bats b/test/test_suite.bats
+index 1891abde..52aa6f3d 100644
+--- a/test/test_suite.bats
++++ b/test/test_suite.bats
+@@ -1755,15 +1755,15 @@
+   printf "%s\n" "${lines[@]}"
+   [[ ${lines[0]} == 'Hello, world 1!' ]]
+   [[ ${lines[1]} == 'Hello, world 2!' ]]
+-  [[ ${lines[2]} == '[string "/var/www/html/broken_lua_2.lp"]:4: Cannot include [/var/www/html/does_not_exist.lp]: not found' ]]
++  [[ ${lines[2]} == '[string "/opt/share/pihole/www/broken_lua_2.lp"]:4: Cannot include [/opt/share/pihole/www/does_not_exist.lp]: not found' ]]
+   [[ ${lines[3]} == 'stack traceback:' ]]
+   [[ ${lines[4]} == "	[C]: in field 'include'" ]]
+-  [[ ${lines[5]} == '	[string "/var/www/html/broken_lua.lp"]:4: in main chunk' ]]
++  [[ ${lines[5]} == '	[string "/opt/share/pihole/www/broken_lua.lp"]:4: in main chunk' ]]
+   [[ ${lines[6]} == 'aborting' ]]
+   [[ ${lines[7]} == '' ]]
+ 
+   # Check if the error is logged (-F = fixed string (no regex), -q = quiet)
+-  run grep -qF 'LSP Kepler: call failed: runtime error: [string "/var/www/html/broken_lua_2.lp"]:4: Cannot include [/var/www/html/does_not_exist.lp]: not found' /var/log/pihole/webserver.log
++  run grep -qF 'LSP Kepler: call failed: runtime error: [string "/opt/share/pihole/www/broken_lua_2.lp"]:4: Cannot include [/opt/share/pihole/www/does_not_exist.lp]: not found' /opt/var/log/pihole/webserver.log
+   [[ $status == 0 ]]
+ }
+ 
 index 94c04019..51bb0b1a 100644
 --- a/test/test_suite.bats
 +++ b/test/test_suite.bats
