@@ -44,7 +44,7 @@ function install_or_update_repository() {
         else
             git -C "$DESTINATION" fetch --depth 1
             git -C "$DESTINATION" checkout "$NEW_BRANCH"
-            git -C "$DESTINATION" branch --set-upstream-to="origin/$MAIN_BRANCH"
+            git -C "$DESTINATION" branch --set-upstream-to="origin/$NEW_BRANCH"
         fi
     fi
 }
