@@ -2,33 +2,35 @@ name: Build, Release and Upload
 
 on:
   schedule:
-    - cron: '0 1 * * *'
+    - cron: 0 1 * * *
   push:
     branches-ignore:
-      - 'gh-pages'
+      - gh-pages
     paths:
-      - '.github/actions/**/*.yml'
-      - '.github/workflows/build.yml'
-      - '.github/*.sh'
-      - 'scripts/**'
+      - .github/actions/**/*.yml
+      - .github/workflows/build.yml
+      - .github/*.sh
+      - scripts/**
       - '!scripts/dev.sh'
-      - 'patches/**'
-      - 'tests/**'
-      - 'files/**'
-      - 'build.env'
+      - patches/**
+      - tests/**
+      - files/**
+      - build.env
+    #tags:
+    #  - '[0-9]+.[0-9]+.[0-9]+-*'
   pull_request:
     paths:
-      - '.github/actions/**/*.yml'
-      - '.github/workflows/build.yml'
-      - '.github/*.sh'
-      - 'scripts/**'
+      - .github/actions/**/*.yml
+      - .github/workflows/build.yml
+      - .github/*.sh
+      - scripts/**
       - '!scripts/dev.sh'
-      - 'patches/**'
-      - 'tests/**'
-      - 'files/**'
-      - 'build.env'
-  release:
-    types: [published]
+      - patches/**
+      - tests/**
+      - files/**
+      - build.env
+  #release:
+  #  types: [published]
   workflow_dispatch:
 
 env:
@@ -37,6 +39,7 @@ env:
 jobs:
   variables:
     concurrency: variables-${{ github.ref_name || github.run_id }}
+    if: ${{ !startsWith(github.ref, 'refs/tags/') || github.event.base_ref == 'refs/heads/master') }}
     runs-on: ubuntu-latest
 
     env:
