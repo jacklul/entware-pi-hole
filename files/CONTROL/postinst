@@ -136,9 +136,6 @@ if /opt/etc/init.d/S65pihole-FTL check | grep -q 'alive'; then
 else
     # Otherwise just run the prestart script to set required permissions
     bash /opt/share/pihole/pihole-FTL-prestart.sh
-
-    # This will initialize the config file
-    /opt/bin/pihole-FTL test > /dev/null 2>&1
 fi
 
 # Make sure gravity database exists and that
