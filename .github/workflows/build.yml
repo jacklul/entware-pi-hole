@@ -94,15 +94,11 @@ jobs:
           key_prefix: core-
           patches_prefix: core
 
-      - name: Apply patches
+      - name: Apply patches and dump version infos
         if: steps.cache.outputs.cache-hit != 'true'
-        uses: ./.github/actions/patch
-        with:
-          patches_prefix: core
-
-      - name: Save repository version infos
-        if: steps.cache.outputs.cache-hit != 'true'
-        uses: ./.github/actions/version
+        run: |
+          bash ./scripts/patch.sh core ./stage
+          bash ./scripts/version.sh ./stage
 
       - name: Remove .git directory
         run: rm -fr ./stage/.git
@@ -145,15 +141,11 @@ jobs:
           key_prefix: web-
           patches_prefix: web
 
-      - name: Apply patches
+      - name: Apply patches and dump version infos
         if: steps.cache.outputs.cache-hit != 'true'
-        uses: ./.github/actions/patch
-        with:
-          patches_prefix: web
-
-      - name: Save repository version infos
-        if: steps.cache.outputs.cache-hit != 'true'
-        uses: ./.github/actions/version
+        run: |
+          bash ./scripts/patch.sh web ./stage
+          bash ./scripts/version.sh ./stage
 
       - name: Remove .git directory
         run: rm -fr ./stage/.git
@@ -232,15 +224,11 @@ jobs:
             ./stage/pihole-FTL-*
             ./stage/.version
 
-      - name: Apply patches
+      - name: Apply patches and dump version infos
         if: steps.cache.outputs.cache-hit != 'true'
-        uses: ./.github/actions/patch
-        with:
-          patches_prefix: ftl
-
-      - name: Save repository version infos
-        if: steps.cache.outputs.cache-hit != 'true'
-        uses: ./.github/actions/version
+        run: |
+          bash ./scripts/patch.sh ftl ./stage
+          bash ./scripts/version.sh ./stage
 
       - name: Set required variables
         if: steps.cache.outputs.cache-hit != 'true'
@@ -346,7 +334,13 @@ jobs:
       - name: Build packages
         run: |
           mkdir -p ./build ./packages
-          sudo -E bash ./scripts/multibuild.sh ./build "${{ needs.variables.outputs.VERSION }}" ./artifacts ./packages
+          bash ./scripts/multibuild.sh ./build "${{ needs.variables.outputs.VERSION }}" ./artifacts ./packages
+          . ./artifacts/core/.version
+          echo "CORE=$VERSION" >> ./.versions
+          . ./artifacts/web/.version
+          echo "WEB=$VERSION" >> ./.versions
+          . ./artifacts/binary/.version
+          echo "FTL=$VERSION" >> ./.versions
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -354,15 +348,6 @@ jobs:
           name: packages
           path: ./packages/*
           include-hidden-files: true
-
-      - name: Save current module versions
-        run: |
-          . ./artifacts/core/.version
-          echo "CORE=$VERSION" >> ./.versions
-          . ./artifacts/web/.version
-          echo "WEB=$VERSION" >> ./.versions
-          . ./artifacts/binary/.version
-          echo "FTL=$VERSION" >> ./.versions
 
       - name: Check if same dev package was already build
         id: devcheck
@@ -465,6 +450,7 @@ jobs:
               find "./gh-pages/$ARCHITECTURE" -maxdepth 2 -type f \( -name "*.ipk" ! -name "*-dev_*.ipk" \) -delete -print
             fi
           ' bash {} \;
+          echo "Copying new packages"
           cp -rv ./artifacts/* ./gh-pages
 
       - name: Checkout Entware/ipk-html-indexer repository
@@ -498,18 +484,14 @@ jobs:
       - name: List files
         uses: ./.github/actions/list
         with:
-          paths: . ./artifacts ./gh-pages
+          paths: . ./artifacts ./gh-pages ./gh-pages/*
 
       - name: Prepare for upload
         if: github.ref_name != 'master' || github.event_name == 'schedule'
         run: |
           find . -mindepth 1 -maxdepth 1 \( ! -name "gh-pages" -type d -exec rm -fr "{}" \; \) -o \( -type f -exec rm -f "{}" \; \)
           shopt -s dotglob && mv -v ./gh-pages/* .
-
-      - name: Rename gh-pages branch
-        if: github.ref_name != 'master' || github.event_name == 'schedule'
-        continue-on-error: true
-        run: git branch -m gh-pages gh-pages.old
+          git branch -m gh-pages gh-pages.old || true
 
       - name: Upload packages
         if: github.ref_name != 'master' || github.event_name == 'schedule'

@@ -31,13 +31,12 @@ runs:
         fi
         echo "GIT_BRANCH=$([ -n "$GIT_TAG" ] && echo "master" || git -C "${{ inputs.git_path }}" rev-parse --abbrev-ref HEAD)" >> $GITHUB_OUTPUT
         echo "GIT_HASH=$(git -C "${{ inputs.git_path }}" rev-parse HEAD | cut -c1-8)" >> $GITHUB_OUTPUT
-        echo "PATCHES=$((sha1sum "./patches/${{ inputs.patches_prefix }}-"*".patch" 2> /dev/null ; sha1sum "./patches/${{ inputs.patches_prefix }}-"*".sh" 2> /dev/null) | sha1sum | cut -c1-8)" >> $GITHUB_OUTPUT
-        echo "TESTS=$(sha1sum "./tests/${{ inputs.patches_prefix }}-"*".sh" 2> /dev/null | sha1sum | cut -c1-8)" >> $GITHUB_OUTPUT
+        echo "PATCHES=$((sha1sum "./patches/${{ inputs.patches_prefix }}-"*".patch" 2> /dev/null ; sha1sum "./patches/${{ inputs.patches_prefix }}-"*".sh" 2> /dev/null ; sha1sum "./patches/checks/${{ inputs.patches_prefix }}-"*".sh" 2> /dev/null) | sha1sum | cut -c1-8)" >> $GITHUB_OUTPUT
 
     - name: Build cache key
       id: key
       shell: bash
-      run: echo "CACHE_KEY=${{ inputs.key_prefix }}${{ steps.hashes.outputs.GIT_BRANCH }}-${{ steps.hashes.outputs.GIT_HASH }}-${{ steps.hashes.outputs.PATCHES }}-${{ steps.hashes.outputs.TESTS }}" >> $GITHUB_OUTPUT
+      run: echo "CACHE_KEY=${{ inputs.key_prefix }}${{ steps.hashes.outputs.GIT_BRANCH }}-${{ steps.hashes.outputs.GIT_HASH }}-${{ steps.hashes.outputs.PATCHES }}" >> $GITHUB_OUTPUT
 
     - name: Check if cache already exists
       id: cache-check

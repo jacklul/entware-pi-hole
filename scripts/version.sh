@@ -4,7 +4,7 @@
 REPOSITORY="$1"
 
 if [ -z "$REPOSITORY" ] || [ ! -d "$REPOSITORY" ]; then
-    echo "Usage: $0 <repository>"
+    echo "Usage: $0 <repository path>"
     exit 1
 fi
 

@@ -36,7 +36,6 @@ declare -A DIRECTORIES=(
 set -e
 
 [ -z "$GITHUB_WORKSPACE" ] && { echo "This script must run inside Github Actions"; exit 1; }
-[ "$UID" -ne 0 ] && { echo "This script must run as root"; exit 1; }
 [ -z "$PACKAGE_DIR" ] && { echo "Error: Package directory not provided"; exit 1; }
 [ -z "$PACKAGE_VERSION" ] && { echo "Error: Package version not provided"; exit 1; }
 [ -z "$SEARCH_DIR" ] && { echo "Error: Search directory not provided"; exit 1; }
