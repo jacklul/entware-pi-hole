@@ -57,6 +57,11 @@ BEGIN { multi_line_comment = 0 }
     CONTENTS="$(echo "$CONTENTS" | grep -av "LUA_ROOT	\"/usr/local/\"")" # src/lua/luaconf.h
     CONTENTS="$(echo "$CONTENTS" | grep -av "/etc/pihole/test.pem\" ### CHANGED")" # test/pihole.toml
 
+    if [ "$(basename "$FILE")" = "test_suite.bats" ]; then
+        CONTENTS="$(echo "$CONTENTS" | grep -av "SQLite 3.x database")" # test/test_suite.bats
+        CONTENTS="$(echo "$CONTENTS" | grep -av "Reading certificate from")" # test/test_suite.bats
+    fi
+
     # Checks
     echo -e "$CONTENTS" | grep -aEn "(^|\s+|\")/etc" && exit 1
     echo -e "$CONTENTS" | grep -aEn "(^|\s+|\")/var" && exit 1
