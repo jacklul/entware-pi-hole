@@ -253,24 +253,20 @@ jobs:
 
       - name: Build and test FTL
         if: steps.cache.outputs.cache-hit != 'true'
-        uses: Wandalen/wretry.action/main@v3
+        uses: docker/build-push-action@v6
         with:
-          action: docker/build-push-action@v6
-          attempt_limit: 3
-          retry_condition: ${{ startsWith(github.ref, 'refs/tags/') || github.event_name == 'schedule' }}
-          with: |
-            platforms: ${{ matrix.docker_platform }}
-            pull: true
-            push: false
-            context: ./stage
-            target: result
-            file: ./stage/.github/Dockerfile
-            outputs: |
-              type=tar,dest=./stage/build.tar
-            build-args: |
-              "CI_ARCH=${{ matrix.docker_platform }}"
-              "GIT_BRANCH=${{ steps.variables.outputs.GIT_BRANCH }}"
-              "GIT_TAG=${{ steps.variables.outputs.GIT_TAG }}"
+          platforms: ${{ matrix.docker_platform }}
+          pull: true
+          push: false
+          context: ./stage
+          target: result
+          file: ./stage/.github/Dockerfile
+          outputs: |
+            type=tar,dest=./stage/build.tar
+          build-args: |
+            "CI_ARCH=${{ matrix.docker_platform }}"
+            "GIT_BRANCH=${{ steps.variables.outputs.GIT_BRANCH }}"
+            "GIT_TAG=${{ steps.variables.outputs.GIT_TAG }}"
 
       - name: Extract FTL binary and generate checksum file
         if: steps.cache.outputs.cache-hit != 'true'
