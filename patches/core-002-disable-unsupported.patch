@@ -30,42 +30,6 @@ diff --git a/pihole b/pihole
 index 7c84771..f4125a9 100755
 --- a/pihole
 +++ b/pihole
-@@ -96,7 +96,7 @@ arpFunc() {
- }
- 
- updatePiholeFunc() {
--  if [ -n "${DOCKER_VERSION}" ]; then
-+  if [ -n "${DOCKER_VERSION}" ] || [ -f /opt/etc/opkg.conf ]; then
-     unsupportedFunc
-   else
-     shift
-@@ -106,7 +106,7 @@ updatePiholeFunc() {
- }
- 
- reconfigurePiholeFunc() {
--  if [ -n "${DOCKER_VERSION}" ]; then
-+  if [ -n "${DOCKER_VERSION}" ] || [ -f /opt/etc/opkg.conf ]; then
-     unsupportedFunc
-   else
-     /opt/share/pihole/basic-install.sh --reconfigure
-@@ -131,7 +131,7 @@ chronometerFunc() {
- 
- 
- uninstallFunc() {
--  if [ -n "${DOCKER_VERSION}" ]; then
-+  if [ -n "${DOCKER_VERSION}" ] || [ -f /opt/etc/opkg.conf ]; then
-     unsupportedFunc
-   else
-     "${PI_HOLE_SCRIPT_DIR}"/uninstall.sh
-@@ -412,7 +412,7 @@ tailFunc() {
- }
- 
- piholeCheckoutFunc() {
--  if [ -n "${DOCKER_VERSION}" ]; then
-+  if [ -n "${DOCKER_VERSION}" ] || [ -f /opt/etc/opkg.conf ]; then
-     unsupportedFunc
-   else
-     if [[ "$2" == "-h" ]] || [[ "$2" == "--help" ]]; then
 @@ -465,7 +469,12 @@ updateCheckFunc() {
  }
  
@@ -80,3 +44,25 @@ index 7c84771..f4125a9 100755
    exit 0
  }
  
+@@ -578,17 +578,17 @@ case "${1}" in
+   "--allow-wild" | "allow-wild"   ) listFunc "$@";;
+   "-d" | "debug"                  ) debugFunc "$@";;
+   "-f" | "flush"                  ) flushFunc "$@";;
+-  "-up" | "updatePihole"          ) updatePiholeFunc "$@";;
+-  "-r"  | "reconfigure"           ) reconfigurePiholeFunc;;
++  "-up" | "updatePihole"          ) unsupportedFunc;;
++  "-r"  | "reconfigure"           ) unsupportedFunc;;
+   "-g" | "updateGravity"          ) updateGravityFunc "$@";;
+   "-l" | "logging"                ) piholeLogging "$@";;
+-  "uninstall"                     ) uninstallFunc;;
++  "uninstall"                     ) unsupportedFunc;;
+   "enable"                        ) piholeEnable true "$2";;
+   "disable"                       ) piholeEnable false "$2";;
+   "reloaddns"                     ) reloadDNS "reload";;
+   "reloadlists"                   ) reloadDNS "reload-lists";;
+   "setpassword"                   ) SetWebPassword "$@";;
+-  "checkout"                      ) piholeCheckoutFunc "$@";;
++  "checkout"                      ) unsupportedFunc;;
+   "updatechecker"                 ) shift; updateCheckFunc "$@";;
+   "arpflush"                      ) arpFunc "$@";;
+   "-t" | "tail"                   ) tailFunc "$2";;
