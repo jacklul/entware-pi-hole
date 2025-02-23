@@ -94,10 +94,14 @@ jobs:
           key_prefix: core-
           patches_prefix: core
 
-      - name: Apply patches and dump version infos
+      - name: Apply patches
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
           bash ./scripts/patch.sh core ./stage
+
+      - name: Dump version infos
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
           bash ./scripts/version.sh ./stage
 
       - name: Remove .git directory
@@ -141,10 +145,14 @@ jobs:
           key_prefix: web-
           patches_prefix: web
 
-      - name: Apply patches and dump version infos
+      - name: Apply patches
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
           bash ./scripts/patch.sh web ./stage
+
+      - name: Dump version infos
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
           bash ./scripts/version.sh ./stage
 
       - name: Remove .git directory
@@ -224,10 +232,14 @@ jobs:
             ./stage/pihole-FTL-*
             ./stage/.version
 
-      - name: Apply patches and dump version infos
+      - name: Apply patches
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
           bash ./scripts/patch.sh ftl ./stage
+
+      - name: Dump version infos
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
           bash ./scripts/version.sh ./stage
 
       - name: Set required variables
