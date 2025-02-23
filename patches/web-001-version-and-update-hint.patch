@@ -35,7 +35,7 @@ index 63197d35..171ab748 100644
        isDocker = true;
      }
  
-@@ -575,6 +585,24 @@ function updateVersionInfo() {
+@@ -575,6 +585,25 @@ function updateVersionInfo() {
            }
          }
  
@@ -51,9 +51,10 @@ index 63197d35..171ab748 100644
 +              "</a>";
 +          }
 +
-+          if (versionCompare(v.local, v.remote) === -1) {
++          if (versionCompare(v.local.replace(/\D/g, '.'), v.remote.replace(/\D/g, '.')) === -1) {
 +            updateComponentAvailable = true;
 +            entwareUpdate = true;
++            isDocker = false;
 +          }
 +        }
 +

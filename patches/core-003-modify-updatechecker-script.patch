@@ -8,7 +8,7 @@ index eda6c40..291f43e 100755
  
 +function get_remote_version_entware() {
 +    if [[ "${1}" == "pi-hole" ]]; then
-+        curl -s "https://api.github.com/repos/pi-hole/${1}/releases/latest" 2>/dev/null | jq --raw-output .tag_name || return 1
++        curl -s "https://api.github.com/repos/jacklul/entware-pi-hole/releases/latest" 2>/dev/null | jq --raw-output .tag_name || return 1
 +    else
 +        echo "null"
 +    fi
