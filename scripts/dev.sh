@@ -43,7 +43,7 @@ function install_or_update_repository() {
             git -C "$DESTINATION" pull --rebase --depth 1 --allow-unrelated-histories
         else
             git -C "$DESTINATION" fetch --depth 1
-            git -C "$DESTINATION" checkout "$NEW_BRANCH"
+            git -C "$DESTINATION" checkout -f "$NEW_BRANCH"
             git -C "$DESTINATION" branch --set-upstream-to="origin/$NEW_BRANCH"
         fi
     fi
