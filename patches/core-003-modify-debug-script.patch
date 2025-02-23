@@ -1,34 +1,139 @@
 diff --git a/advanced/Scripts/piholeDebug.sh b/advanced/Scripts/piholeDebug.sh
-index 7c55812..0116ad3 100755
+index f4226299..c1121c00 100755
 --- a/advanced/Scripts/piholeDebug.sh
 +++ b/advanced/Scripts/piholeDebug.sh
-@@ -376,6 +376,20 @@ diagnose_operating_system() {
-     # If DOCKER_VERSION is set (Sourced from /etc/pihole/versions at start of script), include this information in the debug output
-     [ -n "${DOCKER_VERSION}" ] && log_write "${INFO} Pi-hole Docker Container: ${DOCKER_VERSION}"
+@@ -59,7 +59,7 @@ FAQ_HARDWARE_REQUIREMENTS_FIREWALLD="${COL_CYAN}https://docs.pi-hole.net/main/pr
+ FAQ_GATEWAY="${COL_CYAN}https://discourse.pi-hole.net/t/why-is-a-default-gateway-important-for-pi-hole/3546${COL_NC}"
  
-+    # Existence of this file indicates Entware package is used
-+    if [ -f /opt/etc/opkg.conf ]; then
-+        # shellcheck disable=SC2155
-+        local entware_installed_package="$(opkg list-installed pi-hole)"
-+        [ -z "${entware_installed_package}" ] && entware_installed_package="$(opkg list-installed pi-hole-dev)"
-+        [ -n "${entware_installed_package}" ] && log_write "${INFO} Pi-hole Entware package: ${entware_installed_package}"
+ # Other URLs we may use
+-FORUMS_URL="${COL_CYAN}https://discourse.pi-hole.net${COL_NC}"
++FORUMS_URL="${COL_CYAN}https://github.com/jacklul/entware-pi-hole${COL_NC}"
+ 
+ # Directories required by Pi-hole
+ # https://discourse.pi-hole.net/t/what-files-does-pi-hole-use/1684
+@@ -286,6 +286,39 @@ check_ftl_version() {
+     log_write "${INFO} Commit: ${FTL_COMMIT}"
+ }
+ 
++check_packaged_component_version() {
++    local VERSION BRANCH HASH
 +
-+        # Print informations about Entware release
-+        if [ -f /opt/etc/entware_release ]; then
-+            log_write "${INFO} Entware release details:"
-+            make_array_from_file "/opt/etc/entware_release"
-+        fi
++    case "$1" in
++        "Core")
++            VERSION=$CORE_VERSION
++            BRANCH=$CORE_BRANCH
++            HASH=$CORE_HASH
++        ;;
++        "Web")
++            VERSION=$WEB_VERSION
++            BRANCH=$WEB_BRANCH
++            HASH=$WEB_HASH
++        ;;
++        "FTL")
++            VERSION=$FTL_VERSION
++            BRANCH=$FTL_BRANCH
++            HASH=$FTL_HASH
++        ;;
++        *)
++            log_write "${CROSS} ${COL_RED}Unknown component $1${COL_NC}"
++            return 1
++    esac
++
++    if [[ "${BRANCH}" == "master" ]]; then
++        BRANCH="${COL_GREEN}${BRANCH}${COL_NC}"
++    else
++        BRANCH="${COL_YELLOW}${BRANCH}${COL_NC}"
 +    fi
 +
-     # If there is a /etc/*release file, it's probably a supported operating system, so we can
-     if ls /etc/*release 1> /dev/null 2>&1; then
-         # display the attributes to the user from the function made earlier
-@@ -505,6 +519,8 @@ hardware_check() {
-     echo_current_diagnostic "System hardware configuration"
-     if [ -n "${DOCKER_VERSION}" ]; then
-         log_write "${skip_msg}"
-+    elif [ -f /opt/etc/opkg.conf ];then
-+        log_write "Not supported in unofficial Entware package release"
++    log_write "${INFO} $1 version: $VERSION ($BRANCH, $HASH)"
++}
++
+ # Checks the core version of the Pi-hole codebase
+ check_component_versions() {
+     # Check the Web version, branch, and commit
+@@ -294,6 +327,23 @@ check_component_versions() {
+     compare_local_version_to_git_version "${WEB_GIT_DIRECTORY}" "Web"
+     # Check the FTL version
+     check_ftl_version
++
++    if [ -f /opt/etc/opkg.conf ]; then
++        echo_current_diagnostic "Entware package"
++
++        #shellcheck disable=SC2155
++        local package="$(opkg list-installed pi-hole*)"
++
++        if [ -n "$package" ]; then
++            log_write "${TICK} $package"
++        else
++            log_write "${CROSS} ${COL_RED}Unable to lookup Entware package${COL_NC}"
++        fi
++
++        check_packaged_component_version "Core"
++        check_packaged_component_version "Web"
++        check_packaged_component_version "FTL"
++    fi
+ }
+ 
+ os_check() {
+@@ -395,6 +445,11 @@ diagnose_operating_system() {
+         # If it doesn't exist, it's not a system we currently support and link to FAQ
+         log_write "${CROSS} ${COL_RED}${error_msg}${COL_NC} (${FAQ_HARDWARE_REQUIREMENTS})"
+     fi
++
++    if [ -f /opt/etc/entware_release ]; then
++        echo_current_diagnostic "Entware release"
++        make_array_from_file "/opt/etc/entware_release"
++    fi
+ }
+ 
+ check_selinux() {
+@@ -1307,8 +1362,8 @@ curl_to_tricorder() {
+     # Users can submit their debug logs using curl (encrypted)
+     log_write "    * Using ${COL_GREEN}curl${COL_NC} for transmission."
+     # transmit the log via TLS and store the token returned in a variable
+-    tricorder_token=$(curl --silent --fail --show-error --upload-file ${PIHOLE_DEBUG_LOG} https://tricorder.pi-hole.net 2>&1)
+-    if [[ "${tricorder_token}" != "https://tricorder.pi-hole.net/"* ]]; then
++    tricorder_token=$(curl --silent --fail --show-error --upload-file ${PIHOLE_DEBUG_LOG} https://lurking-cat.appspot.com/upload 2>&1)
++    if [[ "${tricorder_token}" != "https://lurking-cat.appspot.com/upload/"* ]]; then
+         log_write "    * ${COL_GREEN}curl${COL_NC} failed, contact Pi-hole support for assistance."
+         # Log curl error (if available)
+         if [ -n "${tricorder_token}" ]; then
+@@ -1332,7 +1387,7 @@ upload_to_tricorder() {
+     log_write "${TICK} ${COL_GREEN}** FINISHED DEBUGGING! **${COL_NC}\\n"
+ 
+     # Provide information on what they should do with their token
+-    log_write "   * The debug log can be uploaded to tricorder.pi-hole.net for sharing with developers only."
++    log_write "   * The debug log can be uploaded for sharing with Entware package developers only."
+ 
+     # If pihole -d is running automatically
+     if [[ "${AUTOMATED}" ]]; then
+@@ -1350,7 +1405,7 @@ upload_to_tricorder() {
+             # If they say yes, run our function for uploading the log
+             [yY][eE][sS]|[yY]) curl_to_tricorder;;
+             # If they choose no, just exit out of the script
+-            *) log_write "    * Log will ${COL_GREEN}NOT${COL_NC} be uploaded to tricorder.\\n    * A local copy of the debug log can be found at: ${COL_CYAN}${PIHOLE_DEBUG_LOG}${COL_NC}\\n";exit;
++            *) log_write "    * Log will ${COL_GREEN}NOT${COL_NC} be uploaded.\\n    * A local copy of the debug log can be found at: ${COL_CYAN}${PIHOLE_DEBUG_LOG}${COL_NC}\\n";exit;
+         esac
+     fi
+     # Check if tricorder.pi-hole.net is reachable and provide token
+@@ -1366,16 +1421,18 @@ upload_to_tricorder() {
+         log_write "${COL_PURPLE}*****************************************************************${COL_NC}"
+         log_write "${COL_PURPLE}*****************************************************************${COL_NC}"
+         log_write ""
+-        log_write "   * Provide the token above to the Pi-hole team for assistance at ${FORUMS_URL}"
++        log_write "   * Provide the token above to the developers for assistance at ${FORUMS_URL}"
+ 
+     # If no token was generated
      else
-         # Store the output of the command in a variable
-         run_and_print_command "lshw -short"
+         # Show an error and some help instructions
+         log_write "${CROSS} ${COL_RED}There was an error uploading your debug log.${COL_NC}"
+-        log_write "   * Please try again or contact the Pi-hole team for assistance."
++        log_write "   * Please try again or contact the developers for assistance."
+     fi
+     # Finally, show where the log file is no matter the outcome of the function so users can look at it
+     log_write "   * A local copy of the debug log can be found at: ${COL_CYAN}${PIHOLE_DEBUG_LOG}${COL_NC}\\n"
++    log_write " ${COL_YELLOW}If you wish to share the log with the official Pi-hole developers, execute the following command:${COL_NC}"
++    log_write "  ${COL_CYAN}cat /opt/var/log/pihole/pihole_debug.log | pihole tricorder${COL_NC}\\n"
+ }
+ 
+ # Run through all the functions we made

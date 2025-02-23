@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+case "$1" in
+    -short)
+        uname -a
+        echo ""
+
+        if [ -f /sys/firmware/devicetree/base/model ]; then
+            echo "Device model: $(tr -d '\0' < /sys/firmware/devicetree/base/model)"
+        elif [ -f /proc/device-tree/model ]; then
+            echo "Device model: $(tr -d '\0' < /proc/device-tree/model)"
+        else
+            echo "Unable to determine device model"
+        fi
+
+        echo "Device memory: $(free -h | grep 'Mem' | awk '{print $2}')"
+        exit
+    ;;
+esac
+
+echo "'lshw $1' - polyfill not implemented" >&2
+exit 1
