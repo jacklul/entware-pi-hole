@@ -11,47 +11,7 @@ index f4226299..c1121c00 100755
  
  # Directories required by Pi-hole
  # https://discourse.pi-hole.net/t/what-files-does-pi-hole-use/1684
-@@ -286,6 +286,39 @@ check_ftl_version() {
-     log_write "${INFO} Commit: ${FTL_COMMIT}"
- }
- 
-+check_packaged_component_version() {
-+    local VERSION BRANCH HASH
-+
-+    case "$1" in
-+        "Core")
-+            VERSION=$CORE_VERSION
-+            BRANCH=$CORE_BRANCH
-+            HASH=$CORE_HASH
-+        ;;
-+        "Web")
-+            VERSION=$WEB_VERSION
-+            BRANCH=$WEB_BRANCH
-+            HASH=$WEB_HASH
-+        ;;
-+        "FTL")
-+            VERSION=$FTL_VERSION
-+            BRANCH=$FTL_BRANCH
-+            HASH=$FTL_HASH
-+        ;;
-+        *)
-+            log_write "${CROSS} ${COL_RED}Unknown component $1${COL_NC}"
-+            return 1
-+    esac
-+
-+    if [[ "${BRANCH}" == "master" ]]; then
-+        BRANCH="${COL_GREEN}${BRANCH}${COL_NC}"
-+    else
-+        BRANCH="${COL_YELLOW}${BRANCH}${COL_NC}"
-+    fi
-+
-+    log_write "${INFO} $1 version: $VERSION ($BRANCH, $HASH)"
-+}
-+
- # Checks the core version of the Pi-hole codebase
- check_component_versions() {
-     # Check the Web version, branch, and commit
-@@ -294,6 +327,23 @@ check_component_versions() {
+@@ -294,6 +327,17 @@ check_component_versions() {
      compare_local_version_to_git_version "${WEB_GIT_DIRECTORY}" "Web"
      # Check the FTL version
      check_ftl_version
@@ -59,18 +19,12 @@ index f4226299..c1121c00 100755
 +    if [ -f /opt/etc/opkg.conf ]; then
 +        echo_current_diagnostic "Entware package"
 +
-+        #shellcheck disable=SC2155
 +        local package="$(opkg list-installed pi-hole*)"
-+
 +        if [ -n "$package" ]; then
 +            log_write "${TICK} $package"
 +        else
 +            log_write "${CROSS} ${COL_RED}Unable to lookup Entware package${COL_NC}"
 +        fi
-+
-+        check_packaged_component_version "Core"
-+        check_packaged_component_version "Web"
-+        check_packaged_component_version "FTL"
 +    fi
  }
  
