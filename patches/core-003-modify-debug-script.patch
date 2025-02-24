@@ -23,7 +23,7 @@ index f4226299..c1121c00 100755
 +        if [ -n "$package" ]; then
 +            log_write "${TICK} $package"
 +        else
-+            log_write "${CROSS} ${COL_RED}Unable to lookup Entware package${COL_NC}"
++            log_write "${CROSS} ${COL_RED}Package not found${COL_NC}"
 +        fi
 +    fi
  }
