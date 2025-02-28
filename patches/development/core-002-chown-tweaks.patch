@@ -20,48 +20,40 @@ diff --git a/advanced/Templates/pihole-FTL-prestart.sh b/advanced/Templates/piho
 index c681782..1443a90 100755
 --- a/advanced/Templates/pihole-FTL-prestart.sh
 +++ b/advanced/Templates/pihole-FTL-prestart.sh
-@@ -9,16 +9,19 @@ utilsfile="${PI_HOLE_SCRIPT_DIR}/utils.sh"
- # Get file paths
- FTL_PID_FILE="$(getFTLConfigValue files.pid)"
+@@ -1,5 +1,8 @@
+ #!/usr/bin/env sh
  
 +# In Entware user pihole might not exist
 +[ -f /opt/etc/opkg.conf ] && [ -z "$(id -u pihole 2> /dev/null)" ] && NO_PIHOLE_USER=y
 +
+ # Source utils.sh for getFTLConfigValue()
+ PI_HOLE_SCRIPT_DIR='/opt/share/pihole'
+ utilsfile="${PI_HOLE_SCRIPT_DIR}/utils.sh"
+@@ -11,7 +14,7 @@ FTL_PID_FILE="$(getFTLConfigValue files.pid)"
+ 
  # Ensure that permissions are set so that pihole-FTL can edit all necessary files
- # shellcheck disable=SC2174
- mkdir -pm 0640 /opt/var/log/pihole
+ mkdir -p /opt/var/log/pihole
 -chown -R pihole:pihole /opt/etc/pihole /opt/var/log/pihole
 +[ -z "$NO_PIHOLE_USER" ] && chown -R pihole:pihole /opt/etc/pihole /opt/var/log/pihole
- chmod -R 0640 /opt/var/log/pihole
- chmod -R 0660 /opt/etc/pihole
+ # allow pihole to access subdirs in /etc/pihole (sets execution bit on dirs)
+ find /opt/etc/pihole/ /opt/var/log/pihole/ -type d -exec chmod 0755 {} +
+ # Set all files (except TLS-related ones) to u+rw g+r
+@@ -22,8 +25,15 @@ find /opt/etc/pihole/ /opt/var/log/pihole/ -type f -name '*.pem' -o -name '*.crt
+ # Logrotate config file need to be owned by root
+ chown root:root /opt/etc/pihole/logrotate
  
- # Logrotate config file need to be owned by root and must not be writable by group and others
--chown root:root /opt/etc/pihole/logrotate
-+chown 0:0 /opt/etc/pihole/logrotate
- chmod 0644 /opt/etc/pihole/logrotate
- 
- # allow all users to enter the directories
- chmod 0755 /opt/etc/pihole /opt/var/log/pihole
-@@ -28,7 +28,14 @@ chmod 0755 /etc/pihole /var/log/pihole
- find /opt/etc/pihole/ -type d -exec chmod 0755 {} \;
- 
- # Touch files to ensure they exist (create if non-existing, preserve if existing)
--[ -f "${FTL_PID_FILE}" ] || install -D -m 644 -o pihole -g pihole /dev/null "${FTL_PID_FILE}"
--[ -f /opt/var/log/pihole/FTL.log ] || install -m 640 -o pihole -g pihole /dev/null /opt/var/log/pihole/FTL.log
--[ -f /opt/var/log/pihole/pihole.log ] || install -m 640 -o pihole -g pihole /dev/null /opt/var/log/pihole/pihole.log
--[ -f /opt/etc/pihole/dhcp.leases ] || install -m 644 -o pihole -g pihole /dev/null /opt/etc/pihole/dhcp.leases
 +if [ -z "$NO_PIHOLE_USER" ]; then
-+    [ -f "${FTL_PID_FILE}" ] || install -D -m 644 -o pihole -g pihole /dev/null "${FTL_PID_FILE}"
-+    [ -f /opt/var/log/pihole/FTL.log ] || install -m 640 -o pihole -g pihole /dev/null /opt/var/log/pihole/FTL.log
-+    [ -f /opt/var/log/pihole/pihole.log ] || install -m 640 -o pihole -g pihole /dev/null /opt/var/log/pihole/pihole.log
-+    [ -f /opt/etc/pihole/dhcp.leases ] || install -m 644 -o pihole -g pihole /dev/null /opt/etc/pihole/dhcp.leases
+ # Touch files to ensure they exist (create if non-existing, preserve if existing)
+ [ -f "${FTL_PID_FILE}" ] || install -D -m 644 -o pihole -g pihole /dev/null "${FTL_PID_FILE}"
+ [ -f /opt/var/log/pihole/FTL.log ] || install -m 640 -o pihole -g pihole /dev/null /opt/var/log/pihole/FTL.log
+ [ -f /opt/var/log/pihole/pihole.log ] || install -m 640 -o pihole -g pihole /dev/null /opt/var/log/pihole/pihole.log
+ [ -f /opt/etc/pihole/dhcp.leases ] || install -m 644 -o pihole -g pihole /dev/null /opt/etc/pihole/dhcp.leases
 +else
-+    [ -f "${FTL_PID_FILE}" ] || install -D -m 644 /dev/null "${FTL_PID_FILE}"
-+    [ -f /opt/var/log/pihole/FTL.log ] || install -m 640 /dev/null /opt/var/log/pihole/FTL.log
-+    [ -f /opt/var/log/pihole/pihole.log ] || install -m 640 /dev/null /opt/var/log/pihole/pihole.log
-+    [ -f /opt/etc/pihole/dhcp.leases ] || install -m 644 /dev/null /opt/etc/pihole/dhcp.leases
++[ -f "${FTL_PID_FILE}" ] || install -D -m 644 /dev/null "${FTL_PID_FILE}"
++[ -f /opt/var/log/pihole/FTL.log ] || install -m 640 /dev/null /opt/var/log/pihole/FTL.log
++[ -f /opt/var/log/pihole/pihole.log ] || install -m 640 /dev/null /opt/var/log/pihole/pihole.log
++[ -f /opt/etc/pihole/dhcp.leases ] || install -m 644 /dev/null /opt/etc/pihole/dhcp.leases
 +fi
-
 diff --git a/gravity.sh b/gravity.sh
 index 522d92f..bb8f35b 100755
 --- a/gravity.sh
