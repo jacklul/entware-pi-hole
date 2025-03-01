@@ -5,10 +5,10 @@ PATH="/opt/sbin:/opt/bin:$PATH"
 
 # Some of these commands might be missing depending on the system
 # so we check if they exist and then prompt the user to install them
-# These were not added to package dependencies on purpose as they 
-# should be included in busybox on most systems
+# These were not added to package dependencies as they should be included
+# in busybox on most systems and their usage is not version dependent
 command_deps="" # Format: command or command:package
-coreutils_deps="basename cat chmod chown cp date df dirname echo false head kill ln ls mkdir mv pwd rm tail test touch true uptime"
+coreutils_deps="basename cat chmod chown cp date df dirname echo false head kill ln mkdir mv pwd rm tail test touch true uptime"
 
 command_exists() {
     _command=$1
