@@ -56,6 +56,7 @@ BEGIN { multi_line_comment = 0 }
     CONTENTS="$(echo "$CONTENTS" | grep -av "\${PROJECT_SOURCE_DIR}/src/lua /usr/local/include")" # src/webserver/civetweb/CMakeLists.txt
     CONTENTS="$(echo "$CONTENTS" | grep -av "LUA_ROOT	\"/usr/local/\"")" # src/lua/luaconf.h
     CONTENTS="$(echo "$CONTENTS" | grep -av "/etc/pihole/test.pem\" ### CHANGED")" # test/pihole.toml
+    CONTENTS="$(echo "$CONTENTS" | grep -av "read_id_file(\"/etc/machine-id\", machine_id")" # src/webserver/x509.c
 
     if [ "$(basename "$FILE")" = "test_suite.bats" ]; then
         CONTENTS="$(echo "$CONTENTS" | grep -av "SQLite 3.x database")" # test/test_suite.bats

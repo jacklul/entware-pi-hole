@@ -522,12 +522,12 @@ index 4bb7d5e5..fcc988ad 100755
  if [ -f "${versionsfile}" ]; then
      # Only source versionsfile if the file exits
      # fixes a warning during installation where versionsfile does not exist yet
-@@ -113,7 +113,7 @@ reconfigurePiholeFunc() {
+@@ -113,7 +113,7 @@ repairPiholeFunc() {
    if [ -n "${DOCKER_VERSION}" ]; then
      unsupportedFunc
    else
--    /etc/.pihole/automated\ install/basic-install.sh --reconfigure
-+    /opt/share/pihole/basic-install.sh --reconfigure
+-    /etc/.pihole/automated\ install/basic-install.sh --repair
++    /opt/share/pihole/basic-install.sh --repair
      exit 0;
    fi
  }

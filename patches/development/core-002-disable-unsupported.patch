@@ -1,0 +1,40 @@
+diff --git a/pihole b/pihole
+index 7c84771..f4125a9 100755
+--- a/pihole
++++ b/pihole
+@@ -465,7 +469,12 @@ updateCheckFunc() {
+ }
+ 
+ unsupportedFunc(){
+-  echo "Function not supported in Docker images"
++  if [ -n "${DOCKER_VERSION}" ]; then
++    echo "Function not supported in Docker images"
++  elif [ -f /opt/etc/opkg.conf ]; then
++    echo "Function not supported in unofficial Entware package release"
++  fi
++
+   exit 0
+ }
+ 
+@@ -578,17 +578,17 @@ case "${1}" in
+   "--allow-wild" | "allow-wild"   ) listFunc "$@";;
+   "-d" | "debug"                  ) debugFunc "$@";;
+   "-f" | "flush"                  ) flushFunc "$@";;
+-  "-up" | "updatePihole"          ) updatePiholeFunc "$@";;
+-  "-r"  | "repair"                ) repairPiholeFunc;;
++  "-up" | "updatePihole"          ) unsupportedFunc;;
++  "-r"  | "repair"                ) unsupportedFunc;;
+   "-g" | "updateGravity"          ) updateGravityFunc "$@";;
+   "-l" | "logging"                ) piholeLogging "$@";;
+-  "uninstall"                     ) uninstallFunc;;
++  "uninstall"                     ) unsupportedFunc;;
+   "enable"                        ) piholeEnable true "$2";;
+   "disable"                       ) piholeEnable false "$2";;
+   "reloaddns"                     ) reloadDNS "reload";;
+   "reloadlists"                   ) reloadDNS "reload-lists";;
+   "setpassword"                   ) SetWebPassword "$@";;
+-  "checkout"                      ) piholeCheckoutFunc "$@";;
++  "checkout"                      ) unsupportedFunc;;
+   "updatechecker"                 ) shift; updateCheckFunc "$@";;
+   "arpflush"                      ) arpFunc "$@";;
+   "-t" | "tail"                   ) tailFunc "$2";;
