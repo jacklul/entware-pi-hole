@@ -3,89 +3,89 @@
 # Based on https://github.com/Entware/Entware/blob/master/scripts/ipkg-build
 
 #shellcheck disable=SC2155
-readonly SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
-readonly TIMESTAMP="$(date)"
-PACKAGE_DIR="$1"
-PACKAGE_VERSION="$2"
-PACKAGE_ARCHITECTURE="$3"
-DESTINATION_DIR="$4"
+readonly script_dir="$(dirname "$(readlink -f "$0")")"
+readonly timestamp="$(date)"
+package_dir="$1"
+package_version="$2"
+package_architecture="$3"
+destination_dir="$4"
 
 ################
 
 set -e
 
-[ -z "$PACKAGE_DIR" ] && { echo "Error: Package directory not provided"; exit 1; }
-[ ! -d "$PACKAGE_DIR" ] && { echo "Error: Directory $PACKAGE_DIR does not exist"; exit 1; }
-[ -z "$PACKAGE_VERSION" ] && { echo "Error: Package version not provided"; exit 1; }
-[ -z "$PACKAGE_ARCHITECTURE" ] && { echo "Error: Package architecture not provided"; exit 1; }
-[ -z "$DESTINATION_DIR" ] && DESTINATION_DIR="$(dirname "$SCRIPT_DIR")"
-[ ! -d "$DESTINATION_DIR" ] && { echo "Error: Directory $DESTINATION_DIR does not exist"; exit 1; }
+[ -z "$package_dir" ] && { echo "Error: Package directory not provided"; exit 1; }
+[ ! -d "$package_dir" ] && { echo "Error: Directory $package_dir does not exist"; exit 1; }
+[ -z "$package_version" ] && { echo "Error: Package version not provided"; exit 1; }
+[ -z "$package_architecture" ] && { echo "Error: Package architecture not provided"; exit 1; }
+[ -z "$destination_dir" ] && destination_dir="$(dirname "$script_dir")"
+[ ! -d "$destination_dir" ] && { echo "Error: Directory $destination_dir does not exist"; exit 1; }
 
 # If version string is a branch name then append a timestamp to it
-if echo "$PACKAGE_VERSION" | grep -Eq '^\w+$'; then
-    PACKAGE_VERSION="$PACKAGE_VERSION-$(date +%s)"
+if echo "$package_version" | grep -Eq '^\w+$'; then
+    package_version="$package_version-$(date +%s)"
 fi
 
-if ! echo "$PACKAGE_VERSION" | grep -Eq '^[a-zA-Z0-9_.+-]+$'; then
+if ! echo "$package_version" | grep -Eq '^[a-zA-Z0-9_.+-]+$'; then
     echo "Error: Package version contains illegal characters"
     exit 1
 fi
 
-PACKAGE_DIR="$(realpath "$PACKAGE_DIR")"
-DESTINATION_DIR="$(realpath "$DESTINATION_DIR")"
+package_dir="$(realpath "$package_dir")"
+destination_dir="$(realpath "$destination_dir")"
 
-[ ! -d "$PACKAGE_DIR/CONTROL" ] && { echo "Error: Directory $PACKAGE_DIR has no CONTROL subdirectory"; exit 1; }
+[ ! -d "$package_dir/CONTROL" ] && { echo "Error: Directory $package_dir has no CONTROL subdirectory"; exit 1; }
 
-for FIELD in Package Version Architecture Installed-Size; do
-    if ! grep -q "^$FIELD" < "$PACKAGE_DIR/CONTROL/control"; then
-        echo "Error: Missing '$FIELD' field in control file"
+for field in Package Version Architecture Installed-Size; do
+    if ! grep -q "^$field" < "$package_dir/CONTROL/control"; then
+        echo "Error: Missing '$field' field in control file"
         exit 1
     fi
 done
 
 #shellcheck disable=SC2164
-cd "$PACKAGE_DIR"
+cd "$package_dir"
 
 # validate package name and set output package file
-PACKAGE_NAME="$(grep "^Package:" < "$PACKAGE_DIR/CONTROL/control" | sed -e "s/^[^:]*:[[:space:]]*//")"
-PACKAGE_FILE="$DESTINATION_DIR/${PACKAGE_NAME}_${PACKAGE_VERSION}_${PACKAGE_ARCHITECTURE}.ipk"
+package_name="$(grep "^Package:" < "$package_dir/CONTROL/control" | sed -e "s/^[^:]*:[[:space:]]*//")"
+package_file="$destination_dir/${package_name}_${package_version}_${package_architecture}.ipk"
 
-if ! echo "$PACKAGE_NAME" | grep -Eq '^[a-zA-Z0-9_-]+$'; then
+if ! echo "$package_name" | grep -Eq '^[a-zA-Z0-9_-]+$'; then
     echo "Error: Package name contains illegal characters"
     exit 1
 fi
 
 # work in temporary dir
-TMP_DIR="/tmp/IPKG_BUILD.$$"
-[ ! -w /tmp ] && TMP_DIR="$(dirname "$SCRIPT_DIR")/tmp/IPKG_BUILD.$$"
-mkdir -p "$TMP_DIR"
+tmp_dir="/tmp/IPKG_BUILD.$$"
+[ ! -w /tmp ] && tmp_dir="$(dirname "$script_dir")/tmp/IPKG_BUILD.$$"
+mkdir -p "$tmp_dir"
 
 # create data archive
-#sudo chown -R 0:0 "$PACKAGE_DIR/opt"
-tar --exclude CONTROL --exclude '*.ipk' --format=gnu --numeric-owner --owner=0 --group=0 --sort=name -cpf - --mtime="$TIMESTAMP" . | gzip -n - > "$TMP_DIR/data.tar.gz"
+#sudo chown -R 0:0 "$package_dir/opt"
+tar --exclude CONTROL --exclude '*.ipk' --format=gnu --numeric-owner --owner=0 --group=0 --sort=name -cpf - --mtime="$timestamp" . | gzip -n - > "$tmp_dir/data.tar.gz"
 
 # update/set variables in control file
-INSTALLED_SIZE=$(zcat < "$TMP_DIR"/data.tar.gz | wc -c)
-sed -e "s/^Version:.*/Version: $PACKAGE_VERSION/" -i "$PACKAGE_DIR/CONTROL/control"
-sed -e "s/^Architecture:.*/Architecture: $PACKAGE_ARCHITECTURE/" -i "$PACKAGE_DIR/CONTROL/control"
-sed -e "s/^Installed-Size:.*/Installed-Size: $INSTALLED_SIZE/" -i "$PACKAGE_DIR/CONTROL/control"
+installed_size=$(zcat < "$tmp_dir"/data.tar.gz | wc -c)
+sed -e "s/^Version:.*/Version: $package_version/" -i "$package_dir/CONTROL/control"
+sed -e "s/^Architecture:.*/Architecture: $package_architecture/" -i "$package_dir/CONTROL/control"
+sed -e "s/^Installed-Size:.*/Installed-Size: $installed_size/" -i "$package_dir/CONTROL/control"
 
 # if these pre/post scripts exist make sure they are executable
-find "$PACKAGE_DIR/CONTROL" -type f \( -name "post*" -o -name "pre*" \) -exec chmod 0755 {} \;
+find "$package_dir/CONTROL" -type f \( -name "post*" -o -name "pre*" \) -exec chmod 0755 {} \;
 
 # create control archive
-#sudo chown -R 0:0 "$PACKAGE_DIR/CONTROL"
-( cd "$PACKAGE_DIR/CONTROL" && tar --format=gnu --numeric-owner --owner=0 --group=0 --sort=name -cf - --mtime="$TIMESTAMP" . | gzip -n - > "$TMP_DIR/control.tar.gz" )
+#sudo chown -R 0:0 "$package_dir/CONTROL"
+( cd "$package_dir/CONTROL" && tar --format=gnu --numeric-owner --owner=0 --group=0 --sort=name -cf - --mtime="$timestamp" . | gzip -n - > "$tmp_dir/control.tar.gz" )
 
 # package format version
-echo "2.0" > "$TMP_DIR/debian-binary"
+echo "2.0" > "$tmp_dir/debian-binary"
 
 # package everything into single ipk archive
-rm -f "$PACKAGE_FILE"
-#sudo chown 0:0 "$TMP_DIR"/*
-( cd "$TMP_DIR" && tar --format=gnu --numeric-owner --owner=0 --group=0 --sort=name -cf - --mtime="$TIMESTAMP" ./debian-binary ./data.tar.gz ./control.tar.gz | gzip -n - > "$PACKAGE_FILE" )
+rm -f "$package_file"
+#sudo chown 0:0 "$tmp_dir"/*
+( cd "$tmp_dir" && tar --format=gnu --numeric-owner --owner=0 --group=0 --sort=name -cf - --mtime="$timestamp" ./debian-binary ./data.tar.gz ./control.tar.gz | gzip -n - > "$package_file" )
 
 # cleanup
-rm -fr "$TMP_DIR"
+rm -fr "$tmp_dir"
 
-echo "Created IPK package $PACKAGE_FILE"
+echo "Created IPK package $package_file"

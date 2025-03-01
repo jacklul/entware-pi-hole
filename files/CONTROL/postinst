@@ -15,10 +15,10 @@ else
 fi
 
 random_number() {
-    _BASE=$1
-    _MAX=$2
+    _base=$1
+    _max=$2
 
-    bash -c "echo \$(($_BASE + RANDOM % $_MAX))"
+    bash -c "echo \$(($_base + RANDOM % $_max))"
 }
 
 gravitydb_version() {
@@ -30,10 +30,10 @@ gravitydb_version() {
 echo "  ${INFO} ${COL_BOLD}Running Pi-hole install/upgrade tasks...${COL_NC}"
 
 # Make links to system files if they don't exist in /opt/etc
-[ ! -f /opt/etc/hosts ] && [ -f /etc/hosts ] && ln -s /etc/hosts /opt/etc/hosts && SYMLINKS="$SYMLINKS /opt/etc/hosts"
-[ ! -f /opt/etc/ethers ] && [ -f /etc/ethers ] && ln -s /etc/ethers /opt/etc/ethers && SYMLINKS="$SYMLINKS /opt/etc/ethers"
-[ ! -f /opt/etc/resolv.conf ] && [ -f /etc/resolv.conf ] && ln -s /etc/resolv.conf /opt/etc/resolv.conf && SYMLINKS="$SYMLINKS /opt/etc/resolv.conf"
-[ -n "$SYMLINKS" ] && echo "  ${INFO} Created symlinks:$SYMLINKS"
+[ ! -f /opt/etc/hosts ] && [ -f /etc/hosts ] && ln -s /etc/hosts /opt/etc/hosts && symlinks="$symlinks /opt/etc/hosts"
+[ ! -f /opt/etc/ethers ] && [ -f /etc/ethers ] && ln -s /etc/ethers /opt/etc/ethers && symlinks="$symlinks /opt/etc/ethers"
+[ ! -f /opt/etc/resolv.conf ] && [ -f /etc/resolv.conf ] && ln -s /etc/resolv.conf /opt/etc/resolv.conf && symlinks="$symlinks /opt/etc/resolv.conf"
+[ -n "$symlinks" ] && echo "  ${INFO} Created symlinks:$symlinks"
 
 # Set random gravity update and updatechecker times
 if [ -f /opt/etc/cron.d/pihole ] && grep -q "59 1 \|59 17 " /opt/etc/cron.d/pihole; then
@@ -46,39 +46,39 @@ fi
 # Set user and group used for rotating the logs by logrotate
 if [ -f /opt/etc/pihole/logrotate ]; then
     #shellcheck disable=SC2010
-    LOG_USER_GROUP="$(ls -al "/opt/var/log" | grep ' \.$' | awk '{print $3 " " $4}')"
+    log_user_group="$(ls -al "/opt/var/log" | grep ' \.$' | awk '{print $3 " " $4}')"
 
-    if [ -n "$LOG_USER_GROUP" ]; then
+    if [ -n "$log_user_group" ]; then
         echo "  ${INFO} Setting user and group in logrotate file..."
 
         if grep -q "# su #" /opt/etc/pihole/logrotate; then
-            sed "s/# su #/su $LOG_USER_GROUP/g;" -i /opt/etc/pihole/logrotate
+            sed "s/# su #/su $log_user_group/g;" -i /opt/etc/pihole/logrotate
         else
-            sed "s/su.*$/su $LOG_USER_GROUP/g;" -i /opt/etc/pihole/logrotate
+            sed "s/su.*$/su $log_user_group/g;" -i /opt/etc/pihole/logrotate
         fi
     fi
 fi
 
 # Apply possible workarounds
-ROOT_USER="$(id -nu 0 2> /dev/null)"
-if [ "$ROOT_USER" != "root" ]; then
+root_user="$(id -nu 0 2> /dev/null)"
+if [ "$root_user" != "root" ]; then
     echo "  ${INFO} ${COL_YELLOW}It looks like the root user is not called 'root' - this can cause issues!${COL_NC}"
 
-    if ! grep -q "^#*\s*pi-hole-no-crontab-workaround" "/opt/var/spool/cron/crontabs/$ROOT_USER" 2> /dev/null; then
+    if ! grep -q "^#*\s*pi-hole-no-crontab-workaround" "/opt/var/spool/cron/crontabs/$root_user" 2> /dev/null; then
         echo "  ${INFO} ${COL_BOLD}Applying crontab workaround...${COL_NC}"
 
-        if [ ! -f "/opt/var/spool/cron/crontabs/$ROOT_USER" ]; then
-            echo "  ${INFO} Creating /opt/var/spool/cron/crontabs/$ROOT_USER"
+        if [ ! -f "/opt/var/spool/cron/crontabs/$root_user" ]; then
+            echo "  ${INFO} Creating /opt/var/spool/cron/crontabs/$root_user"
             mkdir -p /opt/var/spool/cron/crontabs
-            touch "/opt/var/spool/cron/crontabs/$ROOT_USER"
+            touch "/opt/var/spool/cron/crontabs/$root_user"
         else
-            echo "  ${INFO} Modifying /opt/var/spool/cron/crontabs/$ROOT_USER"
+            echo "  ${INFO} Modifying /opt/var/spool/cron/crontabs/$root_user"
         fi
 
-        SEPARATOR="### Pi-hole crontab - do not modify ###"
-        sed "/$SEPARATOR/,/$SEPARATOR/d" -i "/opt/var/spool/cron/crontabs/$ROOT_USER"
+        separator="### Pi-hole crontab - do not modify ###"
+        sed "/$separator/,/$separator/d" -i "/opt/var/spool/cron/crontabs/$root_user"
         {
-            echo "$SEPARATOR"
+            echo "$separator"
 
             cat <<EOF
 # Everything between the marked lines will be automatically modified by install/upgrade script.
@@ -87,14 +87,14 @@ EOF
 
             grep -Ev "^#|^\s*$" /opt/etc/cron.d/pihole | sed "s/ root / /g"
 
-            echo "$SEPARATOR"
-        } >> "/opt/var/spool/cron/crontabs/$ROOT_USER"
+            echo "$separator"
+        } >> "/opt/var/spool/cron/crontabs/$root_user"
 
-        chmod 600 "/opt/var/spool/cron/crontabs/$ROOT_USER"
+        chmod 600 "/opt/var/spool/cron/crontabs/$root_user"
 
-        if [ ! -f /opt/var/spool/cron/cron.allow ] && ! grep -q "$ROOT_USER" /opt/var/spool/cron/cron.allow 2> /dev/null; then
-            echo "  ${INFO} Adding $ROOT_USER to /opt/var/spool/cron/cron.allow"
-            echo "$ROOT_USER" >> /opt/var/spool/cron/cron.allow
+        if [ ! -f /opt/var/spool/cron/cron.allow ] && ! grep -q "$root_user" /opt/var/spool/cron/cron.allow 2> /dev/null; then
+            echo "  ${INFO} Adding $root_user to /opt/var/spool/cron/cron.allow"
+            echo "$root_user" >> /opt/var/spool/cron/cron.allow
         fi
     fi
 fi
@@ -102,10 +102,10 @@ fi
 # Add a password for the web interface if the config file doesn't exist (new install)
 if [ ! -f /opt/etc/pihole/pihole.toml ]; then
     # same code as in Pi-hole's basic-install.sh
-    PASSWORD=$(tr -dc _A-Z-a-z-0-9 </dev/urandom | head -c 8)
-    pihole setpassword "$PASSWORD" > /dev/null
+    new_password=$(tr -dc _A-Z-a-z-0-9 </dev/urandom | head -c 8)
+    pihole setpassword "$new_password" > /dev/null
 
-    echo "  ${INFO} ${COL_LIGHT_GREEN}Generated password for the web interface: $PASSWORD${COL_NC}"
+    echo "  ${INFO} ${COL_LIGHT_GREEN}Generated password for the web interface: $new_password${COL_NC}"
     echo "  ${INFO} ${COL_BOLD}It can be changed using 'pihole setpassword' command.${COL_NC}"
 elif [ -z "$(pihole-FTL --config webserver.api.pwhash)" ]; then # Show a warning if the password is not set
     echo "  ${INFO} ${COL_LIGHT_RED}Password for the web interface is not set - this is a security risk!${COL_NC}"
@@ -113,14 +113,14 @@ elif [ -z "$(pihole-FTL --config webserver.api.pwhash)" ]; then # Show a warning
 fi
 
 # Gravity database file path
-GRAVITYDB_FILE="$(pihole-FTL --config -q files.gravity)"
+gravitydb_file="$(pihole-FTL --config -q files.gravity)"
 
 # Upgrade existing gravity database
-if [ -n "$GRAVITYDB_FILE" ] && [ -f "$GRAVITYDB_FILE" ]; then
-    GRAVITYDB_VERSION="$(gravitydb_version "$GRAVITYDB_FILE")"
+if [ -n "$gravitydb_file" ] && [ -f "$gravitydb_file" ]; then
+    gravitydb_version="$(gravitydb_version "$gravitydb_file")"
     bash /opt/share/pihole/gravity.sh --upgrade
 
-    [ "$(gravitydb_version "$GRAVITYDB_FILE")" != "$GRAVITYDB_VERSION" ] && RUN_GRAVITY=true
+    [ "$(gravitydb_version "$gravitydb_file")" != "$gravitydb_version" ] && run_gravity=true
 fi
 
 # Restart the service if it's already running
@@ -140,7 +140,7 @@ fi
 
 # Make sure gravity database exists and that
 # gravity is rebuilt after database upgrade
-if [ -n "$RUN_GRAVITY" ] || { [ -n "$GRAVITYDB_FILE" ] && [ ! -f "$GRAVITYDB_FILE" ] ; }; then
+if [ -n "$run_gravity" ] || { [ -n "$gravitydb_file" ] && [ ! -f "$gravitydb_file" ] ; }; then
     if ! timeout 3600 bash /opt/share/pihole/gravity.sh --force; then
         echo "  ${CROSS} ${COL_LIGHT_RED}Gravity database rebuild failed - waited 1 hour for it to complete!${COL_NC}"
     fi

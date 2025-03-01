@@ -2,96 +2,97 @@
 # Made by Jack'lul <jacklul.github.io>
 
 #shellcheck disable=SC2155
-readonly SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
-DESTINATION_DIR="$1"
-SEARCH_DIR="$2"
+readonly script_dir="$(dirname "$(readlink -f "$0")")"
+destination_dir="$1"
+search_dir="$2"
 
 ################
 
 set -e
 
-[ -z "$DESTINATION_DIR" ] && { echo "Error: Destination directory not provided"; exit 1; }
-[ ! -d "$DESTINATION_DIR" ] && { echo "Error: Directory $DESTINATION_DIR does not exist"; exit 1; }
-[ -z "$SEARCH_DIR" ] && SEARCH_DIR="$(dirname "$SCRIPT_DIR")"
+[ -z "$destination_dir" ] && { echo "Error: Destination directory not provided"; exit 1; }
+[ ! -d "$destination_dir" ] && { echo "Error: Directory $destination_dir does not exist"; exit 1; }
+[ -z "$search_dir" ] && search_dir="$(dirname "$script_dir")"
 
-DESTINATION_DIR="$(realpath "$DESTINATION_DIR")"
-SEARCH_DIR="$(realpath "$SEARCH_DIR")"
+destination_dir="$(realpath "$destination_dir")"
+search_dir="$(realpath "$search_dir")"
 
-CORE_PATH="$(find "$SEARCH_DIR" -type f -name "gravity.sh" -print -quit)"
-WEB_PATH="$(find "$SEARCH_DIR" -type f -name "index.lp" -print -quit)"
-FTL_PATH="$(find "$SEARCH_DIR" -type f -name "pihole-FTL" -print -quit)"
+core_path="$(find "$search_dir" -type f -name "gravity.sh" -print -quit)"
+web_path="$(find "$search_dir" -type f -name "index.lp" -print -quit)"
+ftl_path="$(find "$search_dir" -type f -name "pihole-FTL" -print -quit)"
 
-[ -z "$CORE_PATH" ] && { echo "Error: Could not find Pi-hole's core directory"; exit 1; }
-[ -z "$WEB_PATH" ] && { echo "Error: Could not find Pi-hole's web directory"; exit 1; }
-[ -z "$FTL_PATH" ] && { echo "Error: Could not find Pi-hole's FTL binary"; exit 1; }
+[ -z "$core_path" ] && { echo "Error: Could not find Pi-hole's core directory"; exit 1; }
+[ -z "$web_path" ] && { echo "Error: Could not find Pi-hole's web directory"; exit 1; }
+[ -z "$ftl_path" ] && { echo "Error: Could not find Pi-hole's FTL binary"; exit 1; }
 
-ROOT_PATH="$(readlink -f "$(dirname "$SCRIPT_DIR")")"
-CORE_PATH="$(readlink -f "$(dirname "$CORE_PATH")")"
-WEB_PATH="$(readlink -f "$(dirname "$WEB_PATH")")"
-FTL_PATH="$(readlink -f "$(dirname "$FTL_PATH")")"
+root_path="$(readlink -f "$(dirname "$script_dir")")"
+core_path="$(readlink -f "$(dirname "$core_path")")"
+web_path="$(readlink -f "$(dirname "$web_path")")"
+ftl_path="$(readlink -f "$(dirname "$ftl_path")")"
 
-mkdir -p "$DESTINATION_DIR/opt"/{bin,etc/{pihole,cron.d,dnsmasq.d},share/pihole,var/log/pihole}
+mkdir -p "$destination_dir/opt"/{bin,etc/{pihole,cron.d,dnsmasq.d},share/pihole,var/log/pihole}
 
-if [ -z "$(ls -A "$DESTINATION_DIR/opt/share/pihole")" ]; then
+if [ -z "$(ls -A "$destination_dir/opt/share/pihole")" ]; then
     echo "Copying scripts and other essential files..."
-    cp -r --update=none "$CORE_PATH/advanced/Scripts"/* "$DESTINATION_DIR/opt/share/pihole"
-    cp --update=none "$CORE_PATH/advanced/Templates"/*.sh "$DESTINATION_DIR/opt/share/pihole"
-    cp --update=none "$CORE_PATH/advanced/Templates"/*.sql "$DESTINATION_DIR/opt/share/pihole"
-    cp --update=none "$CORE_PATH/gravity.sh" "$DESTINATION_DIR/opt/share/pihole/gravity.sh"
+    cp -r --update=none "$core_path/advanced/Scripts"/* "$destination_dir/opt/share/pihole"
+    cp --update=none "$core_path/advanced/Templates"/*.sh "$destination_dir/opt/share/pihole"
+    cp --update=none "$core_path/advanced/Templates"/*.sql "$destination_dir/opt/share/pihole"
+    cp --update=none "$core_path/gravity.sh" "$destination_dir/opt/share/pihole/gravity.sh"
 fi
 
-if [ -z "$(ls -A "$DESTINATION_DIR/opt/etc/pihole")" ] || [ -z "$(ls -A "$DESTINATION_DIR/opt/etc/cron.d")" ]; then
+if [ -z "$(ls -A "$destination_dir/opt/etc/pihole")" ] || [ -z "$(ls -A "$destination_dir/opt/etc/cron.d")" ]; then
     echo "Copying configuration files..."
-    [ -f "$CORE_PATH/advanced/Templates/pihole-FTL.conf" ] && cp --update=none "$CORE_PATH/advanced/Templates/pihole-FTL.conf" "$DESTINATION_DIR/opt/etc/pihole/pihole-FTL.conf"
-    [ -f "$CORE_PATH/advanced/Templates/pihole.cron" ] && cp --update=none "$CORE_PATH/advanced/Templates/pihole.cron" "$DESTINATION_DIR/opt/etc/cron.d/pihole"
-    [ -f "$CORE_PATH/advanced/Templates/logrotate" ] && cp --update=none "$CORE_PATH/advanced/Templates/logrotate" "$DESTINATION_DIR/opt/etc/pihole"
+    [ -f "$core_path/advanced/Templates/pihole-FTL.conf" ] && cp --update=none "$core_path/advanced/Templates/pihole-FTL.conf" "$destination_dir/opt/etc/pihole/pihole-FTL.conf"
+    [ -f "$core_path/advanced/Templates/pihole.cron" ] && cp --update=none "$core_path/advanced/Templates/pihole.cron" "$destination_dir/opt/etc/cron.d/pihole"
+    [ -f "$core_path/advanced/Templates/logrotate" ] && cp --update=none "$core_path/advanced/Templates/logrotate" "$destination_dir/opt/etc/pihole"
 fi
 
-if [ ! -d "$DESTINATION_DIR/opt/share/pihole/www/admin" ]; then
+if [ ! -d "$destination_dir/opt/share/pihole/www/admin" ]; then
     echo "Copying web files..."
-    mkdir -p "$DESTINATION_DIR/opt/share/pihole/www/admin"
-    cp -r --update=none "$WEB_PATH"/* "$DESTINATION_DIR/opt/share/pihole/www/admin"
-    rm -f "$DESTINATION_DIR/opt/share/pihole/www/admin"/*.md
-    rm -f "$DESTINATION_DIR/opt/share/pihole/www/admin"/*.json
+    mkdir -p "$destination_dir/opt/share/pihole/www/admin"
+    cp -r --update=none "$web_path"/* "$destination_dir/opt/share/pihole/www/admin"
+    rm -f "$destination_dir/opt/share/pihole/www/admin"/*.md
+    rm -f "$destination_dir/opt/share/pihole/www/admin"/*.json
 fi
 
-if [ ! -f "$DESTINATION_DIR/opt/bin/pihole" ]; then
+if [ ! -f "$destination_dir/opt/bin/pihole" ]; then
     echo "Copying 'pihole' script..."
-    cp --update=none "$CORE_PATH/pihole" "$DESTINATION_DIR/opt/bin/pihole"
+    cp --update=none "$core_path/pihole" "$destination_dir/opt/bin/pihole"
 fi
 
-if [ ! -f "$DESTINATION_DIR/opt/bin/pihole-FTL" ]; then
+if [ ! -f "$destination_dir/opt/bin/pihole-FTL" ]; then
     echo "Copying FTL binary..."
-    cp --update=none "$FTL_PATH/pihole-FTL" "$DESTINATION_DIR/opt/bin/pihole-FTL"
+    cp --update=none "$ftl_path/pihole-FTL" "$destination_dir/opt/bin/pihole-FTL"
 fi
 
 echo "Copying files from 'files' directory..."
-cp -r --update=none "$ROOT_PATH/files"/* "$DESTINATION_DIR"
+cp -r --update=none "$root_path/files"/* "$destination_dir"
 
-if [ ! -f "$DESTINATION_DIR/opt/etc/pihole/macvendor.db" ]; then
+if [ ! -f "$destination_dir/opt/etc/pihole/macvendor.db" ]; then
     echo "Downloading macvendor.db..."
 
-    if ! curl -sSL "https://ftl.pi-hole.net/macvendor.db" -o "$DESTINATION_DIR/opt/etc/pihole/macvendor.db"; then
+    if ! curl -sSL "https://ftl.pi-hole.net/macvendor.db" -o "$destination_dir/opt/etc/pihole/macvendor.db"; then
         echo "Error: Could not download macvendor.db"
         exit 1
     fi
 fi
 
-if [ ! -f "$DESTINATION_DIR/opt/etc/pihole/versions" ]; then
+if [ ! -f "$destination_dir/opt/etc/pihole/versions" ]; then
     echo "Creating versions file..."
 
-    for PART in CORE WEB FTL; do
-        PART_PATH="${PART}_PATH"
+    for part in core web ftl; do
+        part_path="${part}_path"
 
-        if [ -d "${!PART_PATH}" ] && [ -f "${!PART_PATH}/.version" ]; then
+        if [ -d "${!part_path}" ] && [ -f "${!part_path}/.version" ]; then
             #shellcheck disable=SC1091
-            . "${!PART_PATH}/.version"
+            . "${!part_path}/.version"
 
+            part="${part^^}"
             {
-                echo "${PART}_VERSION=$VERSION"
-                echo "${PART}_BRANCH=$BRANCH"
-                echo "${PART}_HASH=$HASH"
-            } >> "$DESTINATION_DIR/opt/etc/pihole/versions"
+                echo "${part}_VERSION=$VERSION"
+                echo "${part}_BRANCH=$BRANCH"
+                echo "${part}_HASH=$HASH"
+            } >> "$destination_dir/opt/etc/pihole/versions"
         fi
     done
 fi
@@ -99,9 +100,9 @@ fi
 #shellcheck disable=SC2034
 SKIP_INSTALL=true # Allows sourcing installer without running it
 #shellcheck disable=SC1091
-source "$CORE_PATH/automated install/basic-install.sh"
+source "$core_path/automated install/basic-install.sh"
 
-if [ ! -f "$DESTINATION_DIR/opt/etc/pihole/dns-servers.conf" ]; then
+if [ ! -f "$destination_dir/opt/etc/pihole/dns-servers.conf" ]; then
     echo "Creating dns-servers.conf file..."
 
     if [ -z "$DNS_SERVERS" ]; then
@@ -109,14 +110,14 @@ if [ ! -f "$DESTINATION_DIR/opt/etc/pihole/dns-servers.conf" ]; then
         exit 1
     fi
 
-    echo "$DNS_SERVERS" > "$DESTINATION_DIR/opt/etc/pihole/dns-servers.conf"
+    echo "$DNS_SERVERS" > "$destination_dir/opt/etc/pihole/dns-servers.conf"
 fi
 
-if [ ! -f "$DESTINATION_DIR/opt/etc/pihole/adlists.list" ]; then
+if [ ! -f "$destination_dir/opt/etc/pihole/adlists.list" ]; then
     echo "Creating adlists.list file..."
 
     #shellcheck disable=SC2034
-    adlistFile="$DESTINATION_DIR/opt/etc/pihole/adlists.list"
+    adlistFile="$destination_dir/opt/etc/pihole/adlists.list"
 
     if ! installDefaultBlocklists; then
         echo "Error: Could not install default adlists using basic-install.sh"
@@ -125,10 +126,10 @@ if [ ! -f "$DESTINATION_DIR/opt/etc/pihole/adlists.list" ]; then
 fi
 
 echo "Setting permissions..."
-find "$DESTINATION_DIR" -type f -exec chmod 0644 {} \;
-find "$DESTINATION_DIR" -type d -exec chmod 0755 {} \;
-chmod 755 "$DESTINATION_DIR/opt/bin"/* "$DESTINATION_DIR/opt/etc/init.d"/*
-find "$DESTINATION_DIR/opt/share/pihole" -type f \( -name "*.sh" -o -name "COL_TABLE" \) -exec chmod 0755 {} \;
-find "$DESTINATION_DIR/opt/share/pihole/polyfill" -type f -exec chmod 0755 {} \;
+find "$destination_dir" -type f -exec chmod 0644 {} \;
+find "$destination_dir" -type d -exec chmod 0755 {} \;
+chmod 755 "$destination_dir/opt/bin"/* "$destination_dir/opt/etc/init.d"/*
+find "$destination_dir/opt/share/pihole" -type f \( -name "*.sh" -o -name "COL_TABLE" \) -exec chmod 0755 {} \;
+find "$destination_dir/opt/share/pihole/polyfill" -type f -exec chmod 0755 {} \;
 
-echo "Created package files in $DESTINATION_DIR"
+echo "Created package files in $destination_dir"

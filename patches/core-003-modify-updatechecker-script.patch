@@ -22,7 +22,7 @@ index eda6c40..291f43e 100755
  fi
  
 +# check if running in Entware
-+IS_ENTWARE=$([ -f /opt/etc/opkg.conf ] && echo true || echo false)
++is_entware=$([ -f /opt/etc/opkg.conf ] && echo true || echo false)
 +
  # used in cronjob
  if [[ "$1" == "reboot" ]]; then
@@ -30,7 +30,7 @@ index eda6c40..291f43e 100755
  fi
  
 +# load current versions when running in Entware since we don't have locally cloned repos in this case
-+if $IS_ENTWARE && [ -f "${VERSION_FILE}" ]; then
++if $is_entware && [ -f "${VERSION_FILE}" ]; then
 +    # shellcheck disable=SC1090
 +    . "${VERSION_FILE}"
 +fi
@@ -39,7 +39,7 @@ index eda6c40..291f43e 100755
  
 -CORE_VERSION="$(get_local_version /opt/etc/.pihole)"
 -addOrEditKeyValPair "${VERSION_FILE}" "CORE_VERSION" "${CORE_VERSION}"
-+if ! $IS_ENTWARE; then
++if ! $is_entware; then
 +    CORE_VERSION="$(get_local_version /opt/etc/.pihole)"
 +    addOrEditKeyValPair "${VERSION_FILE}" "CORE_VERSION" "${CORE_VERSION}"
  
@@ -62,7 +62,7 @@ index eda6c40..291f43e 100755
  
 -WEB_VERSION="$(get_local_version /opt/share/pihole/www/admin)"
 -addOrEditKeyValPair "${VERSION_FILE}" "WEB_VERSION" "${WEB_VERSION}"
-+if ! $IS_ENTWARE; then
++if ! $is_entware; then
 +    WEB_VERSION="$(get_local_version /opt/share/pihole/www/admin)"
 +    addOrEditKeyValPair "${VERSION_FILE}" "WEB_VERSION" "${WEB_VERSION}"
  
@@ -85,7 +85,7 @@ index eda6c40..291f43e 100755
  
 -FTL_VERSION="$(pihole-FTL version)"
 -addOrEditKeyValPair "${VERSION_FILE}" "FTL_VERSION" "${FTL_VERSION}"
-+if ! $IS_ENTWARE; then
++if ! $is_entware; then
 +    FTL_VERSION="$(pihole-FTL version)"
 +    addOrEditKeyValPair "${VERSION_FILE}" "FTL_VERSION" "${FTL_VERSION}"
  
@@ -109,7 +109,7 @@ index eda6c40..291f43e 100755
 +
 +# get Entware package versions
 +
-+if $IS_ENTWARE; then
++if $is_entware; then
 +    ENTWARE_PACKAGE="$(opkg list-installed pi-hole* | awk '{print $1}' | head -n 1)"
 +    addOrEditKeyValPair "${VERSION_FILE}" "ENTWARE_PACKAGE" "${ENTWARE_PACKAGE}"
 +

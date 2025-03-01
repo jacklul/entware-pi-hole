@@ -13,25 +13,25 @@ if [ "$GITHUB_EVENT_NAME" = "schedule" ]; then
 fi
 
 if [[ "$GITHUB_REF" =~ ^refs/tags/.* ]]; then
-    VERSION="$GITHUB_REF_NAME"
+    version="$GITHUB_REF_NAME"
 elif [[ "$GITHUB_REF" =~ ^refs/pull/.* ]]; then
-    VERSION="$GITHUB_REF_NAME-$(date +%s)"
+    version="$GITHUB_REF_NAME-$(date +%s)"
 elif [[ "$GITHUB_REF" =~ ^refs/heads/.* ]]; then
-    VERSION="$(date +%Y.%m.%d)-$(date +%H%M%S)"
+    version="$(date +%Y.%m.%d)-$(date +%H%M%S)"
 
     if git rev-parse --is-inside-work-tree &>/dev/null; then
-        VERSION="${VERSION}-$(git describe --always --abbrev=8)"
+        version="${version}-$(git describe --always --abbrev=8)"
     fi
 fi
 
-[ -z "$VERSION" ] && { echo "Package version not set"; exit 1; }
+[ -z "$version" ] && { echo "Package version not set"; exit 1; }
 
 # Clean version string
-if ! echo "$VERSION" | grep -Eq '^[a-zA-Z0-9_.+-]+$'; then
-    VERSION="${VERSION//[^a-zA-Z0-9_.+-]/-}"
+if ! echo "$version" | grep -Eq '^[a-zA-Z0-9_.+-]+$'; then
+    version="${version//[^a-zA-Z0-9_.+-]/-}"
 fi
 
-echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+echo "VERSION=$version" >> "$GITHUB_OUTPUT"
 
 if [[ "$GITHUB_REF" =~ ^refs/tags/.* ]] || [ "$GITHUB_REF_NAME" = "master" ]; then
     if [ -z "$CORE_REF" ] || [ -z "$WEB_REF" ] || [ -z "$FTL_REF" ]; then

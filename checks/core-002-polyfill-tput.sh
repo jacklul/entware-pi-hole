@@ -12,31 +12,31 @@ found2=false
 found3=false
 
 [ -z "$FILES" ] && exit 1
-for FILE in $FILES; do
-    { [ ! -f "$FILE" ] || { [ "$(head -c 3 "$FILE")" != "#!/" ] && ! grep -q '; then' "$FILE" ; } ; } && continue
+for file in $FILES; do
+    { [ ! -f "$file" ] || { [ "$(head -c 3 "$file")" != "#!/" ] && ! grep -q '; then' "$file" ; } ; } && continue
 
-    echo "Checking $FILE..."
+    echo "Checking $file..."
 
     # No comments
-    CONTENTS="$(grep -o "^[^#]*" < "$FILE"))"
+    contents="$(grep -o "^[^#]*" < "$file"))"
 
     # Checks
-    if echo "$CONTENTS" | grep -qaE "$find1"; then
+    if echo "$contents" | grep -qaE "$find1"; then
         found1=true
-        CONTENTS="$(echo "$CONTENTS" | grep -av "$find1")" # /advanced/Scripts/COL_TABLE
+        contents="$(echo "$contents" | grep -av "$find1")" # /advanced/Scripts/COL_TABLE
     fi
 
-    if echo "$CONTENTS" | grep -qaE "$find2"; then
+    if echo "$contents" | grep -qaE "$find2"; then
         found2=true
-        CONTENTS="$(echo "$CONTENTS" | grep -av "$find2")" # /advanced/Scripts/piholeDebug.sh
+        contents="$(echo "$contents" | grep -av "$find2")" # /advanced/Scripts/piholeDebug.sh
     fi
 
-    if echo "$CONTENTS" | grep -qaE "$find3"; then
+    if echo "$contents" | grep -qaE "$find3"; then
         found3=true
-        CONTENTS="$(echo "$CONTENTS" | grep -av "$find3")" # /advanced/Scripts/piholeDebug.sh
+        contents="$(echo "$contents" | grep -av "$find3")" # /advanced/Scripts/piholeDebug.sh
     fi
 
-    echo "$CONTENTS" | grep -aEn "\s+tput [[:alnum:]_]+" && exit 1
+    echo "$contents" | grep -aEn "\s+tput [[:alnum:]_]+" && exit 1
 done
 
 if [ "$found1" = false ] || [ "$found2" = false ] || [ "$found3" = false ]; then

@@ -5,22 +5,22 @@
 . "$(dirname "$(readlink -f "$0")")/common-FTL.sh"
 
 [ -z "$FILES" ] && exit 1
-for FILE in $FILES; do
-    [ ! -f "$FILE" ] && continue
+for file in $FILES; do
+    [ ! -f "$file" ] && continue
 
-    FILENAME=$(basename -- "$FILE")
-    EXTENSION="${FILENAME##*.}"
-    FILENAME="${FILENAME%.*}"
+    filename=$(basename -- "$file")
+    extension="${filename##*.}"
+    filename="${filename%.*}"
 
-    echo "Checking $FILE..."
+    echo "Checking $file..."
 
     # No comments
-    if [ "$EXTENSION" = "sh" ] || [ "$EXTENSION" = "txt" ]; then
-        CONTENTS="$(grep -Ev "^(\s*#)" < "$FILE")"
+    if [ "$extension" = "sh" ] || [ "$extension" = "txt" ]; then
+        contents="$(grep -Ev "^(\s*#)" < "$file")"
     else
-        #CONTENTS="$(grep -Ev "^(\s*//|\s*/\*|\s*\*|\s*\*/)" < "$FILE")"
+        #contents="$(grep -Ev "^(\s*//|\s*/\*|\s*\*|\s*\*/)" < "$file")"
 
-        CONTENTS="$(awk '
+        contents="$(awk '
 BEGIN { multi_line_comment = 0 }
 {
     while (match($0, /\/\*[^*]*\*\//)) {
@@ -42,34 +42,34 @@ BEGIN { multi_line_comment = 0 }
         sub(/\/\/.*/, "")
         print
     }
-}' < "$FILE")"
+}' < "$file")"
     fi
 
     # Exceptions (@TODO the way these are handled needs to be improved)
-    CONTENTS="$(echo "$CONTENTS" | grep -av "HINTS /usr/local/lib64")" # /src/CMakeLists.txt
-    CONTENTS="$(echo "$CONTENTS" | grep -av "CMAKE_INSTALL_PREFIX \"/usr\"")" # /src/CMakeLists.txt
-    CONTENTS="$(echo "$CONTENTS" | grep -av "/etc/hostname")" # src/config/config.c
-    CONTENTS="$(echo "$CONTENTS" | grep -av "/etc/config/resolv.conf")" # src/dnsmasq/config.h
-    CONTENTS="$(echo "$CONTENTS" | grep -av "/usr/local/etc/dnsmasq.conf")" # src/dnsmasq/config.h
-    CONTENTS="$(echo "$CONTENTS" | grep -av "/var/cache/dnsmasq.leases")" # src/dnsmasq/config.h
-    CONTENTS="$(echo "$CONTENTS" | grep -av "/var/db/dnsmasq.leases")" # src/dnsmasq/config.h
-    CONTENTS="$(echo "$CONTENTS" | grep -av "\${PROJECT_SOURCE_DIR}/src/lua /usr/local/include")" # src/webserver/civetweb/CMakeLists.txt
-    CONTENTS="$(echo "$CONTENTS" | grep -av "LUA_ROOT	\"/usr/local/\"")" # src/lua/luaconf.h
-    CONTENTS="$(echo "$CONTENTS" | grep -av "/etc/pihole/test.pem\" ### CHANGED")" # test/pihole.toml
-    CONTENTS="$(echo "$CONTENTS" | grep -av "read_id_file(\"/etc/machine-id\", machine_id")" # src/webserver/x509.c
+    contents="$(echo "$contents" | grep -av "HINTS /usr/local/lib64")" # /src/CMakeLists.txt
+    contents="$(echo "$contents" | grep -av "CMAKE_INSTALL_PREFIX \"/usr\"")" # /src/CMakeLists.txt
+    contents="$(echo "$contents" | grep -av "/etc/hostname")" # src/config/config.c
+    contents="$(echo "$contents" | grep -av "/etc/config/resolv.conf")" # src/dnsmasq/config.h
+    contents="$(echo "$contents" | grep -av "/usr/local/etc/dnsmasq.conf")" # src/dnsmasq/config.h
+    contents="$(echo "$contents" | grep -av "/var/cache/dnsmasq.leases")" # src/dnsmasq/config.h
+    contents="$(echo "$contents" | grep -av "/var/db/dnsmasq.leases")" # src/dnsmasq/config.h
+    contents="$(echo "$contents" | grep -av "\${PROJECT_SOURCE_DIR}/src/lua /usr/local/include")" # src/webserver/civetweb/CMakeLists.txt
+    contents="$(echo "$contents" | grep -av "LUA_ROOT	\"/usr/local/\"")" # src/lua/luaconf.h
+    contents="$(echo "$contents" | grep -av "/etc/pihole/test.pem\" ### CHANGED")" # test/pihole.toml
+    contents="$(echo "$contents" | grep -av "read_id_file(\"/etc/machine-id\", machine_id")" # src/webserver/x509.c
 
-    if [ "$(basename "$FILE")" = "test_suite.bats" ]; then
-        CONTENTS="$(echo "$CONTENTS" | grep -av "SQLite 3.x database")" # test/test_suite.bats
-        CONTENTS="$(echo "$CONTENTS" | grep -av "Reading certificate from")" # test/test_suite.bats
+    if [ "$(basename "$file")" = "test_suite.bats" ]; then
+        contents="$(echo "$contents" | grep -av "SQLite 3.x database")" # test/test_suite.bats
+        contents="$(echo "$contents" | grep -av "Reading certificate from")" # test/test_suite.bats
     fi
 
     # Checks
-    echo -e "$CONTENTS" | grep -aEn "(^|\s+|\")/etc" && exit 1
-    echo -e "$CONTENTS" | grep -aEn "(^|\s+|\")/var" && exit 1
-    echo -e "$CONTENTS" | grep -aEn "(^|\s+|\")/usr" && exit 1
-    echo -e "$CONTENTS" | grep -aEn "(^|\s+|\")/tmp" && exit 1
-    echo -e "$CONTENTS" | grep -aEn "(^|\s+|\")/run" && exit 1
-    echo -e "$CONTENTS" | grep -aEn "(^|\s+|\")/opt/pihole" && exit 1
+    echo -e "$contents" | grep -aEn "(^|\s+|\")/etc" && exit 1
+    echo -e "$contents" | grep -aEn "(^|\s+|\")/var" && exit 1
+    echo -e "$contents" | grep -aEn "(^|\s+|\")/usr" && exit 1
+    echo -e "$contents" | grep -aEn "(^|\s+|\")/tmp" && exit 1
+    echo -e "$contents" | grep -aEn "(^|\s+|\")/run" && exit 1
+    echo -e "$contents" | grep -aEn "(^|\s+|\")/opt/pihole" && exit 1
 done
 
 exit 0

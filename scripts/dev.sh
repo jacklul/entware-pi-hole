@@ -2,50 +2,50 @@
 # Made by Jack'lul <jacklul.github.io>
 
 #shellcheck disable=SC2155
-readonly SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
-readonly REPO_CORE="https://github.com/pi-hole/pi-hole.git"
-readonly REPO_WEB="https://github.com/pi-hole/web.git"
-readonly REPO_FTL="https://github.com/pi-hole/FTL.git"
+readonly script_dir="$(dirname "$(readlink -f "$0")")"
+readonly repository_core="https://github.com/pi-hole/pi-hole.git"
+readonly repository_web="https://github.com/pi-hole/web.git"
+readonly repository_ftl="https://github.com/pi-hole/FTL.git"
 
 function install_or_update_repository() {
-    local REPOSITORY="$1"
-    local DESTINATION="$2"
-    local NEW_BRANCH="$3"
+    local repository="$1"
+    local destination="$2"
+    local new_branch="$3"
 
-    echo "Working with repository: $REPOSITORY"
+    echo "Working with repository: $repository"
 
-    if [ ! -f "$DESTINATION/.git/config" ]; then
-        mkdir -pv "$DESTINATION"
-        git -C "$DESTINATION" init
-        git -C "$DESTINATION" remote add origin "$REPOSITORY"
-        git -C "$DESTINATION" fetch --depth 1
+    if [ ! -f "$destination/.git/config" ]; then
+        mkdir -pv "$destination"
+        git -C "$destination" init
+        git -C "$destination" remote add origin "$repository"
+        git -C "$destination" fetch --depth 1
 
-        MAIN_BRANCH="$(git -C "$DESTINATION" remote show "$REPOSITORY" | grep 'HEAD branch' | cut -d':' -f2 | tr -d ' ')"
+        main_branch="$(git -C "$destination" remote show "$repository" | grep 'HEAD branch' | cut -d':' -f2 | tr -d ' ')"
 
-        if [ -n "$NEW_BRANCH" ]; then
-            MAIN_BRANCH=$NEW_BRANCH
+        if [ -n "$new_branch" ]; then
+            main_branch=$new_branch
         fi
 
-        git -C "$DESTINATION" checkout "$MAIN_BRANCH"
-        git -C "$DESTINATION" branch --set-upstream-to="origin/$MAIN_BRANCH"
+        git -C "$destination" checkout "$main_branch"
+        git -C "$destination" branch --set-upstream-to="origin/$main_branch"
     else
-        local CURRENT_BRANCH="$(git -C "$DESTINATION" rev-parse --abbrev-ref HEAD)"
+        local current_branch="$(git -C "$destination" rev-parse --abbrev-ref HEAD)"
 
-        if [ -z "$NEW_BRANCH" ]; then
-            NEW_BRANCH="$(git -C "$DESTINATION" remote show "$REPOSITORY" | grep 'HEAD branch' | cut -d':' -f2 | tr -d ' ')"
+        if [ -z "$new_branch" ]; then
+            new_branch="$(git -C "$destination" remote show "$repository" | grep 'HEAD branch' | cut -d':' -f2 | tr -d ' ')"
         fi
 
-        git -C "$DESTINATION" clean -fd
+        git -C "$destination" clean -fd
 
-        if [ "$CURRENT_BRANCH" = "$NEW_BRANCH" ]; then
-            git -C "$DESTINATION" fetch
-            git -C "$DESTINATION" reset --hard HEAD
-            git -C "$DESTINATION" pull --rebase --depth 1 --allow-unrelated-histories
+        if [ "$current_branch" = "$new_branch" ]; then
+            git -C "$destination" fetch
+            git -C "$destination" reset --hard HEAD
+            git -C "$destination" pull --rebase --depth 1 --allow-unrelated-histories
         else
-            git -C "$DESTINATION" fetch --depth 1
-            git -C "$DESTINATION" checkout -f "$NEW_BRANCH"
-            git -C "$DESTINATION" branch --set-upstream-to="origin/$NEW_BRANCH"
-            git -C "$DESTINATION" reset --hard HEAD
+            git -C "$destination" fetch --depth 1
+            git -C "$destination" checkout -f "$new_branch"
+            git -C "$destination" branch --set-upstream-to="origin/$new_branch"
+            git -C "$destination" reset --hard HEAD
         fi
     fi
 }
@@ -54,41 +54,46 @@ function install_or_update_repository() {
 
 set -e
 
-BRANCH="$1"
-REPO=all
-[ -n "$2" ] && REPO="$2"
+branch="$1"
+repo=all
+[ -n "$2" ] && repo="$2"
 
-if [ ! -d "$SCRIPT_DIR/../dev" ]; then
-    mkdir -pv "$SCRIPT_DIR/../dev"
+if [ ! -d "$script_dir/../dev" ]; then
+    mkdir -pv "$script_dir/../dev"
 fi
 
-case $BRANCH in
+case $branch in
+    "master"|"release")
+        core_branch=master
+        web_branch=master
+        ftl_branch=master
+    ;;
     "dev")
-        CORE_BRANCH=development
-        WEB_BRANCH=development
-        FTL_BRANCH=development
+        core_branch=development
+        web_branch=development
+        ftl_branch=development
     ;;
     *)
-        CORE_BRANCH=$BRANCH
-        WEB_BRANCH=$BRANCH
-        FTL_BRANCH=$BRANCH
+        core_branch=$branch
+        web_branch=$branch
+        ftl_branch=$branch
     ;;
 esac
 
-case $REPO in
+case $repo in
     all)
-        install_or_update_repository "$REPO_CORE" "$SCRIPT_DIR/../dev/core" "$CORE_BRANCH"
-        install_or_update_repository "$REPO_WEB" "$SCRIPT_DIR/../dev/web" "$WEB_BRANCH"
-        install_or_update_repository "$REPO_FTL" "$SCRIPT_DIR/../dev/FTL" "$FTL_BRANCH"
+        install_or_update_repository "$repository_core" "$script_dir/../dev/core" "$core_branch"
+        install_or_update_repository "$repository_web" "$script_dir/../dev/web" "$web_branch"
+        install_or_update_repository "$repository_ftl" "$script_dir/../dev/FTL" "$ftl_branch"
     ;;
     core)
-        install_or_update_repository "$REPO_CORE" "$SCRIPT_DIR/../dev/core" "$CORE_BRANCH"
+        install_or_update_repository "$repository_core" "$script_dir/../dev/core" "$core_branch"
     ;;
     web)
-        install_or_update_repository "$REPO_WEB" "$SCRIPT_DIR/../dev/web" "$WEB_BRANCH"
+        install_or_update_repository "$repository_web" "$script_dir/../dev/web" "$web_branch"
     ;;
     ftl|FTL)
-        install_or_update_repository "$REPO_FTL" "$SCRIPT_DIR/../dev/FTL" "$FTL_BRANCH"
+        install_or_update_repository "$repository_ftl" "$script_dir/../dev/FTL" "$ftl_branch"
     ;;
     *)
         echo "Invalid repo selected, valid values: all, core, web, FTL"

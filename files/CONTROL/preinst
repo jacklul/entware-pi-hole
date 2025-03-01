@@ -7,36 +7,36 @@ PATH="/opt/sbin:/opt/bin:$PATH"
 # so we check if they exist and then prompt the user to install them
 # These were not added to package dependencies on purpose as they 
 # should be included in busybox on most systems
-#COMMAND_DEPS="" # Format: command or command:package
-COREUTILS_DEPS="basename cat chmod chown cp date df dirname echo false head kill ln ls mkdir mv pwd rm tail test touch true uptime"
+command_deps="" # Format: command or command:package
+coreutils_deps="basename cat chmod chown cp date df dirname echo false head kill ln ls mkdir mv pwd rm tail test touch true uptime"
 
 command_exists() {
-    _COMMAND=$1
+    _command=$1
 
-    if [ -z "$CHECK_COMMAND" ]; then
-        type 2> /dev/null && CHECK_COMMAND="type"
-        which --help > /dev/null 2>&1 && CHECK_COMMAND="which"
-        whereis --help > /dev/null 2>&1 && CHECK_COMMAND="whereis"
+    if [ -z "$_check_command" ]; then
+        type 2> /dev/null && _check_command="type"
+        which --help > /dev/null 2>&1 && _check_command="which"
+        whereis --help > /dev/null 2>&1 && _check_command="whereis"
 
-        if [ -z "$CHECK_COMMAND" ]; then
+        if [ -z "$_check_command" ]; then
             echo "Unable to check for missing dependencies - 'type', 'which' or 'whereis' command is required!"
             exit 1
         fi
     fi
 
-    case $CHECK_COMMAND in
-        type)
-            if [ -n "$(type "$_COMMAND" 2>/dev/null | awk '{print $3}')" ]; then
+    case $_check_command in
+        "type")
+            if [ -n "$(type "$_command" 2>/dev/null | awk '{print $3}')" ]; then
                 return 0
             fi
         ;;
-        which)
-            if [ -n "$(which "$_COMMAND" 2>/dev/null)" ]; then
+        "which")
+            if [ -n "$(which "$_command" 2>/dev/null)" ]; then
                 return 0
             fi
         ;;
-        whereis)
-            if [ -n "$(whereis -b "$_COMMAND" | cut -d ' ' -f2)" ]; then
+        "whereis")
+            if [ -n "$(whereis -b "$_command" | cut -d ' ' -f2)" ]; then
                 return 0
             fi
         ;;
@@ -50,43 +50,43 @@ command_exists() {
 
 ##########
 
-MISSING_CMDS=""
-MISSING_PKGS=""
+missing_commands=""
+missing_packages=""
 
-for COMMAND in $COMMAND_DEPS; do
-    if echo "$COMMAND" | grep -q ":"; then
-        PACKAGE="$(echo "$COMMAND" | cut -d ':' -f 2 2> /dev/null)"
-        COMMAND="$(echo "$COMMAND" | cut -d ':' -f 1 2> /dev/null)"
+for command in $command_deps; do
+    if echo "$command" | grep -q ":"; then
+        package="$(echo "$command" | cut -d ':' -f 2 2> /dev/null)"
+        command="$(echo "$command" | cut -d ':' -f 1 2> /dev/null)"
 
-        echo "$COMMAND" | grep -q ":" && continue # no 'cut' command?
+        echo "$command" | grep -q ":" && continue # no 'cut' command?
     else
-        PACKAGE="$COMMAND"
+        package="$command"
     fi
 
     #shellcheck disable=SC2086
-    if ! command_exists $COMMAND; then
-        MISSING_CMDS="$MISSING_CMDS $COMMAND"
-        MISSING_PKGS="$MISSING_PKGS $PACKAGE"
+    if ! command_exists $command; then
+        missing_commands="$missing_commands $command"
+        missing_packages="$missing_packages $package"
     fi
 done
 
-for COMMAND in $COREUTILS_DEPS; do
+for command in $coreutils_deps; do
     #shellcheck disable=SC2086
-    if ! command_exists $COMMAND; then
-        MISSING_CMDS="$MISSING_CMDS $COMMAND"
-        MISSING_PKGS="$MISSING_PKGS coreutils-$COMMAND"
+    if ! command_exists $command; then
+        missing_commands="$missing_commands $command"
+        missing_packages="$missing_packages coreutils-$command"
     fi
 done
 
-if [ -n "$MISSING_CMDS" ]; then
-    MISSING_CMDS="$(echo "$MISSING_CMDS" | awk '{$1=$1};1')"
-    MISSING_PKGS="$(echo "$MISSING_PKGS" | awk '{$1=$1};1')"
+if [ -n "$missing_commands" ]; then
+    missing_commands="$(echo "$missing_commands" | awk '{$1=$1};1')"
+    missing_packages="$(echo "$missing_packages" | awk '{$1=$1};1')"
 
     cat <<EOT
-Your system is missing required commands: $MISSING_CMDS
+Your system is missing required commands: $missing_commands
 
 Install them by running the following command:
- opkg install $MISSING_PKGS
+ opkg install $missing_packages
 
 EOT
 

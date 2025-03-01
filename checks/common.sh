@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 if [ -z "$1" ]; then
-    echo "TARGET_DIR is not set"
+    echo "Target directory is not set"
     exit 1
 fi
 

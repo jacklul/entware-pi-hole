@@ -8,21 +8,21 @@ find1="getent hosts"
 found1=false
 
 [ -z "$FILES" ] && exit 1
-for FILE in $FILES; do
-    { [ ! -f "$FILE" ] || { [ "$(head -c 3 "$FILE")" != "#!/" ] && ! grep -q '; then' "$FILE" ; } ; } && continue
+for file in $FILES; do
+    { [ ! -f "$file" ] || { [ "$(head -c 3 "$file")" != "#!/" ] && ! grep -q '; then' "$file" ; } ; } && continue
 
-    echo "Checking $FILE..."
+    echo "Checking $file..."
 
     # No comments
-    CONTENTS="$(grep -o "^[^#]*" < "$FILE"))"
+    contents="$(grep -o "^[^#]*" < "$file"))"
 
     # Checks
-    if echo "$CONTENTS" | grep -qaE "$find1"; then
+    if echo "$contents" | grep -qaE "$find1"; then
         found1=true
-        CONTENTS="$(echo "$CONTENTS" | grep -av "$find1")" # /gravity.sh
+        contents="$(echo "$contents" | grep -av "$find1")" # /gravity.sh
     fi
 
-    echo "$CONTENTS" | grep -aEn "getent [[:alnum:]_]+ " && exit 1
+    echo "$contents" | grep -aEn "getent [[:alnum:]_]+ " && exit 1
 done
 
 if [ "$found1" = false ]; then
