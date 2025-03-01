@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# 'locale' - used by piholeDebug.sh
 
 if command -v locale.new &>/dev/null; then
     locale.new "$@"

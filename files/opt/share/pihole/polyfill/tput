@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# 'tput colors' - used by COL_TABLE
+# 'tput civis' - used by piholeDebug.sh
+# 'tput cnorm' - used by piholeDebug.sh
 
 case "$1" in
     colors)

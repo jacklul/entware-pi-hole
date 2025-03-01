@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# 'ss --listening --numeric --tcp --udp --processes --no-header' - used by piholeDebug.sh
+# 'ss --ipv4 --listening --numeric --tcp --udp src' - used by pihole status
+# 'ss --ipv6 --listening --numeric --tcp --udp src' - used by pihole status
 
 args="$*"
 pargs=()

@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# 'getent hosts' - used by gravity.sh
+# 'getent group' - no longer used
 
 case "$1" in
     hosts)
