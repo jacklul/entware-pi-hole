@@ -40,7 +40,8 @@ index c681782..1443a90 100755
  # Set all files (except TLS-related ones) to u+rw g+r
 @@ -22,8 +25,15 @@ find /opt/etc/pihole/ /opt/var/log/pihole/ -type f -name '*.pem' -o -name '*.crt
  # Logrotate config file need to be owned by root
- chown root:root /opt/etc/pihole/logrotate
+-chown root:root /opt/etc/pihole/logrotate
++chown 0:0 /opt/etc/pihole/logrotate
  
 +if [ -z "$no_pihole_user" ]; then
  # Touch files to ensure they exist (create if non-existing, preserve if existing)
