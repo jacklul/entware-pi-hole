@@ -64,7 +64,7 @@ root_user="$(id -nu 0 2> /dev/null)"
 if [ "$root_user" != "root" ]; then
     echo "  ${INFO} ${COL_YELLOW}It looks like the root user is not called 'root' - this can cause issues!${COL_NC}"
 
-    if ! grep -q "^#*\s*pi-hole-no-crontab-workaround" "/opt/var/spool/cron/crontabs/$root_user" 2> /dev/null; then
+    if ! grep -Eq "(^|[^'])pi-hole-no-crontab-workaround([^']|$)" "/opt/var/spool/cron/crontabs/$root_user" 2> /dev/null; then
         echo "  ${INFO} ${COL_BOLD}Applying crontab workaround...${COL_NC}"
 
         if [ ! -f "/opt/var/spool/cron/crontabs/$root_user" ]; then
@@ -82,7 +82,7 @@ if [ "$root_user" != "root" ]; then
 
             cat <<EOF
 # Everything between the marked lines will be automatically modified by install/upgrade script.
-# You can prevent modification of this file by adding '# pi-hole-no-crontab-workaround' somewhere in this file.
+# You can prevent modification of this file by adding 'pi-hole-no-crontab-workaround' somewhere in this file.
 EOF
 
             grep -Ev "^#|^\s*$" /opt/etc/cron.d/pihole | sed "s/ root / /g"
