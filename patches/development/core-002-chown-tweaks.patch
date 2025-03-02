@@ -64,7 +64,7 @@ index 522d92f..bb8f35b 100755
  gravityBCKfile="${gravityBCKdir}/gravity.db"
  
 +# In Entware user pihole might not exist
-+[ -f /opt/etc/opkg.conf ] && [ -z "$(id -u pihole 2> /dev/null)" ] && NO_PIHOLE_USER=y
++[ -f /opt/etc/opkg.conf ] && [ -z "$(id -u pihole 2> /dev/null)" ] && no_pihole_user=y
 +
  fix_owner_permissions() {
    # Fix ownership and permissions for the specified file
