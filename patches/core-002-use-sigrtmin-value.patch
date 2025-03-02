@@ -1,0 +1,14 @@
+diff --git a/pihole b/pihole
+index bf662a82..6779e617 100755
+--- a/pihole
++++ b/pihole
+@@ -165,7 +165,8 @@ reloadDNS() {
+       str="FTL is not running"
+       icon="${INFO}"
+     else
+-      svc="kill -RTMIN ${pid}"
++      local rtmin="$(pihole-FTL sigrtmin || echo "RTMIN")"
++      svc="kill -${rtmin} ${pid}"
+       str="Reloading DNS lists"
+       icon="${TICK}"
+     fi
