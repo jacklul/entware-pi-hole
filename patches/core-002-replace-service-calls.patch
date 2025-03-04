@@ -1,58 +1,5 @@
-diff --git a/advanced/Scripts/piholeDebug.sh b/advanced/Scripts/piholeDebug.sh
-index 7c55812..24e0b3f 100755
---- a/advanced/Scripts/piholeDebug.sh
-+++ b/advanced/Scripts/piholeDebug.sh
-@@ -837,24 +837,10 @@ process_status(){
-     for i in "${PIHOLE_PROCESSES[@]}"; do
-         local status_of_process
- 
--        # If systemd
--        if command -v systemctl &> /dev/null; then
--            # get its status via systemctl
--            status_of_process=$(systemctl is-active "${i}")
-+        if /opt/etc/init.d/S65pihole-FTL check | grep 'alive' &> /dev/null; then
-+            status_of_process="active"
-         else
--            # Otherwise, use the service command and mock the output of `systemctl is-active`
--
--            # If it is a docker container, there is no systemctl or service. Do nothing.
--            if [ -n "${DOCKER_VERSION}" ]; then
--                :
--            else
--            # non-Docker system
--                if service "${i}" status | grep -E 'is\srunning' &> /dev/null; then
--                    status_of_process="active"
--                else
--                    status_of_process="inactive"
--                fi
--            fi
-+            status_of_process="inactive"
-         fi
- 
-         # and print it out to the user
-diff --git a/advanced/Scripts/piholeLogFlush.sh b/advanced/Scripts/piholeLogFlush.sh
-index 34d96318..54dc7fe5 100755
---- a/advanced/Scripts/piholeLogFlush.sh
-+++ b/advanced/Scripts/piholeLogFlush.sh
-@@ -108,13 +108,14 @@ else
-     fi
- 
-     # Stop FTL to make sure it doesn't write to the database while we're deleting data
--    service pihole-FTL stop
-+    /opt/etc/init.d/S65pihole-FTL stop
- 
-     # Delete most recent 24 hours from FTL's database, leave even older data intact (don't wipe out all history)
-     deleted=$(pihole-FTL sqlite3 -ni "${DBFILE}" "DELETE FROM query_storage WHERE timestamp >= strftime('%s','now')-86400; select changes() from query_storage limit 1")
- 
-     # Restart FTL
--    service pihole-FTL restart
-+    /opt/etc/init.d/S65pihole-FTL restart
-+
-     if [[ "$*" != *"quiet"* ]]; then
-         echo -e "${OVER}  ${TICK} Deleted ${deleted} queries from long-term query database"
-     fi
 diff --git a/advanced/Scripts/piholeARPTable.sh b/advanced/Scripts/piholeARPTable.sh
-index f55b1320..64561645 100755
+index f55b1320..6f984bbb 100755
 --- a/advanced/Scripts/piholeARPTable.sh
 +++ b/advanced/Scripts/piholeARPTable.sh
 @@ -32,7 +32,7 @@ flushARP(){
@@ -73,3 +20,37 @@ index f55b1320..64561645 100755
          echo -e "${OVER}  ${CROSS} Failed to restart FTL"
          echo "  Output: ${output}"
          return 1
+diff --git a/advanced/Scripts/piholeDebug.sh b/advanced/Scripts/piholeDebug.sh
+index f4226299..5b1b2cfd 100755
+--- a/advanced/Scripts/piholeDebug.sh
++++ b/advanced/Scripts/piholeDebug.sh
+@@ -849,7 +849,7 @@ process_status(){
+                 :
+             else
+             # non-Docker system
+-                if service "${i}" status | grep -E 'is\srunning' &> /dev/null; then
++                if /opt/etc/init.d/S65pihole-FTL check | grep -q 'alive' &> /dev/null; then
+                     status_of_process="active"
+                 else
+                     status_of_process="inactive"
+diff --git a/advanced/Scripts/piholeLogFlush.sh b/advanced/Scripts/piholeLogFlush.sh
+index 34d96318..f905f045 100755
+--- a/advanced/Scripts/piholeLogFlush.sh
++++ b/advanced/Scripts/piholeLogFlush.sh
+@@ -108,13 +108,14 @@ else
+     fi
+ 
+     # Stop FTL to make sure it doesn't write to the database while we're deleting data
+-    service pihole-FTL stop
++    /opt/etc/init.d/S65pihole-FTL stop
+ 
+     # Delete most recent 24 hours from FTL's database, leave even older data intact (don't wipe out all history)
+     deleted=$(pihole-FTL sqlite3 -ni "${DBFILE}" "DELETE FROM query_storage WHERE timestamp >= strftime('%s','now')-86400; select changes() from query_storage limit 1")
+ 
+     # Restart FTL
+-    service pihole-FTL restart
++    /opt/etc/init.d/S65pihole-FTL restart
++
+     if [[ "$*" != *"quiet"* ]]; then
+         echo -e "${OVER}  ${TICK} Deleted ${deleted} queries from long-term query database"
+     fi

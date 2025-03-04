@@ -391,8 +391,8 @@ index c604d5d4..a6e9274d 100755
 -find /etc/pihole/ /var/log/pihole/ -type f ! \( -name '*.pem' -o -name '*.crt' \) -exec chmod 0640 {} +
 +find /opt/etc/pihole/ /opt/var/log/pihole/ -type f ! \( -name '*.pem' -o -name '*.crt' \) -exec chmod 0640 {} +
  # Set TLS-related files to a more restrictive u+rw *only* (they may contain private keys)
--find /etc/pihole/ /var/log/pihole/ -type f -name '*.pem' -o -name '*.crt' -exec chmod 0600 {} +
-+find /opt/etc/pihole/ /opt/var/log/pihole/ -type f -name '*.pem' -o -name '*.crt' -exec chmod 0600 {} +
+-find /etc/pihole/ -type f \( -name '*.pem' -o -name '*.crt' \) -exec chmod 0600 {} +
++find /opt/etc/pihole/ -type f \( -name '*.pem' -o -name '*.crt' \) -exec chmod 0600 {} +
  
  # Logrotate config file need to be owned by root
 -chown root:root /etc/pihole/logrotate

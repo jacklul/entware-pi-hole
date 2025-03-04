@@ -1,5 +1,34 @@
+diff --git a/src/api/docs/content/specs/info.yaml b/src/api/docs/content/specs/info.yaml
+index 6be2b1ac..dab9526e 100644
+--- a/src/api/docs/content/specs/info.yaml
++++ b/src/api/docs/content/specs/info.yaml
+@@ -1066,6 +1066,24 @@ components:
+                   nullable: true
+                   description: Remote (Docker Hub) Pi-hole Docker image version (`null` if not running in Docker)
+                   example: "v6.1"
++            entware:
++              type: object
++              properties:
++                local:
++                  type: string
++                  nullable: true
++                  description: Local Pi-hole Entware package version (`null` if not running Entware)
++                  example: "v6.1"
++                remote:
++                  type: string
++                  nullable: true
++                  description: Remote Pi-hole Entware package version (`null` if not running Entware)
++                  example: "v6.1"
++                branch:
++                  type: string
++                  nullable: true
++                  description: Local Pi-hole Entware package name
++                  example: "pi-hole"
+     messages:
+       type: object
+       properties:
 diff --git a/src/api/info.c b/src/api/info.c
-index 693f1439..72563415 100644
+index 9a690d31..7d1bfbe5 100644
 --- a/src/api/info.c
 +++ b/src/api/info.c
 @@ -751,6 +751,7 @@ int get_version_obj(struct ftl_conn *api, cJSON *version)
