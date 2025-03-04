@@ -10,7 +10,7 @@ index 7c84771..f4125a9 100755
 +  if [ -n "${DOCKER_VERSION}" ]; then
 +    echo "Function not supported in Docker images"
 +  elif [ -f /opt/etc/opkg.conf ]; then
-+    echo "Function not supported in unofficial Entware package releases"
++    echo "Function not supported in unofficial Entware package release"
 +  fi
 +
    exit 0
@@ -21,9 +21,9 @@ index 7c84771..f4125a9 100755
    "-d" | "debug"                  ) debugFunc "$@";;
    "-f" | "flush"                  ) flushFunc "$@";;
 -  "-up" | "updatePihole"          ) updatePiholeFunc "$@";;
--  "-r"  | "reconfigure"           ) reconfigurePiholeFunc;;
+-  "-r"  | "repair"                ) repairPiholeFunc;;
 +  "-up" | "updatePihole"          ) unsupportedFunc;;
-+  "-r"  | "reconfigure"           ) unsupportedFunc;;
++  "-r"  | "repair"                ) unsupportedFunc;;
    "-g" | "updateGravity"          ) updateGravityFunc "$@";;
    "-l" | "logging"                ) piholeLogging "$@";;
 -  "uninstall"                     ) uninstallFunc;;

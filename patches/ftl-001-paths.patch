@@ -183,8 +183,8 @@ index eee5a8c0..51c882cd 100644
  	conf->misc.addr2line.c = validate_stub; // Only type-based checking
  
  	conf->misc.etc_dnsmasq_d.k = "misc.etc_dnsmasq_d";
--	conf->misc.etc_dnsmasq_d.h = "Should FTL load additional dnsmasq configuration files from /etc/dnsmasq.d/?";
-+	conf->misc.etc_dnsmasq_d.h = "Should FTL load additional dnsmasq configuration files from /opt/etc/dnsmasq.d/?";
+-	conf->misc.etc_dnsmasq_d.h = "Should FTL load additional dnsmasq configuration files from /etc/dnsmasq.d/?\n Warning: This is an advanced setting and should only be used with care.\n Incorrectly formatted or config files specifying options which can only be defined once can result in conflicts with the automatic configuration of Pi-hole (see "DNSMASQ_PH_CONFIG") and may stop DNS resolution from working.";
++	conf->misc.etc_dnsmasq_d.h = "Should FTL load additional dnsmasq configuration files from /opt/etc/dnsmasq.d/?\n Warning: This is an advanced setting and should only be used with care.\n Incorrectly formatted or config files specifying options which can only be defined once can result in conflicts with the automatic configuration of Pi-hole (see "DNSMASQ_PH_CONFIG") and may stop DNS resolution from working.";
  	conf->misc.etc_dnsmasq_d.t = CONF_BOOL;
  	conf->misc.etc_dnsmasq_d.f = FLAG_RESTART_FTL;
  	conf->misc.etc_dnsmasq_d.d.b = false;
@@ -306,18 +306,19 @@ index c50223b1..8e0700f9 100644
  			fputs("# domain to any upstream servers\n", pihole_conf);
  			fprintf(pihole_conf, "domain=%s\n", conf->dns.domain.v.s);
  			fprintf(pihole_conf, "local=/%s/\n\n", conf->dns.domain.v.s);
-@@ -670,12 +670,12 @@ bool __attribute__((const)) write_dnsmasq_config(struct config *conf, bool test_
+@@ -701,13 +701,13 @@ bool __attribute__((nonnull(1,3))) write_dnsmasq_config(struct config *conf, boo
  	fputs("server=/onion/\n", pihole_conf);
  	fputs("\n", pihole_conf);
  
 -	if(directory_exists("/etc/dnsmasq.d") && conf->misc.etc_dnsmasq_d.v.b)
 +	if(directory_exists("/opt/etc/dnsmasq.d") && conf->misc.etc_dnsmasq_d.v.b)
  	{
- 		// Load additional user scripts from /etc/dnsmasq.d if the
+ 		// Load additional user configs from /etc/dnsmasq.d if the
  		// directory exists (it may not, e.g., in a container)
- 		fputs("# Load additional user scripts\n", pihole_conf);
--		fputs("conf-dir=/etc/dnsmasq.d\n", pihole_conf);
-+		fputs("conf-dir=/opt/etc/dnsmasq.d\n", pihole_conf);
+ 		// Load only files ending in .conf
+ 		fputs("# Load additional user configs\n", pihole_conf);
+-		fputs("conf-dir=/etc/dnsmasq.d,*.conf\n", pihole_conf);
++		fputs("conf-dir=/opt/etc/dnsmasq.d,*.conf\n", pihole_conf);
  		fputs("\n", pihole_conf);
  	}
  
