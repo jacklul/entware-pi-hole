@@ -1,0 +1,120 @@
+diff --git a/advanced/Scripts/piholeDebug.sh b/advanced/Scripts/piholeDebug.sh
+index f4226299..c1121c00 100755
+--- a/advanced/Scripts/piholeDebug.sh
++++ b/advanced/Scripts/piholeDebug.sh
+@@ -59,7 +59,7 @@ FAQ_HARDWARE_REQUIREMENTS_FIREWALLD="${COL_CYAN}https://docs.pi-hole.net/main/pr
+ FAQ_GATEWAY="${COL_CYAN}https://discourse.pi-hole.net/t/why-is-a-default-gateway-important-for-pi-hole/3546${COL_NC}"
+ 
+ # Other URLs we may use
+-FORUMS_URL="${COL_CYAN}https://discourse.pi-hole.net${COL_NC}"
++FORUMS_URL="${COL_CYAN}https://github.com/jacklul/entware-pi-hole${COL_NC}"
+ 
+ # Directories required by Pi-hole
+ # https://discourse.pi-hole.net/t/what-files-does-pi-hole-use/1684
+@@ -294,6 +327,17 @@ check_component_versions() {
+     compare_local_version_to_git_version "${WEB_GIT_DIRECTORY}" "Web"
+     # Check the FTL version
+     check_ftl_version
++
++    if [ -f /opt/etc/opkg.conf ]; then
++        echo_current_diagnostic "Entware package"
++
++        local package="$(opkg list-installed pi-hole*)"
++        if [ -n "$package" ]; then
++            log_write "${TICK} $package"
++        else
++            log_write "${CROSS} ${COL_RED}Package not found${COL_NC}"
++        fi
++    fi
+ }
+ 
+ os_check() {
+@@ -395,6 +445,11 @@ diagnose_operating_system() {
+         # If it doesn't exist, it's not a system we currently support and link to FAQ
+         log_write "${CROSS} ${COL_RED}${error_msg}${COL_NC} (${FAQ_HARDWARE_REQUIREMENTS})"
+     fi
++
++    if [ -f /opt/etc/entware_release ]; then
++        echo_current_diagnostic "Entware release"
++        make_array_from_file "/opt/etc/entware_release"
++    fi
+ }
+ 
+ check_selinux() {
+diff --git a/advanced/Scripts/piholeDebug.sh b/advanced/Scripts/piholeDebug.sh
+index f4226299..30f0db1f 100755
+--- a/advanced/Scripts/piholeDebug.sh
++++ b/advanced/Scripts/piholeDebug.sh
+@@ -1056,6 +1056,22 @@ show_content_of_pihole_files() {
+     show_content_of_files_in_dir "${LOG_DIRECTORY}"
+     show_content_of_files_in_dir "${SHM_DIRECTORY}"
+     show_content_of_files_in_dir "${ETC}"
++
++    # If cron workaround should be applied also include the new crontab file
++    local root_user="$(id -nu 0 2> /dev/null)"
++    if [ "$root_user" != "root" ]; then
++        local crontab_file="/opt/var/spool/cron/crontabs/$root_user"
++        echo_current_diagnostic "contents of ${COL_CYAN}$crontab_file${COL_NC}"
++        log_write "\\n${COL_GREEN}$(ls -lhd "$crontab_file")${COL_NC}"
++        make_array_from_file "$crontab_file";
++    fi
++
++    # Show contents of /opt/etc/pihole/run_as_user if it exists
++    if [ -f /opt/etc/pihole/run_as_user ]; then
++        echo_current_diagnostic "contents of ${COL_CYAN}/opt/etc/pihole/run_as_user${COL_NC}"
++        log_write "\\n${COL_GREEN}$(ls -lhd "/opt/etc/pihole/run_as_user")${COL_NC}"
++        make_array_from_file "/opt/etc/pihole/run_as_user";
++    fi
+ }
+ 
+ head_tail_log() {
+@@ -1307,8 +1362,8 @@ curl_to_tricorder() {
+     # Users can submit their debug logs using curl (encrypted)
+     log_write "    * Using ${COL_GREEN}curl${COL_NC} for transmission."
+     # transmit the log via TLS and store the token returned in a variable
+-    tricorder_token=$(curl --silent --fail --show-error --upload-file ${PIHOLE_DEBUG_LOG} https://tricorder.pi-hole.net 2>&1)
+-    if [[ "${tricorder_token}" != "https://tricorder.pi-hole.net/"* ]]; then
++    tricorder_token=$(curl --silent --fail --show-error --upload-file ${PIHOLE_DEBUG_LOG} https://lurking-cat.appspot.com/upload 2>&1)
++    if [[ "${tricorder_token}" != "https://lurking-cat.appspot.com/upload/"* ]]; then
+         log_write "    * ${COL_GREEN}curl${COL_NC} failed, contact Pi-hole support for assistance."
+         # Log curl error (if available)
+         if [ -n "${tricorder_token}" ]; then
+@@ -1332,7 +1387,7 @@ upload_to_tricorder() {
+     log_write "${TICK} ${COL_GREEN}** FINISHED DEBUGGING! **${COL_NC}\\n"
+ 
+     # Provide information on what they should do with their token
+-    log_write "   * The debug log can be uploaded to tricorder.pi-hole.net for sharing with developers only."
++    log_write "   * The debug log can be uploaded for sharing with Entware package developers only."
+ 
+     # If pihole -d is running automatically
+     if [[ "${AUTOMATED}" ]]; then
+@@ -1350,7 +1405,7 @@ upload_to_tricorder() {
+             # If they say yes, run our function for uploading the log
+             [yY][eE][sS]|[yY]) curl_to_tricorder;;
+             # If they choose no, just exit out of the script
+-            *) log_write "    * Log will ${COL_GREEN}NOT${COL_NC} be uploaded to tricorder.\\n    * A local copy of the debug log can be found at: ${COL_CYAN}${PIHOLE_DEBUG_LOG}${COL_NC}\\n";exit;
++            *) log_write "    * Log will ${COL_GREEN}NOT${COL_NC} be uploaded.\\n    * A local copy of the debug log can be found at: ${COL_CYAN}${PIHOLE_DEBUG_LOG}${COL_NC}\\n";exit;
+         esac
+     fi
+     # Check if tricorder.pi-hole.net is reachable and provide token
+@@ -1366,16 +1421,18 @@ upload_to_tricorder() {
+         log_write "${COL_PURPLE}*****************************************************************${COL_NC}"
+         log_write "${COL_PURPLE}*****************************************************************${COL_NC}"
+         log_write ""
+-        log_write "   * Provide the token above to the Pi-hole team for assistance at ${FORUMS_URL}"
++        log_write "   * Provide the token above to the developers for assistance at ${FORUMS_URL}"
+ 
+     # If no token was generated
+     else
+         # Show an error and some help instructions
+         log_write "${CROSS} ${COL_RED}There was an error uploading your debug log.${COL_NC}"
+-        log_write "   * Please try again or contact the Pi-hole team for assistance."
++        log_write "   * Please try again or contact the developers for assistance."
+     fi
+     # Finally, show where the log file is no matter the outcome of the function so users can look at it
+     log_write "   * A local copy of the debug log can be found at: ${COL_CYAN}${PIHOLE_DEBUG_LOG}${COL_NC}\\n"
++    log_write " ${COL_YELLOW}If you wish to share the log with the official Pi-hole developers, execute the following command:${COL_NC}"
++    log_write "  ${COL_CYAN}cat /opt/var/log/pihole/pihole_debug.log | pihole tricorder${COL_NC}\\n"
+ }
+ 
+ # Run through all the functions we made
