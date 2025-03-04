@@ -34,6 +34,8 @@ if [ "$3" != "no-patches" ]; then
 
     files="$(find "$patches_dir" -maxdepth 1 -type f -name "$prefix-*.sh" | sort)"
     for file in $files; do
+        basename="$(basename "$file")"
+
         # if the same file exists in BRANCH subdirectory then use it instead
         if [ -f "$patches_dir/$branch/$basename" ]; then
             file="$patches_dir/$branch/$basename"
