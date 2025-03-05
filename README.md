@@ -8,8 +8,7 @@ Run [Pi-hole](https://pi-hole.net) directly on your [Entware](https://github.com
 ## Requirements
 
 Only **aarch64-3.10, armv7-3.2 and x64-3.2** <ins>Entware architectures</ins> are currently supported.  
-You will need at least **50-100 MB** of free memory on the device to be able to update the gravity database without running out of memory.  
-Memory requirements increase as you add more lists.  
+You will need at least **50-100 MB** of free memory on the device to be able to update the gravity database without running out of memory, memory requirements increase as you add more lists.  
 Swap file is **recommended**.  
 
 ## Installation
