@@ -14,10 +14,10 @@ for file in $FILES; do
     contents="$(grep -o "^[^#]*" < "$file"))"
 
     # Exceptions (@TODO the way these are handled needs to be improved)
-    contents="$(echo "$contents" | grep -av "systemctl status --full --no-pager pihole-FTL.service")" # /advanced/Scripts/piholeDebug.sh
+    contents="$(echo "$contents" | grep -aFv "systemctl status --full --no-pager pihole-FTL.service")" # /advanced/Scripts/piholeDebug.sh
 
     # Checks
-    echo "$contents" | grep -aEn "service pihole-FTL" && exit 1
+    echo "$contents" | grep -aFn "service pihole-FTL" && exit 1
     echo "$contents" | grep -aEn "service \"[[:alnum:]_]+\" status" && exit 1
     echo "$contents" | grep -aEn "systemctl [a-zA-Z0-9 _-]+ pihole-FTL" && exit 1
 done

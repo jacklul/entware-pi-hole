@@ -46,21 +46,21 @@ BEGIN { multi_line_comment = 0 }
     fi
 
     # Exceptions (@TODO the way these are handled needs to be improved)
-    contents="$(echo "$contents" | grep -av "HINTS /usr/local/lib64")" # /src/CMakeLists.txt
-    contents="$(echo "$contents" | grep -av "CMAKE_INSTALL_PREFIX \"/usr\"")" # /src/CMakeLists.txt
-    contents="$(echo "$contents" | grep -av "/etc/hostname")" # src/config/config.c
-    contents="$(echo "$contents" | grep -av "/etc/config/resolv.conf")" # src/dnsmasq/config.h
-    contents="$(echo "$contents" | grep -av "/usr/local/etc/dnsmasq.conf")" # src/dnsmasq/config.h
-    contents="$(echo "$contents" | grep -av "/var/cache/dnsmasq.leases")" # src/dnsmasq/config.h
-    contents="$(echo "$contents" | grep -av "/var/db/dnsmasq.leases")" # src/dnsmasq/config.h
-    contents="$(echo "$contents" | grep -av "\${PROJECT_SOURCE_DIR}/src/lua /usr/local/include")" # src/webserver/civetweb/CMakeLists.txt
-    contents="$(echo "$contents" | grep -av "LUA_ROOT	\"/usr/local/\"")" # src/lua/luaconf.h
-    contents="$(echo "$contents" | grep -av "/etc/pihole/test.pem\" ### CHANGED")" # test/pihole.toml
-    contents="$(echo "$contents" | grep -av "read_id_file(\"/etc/machine-id\", machine_id")" # src/webserver/x509.c
+    contents="$(echo "$contents" | grep -aFv "HINTS /usr/local/lib64")" # /src/CMakeLists.txt
+    contents="$(echo "$contents" | grep -aFv "CMAKE_INSTALL_PREFIX \"/usr\"")" # /src/CMakeLists.txt
+    contents="$(echo "$contents" | grep -aFv "/etc/hostname")" # src/config/config.c
+    contents="$(echo "$contents" | grep -aFv "/etc/config/resolv.conf")" # src/dnsmasq/config.h
+    contents="$(echo "$contents" | grep -aFv "/usr/local/etc/dnsmasq.conf")" # src/dnsmasq/config.h
+    contents="$(echo "$contents" | grep -aFv "/var/cache/dnsmasq.leases")" # src/dnsmasq/config.h
+    contents="$(echo "$contents" | grep -aFv "/var/db/dnsmasq.leases")" # src/dnsmasq/config.h
+    contents="$(echo "$contents" | grep -Fav "\${PROJECT_SOURCE_DIR}/src/lua /usr/local/include")" # src/webserver/civetweb/CMakeLists.txt
+    contents="$(echo "$contents" | grep -aFv "LUA_ROOT	\"/usr/local/\"")" # src/lua/luaconf.h
+    contents="$(echo "$contents" | grep -aFv "/etc/pihole/test.pem\" ### CHANGED")" # test/pihole.toml
+    contents="$(echo "$contents" | grep -aFv "read_id_file(\"/etc/machine-id\", machine_id")" # src/webserver/x509.c
 
     if [ "$(basename "$file")" = "test_suite.bats" ]; then
-        contents="$(echo "$contents" | grep -av "SQLite 3.x database")" # test/test_suite.bats
-        contents="$(echo "$contents" | grep -av "Reading certificate from")" # test/test_suite.bats
+        contents="$(echo "$contents" | grep -aFv "SQLite 3.x database")" # test/test_suite.bats
+        contents="$(echo "$contents" | grep -aFv "Reading certificate from")" # test/test_suite.bats
     fi
 
     # Checks

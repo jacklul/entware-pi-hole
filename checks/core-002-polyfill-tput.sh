@@ -23,17 +23,17 @@ for file in $FILES; do
     # Checks
     if echo "$contents" | grep -qaE "$find1"; then
         found1=true
-        contents="$(echo "$contents" | grep -av "$find1")" # /advanced/Scripts/COL_TABLE
+        contents="$(echo "$contents" | grep -aFv "$find1")" # /advanced/Scripts/COL_TABLE
     fi
 
     if echo "$contents" | grep -qaE "$find2"; then
         found2=true
-        contents="$(echo "$contents" | grep -av "$find2")" # /advanced/Scripts/piholeDebug.sh
+        contents="$(echo "$contents" | grep -aFv "$find2")" # /advanced/Scripts/piholeDebug.sh
     fi
 
     if echo "$contents" | grep -qaE "$find3"; then
         found3=true
-        contents="$(echo "$contents" | grep -av "$find3")" # /advanced/Scripts/piholeDebug.sh
+        contents="$(echo "$contents" | grep -aFv "$find3")" # /advanced/Scripts/piholeDebug.sh
     fi
 
     echo "$contents" | grep -aEn "\s+tput [[:alnum:]_]+" && exit 1

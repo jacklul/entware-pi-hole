@@ -19,7 +19,7 @@ for file in $FILES; do
     # Checks
     if echo "$contents" | grep -qaE "$find1"; then
         found1=true
-        contents="$(echo "$contents" | grep -av "$find1")" # /gravity.sh
+        contents="$(echo "$contents" | grep -aFv "$find1")" # /gravity.sh
     fi
 
     echo "$contents" | grep -aEn "getent [[:alnum:]_]+ " && exit 1
