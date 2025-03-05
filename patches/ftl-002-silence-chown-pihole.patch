@@ -1,0 +1,13 @@
+diff --git a/src/files.c b/src/files.c
+index c482bfd7..3ee34d5c 100644
+--- a/src/files.c
++++ b/src/files.c
+@@ -444,7 +444,7 @@ bool chown_pihole(const char *path, struct passwd *pwd)
+ 		pwd = getpwnam("pihole");
+ 		if(pwd == NULL)
+ 		{
+-			log_warn("chown_pihole(): Failed to get pihole user's UID/GID: %s", strerror(errno));
++			//log_warn("chown_pihole(): Failed to get pihole user's UID/GID: %s", strerror(errno));
+ 			return false;
+ 		}
+ 	}
