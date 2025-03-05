@@ -9,13 +9,14 @@ output_dir="$4"
 # This array maps Entware architectures to FTL binary architectures
 declare -A architectures=(
     ["aarch64-3.10"]="arm64"
-    #["armv5-3.2"]="armv5" # EOS by Entware team
+    #["armv5-3.2"]="armv5" # EOS by Entware team / Not supported by Pi-hole
     #["armv7-2.6"]="armv7" # EOS by Entware team
     ["armv7-3.2"]="armv7"
-    #["mipsel-3.4"]="mipsel"
-    #["mips-3.4"]="mips"
+    #["mipsel-3.4"]="mipsel" # Not supported by Pi-hole
+    #["mips-3.4"]="mips" # Not supported by Pi-hole
     ["x64-3.2"]="amd64"
     #["x86-2.6"]="386" # EOS by Entware team
+    #["cortex-a15-3x"]="armv7" # Voxel's firmware Entware
 )
 
 # This array maps Entware architectures to target directory names
