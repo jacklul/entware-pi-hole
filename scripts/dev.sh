@@ -7,10 +7,19 @@ readonly repository_core="https://github.com/pi-hole/pi-hole.git"
 readonly repository_web="https://github.com/pi-hole/web.git"
 readonly repository_ftl="https://github.com/pi-hole/FTL.git"
 
+shallow=true
+[ -f "$script_dir/../dev/noshallow" ] && shallow=false
+
+#shellcheck disable=SC2086
 function install_or_update_repository() {
     local repository="$1"
     local destination="$2"
     local new_branch="$3"
+    local shallow_arg="--depth 1"
+
+    if [ "$shallow" = false ]; then
+        shallow_arg=
+    fi
 
     echo "Working with repository: $repository"
 
@@ -18,7 +27,7 @@ function install_or_update_repository() {
         mkdir -pv "$destination"
         git -C "$destination" init
         git -C "$destination" remote add origin "$repository"
-        git -C "$destination" fetch --depth 1
+        git -C "$destination" fetch $shallow_arg
 
         main_branch="$(git -C "$destination" remote show "$repository" | grep 'HEAD branch' | cut -d':' -f2 | tr -d ' ')"
 
@@ -38,11 +47,11 @@ function install_or_update_repository() {
         git -C "$destination" clean -fd
 
         if [ "$current_branch" = "$new_branch" ]; then
-            git -C "$destination" fetch
+            git -C "$destination" fetch $shallow_arg
             git -C "$destination" reset --hard HEAD
-            git -C "$destination" pull --rebase --depth 1 --allow-unrelated-histories
+            git -C "$destination" pull --rebase --allow-unrelated-histories $shallow_arg
         else
-            git -C "$destination" fetch --depth 1
+            git -C "$destination" fetch $shallow_arg
             git -C "$destination" checkout -f "$new_branch"
             git -C "$destination" branch --set-upstream-to="origin/$new_branch"
             git -C "$destination" reset --hard HEAD
