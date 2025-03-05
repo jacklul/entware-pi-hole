@@ -55,6 +55,15 @@
             }
         },
         {
+            "label": "Save dev/PADD patch to dev/patch.patch",
+            "type": "shell",
+            "command": "git -C dev/PADD diff --cached --abbrev=8 > dev/patch.patch && code dev/patch.patch",
+            "problemMatcher": [],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        },
+        {
             "label": "Patch dev/core",
             "type": "shell",
             "command": "bash scripts/patch.sh core dev/core",

@@ -1,0 +1,58 @@
+diff --git a/padd.sh b/padd.sh
+index 8fa5ef86..e86332e9 100755
+--- a/padd.sh
++++ b/padd.sh
+@@ -1,4 +1,4 @@
+-#!/usr/bin/env sh
++#!/usr/bin/env bash
+ # shellcheck disable=SC1091
+ 
+ # Ignore warning about `local` being undefinded in POSIX
+@@ -12,6 +12,8 @@
+ export LC_ALL=C
+ export LC_NUMERIC=C
+ 
++PATH=/opt/bin:/opt/sbin:$PATH
++
+ ############################################ VARIABLES #############################################
+ 
+ # VERSION
+@@ -192,8 +194,8 @@ LoginAPI() {
+     fi
+ 
+     # Try to read the CLI password (if enabled and readable by the current user)
+-    if [ -r /etc/pihole/cli_pw ]; then
+-        password=$(cat /etc/pihole/cli_pw)
++    if [ -r /opt/etc/pihole/cli_pw ]; then
++        password=$(cat /opt/etc/pihole/cli_pw)
+         # If we can read the CLI password, we can skip 2FA even when it's required otherwise
+         needTOTP=false
+     fi
+@@ -414,6 +416,7 @@ GetSystemInformation() {
+ 
+     # CPU temperature and unit
+     cpu_temp_raw=$(GetPADDValue sensors.cpu_temp)
++    [ "$cpu_temp_raw" == "null" ] && cpu_temp_raw=0
+     cpu_temp=$(printf "%.1f" "${cpu_temp_raw}")
+     temp_unit=$(echo "${padd_data}"  | GetPADDValue sensors.unit)
+ 
+@@ -1279,8 +1282,8 @@ SizeChecker(){
+     # this reduces "flickering" of GenerateSizeDependendOutput() items
+     # after a terminal re-size
+     sleep 0.1
+-    console_width=$(tput cols)
+-    console_height=$(tput lines)
++    console_width=$(stty size | cut -d' ' -f2)
++    console_height=$(stty size | cut -d' ' -f1)
+ 
+     # Mega
+     if [ "$console_width" -ge "80" ] && [ "$console_height" -ge "26" ]; then
+@@ -1759,7 +1762,7 @@ NormalPADD() {
+ 
+ Update() {
+     # source version file to check if $DOCKER_VERSION is set
+-    . /etc/pihole/versions
++    . /opt/etc/pihole/versions
+ 
+     if [ -n "${DOCKER_VERSION}" ]; then
+         echo "${check_box_info} Update is not supported for Docker"

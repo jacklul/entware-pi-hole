@@ -2,6 +2,8 @@
 # 'tput colors' - used by COL_TABLE
 # 'tput civis' - used by piholeDebug.sh
 # 'tput cnorm' - used by piholeDebug.sh
+# 'tput cols' - used by padd.sh
+# 'tput lines' - used by padd.sh
 
 case "$1" in
     colors)
@@ -25,6 +27,12 @@ case "$1" in
     ;;
     cnorm)
         echo -e "\e[?25h"
+    ;;
+    cols)
+        stty size | cut -d' ' -f2
+    ;;
+    lines)
+        stty size | cut -d' ' -f1
     ;;
     *)
         echo "'tput $1' - polyfill not implemented" >&2
