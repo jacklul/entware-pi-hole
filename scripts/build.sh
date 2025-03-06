@@ -128,7 +128,8 @@ fi
 echo "Setting permissions..."
 find "$destination_dir" -type f -exec chmod 0644 {} \;
 find "$destination_dir" -type d -exec chmod 0755 {} \;
-chmod 755 "$destination_dir/opt/bin"/* "$destination_dir/opt/etc/init.d"/*
+chmod 755 "$destination_dir/opt/bin"/* 
+chmod 600 "$destination_dir/opt/etc/cron.d/pihole"
 find "$destination_dir/opt/share/pihole" -type f \( -name "*.sh" -o -name "COL_TABLE" \) -exec chmod 0755 {} \;
 find "$destination_dir/opt/share/pihole/polyfill" -type f -exec chmod 0755 {} \;
 

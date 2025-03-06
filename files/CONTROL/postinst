@@ -64,38 +64,13 @@ root_user="$(id -nu 0 2> /dev/null)"
 if [ "$root_user" != "root" ]; then
     echo "  ${INFO} ${COL_YELLOW}It looks like the root user is not called 'root' - this can cause issues!${COL_NC}"
 
-    if ! grep -Eq "(^|[^'])pi-hole-no-crontab-workaround([^']|$)" "/opt/var/spool/cron/crontabs/$root_user" 2> /dev/null; then
-        echo "  ${INFO} ${COL_BOLD}Applying crontab workaround...${COL_NC}"
+    echo "  ${INFO} ${COL_BOLD}Correcting username in crontab file...${COL_NC}"
+    sed "s/ root / $root_user /g" -i /opt/etc/cron.d/pihole
 
-        if [ ! -f "/opt/var/spool/cron/crontabs/$root_user" ]; then
-            echo "  ${INFO} Creating /opt/var/spool/cron/crontabs/$root_user"
-            mkdir -p /opt/var/spool/cron/crontabs
-            touch "/opt/var/spool/cron/crontabs/$root_user"
-        else
-            echo "  ${INFO} Modifying /opt/var/spool/cron/crontabs/$root_user"
-        fi
-
-        separator="### Pi-hole crontab - do not modify ###"
+    separator="### Pi-hole crontab - do not modify ###"
+    if grep -Fq "$separator" "/opt/var/spool/cron/crontabs/$root_user" 2> /dev/null; then
+        echo "  ${INFO} ${COL_BOLD}Crontab workaround is no longer required, removing it...${COL_NC}"
         sed "/$separator/,/$separator/d" -i "/opt/var/spool/cron/crontabs/$root_user"
-        {
-            echo "$separator"
-
-            cat <<EOF
-# Everything between the marked lines will be automatically modified by install/upgrade script.
-# You can prevent modification of this file by adding 'pi-hole-no-crontab-workaround' somewhere in this file.
-EOF
-
-            grep -Ev "^#|^\s*$" /opt/etc/cron.d/pihole | sed "s/ root / /g"
-
-            echo "$separator"
-        } >> "/opt/var/spool/cron/crontabs/$root_user"
-
-        chmod 600 "/opt/var/spool/cron/crontabs/$root_user"
-
-        if [ ! -f /opt/var/spool/cron/cron.allow ] && ! grep -q "$root_user" /opt/var/spool/cron/cron.allow 2> /dev/null; then
-            echo "  ${INFO} Adding $root_user to /opt/var/spool/cron/cron.allow"
-            echo "$root_user" >> /opt/var/spool/cron/cron.allow
-        fi
     fi
 fi
 
