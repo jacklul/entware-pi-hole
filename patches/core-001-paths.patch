@@ -415,14 +415,14 @@ index c62d31ab..403ffe97 100644
  #          Squash output to log, then splat the log to stdout on error to allow for
  #          standard crontab job error handling.
 -59 1    * * 7   root    PATH="$PATH:/usr/sbin:/usr/local/bin/" pihole updateGravity >/var/log/pihole/pihole_updateGravity.log || cat /var/log/pihole/pihole_updateGravity.log
-+59 1    * * 7   root    PATH="$PATH:/opt/sbin:/opt/bin/" pihole updateGravity >/opt/var/log/pihole/pihole_updateGravity.log || cat /opt/var/log/pihole/pihole_updateGravity.log
++59 1    * * 7   root    PATH="$PATH:/opt/bin" pihole updateGravity >/opt/var/log/pihole/pihole_updateGravity.log || cat /opt/var/log/pihole/pihole_updateGravity.log
  
  # Pi-hole: Flush the log daily at 00:00
  #          The flush script will use logrotate if available
  #          parameter "once": logrotate only once (default is twice)
  #          parameter "quiet": don't print messages
 -00 00   * * *   root    PATH="$PATH:/usr/sbin:/usr/local/bin/" pihole flush once quiet
-+00 00   * * *   root    PATH="$PATH:/opt/sbin:/opt/bin/" pihole flush once quiet
++00 00   * * *   root    PATH="$PATH:/opt/bin" pihole flush once quiet
  
 -@reboot root /usr/sbin/logrotate --state /var/lib/logrotate/pihole /etc/pihole/logrotate
 +@reboot root /opt/sbin/logrotate --state /opt/etc/pihole/logrotate.state /opt/etc/pihole/logrotate
@@ -430,8 +430,8 @@ index c62d31ab..403ffe97 100644
  # Pi-hole: Grab remote and local version every 24 hours
 -59 17  * * *   root    PATH="$PATH:/usr/sbin:/usr/local/bin/" pihole updatechecker
 -@reboot root    PATH="$PATH:/usr/sbin:/usr/local/bin/" pihole updatechecker reboot
-+59 17  * * *   root    PATH="$PATH:/opt/sbin:/opt/bin/" pihole updatechecker
-+@reboot root    PATH="$PATH:/opt/sbin:/opt/bin/" pihole updatechecker reboot
++59 17  * * *   root    PATH="$PATH:/opt/bin" pihole updatechecker
++@reboot root    PATH="$PATH:/opt/bin" pihole updatechecker reboot
 diff --git a/gravity.sh b/gravity.sh
 index d1664394..a9adf9c0 100755
 --- a/gravity.sh
