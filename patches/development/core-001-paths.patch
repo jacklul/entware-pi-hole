@@ -381,9 +381,9 @@ index c604d5d4..a6e9274d 100755
  
  # Ensure that permissions are set so that pihole-FTL can edit all necessary files
 -mkdir -p /var/log/pihole
--chown -R pihole:pihole /etc/pihole /var/log/pihole
+-chown -R pihole:pihole /etc/pihole/ /var/log/pihole/
 +mkdir -p /opt/var/log/pihole
-+chown -R pihole:pihole /opt/etc/pihole /opt/var/log/pihole
++chown -R pihole:pihole /opt/etc/pihole/ /opt/var/log/pihole/
  # allow pihole to access subdirs in /etc/pihole (sets execution bit on dirs)
 -find /etc/pihole/ /var/log/pihole/ -type d -exec chmod 0755 {} +
 +find /opt/etc/pihole/ /opt/var/log/pihole/ -type d -exec chmod 0755 {} +
