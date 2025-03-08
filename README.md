@@ -26,7 +26,7 @@ src/gz pi-hole https://jacklul.github.io/entware-pi-hole/[architecture]
 
 > [!IMPORTANT]
 > The service might initially not start due to ports being in use - make adjustements in `/opt/etc/pihole/pihole.toml` when necessary.  
-> For device or firmware specific setup instructions check the [Wiki](https://github.com/jacklul/entware-pi-hole/wiki).
+> For device or firmware specific setup instructions check the [wiki](https://github.com/jacklul/entware-pi-hole/wiki).
 
 ## Support
 
