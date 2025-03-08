@@ -45,18 +45,13 @@ diff --git a/advanced/Scripts/piholeDebug.sh b/advanced/Scripts/piholeDebug.sh
 index f4226299..30f0db1f 100755
 --- a/advanced/Scripts/piholeDebug.sh
 +++ b/advanced/Scripts/piholeDebug.sh
-@@ -1056,6 +1056,22 @@ show_content_of_pihole_files() {
+@@ -1056,6 +1056,17 @@ show_content_of_pihole_files() {
      show_content_of_files_in_dir "${LOG_DIRECTORY}"
      show_content_of_files_in_dir "${SHM_DIRECTORY}"
      show_content_of_files_in_dir "${ETC}"
 +
-+    # If cron workaround should be applied also include the new crontab file
-+    local root_user="$(id -nu 0 2> /dev/null)"
-+    if [ "$root_user" != "root" ]; then
-+        local crontab_file="/opt/var/spool/cron/crontabs/$root_user"
-+        echo_current_diagnostic "contents of ${COL_CYAN}$crontab_file${COL_NC}"
-+        log_write "\\n${COL_GREEN}$(ls -lhd "$crontab_file")${COL_NC}"
-+        make_array_from_file "$crontab_file";
++    if [ -n "$(id -u pihole 2> /dev/null)" ]; then
++        echo_current_diagnostic "${COL_CYAN}User 'pihole' is available!${COL_NC}"
 +    fi
 +
 +    # Show contents of /opt/etc/pihole/run_as_user if it exists

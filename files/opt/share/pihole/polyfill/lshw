@@ -14,7 +14,7 @@ case "$1" in
         elif [ -f /proc/device-tree/model ]; then
             echo "Device model: $(tr -d '\0' < /proc/device-tree/model)"
         else
-            echo "Unable to determine device model"
+            echo "Device model: unknown"
         fi
 
         echo "Device memory: $(free -h | grep 'Mem' | awk '{print $2}')"
