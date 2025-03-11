@@ -59,7 +59,7 @@ index 63197d35..171ab748 100644
 +        }
 +
          // Display update information of individual components only if we are not running in a Docker container
-         if ((!isDocker || (isDocker && v.name === "Docker Tag")) && updateComponentAvailable) {
+         if ((!isDocker || v.name === "Docker Tag") && updateComponentAvailable) {
            $("#versions").append(
 @@ -598,7 +626,11 @@ function updateVersionInfo() {
        $("#update-hint").html(
