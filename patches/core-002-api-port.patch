@@ -1,7 +1,15 @@
 diff --git a/advanced/Scripts/api.sh b/advanced/Scripts/api.sh
-index 18a48ce7..88a9e8b4 100755
+index 79fc90f4..6f08eeb2 100755
 --- a/advanced/Scripts/api.sh
 +++ b/advanced/Scripts/api.sh
+@@ -10,6 +10,7 @@
+ # This file is copyright under the latest version of the EUPL.
+ # Please see LICENSE file for your rights under this license.
+ 
++source "/opt/share/pihole/utils.sh"
+ 
+ # The basic usage steps are
+ # 1) Test Availability of the API
 @@ -26,7 +26,8 @@ TestAPIAvailability() {
      # Query the API URLs from FTL using CHAOS TXT local.api.ftl
      # The result is a space-separated enumeration of full URLs
