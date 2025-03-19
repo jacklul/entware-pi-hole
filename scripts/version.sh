@@ -10,7 +10,7 @@ fi
 
 repository="$(realpath "$repository")"
 
-if [[ "$GITHUB_REF" == refs/tags/* ]] || [[ "$GITHUB_REF" == "refs/heads/master" ]]; then
+if [[ "$GITHUB_EVENT_NAME" != "schedule" ]] && { [[ "$GITHUB_REF" == refs/tags/* ]] || [[ "$GITHUB_REF" == "refs/heads/master" ]] ; }; then
     GIT_TAG=$(git -C "$repository" describe --tags --abbrev=0 2> /dev/null || echo "")
 fi
 
