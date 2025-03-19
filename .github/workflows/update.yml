@@ -132,11 +132,11 @@ jobs:
       - name: Build and test FTL
         id: build-FTL
         if: ${{ steps.setup-docker-buildx.outcome == 'success' }}
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         env:
-          platform: linux/amd64
+          DOCKER_BUILD_SUMMARY: false
         with:
-          platforms: ${{ env.platform }}
+          platforms: linux/amd64
           pull: true
           push: false
           context: ./dev/FTL
@@ -145,7 +145,7 @@ jobs:
           outputs: |
             type=tar,dest=./dev/FTL/build.tar
           build-args: |
-            "CI_ARCH=${{ env.platform }}"
+            "CI_ARCH=linux/amd64"
             "GIT_BRANCH=${{ steps.branches.outputs.FTL }}"
             "GIT_TAG="
 
