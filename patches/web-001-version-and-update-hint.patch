@@ -51,7 +51,7 @@ index 63197d35..171ab748 100644
 +              "</a>";
 +          }
 +
-+          if (versionCompare(v.local.replace(/\D/g, '.'), v.remote.replace(/\D/g, '.')) === -1) {
++          if (v.remote != 'null' && versionCompare(v.local.replace(/\D/g, '.'), v.remote.replace(/\D/g, '.')) === -1) {
 +            updateComponentAvailable = true;
 +            entwareUpdate = true;
 +            isDocker = false;
