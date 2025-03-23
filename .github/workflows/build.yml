@@ -245,13 +245,10 @@ jobs:
       - name: Set required variables
         if: steps.cache.outputs.cache-hit != 'true'
         id: variables
-        working-directory: ./stage
         run: |
-          if [[ "$GITHUB_REF" == refs/tags/* ]] || [[ "$GITHUB_REF" == "refs/heads/master" ]]; then
-            GIT_TAG=$(git describe --tags --abbrev=0 2> /dev/null || echo "")
-          fi
-          echo "GIT_BRANCH=$([ -n "$GIT_TAG" ] && echo "master" || git rev-parse --abbrev-ref HEAD)" >> $GITHUB_OUTPUT
-          echo "GIT_TAG=$GIT_TAG" >> $GITHUB_OUTPUT
+          source ./stage/.version
+          echo "GIT_BRANCH=$BRANCH" >> $GITHUB_OUTPUT
+          echo "GIT_TAG=$([ "$BRANCH" = "master" ] && echo "$VERSION" || echo "")" >> $GITHUB_OUTPUT
           cat $GITHUB_OUTPUT
 
       - name: Set up Docker Buildx
