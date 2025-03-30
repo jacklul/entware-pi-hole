@@ -66,12 +66,12 @@ index 49b0f0d4..dde8214e 100755
  
  # Ensure that permissions are set so that pihole-FTL can edit all necessary files
  mkdir -p /opt/var/log/pihole
--chown -R pihole:pihole /opt/etc/pihole /opt/var/log/pihole
-+chown -R "$chown_user:$chown_user" /opt/etc/pihole /opt/var/log/pihole
+-chown -R pihole:pihole /opt/etc/pihole/ /opt/var/log/pihole/
++chown -R "$chown_user:$chown_user" /opt/etc/pihole/ /opt/var/log/pihole/
  # allow pihole to access subdirs in /etc/pihole (sets execution bit on dirs)
  find /opt/etc/pihole/ /opt/var/log/pihole/ -type d -exec chmod 0755 {} +
  # Set all files (except TLS-related ones) to u+rw g+r
-@@ -20,10 +22,10 @@ find /opt/etc/pihole/ /var/log/pihole/ -type f ! \( -name '*.pem' -o -name '*.crt' \
+@@ -20,11 +22,11 @@ find /opt/etc/pihole/ /var/log/pihole/ -type f ! \( -name '*.pem' -o -name '*.crt' \
  find /opt/etc/pihole/ -type f \( -name '*.pem' -o -name '*.crt' \) -exec chmod 0600 {} +
  
  # Logrotate config file need to be owned by root
@@ -82,10 +82,12 @@ index 49b0f0d4..dde8214e 100755
 -[ -f "${FTL_PID_FILE}" ] || install -D -m 644 -o pihole -g pihole /dev/null "${FTL_PID_FILE}"
 -[ -f /opt/var/log/pihole/FTL.log ] || install -m 640 -o pihole -g pihole /dev/null /opt/var/log/pihole/FTL.log
 -[ -f /opt/var/log/pihole/pihole.log ] || install -m 640 -o pihole -g pihole /dev/null /opt/var/log/pihole/pihole.log
+-[ -f /opt/var/log/pihole/webserver.log ] || install -m 640 -o pihole -g pihole /dev/null /opt/var/log/pihole/webserver.log
 -[ -f /opt/etc/pihole/dhcp.leases ] || install -m 644 -o pihole -g pihole /dev/null /opt/etc/pihole/dhcp.leases
 +[ -f "${FTL_PID_FILE}" ] || install -D -m 644 -o "$chown_user" -g "$chown_user" /dev/null "${FTL_PID_FILE}"
 +[ -f /opt/var/log/pihole/FTL.log ] || install -m 640 -o "$chown_user" -g "$chown_user" /dev/null /opt/var/log/pihole/FTL.log
 +[ -f /opt/var/log/pihole/pihole.log ] || install -m 640 -o "$chown_user" -g "$chown_user" /dev/null /opt/var/log/pihole/pihole.log
++[ -f /opt/var/log/pihole/webserver.log ] || install -m 640 -o "$chown_user" -g "$chown_user" /dev/null /opt/var/log/pihole/webserver.log
 +[ -f /opt/etc/pihole/dhcp.leases ] || install -m 644 -o "$chown_user" -g "$chown_user" /dev/null /opt/etc/pihole/dhcp.leases
 diff --git a/gravity.sh b/gravity.sh
 index 3a7db5ae..56c9fd91 100755
