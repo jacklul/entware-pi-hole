@@ -12,7 +12,7 @@ index 8fa5ef86..e86332e9 100755
  export LC_ALL=C
  export LC_NUMERIC=C
  
-+PATH=/opt/bin:/opt/sbin:$PATH
++PATH="/opt/bin:/opt/sbin:$PATH:/opt/share/pihole/polyfill"
 +
  ############################################ VARIABLES #############################################
  
@@ -36,23 +36,17 @@ index 8fa5ef86..e86332e9 100755
      cpu_temp=$(printf "%.1f" "${cpu_temp_raw}")
      temp_unit=$(echo "${padd_data}"  | GetPADDValue sensors.unit)
  
-@@ -1279,8 +1282,8 @@ SizeChecker(){
-     # this reduces "flickering" of GenerateSizeDependendOutput() items
-     # after a terminal re-size
-     sleep 0.1
--    console_width=$(tput cols)
--    console_height=$(tput lines)
-+    console_width=$(stty size | cut -d' ' -f2)
-+    console_height=$(stty size | cut -d' ' -f1)
- 
-     # Mega
-     if [ "$console_width" -ge "80" ] && [ "$console_height" -ge "26" ]; then
-@@ -1759,7 +1762,7 @@ NormalPADD() {
+@@ -1759,7 +1759,12 @@ NormalPADD() {
  
  Update() {
      # source version file to check if $DOCKER_VERSION is set
 -    . /etc/pihole/versions
 +    . /opt/etc/pihole/versions
++
++    if [ -n "${ENTWARE_VERSION}" ]; then
++        echo "${check_box_info} Update is not supported for Entware package"
++        exit 1
++    fi
  
      if [ -n "${DOCKER_VERSION}" ]; then
          echo "${check_box_info} Update is not supported for Docker"
