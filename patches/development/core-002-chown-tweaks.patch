@@ -55,8 +55,8 @@ diff --git a/advanced/Templates/pihole-FTL-prestart.sh b/advanced/Templates/piho
 index 49b0f0d4..dde8214e 100755
 --- a/advanced/Templates/pihole-FTL-prestart.sh
 +++ b/advanced/Templates/pihole-FTL-prestart.sh
-@@ -6,12 +6,14 @@ utilsfile="${PI_HOLE_SCRIPT_DIR}/utils.sh"
- # shellcheck disable=SC1090
+@@ -6,12 +6,14 @@ PI_HOLE_SCRIPT_DIR='/opt/share/pihole'
+ utilsfile="${PI_HOLE_SCRIPT_DIR}/utils.sh"
  . "${utilsfile}"
  
 +chown_user="$(getChownUser)"
@@ -68,9 +68,9 @@ index 49b0f0d4..dde8214e 100755
  mkdir -p /opt/var/log/pihole
 -chown -R pihole:pihole /opt/etc/pihole/ /opt/var/log/pihole/
 +chown -R "$chown_user:$chown_user" /opt/etc/pihole/ /opt/var/log/pihole/
- # allow pihole to access subdirs in /etc/pihole (sets execution bit on dirs)
- find /opt/etc/pihole/ /opt/var/log/pihole/ -type d -exec chmod 0755 {} +
- # Set all files (except TLS-related ones) to u+rw g+r
+ 
+ # allow all users read version file (and use pihole -v)
+ chmod 0644 /opt/etc/pihole/versions
 @@ -20,11 +22,11 @@ find /opt/etc/pihole/ /var/log/pihole/ -type f ! \( -name '*.pem' -o -name '*.crt' \
  find /opt/etc/pihole/ -type f \( -name '*.pem' -o -name '*.crt' \) -exec chmod 0600 {} +
  
