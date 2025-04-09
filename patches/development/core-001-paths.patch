@@ -30,13 +30,14 @@ diff --git a/advanced/Scripts/list.sh b/advanced/Scripts/list.sh
 index 8c930f04..efb9dab1 100755
 --- a/advanced/Scripts/list.sh
 +++ b/advanced/Scripts/list.sh
-@@ -10,7 +10,7 @@
+@@ -10,8 +10,8 @@
  # This file is copyright under the latest version of the EUPL.
  # Please see LICENSE file for your rights under this license.
  
 -readonly PI_HOLE_SCRIPT_DIR="/opt/pihole"
 +readonly PI_HOLE_SCRIPT_DIR="/opt/share/pihole"
  readonly utilsfile="${PI_HOLE_SCRIPT_DIR}/utils.sh"
+ # shellcheck source="./advanced/Scripts/utils.sh"
  source "${utilsfile}"
  
 @@ -20,13 +20,13 @@ source "${apifile}"
@@ -55,12 +56,13 @@ index 8c930f04..efb9dab1 100755
  fi
  
  addmode=true
-@@ -38,7 +38,7 @@ domList=()
+@@ -38,8 +38,8 @@ domList=()
  typeId=""
  comment=""
  
 -colfile="/opt/pihole/COL_TABLE"
 +colfile="/opt/share/pihole/COL_TABLE"
+ # shellcheck source="./advanced/Scripts/COL_TABLE"
  source ${colfile}
  
  helpFunc() {
@@ -68,19 +70,21 @@ diff --git a/advanced/Scripts/piholeARPTable.sh b/advanced/Scripts/piholeARPTabl
 index c04c5b33..ecf5365e 100755
 --- a/advanced/Scripts/piholeARPTable.sh
 +++ b/advanced/Scripts/piholeARPTable.sh
-@@ -10,19 +10,19 @@
+@@ -10,21 +10,21 @@
  # This file is copyright under the latest version of the EUPL.
  # Please see LICENSE file for your rights under this license.
  
 -coltable="/opt/pihole/COL_TABLE"
 +coltable="/opt/share/pihole/COL_TABLE"
  if [[ -f ${coltable} ]]; then
+ # shellcheck source="./advanced/Scripts/COL_TABLE"
      source ${coltable}
  fi
  
 -readonly PI_HOLE_SCRIPT_DIR="/opt/pihole"
 +readonly PI_HOLE_SCRIPT_DIR="/opt/share/pihole"
  utilsfile="${PI_HOLE_SCRIPT_DIR}/utils.sh"
+ # shellcheck source=./advanced/Scripts/utils.sh
  source "${utilsfile}"
  
  # Determine database location
@@ -107,7 +111,7 @@ index 7c558127..d2942f01 100755
 @@ -42,7 +42,7 @@ else
  fi
  
- # shellcheck disable=SC1091
+ # shellcheck source=/dev/null
 -. /etc/pihole/versions
 +. /opt/etc/pihole/versions
  
@@ -153,17 +157,19 @@ diff --git a/advanced/Scripts/piholeLogFlush.sh b/advanced/Scripts/piholeLogFlus
 index 34d96318..b4ffc79b 100755
 --- a/advanced/Scripts/piholeLogFlush.sh
 +++ b/advanced/Scripts/piholeLogFlush.sh
-@@ -8,36 +8,36 @@
+@@ -8,38 +8,38 @@
  # This file is copyright under the latest version of the EUPL.
  # Please see LICENSE file for your rights under this license.
  
 -colfile="/opt/pihole/COL_TABLE"
 +colfile="/opt/share/pihole/COL_TABLE"
+ # shellcheck source="./advanced/Scripts/COL_TABLE"
  source ${colfile}
  
 -readonly PI_HOLE_SCRIPT_DIR="/opt/pihole"
 +readonly PI_HOLE_SCRIPT_DIR="/opt/share/pihole"
  utilsfile="${PI_HOLE_SCRIPT_DIR}/utils.sh"
+ # shellcheck source="./advanced/Scripts/utils.sh"
  source "${utilsfile}"
  
  # In case we're running at the same time as a system logrotate, use a
@@ -217,7 +223,7 @@ diff --git a/advanced/Scripts/query.sh b/advanced/Scripts/query.sh
 index 3340bdd2..a2b5802d 100755
 --- a/advanced/Scripts/query.sh
 +++ b/advanced/Scripts/query.sh
-@@ -15,13 +15,13 @@
+@@ -15,14 +15,14 @@
  # Please see LICENSE file for your rights under this license.
  
  # Globals
@@ -230,6 +236,7 @@ index 3340bdd2..a2b5802d 100755
  # Source color table
 -colfile="/opt/pihole/COL_TABLE"
 +colfile="/opt/share/pihole/COL_TABLE"
+ # shellcheck source="./advanced/Scripts/COL_TABLE"
  . "${colfile}"
  
  # Source api functions
@@ -240,7 +247,7 @@ index b325ee9c..c1efe13b 100755
 @@ -40,18 +40,18 @@ function get_remote_hash() {
  
  # Source the utils file for addOrEditKeyValPair()
- # shellcheck disable=SC1091
+ # shellcheck source="./advanced/Scripts/utils.sh"
 -. /opt/pihole/utils.sh
 +. /opt/share/pihole/utils.sh
  
@@ -282,20 +289,21 @@ diff --git a/advanced/Scripts/version.sh b/advanced/Scripts/version.sh
 index 2b0883af..f1f2fa22 100755
 --- a/advanced/Scripts/version.sh
 +++ b/advanced/Scripts/version.sh
-@@ -13,11 +13,11 @@
- # https://github.com/koalaman/shellcheck/wiki/SC3043#exceptions
+@@ -13,12 +13,12 @@
+ # Please see LICENSE file for your rights under this license.
  
  # Source the versions file populated by updatechecker.sh
 -cachedVersions="/etc/pihole/versions"
 +cachedVersions="/opt/etc/pihole/versions"
  
  if [ -f ${cachedVersions} ]; then
+     # shellcheck source=/dev/null
      . "$cachedVersions"
  else
 -    echo "Could not find /etc/pihole/versions. Running update now."
 +    echo "Could not find /opt/etc/pihole/versions. Running update now."
      pihole updatechecker
-     . "$cachedVersions"
+      # shellcheck source=/dev/null
 diff --git a/advanced/Templates/gravity_copy.sql b/advanced/Templates/gravity_copy.sql
 index ed11b61a..b27bd6e5 100644
 --- a/advanced/Templates/gravity_copy.sql
@@ -347,7 +355,7 @@ index b5ddbc97..4d7a10e3 100755
 -PI_HOLE_SCRIPT_DIR='/opt/pihole'
 +PI_HOLE_SCRIPT_DIR='/opt/share/pihole'
  utilsfile="${PI_HOLE_SCRIPT_DIR}/utils.sh"
- . "${utilsfile}"
+ # shellcheck source="./advanced/Scripts/utils.sh"
 @@ -10,4 +10,4 @@ utilsfile="${PI_HOLE_SCRIPT_DIR}/utils.sh"
  FTL_PID_FILE="$(getFTLConfigValue files.pid)"
  
@@ -365,7 +373,7 @@ index c604d5d4..a6e9274d 100755
 -PI_HOLE_SCRIPT_DIR='/opt/pihole'
 +PI_HOLE_SCRIPT_DIR='/opt/share/pihole'
  utilsfile="${PI_HOLE_SCRIPT_DIR}/utils.sh"
- . "${utilsfile}"
+ # shellcheck source="./advanced/Scripts/utils.sh"
 @@ -10,25 +10,25 @@ utilsfile="${PI_HOLE_SCRIPT_DIR}/utils.sh"
  FTL_PID_FILE="$(getFTLConfigValue files.pid)"
  
@@ -441,11 +449,12 @@ index d1664394..a9adf9c0 100755
 +PI_HOLE_SCRIPT_DIR="/opt/share/pihole"
  # Source utils.sh for GetFTLConfigValue
  utilsfile="${PI_HOLE_SCRIPT_DIR}/utils.sh"
- . "${utilsfile}"
-@@ -23,12 +23,12 @@
+ # shellcheck source=./advanced/Scripts/utils.sh
+@@ -23,13 +23,13 @@
  coltable="${PI_HOLE_SCRIPT_DIR}/COL_TABLE"
+ # shellcheck source=./advanced/Scripts/COL_TABLE
  . "${coltable}"
- # shellcheck disable=SC1091
+ # shellcheck source=./advanced/Scripts/database_migration/gravity-db.sh
 -. "/etc/.pihole/advanced/Scripts/database_migration/gravity-db.sh"
 +. "/opt/share/pihole/database_migration/gravity-db.sh"
  
@@ -503,9 +512,10 @@ index 4bb7d5e5..fcc988ad 100755
 +PI_HOLE_BIN_DIR="/opt/bin"
  
  readonly colfile="${PI_HOLE_SCRIPT_DIR}/COL_TABLE"
- source "${colfile}"
-@@ -26,7 +26,7 @@ source "${utilsfile}"
+ # shellcheck source=./advanced/Scripts/COL_TABLE
+@@ -26,8 +26,8 @@ # shellcheck source=./advanced/Scripts/utils.sh
  readonly apifile="${PI_HOLE_SCRIPT_DIR}/api.sh"
+ # shellcheck source=./advanced/Scripts/api.sh
  source "${apifile}"
  
 -versionsfile="/etc/pihole/versions"

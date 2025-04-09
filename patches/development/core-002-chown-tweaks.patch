@@ -55,8 +55,8 @@ diff --git a/advanced/Templates/pihole-FTL-prestart.sh b/advanced/Templates/piho
 index 49b0f0d4..dde8214e 100755
 --- a/advanced/Templates/pihole-FTL-prestart.sh
 +++ b/advanced/Templates/pihole-FTL-prestart.sh
-@@ -6,12 +6,14 @@ PI_HOLE_SCRIPT_DIR='/opt/share/pihole'
- utilsfile="${PI_HOLE_SCRIPT_DIR}/utils.sh"
+@@ -6,12 +6,14 @@ utilsfile="${PI_HOLE_SCRIPT_DIR}/utils.sh"
+ # shellcheck source="./advanced/Scripts/utils.sh"
  . "${utilsfile}"
  
 +chown_user="$(getChownUser)"
