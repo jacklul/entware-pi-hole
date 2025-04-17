@@ -5,13 +5,17 @@ Run [Pi-hole](https://pi-hole.net) directly on your [Entware](https://github.com
 > [!WARNING]
 > **Releases here are unofficial and not supported by the Pi-hole developers.**
 
+Supported Entware architectures: **aarch64-3.10, armv7-3.2, x64-3.2**
+
 ## Requirements
 
-Only **aarch64-3.10, armv7-3.2 and x64-3.2** <ins>Entware architectures</ins> are currently supported.  
-You will need at least **50-100 MB** of free memory on the device to be able to update the gravity database without running out of memory, memory requirements increase as you add more lists.  
-Swap file is **recommended**.  
+You will need around **50 MB** of free memory to run the daemon and **around 100 MB** more to be able to update the gravity database without running out of memory.  
+Keep in mind that memory requirements increase as you add more blocklists.  
+Swap file is **recommended**.
 
 ## Installation
+
+- Install Entware - check [their wiki](https://github.com/Entware/Entware/wiki) for instructions
 
 - Add this repository to your `opkg.conf` configuration:
 
