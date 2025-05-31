@@ -28,7 +28,7 @@ index f4226299..c1121c00 100755
 +    fi
  }
  
- os_check() {
+ diagnose_operating_system() {
 @@ -395,6 +445,11 @@ diagnose_operating_system() {
          # If it doesn't exist, it's not a system we currently support and link to FAQ
          log_write "${CROSS} ${COL_RED}${error_msg}${COL_NC} (${FAQ_HARDWARE_REQUIREMENTS})"

@@ -50,13 +50,13 @@ index b325ee9c..2ab983c1 100755
  
  # get Web versions
  
--WEB_VERSION="$(get_local_version /opt/share/pihole/www/admin)"
+-WEB_VERSION="$(get_local_version "${ADMIN_INTERFACE_DIR}")"
 -addOrEditKeyValPair "${VERSION_FILE}" "WEB_VERSION" "${WEB_VERSION}"
 -
--WEB_BRANCH="$(get_local_branch /opt/share/pihole/www/admin)"
+-WEB_BRANCH="$(get_local_branch "${ADMIN_INTERFACE_DIR}")"
 -addOrEditKeyValPair "${VERSION_FILE}" "WEB_BRANCH" "${WEB_BRANCH}"
 -
--WEB_HASH="$(get_local_hash /opt/share/pihole/www/admin)"
+-WEB_HASH="$(get_local_hash "${ADMIN_INTERFACE_DIR}")"
 -addOrEditKeyValPair "${VERSION_FILE}" "WEB_HASH" "${WEB_HASH}"
 -
  GITHUB_WEB_VERSION="$(get_remote_version web "${WEB_BRANCH}")"

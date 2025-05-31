@@ -83,14 +83,14 @@ index 0b433266..85d8a45c 100644
  
    # Validate DNS replies using DNSSEC?
 @@ -360,7 +360,7 @@
-     # (start of the daemon + possible delay by DELAY_STARTUP) then it will advance in
-     # steps of the rate-limiting interval. If a client reaches the maximum number of
-     # queries it will be blocked until the end of the current interval. This will be
--    # logged to /var/log/pihole/FTL.log, e.g. Rate-limiting 10.0.1.39 for at least 44
-+    # logged to /opt/var/log/pihole/FTL.log, e.g. Rate-limiting 10.0.1.39 for at least 44
-     # seconds. If the client continues to send queries while being blocked already and
-     # this number of queries during the blocking exceeds the limit the client will
-     # continue to be blocked until the end of the next interval (FTL.log will contain
+     # to when FTL has finished starting (start of the daemon + possible delay by
+     # DELAY_STARTUP) then it will advance in steps of the rate-limiting interval. If a
+     # client reaches the maximum number of queries it will be blocked until the end of the
+-    # current interval. This will be logged to /var/log/pihole/FTL.log, e.g. Rate-limiting
++    # current interval. This will be logged to /opt/var/log/pihole/FTL.log, e.g. Rate-limiting
+     # 10.0.1.39 for at least 44 seconds. If the client continues to send queries while
+     # being blocked already and this number of queries during the blocking exceeds the
+     # limit the client will continue to be blocked until the end of the next interval
 @@ -665,14 +665,14 @@
      #
      # Possible values are:
@@ -117,7 +117,7 @@ index 0b433266..85d8a45c 100644
      # against the API. Note that the password is only valid for the current session and
      # regenerated on each FTL restart. Sessions initiated with this password cannot modify
      # the Pi-hole configuration (change passwords, etc.) for security reasons but can
-@@ -822,38 +822,38 @@
+@@ -822,32 +822,32 @@
    #
    # Possible values are:
    #     <any writable file>
@@ -152,13 +152,6 @@ index 0b433266..85d8a45c 100644
    #     <any Pi-hole macvendor database>
 -  macvendor = "/etc/pihole/macvendor.db"
 +  macvendor = "/opt/etc/pihole/macvendor.db"
- 
-   # The old config file of Pi-hole used before v6.0
-   #
-   # Possible values are:
-   #     <any Pi-hole setupVars file>
--  setupVars = "/etc/pihole/setupVars.conf"
-+  setupVars = "/opt/etc/pihole/setupVars.conf"
  
    # An optional file containing a pcap capture of the network traffic. This file is used
    # for debugging purposes only. If you don't know what this is, you don't need it.

@@ -25,18 +25,19 @@ index 8f84e2b0..fec93047 100755
 +readonly scriptPath="/opt/share/pihole/database_migration/gravity"
  
  upgrade_gravityDB(){
-     local database piholeDir version
+     local database version
 diff --git a/advanced/Scripts/list.sh b/advanced/Scripts/list.sh
 index 8c930f04..efb9dab1 100755
 --- a/advanced/Scripts/list.sh
 +++ b/advanced/Scripts/list.sh
-@@ -10,7 +10,7 @@
+@@ -10,8 +10,8 @@
  # This file is copyright under the latest version of the EUPL.
  # Please see LICENSE file for your rights under this license.
  
 -readonly PI_HOLE_SCRIPT_DIR="/opt/pihole"
 +readonly PI_HOLE_SCRIPT_DIR="/opt/share/pihole"
  readonly utilsfile="${PI_HOLE_SCRIPT_DIR}/utils.sh"
+ # shellcheck source="./advanced/Scripts/utils.sh"
  source "${utilsfile}"
  
 @@ -20,13 +20,13 @@ source "${apifile}"
@@ -55,12 +56,13 @@ index 8c930f04..efb9dab1 100755
  fi
  
  addmode=true
-@@ -38,7 +38,7 @@ domList=()
+@@ -38,8 +38,8 @@ domList=()
  typeId=""
  comment=""
  
 -colfile="/opt/pihole/COL_TABLE"
 +colfile="/opt/share/pihole/COL_TABLE"
+ # shellcheck source="./advanced/Scripts/COL_TABLE"
  source ${colfile}
  
  helpFunc() {
@@ -68,20 +70,31 @@ diff --git a/advanced/Scripts/piholeARPTable.sh b/advanced/Scripts/piholeARPTabl
 index c04c5b33..ecf5365e 100755
 --- a/advanced/Scripts/piholeARPTable.sh
 +++ b/advanced/Scripts/piholeARPTable.sh
-@@ -10,19 +10,19 @@
+@@ -10,28 +10,28 @@
  # This file is copyright under the latest version of the EUPL.
  # Please see LICENSE file for your rights under this license.
  
 -coltable="/opt/pihole/COL_TABLE"
 +coltable="/opt/share/pihole/COL_TABLE"
  if [[ -f ${coltable} ]]; then
+ # shellcheck source="./advanced/Scripts/COL_TABLE"
      source ${coltable}
  fi
  
 -readonly PI_HOLE_SCRIPT_DIR="/opt/pihole"
 +readonly PI_HOLE_SCRIPT_DIR="/opt/share/pihole"
  utilsfile="${PI_HOLE_SCRIPT_DIR}/utils.sh"
+ # shellcheck source=./advanced/Scripts/utils.sh
  source "${utilsfile}"
+ 
+-readonly PI_HOLE_FILES_DIR="/etc/.pihole"
++readonly PI_HOLE_FILES_DIR="/opt/etc/.pihole"
+ SKIP_INSTALL="true"
+ # shellcheck source="./automated install/basic-install.sh"
+-source "${PI_HOLE_FILES_DIR}/automated install/basic-install.sh"
++source "/opt/share/pihole/basic-install.sh"
+ # stop_service() is defined in basic-install.sh
+ # restart_service() is defined in basic-install.sh
  
  # Determine database location
  DBFILE=$(getFTLConfigValue "files.database")
@@ -107,7 +120,7 @@ index 7c558127..d2942f01 100755
 @@ -42,7 +42,7 @@ else
  fi
  
- # shellcheck disable=SC1091
+ # shellcheck source=/dev/null
 -. /etc/pihole/versions
 +. /opt/etc/pihole/versions
  
@@ -153,18 +166,27 @@ diff --git a/advanced/Scripts/piholeLogFlush.sh b/advanced/Scripts/piholeLogFlus
 index 34d96318..b4ffc79b 100755
 --- a/advanced/Scripts/piholeLogFlush.sh
 +++ b/advanced/Scripts/piholeLogFlush.sh
-@@ -8,43 +8,43 @@
+@@ -8,44 +8,44 @@
  # This file is copyright under the latest version of the EUPL.
  # Please see LICENSE file for your rights under this license.
  
 -colfile="/opt/pihole/COL_TABLE"
 +colfile="/opt/share/pihole/COL_TABLE"
+ # shellcheck source="./advanced/Scripts/COL_TABLE"
  source ${colfile}
  
 -readonly PI_HOLE_SCRIPT_DIR="/opt/pihole"
 +readonly PI_HOLE_SCRIPT_DIR="/opt/share/pihole"
  utilsfile="${PI_HOLE_SCRIPT_DIR}/utils.sh"
+ # shellcheck source="./advanced/Scripts/utils.sh"
  source "${utilsfile}"
+ 
+ SKIP_INSTALL="true"
+ # shellcheck source="./automated install/basic-install.sh"
+-source "${PI_HOLE_FILES_DIR}/automated install/basic-install.sh"
++source "/opt/share/pihole/basic-install.sh"
+ # stop_service() is defined in basic-install.sh
+ # restart_service() is defined in basic-install.sh
  
  # In case we're running at the same time as a system logrotate, use a
  # separate logrotate state file to prevent stepping on each other's
@@ -190,6 +212,14 @@ index 34d96318..b4ffc79b 100755
 -    FTLFILE="/var/log/pihole/FTL.log"
 +    FTLFILE="/opt/var/log/pihole/FTL.log"
  fi
+ WEBFILE=$(getFTLConfigValue "files.log.webserver")
+ if [ -z "$WEBFILE" ]; then
+-    WEBFILE="/var/log/pihole/webserver.log"
++    WEBFILE="/opt/var/log/pihole/webserver.log"
+ fi
+ 
+ # Helper function to handle log rotation for a single file
+@@ -78,13 +78,13 @@ flush_log() {
  
  if [[ "$*" == *"once"* ]]; then
      # Nightly logrotation
@@ -203,13 +233,13 @@ index 34d96318..b4ffc79b 100755
 -        /usr/sbin/logrotate --force --state "${STATEFILE}" /etc/pihole/logrotate
 +        /opt/sbin/logrotate --force --state "${STATEFILE}" /opt/etc/pihole/logrotate
      else
-         # Copy pihole.log over to pihole.log.1
-         # and empty out pihole.log
+         # Handle rotation for each log file
+         rotate_log "${LOGFILE}"
 diff --git a/advanced/Scripts/query.sh b/advanced/Scripts/query.sh
 index 3340bdd2..a2b5802d 100755
 --- a/advanced/Scripts/query.sh
 +++ b/advanced/Scripts/query.sh
-@@ -15,13 +15,13 @@
+@@ -15,14 +15,14 @@
  # Please see LICENSE file for your rights under this license.
  
  # Globals
@@ -222,6 +252,7 @@ index 3340bdd2..a2b5802d 100755
  # Source color table
 -colfile="/opt/pihole/COL_TABLE"
 +colfile="/opt/share/pihole/COL_TABLE"
+ # shellcheck source="./advanced/Scripts/COL_TABLE"
  . "${colfile}"
  
  # Source api functions
@@ -229,12 +260,15 @@ diff --git a/advanced/Scripts/updatecheck.sh b/advanced/Scripts/updatecheck.sh
 index b325ee9c..c1efe13b 100755
 --- a/advanced/Scripts/updatecheck.sh
 +++ b/advanced/Scripts/updatecheck.sh
-@@ -40,15 +40,15 @@ function get_remote_hash() {
+@@ -40,18 +40,18 @@ function get_remote_hash() {
  
  # Source the utils file for addOrEditKeyValPair()
- # shellcheck disable=SC1091
+ # shellcheck source="./advanced/Scripts/utils.sh"
 -. /opt/pihole/utils.sh
 +. /opt/share/pihole/utils.sh
+ 
+ ADMIN_INTERFACE_DIR=$(getFTLConfigValue "webserver.paths.webroot")$(getFTLConfigValue "webserver.paths.webhome")
+ readonly ADMIN_INTERFACE_DIR
  
  # Remove the below three legacy files if they exist
 -rm -f "/etc/pihole/GitHubVersions"
@@ -267,43 +301,25 @@ index b325ee9c..c1efe13b 100755
  addOrEditKeyValPair "${VERSION_FILE}" "CORE_HASH" "${CORE_HASH}"
  
  GITHUB_CORE_VERSION="$(get_remote_version pi-hole "${CORE_BRANCH}")"
-@@ -85,13 +85,13 @@ addOrEditKeyValPair "${VERSION_FILE}" "GITHUB_CORE_HASH" "${GITHUB_CORE_HASH}"
- 
- # get Web versions
- 
--WEB_VERSION="$(get_local_version /var/www/html/admin)"
-+WEB_VERSION="$(get_local_version /opt/share/pihole/www/admin)"
- addOrEditKeyValPair "${VERSION_FILE}" "WEB_VERSION" "${WEB_VERSION}"
- 
--WEB_BRANCH="$(get_local_branch /var/www/html/admin)"
-+WEB_BRANCH="$(get_local_branch /opt/share/pihole/www/admin)"
- addOrEditKeyValPair "${VERSION_FILE}" "WEB_BRANCH" "${WEB_BRANCH}"
- 
--WEB_HASH="$(get_local_hash /var/www/html/admin)"
-+WEB_HASH="$(get_local_hash /opt/share/pihole/www/admin)"
- addOrEditKeyValPair "${VERSION_FILE}" "WEB_HASH" "${WEB_HASH}"
- 
- GITHUB_WEB_VERSION="$(get_remote_version web "${WEB_BRANCH}")"
 diff --git a/advanced/Scripts/version.sh b/advanced/Scripts/version.sh
 index 2b0883af..f1f2fa22 100755
 --- a/advanced/Scripts/version.sh
 +++ b/advanced/Scripts/version.sh
-@@ -13,13 +13,13 @@
- # https://github.com/koalaman/shellcheck/wiki/SC3043#exceptions
+@@ -13,12 +13,12 @@
+ # Please see LICENSE file for your rights under this license.
  
  # Source the versions file populated by updatechecker.sh
 -cachedVersions="/etc/pihole/versions"
 +cachedVersions="/opt/etc/pihole/versions"
  
  if [ -f ${cachedVersions} ]; then
-     # shellcheck disable=SC1090
+     # shellcheck source=/dev/null
      . "$cachedVersions"
  else
 -    echo "Could not find /etc/pihole/versions. Running update now."
 +    echo "Could not find /opt/etc/pihole/versions. Running update now."
      pihole updatechecker
-     # shellcheck disable=SC1090
-     . "$cachedVersions"
+      # shellcheck source=/dev/null
 diff --git a/advanced/Templates/gravity_copy.sql b/advanced/Templates/gravity_copy.sql
 index ed11b61a..b27bd6e5 100644
 --- a/advanced/Templates/gravity_copy.sql
@@ -348,15 +364,14 @@ diff --git a/advanced/Templates/pihole-FTL-poststop.sh b/advanced/Templates/piho
 index b5ddbc97..4d7a10e3 100755
 --- a/advanced/Templates/pihole-FTL-poststop.sh
 +++ b/advanced/Templates/pihole-FTL-poststop.sh
-@@ -1,7 +1,7 @@
+@@ -1,6 +1,6 @@
  #!/usr/bin/env sh
  
  # Source utils.sh for getFTLConfigValue()
 -PI_HOLE_SCRIPT_DIR='/opt/pihole'
 +PI_HOLE_SCRIPT_DIR='/opt/share/pihole'
  utilsfile="${PI_HOLE_SCRIPT_DIR}/utils.sh"
- # shellcheck disable=SC1090
- . "${utilsfile}"
+ # shellcheck source="./advanced/Scripts/utils.sh"
 @@ -10,4 +10,4 @@ utilsfile="${PI_HOLE_SCRIPT_DIR}/utils.sh"
  FTL_PID_FILE="$(getFTLConfigValue files.pid)"
  
@@ -367,16 +382,15 @@ diff --git a/advanced/Templates/pihole-FTL-prestart.sh b/advanced/Templates/piho
 index c604d5d4..a6e9274d 100755
 --- a/advanced/Templates/pihole-FTL-prestart.sh
 +++ b/advanced/Templates/pihole-FTL-prestart.sh
-@@ -1,7 +1,7 @@
+@@ -1,6 +1,6 @@
  #!/usr/bin/env sh
  
  # Source utils.sh for getFTLConfigValue()
 -PI_HOLE_SCRIPT_DIR='/opt/pihole'
 +PI_HOLE_SCRIPT_DIR='/opt/share/pihole'
  utilsfile="${PI_HOLE_SCRIPT_DIR}/utils.sh"
- # shellcheck disable=SC1090
- . "${utilsfile}"
-@@ -10,21 +10,21 @@ utilsfile="${PI_HOLE_SCRIPT_DIR}/utils.sh"
+ # shellcheck source="./advanced/Scripts/utils.sh"
+@@ -10,25 +10,25 @@ utilsfile="${PI_HOLE_SCRIPT_DIR}/utils.sh"
  FTL_PID_FILE="$(getFTLConfigValue files.pid)"
  
  # Ensure that permissions are set so that pihole-FTL can edit all necessary files
@@ -384,6 +398,11 @@ index c604d5d4..a6e9274d 100755
 -chown -R pihole:pihole /etc/pihole/ /var/log/pihole/
 +mkdir -p /opt/var/log/pihole
 +chown -R pihole:pihole /opt/etc/pihole/ /opt/var/log/pihole/
+ 
+ # allow all users read version file (and use pihole -v)
+-chmod 0644 /etc/pihole/versions
++chmod 0644 /opt/etc/pihole/versions
+
  # allow pihole to access subdirs in /etc/pihole (sets execution bit on dirs)
 -find /etc/pihole/ /var/log/pihole/ -type d -exec chmod 0755 {} +
 +find /opt/etc/pihole/ /opt/var/log/pihole/ -type d -exec chmod 0755 {} +
@@ -446,11 +465,12 @@ index d1664394..a9adf9c0 100755
 +PI_HOLE_SCRIPT_DIR="/opt/share/pihole"
  # Source utils.sh for GetFTLConfigValue
  utilsfile="${PI_HOLE_SCRIPT_DIR}/utils.sh"
- # shellcheck disable=SC1090
-@@ -23,12 +23,12 @@ coltable="${PI_HOLE_SCRIPT_DIR}/COL_TABLE"
- # shellcheck disable=SC1090
+ # shellcheck source=./advanced/Scripts/utils.sh
+@@ -23,13 +23,13 @@
+ coltable="${PI_HOLE_SCRIPT_DIR}/COL_TABLE"
+ # shellcheck source=./advanced/Scripts/COL_TABLE
  . "${coltable}"
- # shellcheck disable=SC1091
+ # shellcheck source=./advanced/Scripts/database_migration/gravity-db.sh
 -. "/etc/.pihole/advanced/Scripts/database_migration/gravity-db.sh"
 +. "/opt/share/pihole/database_migration/gravity-db.sh"
  
@@ -463,7 +483,7 @@ index d1664394..a9adf9c0 100755
  
  # Gravity aux files directory
  listsCacheDir="${piholeDir}/listsCache"
-@@ -36,26 +36,26 @@ blacklistFile="${piholeDir}/blacklist.txt"
+@@ -36,20 +36,20 @@ blacklistFile="${piholeDir}/blacklist.txt"
  regexFile="${piholeDir}/regex.list"
  adListFile="${piholeDir}/adlists.list"
  
@@ -490,12 +510,6 @@ index d1664394..a9adf9c0 100755
  
  # Set this only after sourcing pihole-FTL.conf as the gravity database path may
  # have changed
- gravityDBfile="${GRAVITYDB}"
--gravityDBfile_default="/etc/pihole/gravity.db"
-+gravityDBfile_default="/opt/etc/pihole/gravity.db"
- gravityTEMPfile="${GRAVITYDB}_temp"
- gravityDIR="$(dirname -- "${gravityDBfile}")"
- gravityOLDfile="${gravityDIR}/gravity_old.db"
 diff --git a/pihole b/pihole
 index 4bb7d5e5..fcc988ad 100755
 --- a/pihole
@@ -514,9 +528,10 @@ index 4bb7d5e5..fcc988ad 100755
 +PI_HOLE_BIN_DIR="/opt/bin"
  
  readonly colfile="${PI_HOLE_SCRIPT_DIR}/COL_TABLE"
- source "${colfile}"
-@@ -26,7 +26,7 @@ source "${utilsfile}"
+ # shellcheck source=./advanced/Scripts/COL_TABLE
+@@ -26,8 +26,8 @@ # shellcheck source=./advanced/Scripts/utils.sh
  readonly apifile="${PI_HOLE_SCRIPT_DIR}/api.sh"
+ # shellcheck source=./advanced/Scripts/api.sh
  source "${apifile}"
  
 -versionsfile="/etc/pihole/versions"
