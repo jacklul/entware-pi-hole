@@ -96,8 +96,9 @@ jobs:
 
       - name: Apply patches
         if: steps.cache.outputs.cache-hit != 'true'
-        run: |
-          bash ./scripts/patch.sh core ./stage
+        uses: ./.github/actions/patch
+        with:
+          patches_prefix: core
 
       - name: Dump version infos
         if: steps.cache.outputs.cache-hit != 'true'
@@ -147,8 +148,9 @@ jobs:
 
       - name: Apply patches
         if: steps.cache.outputs.cache-hit != 'true'
-        run: |
-          bash ./scripts/patch.sh web ./stage
+        uses: ./.github/actions/patch
+        with:
+          patches_prefix: web
 
       - name: Dump version infos
         if: steps.cache.outputs.cache-hit != 'true'
@@ -234,8 +236,9 @@ jobs:
 
       - name: Apply patches
         if: steps.cache.outputs.cache-hit != 'true'
-        run: |
-          bash ./scripts/patch.sh ftl ./stage
+        uses: ./.github/actions/patch
+        with:
+          patches_prefix: ftl
 
       - name: Dump version infos
         if: steps.cache.outputs.cache-hit != 'true'
@@ -251,10 +254,6 @@ jobs:
           echo "GIT_TAG=$([ "$BRANCH" = "master" ] && echo "$VERSION" || echo "")" >> $GITHUB_OUTPUT
           cat $GITHUB_OUTPUT
 
-      - name: Set up Docker Buildx
-        if: steps.cache.outputs.cache-hit != 'true'
-        uses: docker/setup-buildx-action@v3
-
       #- name: Do not run tests
       #  if: steps.cache.outputs.cache-hit != 'true'
       #  continue-on-error: true
@@ -262,22 +261,11 @@ jobs:
 
       - name: Build and test FTL
         if: steps.cache.outputs.cache-hit != 'true'
-        uses: docker/build-push-action@v6
-        env:
-          DOCKER_BUILD_SUMMARY: false
+        uses: ./.github/actions/ftl-build
         with:
-          platforms: ${{ matrix.docker_platform }}
-          pull: true
-          push: false
-          context: ./stage
-          target: result
-          file: ./stage/.github/Dockerfile
-          outputs: |
-            type=tar,dest=./stage/build.tar
-          build-args: |
-            "CI_ARCH=${{ matrix.docker_platform }}"
-            "GIT_BRANCH=${{ steps.variables.outputs.GIT_BRANCH }}"
-            "GIT_TAG=${{ steps.variables.outputs.GIT_TAG }}"
+          platform: ${{ matrix.docker_platform }}
+          git_branch: ${{ steps.variables.outputs.GIT_BRANCH }}
+          git_tag: ${{ steps.variables.outputs.GIT_TAG }}
 
       - name: Extract FTL binary and generate checksum file
         if: steps.cache.outputs.cache-hit != 'true'

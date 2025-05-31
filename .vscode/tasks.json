@@ -132,6 +132,41 @@
                 "Reset dev/web",
                 "Reset dev/FTL"
             ]
-        }
+        },
+        {
+            "label": "Test dev/core",
+            "type": "shell",
+            "command": "bash scripts/patch.sh core dev/core no-patches",
+            "problemMatcher": [],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        },
+        {
+            "label": "Test dev/web",
+            "type": "shell",
+            "command": "bash scripts/patch.sh web dev/web no-patches",
+            "problemMatcher": [],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        },
+        {
+            "label": "Test dev/FTL",
+            "type": "shell",
+            "command": "bash scripts/patch.sh ftl dev/FTL no-patches",
+            "problemMatcher": [],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        },
+        {
+            "label": "Test all repositories",
+            "dependsOn": [
+                "Test dev/core",
+                "Test dev/web",
+                "Test dev/FTL"
+            ]
+        },
     ]
 }

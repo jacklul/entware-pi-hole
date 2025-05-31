@@ -26,8 +26,8 @@ jobs:
     steps:
       - name: Checkout own repository
         uses: actions/checkout@v4
-        #with:
-        #  ref: develop
+        with:
+          ref: develop
 
       - name: Set branches to pull
         id: branches
@@ -100,6 +100,10 @@ jobs:
             echo "RESULT=ok" >> $GITHUB_OUTPUT
           fi
 
+      - name: Commit development patches
+        if: ${{ steps.hashes-have-tags.outputs.RESULT == 'ok' }}
+        run: cp -f ./patches/development/* ./patches/
+
       - name: Apply patches (core)
         id: patch-core
         if: ${{ steps.hashes-have-tags.outputs.RESULT == 'ok' }}
@@ -124,30 +128,17 @@ jobs:
           patches_prefix: FTL
           git_path: ./dev/FTL
 
-      - name: Set up Docker Buildx
-        id: setup-docker-buildx
-        if: ${{ steps.patch-FTL.outcome == 'success' }}
-        uses: docker/setup-buildx-action@v3
-
       - name: Build and test FTL
         id: build-FTL
-        if: ${{ steps.setup-docker-buildx.outcome == 'success' }}
-        uses: docker/build-push-action@v6
-        env:
-          DOCKER_BUILD_SUMMARY: false
+        if: ${{ steps.patch-FTL.outcome == 'success' }}
+        uses: ./.github/actions/ftl-build
         with:
-          platforms: linux/amd64
-          pull: true
-          push: false
+          platform: linux/amd64
+          git_branch: ${{ steps.branches.outputs.FTL }}
+          git_tag: 
           context: ./dev/FTL
-          target: result
-          file: ./dev/FTL/.github/Dockerfile
-          outputs: |
-            type=tar,dest=./dev/FTL/build.tar
-          build-args: |
-            "CI_ARCH=linux/amd64"
-            "GIT_BRANCH=${{ steps.branches.outputs.FTL }}"
-            "GIT_TAG="
+          dockerfile: ./dev/FTL/.github/Dockerfile
+          destination: ./dev/FTL/build.tar
 
       - name: Set ok status
         if: ${{ steps.patch-core.outcome == 'success' && steps.patch-web.outcome == 'success' && steps.patch-FTL.outcome == 'success' && steps.build-FTL.outcome == 'success' }}
@@ -167,8 +158,8 @@ jobs:
     steps:
       - name: Checkout own repository
         uses: actions/checkout@v4
-        #with:
-        #  ref: develop
+        with:
+          ref: develop
 
       - name: Replace hashes in env file
         run: |

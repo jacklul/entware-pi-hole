@@ -27,6 +27,12 @@ if [ "$3" != "no-patches" ]; then
             file="$patches_dir/$branch/$basename"
         fi
 
+        if [ ! -s "$file" ]; then
+            echo "Patch file $file is empty, skipping"
+            echo ""
+            continue
+        fi
+
         echo "Applying patch file: $file"
         git -C "$target" apply -v "$file" || exit 1
         echo ""
@@ -39,6 +45,12 @@ if [ "$3" != "no-patches" ]; then
         # if the same file exists in BRANCH subdirectory then use it instead
         if [ -f "$patches_dir/$branch/$basename" ]; then
             file="$patches_dir/$branch/$basename"
+        fi
+
+        if [ ! -s "$file" ]; then
+            echo "Patch script $file is empty, skipping"
+            echo ""
+            continue
         fi
 
         echo "Running patch script: $file"

@@ -1,0 +1,47 @@
+name: Build FTL binary
+
+inputs:
+  platform:
+    required: true
+  git_branch:
+    required: false
+    default: ''
+  git_tag:
+    required: false
+    default: ''
+  context:
+    required: false
+    default: ./stage
+  dockerfile:
+    required: false
+    default: ./stage/.github/Dockerfile
+  destination:
+    required: false
+    default: ./stage/build.tar
+
+runs:
+  using: composite
+
+  steps:
+    - name: Set up Docker Buildx
+      id: setup-docker-buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build and test FTL
+      if: ${{ steps.setup-docker-buildx.outcome == 'success' }}
+      uses: docker/build-push-action@v6
+      env:
+        DOCKER_BUILD_SUMMARY: false
+      with:
+        platforms: "${{ inputs.platform }}"
+        pull: true
+        push: false
+        context: "${{ inputs.context }}"
+        target: result
+        file: "${{ inputs.dockerfile }}"
+        outputs: |
+          type=tar,dest=${{ inputs.destination }}
+        build-args: |
+          "CI_ARCH=${{ inputs.platform }}"
+          "GIT_BRANCH=${{ inputs.git_branch }}"
+          "GIT_TAG=${{ inputs.git_tag }}"

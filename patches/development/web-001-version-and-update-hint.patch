@@ -63,7 +63,7 @@ index 63197d35..171ab748 100644
            $("#versions").append(
 @@ -598,7 +626,11 @@ function updateVersionInfo() {
        $("#update-hint").html(
-         'To install updates, <a href="https://github.com/pi-hole/docker-pi-hole#upgrading-persistence-and-customizations" rel="noopener" target="_blank">replace this old container with a fresh upgraded image</a>.'
+         'To install updates, <a href="https://github.com/pi-hole/docker-pi-hole#upgrading-persistence-and-customizations" rel="noopener noreferrer" target="_blank">replace this old container with a fresh upgraded image</a>.'
        );
 -    else if (updateAvailable)
 +    else if (entwareUpdate)
@@ -72,5 +72,5 @@ index 63197d35..171ab748 100644
 +      );
 +    else if (updateAvailable && !packaged)
        $("#update-hint").html(
-         'To install updates, run <code><a href="https://docs.pi-hole.net/main/update/" rel="noopener" target="_blank">pihole -up</a></code>.'
+         'To install updates, run <code><a href="https://docs.pi-hole.net/main/update/" rel="noopener noreferrer" target="_blank">pihole -up</a></code>.'
        );

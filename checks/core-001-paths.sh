@@ -14,7 +14,7 @@ for file in $FILES; do
     contents="$(grep -o "^[^#]*" < "$file")"
 
     # Exceptions (@TODO the way these are handled needs to be improved)
-    contents="$(echo "$contents" | grep -av "\/etc\/os-release\|\/etc\/\*release\|\/etc\/selinux")" # advanced/Scripts/piholeDebug.sh
+    contents="$(echo "$contents" | grep -av "\/etc\/os-release\|\/etc\/\*release\|\/etc\/selinux")" # /advanced/Scripts/piholeDebug.sh
 
     # Checks
     echo "$contents" | grep -aEn "(^|\s+|\")/etc" && exit 1

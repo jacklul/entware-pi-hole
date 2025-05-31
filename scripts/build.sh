@@ -38,6 +38,7 @@ if [ -z "$(ls -A "$destination_dir/opt/share/pihole")" ]; then
     cp --update=none "$core_path/advanced/Templates"/*.sh "$destination_dir/opt/share/pihole"
     cp --update=none "$core_path/advanced/Templates"/*.sql "$destination_dir/opt/share/pihole"
     cp --update=none "$core_path/gravity.sh" "$destination_dir/opt/share/pihole/gravity.sh"
+    cp --update=none "$core_path/automated install/basic-install.sh" "$destination_dir/opt/share/pihole/basic-install.sh"
 fi
 
 if [ -z "$(ls -A "$destination_dir/opt/etc/pihole")" ] || [ -z "$(ls -A "$destination_dir/opt/etc/cron.d")" ]; then

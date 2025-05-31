@@ -15,6 +15,8 @@ for file in $FILES; do
 
     # Exceptions (@TODO the way these are handled needs to be improved)
     contents="$(echo "$contents" | grep -aFv "systemctl status --full --no-pager pihole-FTL.service")" # /advanced/Scripts/piholeDebug.sh
+    contents="$(echo "$contents" | grep -aFv "stop_service pihole-FTL")" # /advanced/Scripts/piholeARPTable.sh /advanced/Scripts/piholeLogFlush.sh
+    contents="$(echo "$contents" | grep -aFv "restart_service pihole-FTL")" # /advanced/Scripts/piholeARPTable.sh /advanced/Scripts/piholeLogFlush.sh
 
     # Checks
     echo "$contents" | grep -aFn "service pihole-FTL" && exit 1

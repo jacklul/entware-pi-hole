@@ -1,0 +1,17 @@
+name: Apply patches
+
+inputs:
+  patches_prefix:
+    required: true
+  git_path:
+    required: false
+    default: ./stage
+
+runs:
+  using: composite
+
+  steps:
+    - name: Apply patches
+      shell: bash
+      run: |
+        bash ./scripts/patch.sh "${{ inputs.patches_prefix }}" "${{ inputs.git_path }}"
