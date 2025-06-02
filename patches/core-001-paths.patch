@@ -70,7 +70,7 @@ diff --git a/advanced/Scripts/piholeARPTable.sh b/advanced/Scripts/piholeARPTabl
 index c04c5b33..ecf5365e 100755
 --- a/advanced/Scripts/piholeARPTable.sh
 +++ b/advanced/Scripts/piholeARPTable.sh
-@@ -10,28 +10,28 @@
+@@ -10,21 +10,21 @@
  # This file is copyright under the latest version of the EUPL.
  # Please see LICENSE file for your rights under this license.
  
@@ -86,16 +86,7 @@ index c04c5b33..ecf5365e 100755
  utilsfile="${PI_HOLE_SCRIPT_DIR}/utils.sh"
  # shellcheck source=./advanced/Scripts/utils.sh
  source "${utilsfile}"
- 
--readonly PI_HOLE_FILES_DIR="/etc/.pihole"
-+readonly PI_HOLE_FILES_DIR="/opt/etc/.pihole"
- SKIP_INSTALL="true"
- # shellcheck source="./automated install/basic-install.sh"
--source "${PI_HOLE_FILES_DIR}/automated install/basic-install.sh"
-+source "/opt/share/pihole/basic-install.sh"
- # stop_service() is defined in basic-install.sh
- # restart_service() is defined in basic-install.sh
- 
+
  # Determine database location
  DBFILE=$(getFTLConfigValue "files.database")
  if [ -z "$DBFILE" ]; then
@@ -166,7 +157,7 @@ diff --git a/advanced/Scripts/piholeLogFlush.sh b/advanced/Scripts/piholeLogFlus
 index 34d96318..b4ffc79b 100755
 --- a/advanced/Scripts/piholeLogFlush.sh
 +++ b/advanced/Scripts/piholeLogFlush.sh
-@@ -8,44 +8,44 @@
+@@ -8,38 +8,38 @@
  # This file is copyright under the latest version of the EUPL.
  # Please see LICENSE file for your rights under this license.
  
@@ -180,13 +171,6 @@ index 34d96318..b4ffc79b 100755
  utilsfile="${PI_HOLE_SCRIPT_DIR}/utils.sh"
  # shellcheck source="./advanced/Scripts/utils.sh"
  source "${utilsfile}"
- 
- SKIP_INSTALL="true"
- # shellcheck source="./automated install/basic-install.sh"
--source "${PI_HOLE_FILES_DIR}/automated install/basic-install.sh"
-+source "/opt/share/pihole/basic-install.sh"
- # stop_service() is defined in basic-install.sh
- # restart_service() is defined in basic-install.sh
  
  # In case we're running at the same time as a system logrotate, use a
  # separate logrotate state file to prevent stepping on each other's
