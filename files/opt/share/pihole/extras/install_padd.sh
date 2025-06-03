@@ -10,5 +10,5 @@ set -e
 cd /opt/share/pihole
 wget -O padd.sh https://install.padd.sh
 chmod +x padd.sh
-git apply --include=padd.sh PADD.patch
+git apply --include=padd.sh padd.patch
 echo "PADD has been installed. Run 'padd.sh' to start PADD."
