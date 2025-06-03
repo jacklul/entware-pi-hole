@@ -29,7 +29,7 @@ src/gz pi-hole https://jacklul.github.io/entware-pi-hole/[architecture]
 - Start `pihole-FTL` daemon: `/opt/etc/init.d/S65pihole-FTL start`
 
 > [!IMPORTANT]
-> The service might initially not start due to ports being in use - make adjustements in `/opt/etc/pihole/pihole.toml` when necessary.  
+> The service might initially not start due to ports being in use - make adjustments in `/opt/etc/pihole/pihole.toml` when necessary.  
 > For device or firmware specific setup instructions check the [wiki](https://github.com/jacklul/entware-pi-hole/wiki).
 
 ## Support
