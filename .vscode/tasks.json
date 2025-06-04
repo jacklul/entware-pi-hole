@@ -28,36 +28,36 @@
             }
         },
         {
-            "label": "Save dev/core patch to dev/patch.patch",
+            "label": "Create dev/core patch",
             "type": "shell",
-            "command": "git -C dev/core diff --cached --abbrev=8 > dev/patch.patch && code dev/patch.patch",
+            "command": "git -C dev/core diff --cached --abbrev=8 > dev/patch.patch && code dev/patch_core.patch",
             "problemMatcher": [],
             "options": {
                 "cwd": "${workspaceFolder}"
             }
         },
         {
-            "label": "Save dev/web patch to dev/patch.patch",
+            "label": "Create dev/web patch",
             "type": "shell",
-            "command": "git -C dev/web diff --cached --abbrev=8 > dev/patch.patch && code dev/patch.patch",
+            "command": "git -C dev/web diff --cached --abbrev=8 > dev/patch.patch && code dev/patch_web.patch",
             "problemMatcher": [],
             "options": {
                 "cwd": "${workspaceFolder}"
             }
         },
         {
-            "label": "Save dev/FTL patch to dev/patch.patch",
+            "label": "Create dev/FTL patch",
             "type": "shell",
-            "command": "git -C dev/FTL diff --cached --abbrev=8 > dev/patch.patch && code dev/patch.patch",
+            "command": "git -C dev/FTL diff --cached --abbrev=8 > dev/patch.patch && code dev/patch_ftl.patch",
             "problemMatcher": [],
             "options": {
                 "cwd": "${workspaceFolder}"
             }
         },
         {
-            "label": "Save dev/PADD patch to dev/patch.patch",
+            "label": "Create dev/PADD patch",
             "type": "shell",
-            "command": "git -C dev/PADD diff --cached --abbrev=8 > dev/patch.patch && code dev/patch.patch",
+            "command": "git -C dev/PADD diff --cached --abbrev=8 > dev/patch.patch && code dev/patch_padd.patch",
             "problemMatcher": [],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -167,6 +167,6 @@
                 "Test dev/web",
                 "Test dev/FTL"
             ]
-        },
+        }
     ]
 }
