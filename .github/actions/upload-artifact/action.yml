@@ -1,0 +1,27 @@
+name: Upload artifact without unnecessary files
+
+inputs:
+  name:
+    required: true
+  path:
+    required: false
+    default: ./stage/*
+  git_path:
+    required: false
+    default: ./stage
+
+runs:
+  using: composite
+
+  steps:
+    - name: Remove .git directory
+      shell: bash
+      run: |
+        [ -n "${{ inputs.git_path }}" ] && rm -fr "${{ inputs.git_path }}/.git"
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.name }}
+        path: ${{ inputs.path }}
+        include-hidden-files: true

@@ -131,11 +131,11 @@ jobs:
       - name: Build and test FTL
         id: build-FTL
         if: ${{ steps.patch-FTL.outcome == 'success' }}
-        uses: ./.github/actions/ftl-build
+        uses: ./.github/actions/build-ftl
         with:
           platform: linux/amd64
           git_branch: ${{ steps.branches.outputs.FTL }}
-          git_tag: 
+          git_tag: ''
           context: ./dev/FTL
           dockerfile: ./dev/FTL/.github/Dockerfile
           destination: ./dev/FTL/build.tar

@@ -15,3 +15,8 @@ runs:
       shell: bash
       run: |
         bash ./scripts/patch.sh "${{ inputs.patches_prefix }}" "${{ inputs.git_path }}"
+
+    - name: Dump version infos
+      shell: bash
+      run: |
+        bash ./scripts/version.sh "${{ inputs.git_path }}"

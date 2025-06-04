@@ -93,6 +93,7 @@ jobs:
         with:
           key_prefix: core-
           patches_prefix: core
+          ref: ${{ env.SELF_REF }}
 
       - name: Apply patches
         if: steps.cache.outputs.cache-hit != 'true'
@@ -100,20 +101,15 @@ jobs:
         with:
           patches_prefix: core
 
-      - name: Dump version infos
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: |
-          bash ./scripts/version.sh ./stage
-
-      - name: Remove .git directory
-        run: rm -fr ./stage/.git
+      - name: List files
+        uses: ./.github/actions/list-files
+        with:
+          paths: ./stage
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: ./.github/actions/upload-artifact
         with:
           name: core
-          path: ./stage/*
-          include-hidden-files: true
 
   build-web:
     concurrency: build-web-${{ github.ref_name || github.run_id }}
@@ -145,6 +141,7 @@ jobs:
         with:
           key_prefix: web-
           patches_prefix: web
+          ref: ${{ env.SELF_REF }}
 
       - name: Apply patches
         if: steps.cache.outputs.cache-hit != 'true'
@@ -152,23 +149,18 @@ jobs:
         with:
           patches_prefix: web
 
-      - name: Dump version infos
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: |
-          bash ./scripts/version.sh ./stage
-
-      - name: Remove .git directory
-        run: rm -fr ./stage/.git
+      - name: List files
+        uses: ./.github/actions/list-files
+        with:
+          paths: ./stage
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: ./.github/actions/upload-artifact
         with:
           name: web
-          path: ./stage/*
-          include-hidden-files: true
 
-  build-binary:
-    concurrency: build-binary-${{ github.ref_name || github.run_id }}-${{ matrix.architecture }}
+  build-ftl:
+    concurrency: build-ftl-${{ github.ref_name || github.run_id }}-${{ matrix.architecture }}
     needs: [variables]
     runs-on: ${{ matrix.machine }}
     continue-on-error: ${{ matrix.allow-failure }}
@@ -228,8 +220,9 @@ jobs:
         id: cache
         uses: ./.github/actions/cache
         with:
-          key_prefix: binary-${{ matrix.architecture }}-
+          key_prefix: ftl-${{ matrix.architecture }}-
           patches_prefix: ftl
+          ref: ${{ env.SELF_REF }}
           files: |
             ./stage/pihole-FTL-*
             ./stage/.version
@@ -239,11 +232,6 @@ jobs:
         uses: ./.github/actions/patch
         with:
           patches_prefix: ftl
-
-      - name: Dump version infos
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: |
-          bash ./scripts/version.sh ./stage
 
       - name: Set required variables
         if: steps.cache.outputs.cache-hit != 'true'
@@ -261,7 +249,7 @@ jobs:
 
       - name: Build and test FTL
         if: steps.cache.outputs.cache-hit != 'true'
-        uses: ./.github/actions/ftl-build
+        uses: ./.github/actions/build-ftl
         with:
           platform: ${{ matrix.docker_platform }}
           git_branch: ${{ steps.variables.outputs.GIT_BRANCH }}
@@ -275,21 +263,22 @@ jobs:
           mv pihole-FTL "pihole-FTL-${{ matrix.architecture }}"
           sha1sum pihole-FTL-* > "pihole-FTL-${{ matrix.architecture }}.sha1"
 
-      - name: Remove .git directory
-        run: rm -fr ./stage/.git
+      - name: List files
+        uses: ./.github/actions/list-files
+        with:
+          paths: ./stage
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: ./.github/actions/upload-artifact
         with:
-          name: binary-${{ matrix.architecture }}
+          name: ftl-${{ matrix.architecture }}
           path: |
             ./stage/pihole-FTL-*
             ./stage/.version
-          include-hidden-files: true
 
   build-packages:
     concurrency: build-packages-${{ github.ref_name || github.run_id }}
-    needs: [variables, build-core, build-web, build-binary]
+    needs: [variables, build-core, build-web, build-ftl]
     runs-on: ubuntu-latest
 
     outputs:
@@ -316,11 +305,11 @@ jobs:
           name: web
           path: ./artifacts/web
 
-      - name: Download binary artifacts
+      - name: Download FTL binary artifact
         uses: actions/download-artifact@v4
         with:
-          pattern: binary-*
-          path: ./artifacts/binary
+          pattern: ftl-*
+          path: ./artifacts/ftl
 
       - name: Add '-dev' to package name
         if: github.ref_name == 'develop' || github.event_name == 'schedule'
@@ -334,9 +323,14 @@ jobs:
           echo "CORE=$VERSION" >> ./.versions
           . ./artifacts/web/.version
           echo "WEB=$VERSION" >> ./.versions
-          . ./artifacts/binary/.version
+          . ./artifacts/ftl/.version
           echo "FTL=$VERSION" >> ./.versions
           cat ./.versions
+
+      - name: List files
+        uses: ./.github/actions/list-files
+        with:
+          paths: ./packages
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -345,13 +339,13 @@ jobs:
           path: ./packages/*
           include-hidden-files: true
 
-      - name: Check if same dev package was already build
-        id: devcheck
+      - name: Check if same dev package was already built
         if: github.event_name == 'schedule'
-        uses: ./.github/actions/devcheck
+        id: check
+        uses: ./.github/actions/dev-check
 
       - name: Set versions
-        if: github.event_name != 'schedule' || steps.devcheck.outputs.cache-hit != 'true'
+        if: github.event_name != 'schedule' || steps.check.outputs.cache-hit != 'true'
         id: versions
         run: |
           if [ -f ./.versions ]; then
@@ -472,13 +466,13 @@ jobs:
           find ./gh-pages -mindepth 1 -maxdepth 1 -type f ! -name "Packages*" -exec rm -fv "{}" \;
 
       - name: Create directory listings
-        uses: ./.github/actions/index
+        uses: ./.github/actions/generate-directory-listings
         with:
           path: ./gh-pages
           ignored: css
 
       - name: List files
-        uses: ./.github/actions/list
+        uses: ./.github/actions/list-files
         with:
           paths: . ./artifacts ./gh-pages ./gh-pages/*
 

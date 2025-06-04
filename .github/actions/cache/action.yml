@@ -5,6 +5,8 @@ inputs:
     required: true
   patches_prefix:
     required: true
+  ref:
+    required: false
   files:
     required: false
     default: |
@@ -26,7 +28,7 @@ runs:
       id: hashes
       shell: bash
       run: |
-        if [[ "$GITHUB_REF" == refs/tags/* ]] || [[ "$GITHUB_REF" == "refs/heads/master" ]]; then
+        if [ "${{ inputs.ref }}" != "develop" ] && ([[ "$GITHUB_REF" == refs/tags/* ]] || [ "$GITHUB_REF" == "refs/heads/master" ]; ); then
           GIT_TAG=$(git -C "${{ inputs.git_path }}" describe --tags --abbrev=0 2> /dev/null || echo "")
         fi
         echo "GIT_BRANCH=$([ -n "$GIT_TAG" ] && echo "master" || git -C "${{ inputs.git_path }}" rev-parse --abbrev-ref HEAD)" >> $GITHUB_OUTPUT

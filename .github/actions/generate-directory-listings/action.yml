@@ -1,4 +1,4 @@
-name: Create directory listings
+name: Generate directory listings for specific directory tree
 
 inputs:
   path:

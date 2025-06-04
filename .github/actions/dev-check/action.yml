@@ -12,6 +12,7 @@ runs:
       id: versions_hash
       shell: bash
       run: |
+        [ ! -f ./.versions ] && { echo "Error: ./.versions file not found."; exit 1; }
         echo "HASH=$(sha1sum ./.versions | awk '{print $1}')" >> $GITHUB_OUTPUT
         cat $GITHUB_OUTPUT
 
