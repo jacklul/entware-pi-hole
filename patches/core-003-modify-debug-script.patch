@@ -116,7 +116,7 @@ index f4226299..30f0db1f 100755
      fi
      # Finally, show where the log file is no matter the outcome of the function so users can look at it
      log_write "   * A local copy of the debug log can be found at: ${COL_CYAN}${PIHOLE_DEBUG_LOG}${COL_NC}\\n"
-+    log_write " ${COL_YELLOW}If you wish to share the log with the official Pi-hole developers, execute the following command:${COL_NC}"
++    log_write " ${COL_YELLOW}If you wish to share this log with the official Pi-hole developers then execute the following command:${COL_NC}"
 +    log_write "  ${COL_CYAN}cat /opt/var/log/pihole/pihole_debug.log | pihole tricorder${COL_NC}\\n"
  }
  
