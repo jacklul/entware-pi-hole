@@ -1,5 +1,5 @@
 diff --git a/advanced/Scripts/piholeDebug.sh b/advanced/Scripts/piholeDebug.sh
-index f4226299..c1121c00 100755
+index 741ff2f4..264e0e89 100755
 --- a/advanced/Scripts/piholeDebug.sh
 +++ b/advanced/Scripts/piholeDebug.sh
 @@ -59,7 +59,7 @@ FAQ_HARDWARE_REQUIREMENTS_FIREWALLD="${COL_CYAN}https://docs.pi-hole.net/main/pr
@@ -49,10 +49,6 @@ index f4226299..c1121c00 100755
  }
  
  check_selinux() {
-diff --git a/advanced/Scripts/piholeDebug.sh b/advanced/Scripts/piholeDebug.sh
-index 741ff2f4..1a722053 100755
---- a/advanced/Scripts/piholeDebug.sh
-+++ b/advanced/Scripts/piholeDebug.sh
 @@ -581,7 +581,7 @@ check_required_ports() {
      # Sort the addresses and remove duplicates
      while IFS= read -r line; do
@@ -62,10 +58,19 @@ index 741ff2f4..1a722053 100755
  
      local ports_configured
      # Get all configured ports
-diff --git a/advanced/Scripts/piholeDebug.sh b/advanced/Scripts/piholeDebug.sh
-index f4226299..30f0db1f 100755
---- a/advanced/Scripts/piholeDebug.sh
-+++ b/advanced/Scripts/piholeDebug.sh
+@@ -592,6 +608,12 @@ check_required_ports() {
+     # Add port 53
+     ports_configured+=("53")
+ 
++    local custom_dns_port
++    custom_dns_port="$(pihole-FTL --config "dns.port")"
++    if [ "$custom_dns_port" != "53" ]; then
++        ports_configured+=("${custom_dns_port}")
++    fi
++
+     # Now that we have the values stored,
+     for i in "${!ports_in_use[@]}"; do
+         # loop through them and assign some local variables
 @@ -1056,6 +1056,17 @@ show_content_of_pihole_files() {
      show_content_of_files_in_dir "${LOG_DIRECTORY}"
      show_content_of_files_in_dir "${SHM_DIRECTORY}"
