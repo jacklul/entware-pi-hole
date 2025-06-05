@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # 'getent hosts' - used by gravity.sh
-# 'getent group' - no longer used
+# 'getent group' - used by basic-install.sh
 
 case "$1" in
     hosts)
