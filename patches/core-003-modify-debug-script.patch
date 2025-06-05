@@ -50,6 +50,19 @@ index f4226299..c1121c00 100755
  
  check_selinux() {
 diff --git a/advanced/Scripts/piholeDebug.sh b/advanced/Scripts/piholeDebug.sh
+index 741ff2f4..1a722053 100755
+--- a/advanced/Scripts/piholeDebug.sh
++++ b/advanced/Scripts/piholeDebug.sh
+@@ -581,7 +581,7 @@ check_required_ports() {
+     # Sort the addresses and remove duplicates
+     while IFS= read -r line; do
+         ports_in_use+=( "$line" )
+-    done < <( ss --listening --numeric --tcp --udp --processes --no-header )
++    done < <( ss --listening --numeric --tcp --udp --processes | tail -n +2 )
+ 
+     local ports_configured
+     # Get all configured ports
+diff --git a/advanced/Scripts/piholeDebug.sh b/advanced/Scripts/piholeDebug.sh
 index f4226299..30f0db1f 100755
 --- a/advanced/Scripts/piholeDebug.sh
 +++ b/advanced/Scripts/piholeDebug.sh
