@@ -1,6 +1,6 @@
 #!/bin/sh
 # https://github.com/jacklul/entware-pi-hole/
-#shellcheck disable=SC2034
+#shellcheck disable=SC2034,SC1091
 
 ENABLED=yes
 PROCS=pihole-FTL
@@ -9,8 +9,5 @@ PREARGS=""
 DESC=$PROCS
 PATH=/opt/sbin:/opt/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
-#shellcheck disable=SC1091
 . /opt/share/pihole/rc.sh
-
-#shellcheck disable=SC1091
 . /opt/etc/init.d/rc.func
