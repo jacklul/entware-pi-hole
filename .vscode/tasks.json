@@ -30,7 +30,7 @@
         {
             "label": "Create dev/core patch",
             "type": "shell",
-            "command": "git -C dev/core diff --cached --abbrev=8 > dev/patch.patch && code dev/patch_core.patch",
+            "command": "git -C dev/core diff --cached --abbrev=8 > dev/patch_core.patch && code dev/patch_core.patch",
             "problemMatcher": [],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -39,7 +39,7 @@
         {
             "label": "Create dev/web patch",
             "type": "shell",
-            "command": "git -C dev/web diff --cached --abbrev=8 > dev/patch.patch && code dev/patch_web.patch",
+            "command": "git -C dev/web diff --cached --abbrev=8 > dev/patch_web.patch && code dev/patch_web.patch",
             "problemMatcher": [],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -48,7 +48,7 @@
         {
             "label": "Create dev/FTL patch",
             "type": "shell",
-            "command": "git -C dev/FTL diff --cached --abbrev=8 > dev/patch.patch && code dev/patch_ftl.patch",
+            "command": "git -C dev/FTL diff --cached --abbrev=8 > dev/patch_ftl.patch && code dev/patch_ftl.patch",
             "problemMatcher": [],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -57,7 +57,7 @@
         {
             "label": "Create dev/PADD patch",
             "type": "shell",
-            "command": "git -C dev/PADD diff --cached --abbrev=8 > dev/patch.patch && code dev/patch_padd.patch",
+            "command": "git -C dev/PADD diff --cached --abbrev=8 > dev/patch_padd.patch && code dev/patch_padd.patch",
             "problemMatcher": [],
             "options": {
                 "cwd": "${workspaceFolder}"
