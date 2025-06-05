@@ -59,19 +59,6 @@ index f55b1320..6f984bbb 100755
          echo -e "${OVER}  ${CROSS} Failed to restart FTL"
          echo "  Output: ${output}"
          return 1
-diff --git a/advanced/Scripts/piholeDebug.sh b/advanced/Scripts/piholeDebug.sh
-index f4226299..5b1b2cfd 100755
---- a/advanced/Scripts/piholeDebug.sh
-+++ b/advanced/Scripts/piholeDebug.sh
-@@ -849,7 +849,7 @@ process_status(){
-                 :
-             else
-             # non-Docker system
--                if service "${i}" status | grep -E 'is\srunning' &> /dev/null; then
-+                if /opt/etc/init.d/S65pihole-FTL check | grep -q 'alive' &> /dev/null; then
-                     status_of_process="active"
-                 else
-                     status_of_process="inactive"
 diff --git a/advanced/Scripts/piholeLogFlush.sh b/advanced/Scripts/piholeLogFlush.sh
 index 34d96318..f905f045 100755
 --- a/advanced/Scripts/piholeLogFlush.sh
