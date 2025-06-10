@@ -50,7 +50,7 @@ if [ -n "$binary_file" ]; then
 
     while [ "$binary_dir_tmp" != "/" ] && [ "$binary_dir_tmp" != "." ]; do
         binary_dir_tmp="$(dirname "$binary_dir_tmp")"
-        
+
         if [ -d "$search_dir/$(basename "$binary_dir_tmp")" ]; then
             binary_dir=$binary_dir_tmp
             break
