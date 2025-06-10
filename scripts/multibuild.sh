@@ -58,6 +58,8 @@ if [ -n "$binary_file" ]; then
     done
 fi
 
+echo "Using binary directory: $binary_dir"
+
 for key in "${!architectures[@]}"; do
     entware_architecture="${key}"
     binary_architecture="${architectures[$key]}"
