@@ -1,23 +1,23 @@
 #!/usr/bin/env bash
 # 'lshw -short' - used by piholeDebug.sh
-
+#
 # note: not an actual polyfill, just using it to 
 # print basic system info in the debug log
 
 case "$1" in
     -short)
-        uname -a
-        echo ""
+        echo "System: $(uname -a)"
 
         if [ -f /sys/firmware/devicetree/base/model ]; then
-            echo "Device model: $(tr -d '\0' < /sys/firmware/devicetree/base/model)"
+            echo "Model: $(tr -d '\0' < /sys/firmware/devicetree/base/model)"
         elif [ -f /proc/device-tree/model ]; then
-            echo "Device model: $(tr -d '\0' < /proc/device-tree/model)"
+            echo "Model: $(tr -d '\0' < /proc/device-tree/model)"
         else
-            echo "Device model: unknown"
+            echo "Model: Unknown"
         fi
 
-        echo "Device memory: $(free -h | grep 'Mem' | awk '{print $2}')"
+        echo "Memory: $(free -h | grep 'Mem' | awk '{print $2}')"
+
         exit
     ;;
 esac
