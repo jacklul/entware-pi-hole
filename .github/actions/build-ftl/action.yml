@@ -1,4 +1,4 @@
-name: Build FTL binary
+name: Build and test FTL binary
 
 inputs:
   platform:
@@ -15,9 +15,15 @@ inputs:
   dockerfile:
     required: false
     default: ./stage/.github/Dockerfile
-  destination:
+  build_opts:
     required: false
-    default: ./stage/build.tar
+    default: ''
+  run_tests:
+    required: false
+    default: true
+  extract_binary:
+    required: false
+    default: true
 
 runs:
   using: composite
@@ -27,8 +33,9 @@ runs:
       id: setup-docker-buildx
       uses: docker/setup-buildx-action@v3
 
-    - name: Build and test FTL
-      if: ${{ steps.setup-docker-buildx.outcome == 'success' }}
+    - name: Build FTL 
+      if: steps.setup-docker-buildx.outcome == 'success'
+      id: build-ftl
       uses: docker/build-push-action@v6
       env:
         DOCKER_BUILD_SUMMARY: false
@@ -40,8 +47,27 @@ runs:
         target: result
         file: "${{ inputs.dockerfile }}"
         outputs: |
-          type=tar,dest=${{ inputs.destination }}
+          type=tar,dest=${{ inputs.context }}/build.tar
         build-args: |
           "CI_ARCH=${{ inputs.platform }}"
           "GIT_BRANCH=${{ inputs.git_branch }}"
           "GIT_TAG=${{ inputs.git_tag }}"
+          "BUILD_OPTS=${{ inputs.build_opts }}"
+
+    - name: Test FTL
+      if: inputs.run_tests == true && steps.build-ftl.outcome == 'success'
+      uses: docker/build-push-action@v6
+      with: |
+        platforms: ${{ inputs.platform }}
+        pull: true
+        push: false
+        context: .
+        target: tests
+        file: "${{ inputs.dockerfile }}"
+
+    - name: Extract FTL binary
+      if: inputs.extract_binary == true && steps.build-ftl.outcome == 'success'
+      run: |
+        tar -xf "${{ inputs.context }}/build.tar" pihole-FTL -C "${{ inputs.context }}"
+        mv "${{ inputs.context }}/pihole-FTL" "${{ inputs.context }}/pihole-FTL-${{ inputs.platform }}"
+        sha1sum "${{ inputs.context }}/pihole-FTL-${{ inputs.platform }}" > "${{ inputs.context }}/pihole-FTL-${{ inputs.platform }}.sha1"
