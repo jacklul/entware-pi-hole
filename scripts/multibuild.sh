@@ -42,7 +42,7 @@ set -e
 [ -z "$output_dir" ] && { echo "Error: Output directory not provided"; exit 1; }
 
 # Find the folder containing artifacts with FTL binaries
-binary_file="$(find "$search_dir" -type f -name "pihole-FTL-*" -print -quit)"
+binary_file="$(find "$search_dir" -type f -name "pihole-FTL-*" ! -name "*.*" -size +1M -print -quit)"
 binary_dir="$search_dir/ftl"
 
 if [ -n "$binary_file" ]; then
@@ -53,18 +53,17 @@ if [ -n "$binary_file" ]; then
 
         if [ -d "$search_dir/$(basename "$binary_dir_tmp")" ]; then
             binary_dir=$binary_dir_tmp
+            echo "Found FTL artifacts directory: $binary_dir"
             break
         fi
     done
 fi
 
-echo "Using binary directory: $binary_dir"
-
 for key in "${!architectures[@]}"; do
     entware_architecture="${key}"
     binary_architecture="${architectures[$key]}"
 
-    binary_file="$(find "$search_dir" -type f -name "pihole-FTL-$binary_architecture" -print -quit)"
+    binary_file="$(find "$search_dir" -type f -name "pihole-FTL-$binary_architecture" -size +1M -print -quit)"
     if [ -z "$binary_file" ]; then
         echo "Skipping $entware_architecture as binary (pihole-FTL-$binary_architecture) was not found"
         continue
