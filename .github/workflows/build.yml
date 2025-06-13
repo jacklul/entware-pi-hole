@@ -38,7 +38,7 @@ env:
 
 jobs:
   variables:
-    concurrency: variables-${{ github.ref_name || github.run_id }}
+    concurrency: variables-${{ github.run_id }}
     runs-on: ubuntu-latest
 
     env:
@@ -64,7 +64,7 @@ jobs:
           cat $GITHUB_OUTPUT
 
   build-core:
-    concurrency: build-core-${{ github.ref_name || github.run_id }}
+    concurrency: build-core-${{ github.run_id }}
     needs: [variables]
     runs-on: ubuntu-latest
 
@@ -112,7 +112,7 @@ jobs:
           name: core
 
   build-web:
-    concurrency: build-web-${{ github.ref_name || github.run_id }}
+    concurrency: build-web-${{ github.run_id }}
     needs: [variables]
     runs-on: ubuntu-latest
 
@@ -160,7 +160,7 @@ jobs:
           name: web
 
   build-ftl:
-    concurrency: build-ftl-${{ github.ref_name || github.run_id }}-${{ matrix.architecture }}
+    concurrency: build-ftl-${{ github.run_id }}-${{ matrix.architecture }}
     needs: [variables]
     runs-on: ${{ matrix.machine }}
     continue-on-error: ${{ matrix.allow-failure }}
@@ -272,7 +272,7 @@ jobs:
             ./stage/.version
 
   build-packages:
-    concurrency: build-packages-${{ github.ref_name || github.run_id }}
+    concurrency: build-packages-${{ github.run_id }}
     needs: [variables, build-core, build-web, build-ftl]
     runs-on: ubuntu-latest
 
@@ -350,7 +350,7 @@ jobs:
           cat $GITHUB_OUTPUT
 
   release:
-    concurrency: release-${{ github.ref_name || github.run_id }}
+    concurrency: release
     needs: [build-packages]
     if: startsWith(github.ref, 'refs/tags/') && needs.build-packages.outputs.IPK_VERSION != '' || (github.ref_name == 'master' && github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
