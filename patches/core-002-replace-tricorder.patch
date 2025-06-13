@@ -72,7 +72,7 @@ index 1dfab754..0f253258 100755
 -  tricorder_token=$(curl --silent --fail --show-error --upload-file "-" https://tricorder.pi-hole.net/upload < /dev/stdin 2>&1)
 -  if [[ "${tricorder_token}" != "https://tricorder.pi-hole.net/"* ]]; then
 +  if [ "$1" = "original" ]; then
-+    echo -e "  ${INFO} Uploading file to original Tricorder server"
++    echo -e "${INFO} Uploading file to original Tricorder server"
 +    tricorder_url="https://tricorder.pi-hole.net/upload"
 +    tricorder_token_url="https://tricorder.pi-hole.net/"
 +  else
