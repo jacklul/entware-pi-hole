@@ -35,9 +35,9 @@ runs:
         echo "GIT_HASH=$(git -C "${{ inputs.git_path }}" rev-parse HEAD | cut -c1-8)" >> $GITHUB_OUTPUT
         CHECKSUM_PATCHES="$(find ./patches/ -type f \( -name '${{ inputs.patches_prefix }}-*.patch' -o -name '${{ inputs.patches_prefix }}-*.sh' \) -print0 | xargs -0 sha1sum 2> /dev/null)"
         CHECKSUM_CHECKS="$(find ./checks/ -type f -name '${{ inputs.patches_prefix }}-*.sh' -print0 | xargs -0 sha1sum 2> /dev/null)"
-        CHECKSUM_SCRIPTS="$(find  ./scripts/ ./.github/ -type f -name '*.sh' -print0 | xargs -0 sha1sum 2> /dev/null)"
-        CHECKSUM_WORKFLOWS="$(find ./.github/workflows/ ./.github/actions/ -type f -name '*.yml' -print0 | xargs -0 sha1sum 2> /dev/null)"
-        CHECKSUM="$CHECKSUM_PATCHES\n$CHECKSUM_CHECKS\n$CHECKSUM_SCRIPTS\n$CHECKSUM_WORKFLOWS"
+        #CHECKSUM_SCRIPTS="$(find  ./scripts/ ./.github/ -type f -name '*.sh' -print0 | xargs -0 sha1sum 2> /dev/null)"
+        #CHECKSUM_WORKFLOWS="$(find ./.github/workflows/ ./.github/actions/ -type f -name '*.yml' -print0 | xargs -0 sha1sum 2> /dev/null)"
+        CHECKSUM="$CHECKSUM_PATCHES\n$CHECKSUM_CHECKS"
         echo -e "$CHECKSUM"
         echo "HASHES=$(echo -e "$CHECKSUM" | sha1sum | cut -c1-8)" >> $GITHUB_OUTPUT
         cat $GITHUB_OUTPUT
