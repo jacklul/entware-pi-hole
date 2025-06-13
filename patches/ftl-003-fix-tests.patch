@@ -46,16 +46,19 @@ index 5d490a82..dfd08dac 100755
  # Start FTL
  if ! su pihole -s /bin/sh -c /home/pihole/pihole-FTL; then
    echo "pihole-FTL failed to start"
-@@ -109,6 +109,9 @@ dig TXT CHAOS version.bind @127.0.0.1 +short
- $BATS -p "test/test_suite.bats"
+@@ -119,10 +119,10 @@ $BATS -p "test/test_suite.bats"
  RET=$?
  
-+# Do not upload logs if tests failed
-+RET=0
-+
  curl_to_tricorder() {
-   curl --silent --upload-file "${1}" https://tricorder.pi-hole.net
+-  curl --silent --upload-file "${1}" https://tricorder.pi-hole.net
++  curl --silent --upload-file "${1}" https://lurking-cat.appspot.com/upload
  }
+ 
+-if [[ $RET != 0 ]]; then
++if [[ $RET != 0 ]] && [ ! -f test/opt.sh ]; then
+   echo -n "pihole/pihole.log: "
+   curl_to_tricorder /var/log/pihole/pihole.log
+   echo ""
 diff --git a/test/pihole.toml b/test/pihole.toml
 index 0b433266..85d8a45c 100644
 --- a/test/pihole.toml
@@ -82,15 +85,27 @@ index 0b433266..85d8a45c 100644
    bogusPriv = true
  
    # Validate DNS replies using DNSSEC?
-@@ -360,7 +360,7 @@
+@@ -388,13 +388,13 @@
      # to when FTL has finished starting (start of the daemon + possible delay by
      # DELAY_STARTUP) then it will advance in steps of the rate-limiting interval. If a
      # client reaches the maximum number of queries it will be blocked until the end of the
 -    # current interval. This will be logged to /var/log/pihole/FTL.log, e.g. Rate-limiting
-+    # current interval. This will be logged to /opt/var/log/pihole/FTL.log, e.g. Rate-limiting
-     # 10.0.1.39 for at least 44 seconds. If the client continues to send queries while
-     # being blocked already and this number of queries during the blocking exceeds the
-     # limit the client will continue to be blocked until the end of the next interval
+-    # 10.0.1.39 for at least 44 seconds. If the client continues to send queries while
+-    # being blocked already and this number of queries during the blocking exceeds the
+-    # limit the client will continue to be blocked until the end of the next interval
+-    # (FTL.log will contain lines like Still rate-limiting 10.0.1.39 as it made additional
+-    # 5007 queries). As soon as the client requests less than the set limit, it will be
+-    # unblocked (Ending rate-limitation of 10.0.1.39).
++    # current interval. This will be logged to /opt/var/log/pihole/FTL.log, e.g.
++    # Rate-limiting 10.0.1.39 for at least 44 seconds. If the client continues to send
++    # queries while being blocked already and this number of queries during the blocking
++    # exceeds the limit the client will continue to be blocked until the end of the next
++    # interval (FTL.log will contain lines like Still rate-limiting 10.0.1.39 as it made
++    # additional 5007 queries). As soon as the client requests less than the set limit, it
++    # will be unblocked (Ending rate-limitation of 10.0.1.39).
+     # Rate-limiting may be disabled altogether by setting both values to zero (this
+     # results in the same behavior as before FTL v5.7).
+     # How many queries are permitted...
 @@ -665,14 +665,14 @@
      #
      # Possible values are:
