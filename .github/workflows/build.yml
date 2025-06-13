@@ -32,6 +32,16 @@ on:
   #release:
   #  types: [published]
   workflow_dispatch:
+    inputs:
+      CORE_REF:
+        required: false
+        default: ''
+      WEB_REF:
+        required: false
+        default: ''
+      FTL_REF:
+        required: false
+        default: ''
 
 env:
   SELF_REF: ${{ github.event_name == 'schedule' && 'develop' || github.ref_name }}
@@ -60,6 +70,9 @@ jobs:
         id: variables
         run: |
           export $(grep -v '^#' ${{ env.ENV_FILE }} | xargs -d '\n')
+          export CORE_REF_OVERRIDE=${{ github.event.inputs.CORE_REF }}
+          export WEB_REF_OVERRIDE=${{ github.event.inputs.WEB_REF }}
+          export FTL_REF_OVERRIDE=${{ github.event.inputs.FTL_REF }}
           bash ./.github/variables.sh
           cat $GITHUB_OUTPUT
 
@@ -352,7 +365,7 @@ jobs:
   release:
     concurrency: release
     needs: [build-packages]
-    if: startsWith(github.ref, 'refs/tags/') && needs.build-packages.outputs.IPK_VERSION != '' || (github.ref_name == 'master' && github.event_name == 'workflow_dispatch')
+    if: needs.build-packages.outputs.IPK_VERSION != '' && (startsWith(github.ref, 'refs/tags/') || (github.ref_name == 'master' && github.event_name == 'workflow_dispatch'))
     runs-on: ubuntu-latest
 
     permissions:
@@ -394,7 +407,7 @@ jobs:
   upload:
     concurrency: upload
     needs: [build-packages]
-    if: needs.build-packages.outputs.IPK_VERSION != '' && (startsWith(github.ref, 'refs/tags/') || github.event_name == 'schedule' || github.ref_name == 'develop' || (github.ref_name == 'master' && github.event_name == 'workflow_dispatch'))
+    if: needs.build-packages.outputs.IPK_VERSION != '' && (startsWith(github.ref, 'refs/tags/') || github.event_name == 'schedule' || github.ref_name == 'develop' || (github.ref_name == 'master' && github.event_name == 'workflow_dispatch')) && (github.event.inputs.CORE_REF == '' && github.event.inputs.WEB_REF == '' && github.event.inputs.FTL_REF == '')
     runs-on: ubuntu-latest
 
     permissions:
@@ -472,11 +485,11 @@ jobs:
           paths: . ./artifacts ./gh-pages ./gh-pages/*
 
       - name: Prepare for upload
-        if: github.ref_name != 'master' || github.event_name == 'schedule'
         run: |
           find . -mindepth 1 -maxdepth 1 \( ! -name "gh-pages" -type d -exec rm -fr "{}" \; \) -o \( -type f -exec rm -f "{}" \; \)
           shopt -s dotglob && mv -v ./gh-pages/* .
           git branch -m gh-pages gh-pages.old || true
+          ls -aAlv --group-directories-first . || true
 
       - name: Upload packages
         if: github.ref_name != 'master' || github.event_name == 'schedule'

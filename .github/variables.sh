@@ -47,21 +47,23 @@ if [[ "$GITHUB_REF" =~ ^refs/tags/.* ]] || [ "$GITHUB_REF_NAME" = "master" ]; th
             exit 1
         fi
     fi
-
-    {
-        echo "CORE_REF=$CORE_REF"
-        echo "WEB_REF=$WEB_REF"
-        echo "FTL_REF=$FTL_REF"
-    } >> "$GITHUB_OUTPUT"
 else
     if [ -z "$CORE_DEV_BRANCH" ] || [ -z "$WEB_DEV_BRANCH" ] || [ -z "$FTL_DEV_BRANCH" ]; then
         echo "Development branches are not set"
         exit 1
     fi
 
-    {
-        echo "CORE_REF=$CORE_DEV_BRANCH"
-        echo "WEB_REF=$WEB_DEV_BRANCH"
-        echo "FTL_REF=$FTL_DEV_BRANCH"
-    } >> "$GITHUB_OUTPUT"
+    CORE_REF=$CORE_DEV_BRANCH
+    WEB_REF=$WEB_DEV_BRANCH
+    FTL_REF=$FTL_DEV_BRANCH
 fi
+
+[ -n "$CORE_REF_OVERRIDE" ] && CORE_REF="$CORE_REF_OVERRIDE"
+[ -n "$WEB_REF_OVERRIDE" ] && WEB_REF="$WEB_REF_OVERRIDE"
+[ -n "$FTL_REF_OVERRIDE" ] && FTL_REF="$FTL_REF_OVERRIDE"
+
+{
+    echo "CORE_REF=$CORE_REF"
+    echo "WEB_REF=$WEB_REF"
+    echo "FTL_REF=$FTL_REF"
+} >> "$GITHUB_OUTPUT"
