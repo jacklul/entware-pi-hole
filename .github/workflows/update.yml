@@ -139,7 +139,6 @@ jobs:
           context: ./dev/FTL
           dockerfile: ./dev/FTL/.github/Dockerfile
           run_tests: false
-          extract_binary: false
 
       - name: Set ok status
         if: ${{ steps.patch-core.outcome == 'success' && steps.patch-web.outcome == 'success' && steps.patch-FTL.outcome == 'success' && steps.build-FTL.outcome == 'success' }}

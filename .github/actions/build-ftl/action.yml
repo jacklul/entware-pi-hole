@@ -21,9 +21,6 @@ inputs:
   run_tests:
     required: false
     default: true
-  extract_binary:
-    required: false
-    default: true
 
 runs:
   using: composite
@@ -55,19 +52,16 @@ runs:
           "BUILD_OPTS=${{ inputs.build_opts }}"
 
     - name: Test FTL
-      if: inputs.run_tests == true && steps.build-ftl.outcome == 'success'
+      if: inputs.run_tests == 'true' && steps.build-ftl.outcome == 'success'
       uses: docker/build-push-action@v6
-      with: |
-        platforms: ${{ inputs.platform }}
+      env:
+        DOCKER_BUILD_SUMMARY: false
+      with:
+        platforms: "${{ inputs.platform }}"
         pull: true
         push: false
-        context: .
+        context: "${{ inputs.context }}"
         target: tests
         file: "${{ inputs.dockerfile }}"
-
-    - name: Extract FTL binary
-      if: inputs.extract_binary == true && steps.build-ftl.outcome == 'success'
-      run: |
-        tar -xf "${{ inputs.context }}/build.tar" pihole-FTL -C "${{ inputs.context }}"
-        mv "${{ inputs.context }}/pihole-FTL" "${{ inputs.context }}/pihole-FTL-${{ inputs.platform }}"
-        sha1sum "${{ inputs.context }}/pihole-FTL-${{ inputs.platform }}" > "${{ inputs.context }}/pihole-FTL-${{ inputs.platform }}.sha1"
+        build-args: |
+          "CI_ARCH=${{ inputs.platform }}"

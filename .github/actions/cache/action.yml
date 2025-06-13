@@ -24,7 +24,7 @@ runs:
   using: composite
 
   steps:
-    - name: Create hashes for cache key
+    - name: Create hashes and set variables
       id: hashes
       shell: bash
       run: |
@@ -33,17 +33,19 @@ runs:
         fi
         echo "GIT_BRANCH=$([ -n "$GIT_TAG" ] && echo "master" || git -C "${{ inputs.git_path }}" rev-parse --abbrev-ref HEAD)" >> $GITHUB_OUTPUT
         echo "GIT_HASH=$(git -C "${{ inputs.git_path }}" rev-parse HEAD | cut -c1-8)" >> $GITHUB_OUTPUT
-        CHECKSUM_PATCHES="$(find ./patches/ -type f -name '${{ inputs.patches_prefix }}-*.patch' -print0 | xargs -0 sha1sum 2> /dev/null)"
-        CHECKSUM_SCRIPTS="$(find ./patches/ -type f -name '${{ inputs.patches_prefix }}-*.sh' -print0 | xargs -0 sha1sum 2> /dev/null)"
+        CHECKSUM_PATCHES="$(find ./patches/ -type f \( -name '${{ inputs.patches_prefix }}-*.patch' -o -name '${{ inputs.patches_prefix }}-*.sh' \) -print0 | xargs -0 sha1sum 2> /dev/null)"
         CHECKSUM_CHECKS="$(find ./checks/ -type f -name '${{ inputs.patches_prefix }}-*.sh' -print0 | xargs -0 sha1sum 2> /dev/null)"
-        echo -e "$CHECKSUM_PATCHES\n$CHECKSUM_SCRIPTS\n$CHECKSUM_CHECKS"
-        echo "PATCHES=$(echo -e "$CHECKSUM_PATCHES\n$CHECKSUM_SCRIPTS\n$CHECKSUM_CHECKS" | sha1sum | cut -c1-8)" >> $GITHUB_OUTPUT
+        CHECKSUM_SCRIPTS="$(find  ./scripts/ ./.github/ -type f -name '*.sh' -print0 | xargs -0 sha1sum 2> /dev/null)"
+        CHECKSUM_WORKFLOWS="$(find ./.github/workflows/ ./.github/actions/ -type f -name '*.yml' -print0 | xargs -0 sha1sum 2> /dev/null)"
+        CHECKSUM="$CHECKSUM_PATCHES\n$CHECKSUM_CHECKS\n$CHECKSUM_SCRIPTS\n$CHECKSUM_WORKFLOWS"
+        echo -e "$CHECKSUM"
+        echo "HASHES=$(echo -e "$CHECKSUM" | sha1sum | cut -c1-8)" >> $GITHUB_OUTPUT
         cat $GITHUB_OUTPUT
 
     - name: Build cache key
       id: key
       shell: bash
-      run: echo "CACHE_KEY=${{ inputs.key_prefix }}${{ steps.hashes.outputs.GIT_BRANCH }}-${{ steps.hashes.outputs.GIT_HASH }}-${{ steps.hashes.outputs.PATCHES }}" >> $GITHUB_OUTPUT
+      run: echo "CACHE_KEY=${{ inputs.key_prefix }}${{ steps.hashes.outputs.GIT_BRANCH }}-${{ steps.hashes.outputs.GIT_HASH }}-${{ steps.hashes.outputs.HASHES }}" >> $GITHUB_OUTPUT
 
     - name: Check if cache already exists
       id: cache-check
