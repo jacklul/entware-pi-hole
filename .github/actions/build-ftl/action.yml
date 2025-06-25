@@ -21,47 +21,53 @@ inputs:
   run_tests:
     required: false
     default: true
+  extract_binary:
+    required: false
+    default: true
 
 runs:
   using: composite
 
   steps:
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+
     - name: Set up Docker Buildx
-      id: setup-docker-buildx
       uses: docker/setup-buildx-action@v3
 
     - name: Build FTL 
-      if: steps.setup-docker-buildx.outcome == 'success'
       id: build-ftl
-      uses: docker/build-push-action@v6
-      env:
-        DOCKER_BUILD_SUMMARY: false
-      with:
-        platforms: "${{ inputs.platform }}"
-        pull: true
-        push: false
-        context: "${{ inputs.context }}"
-        target: result
-        file: "${{ inputs.dockerfile }}"
-        outputs: |
-          type=tar,dest=${{ inputs.context }}/build.tar
-        build-args: |
-          "CI_ARCH=${{ inputs.platform }}"
-          "GIT_BRANCH=${{ inputs.git_branch }}"
-          "GIT_TAG=${{ inputs.git_tag }}"
-          "BUILD_OPTS=${{ inputs.build_opts }}"
+      shell: bash
+      run: |
+        docker buildx build \
+          --platform ${{ inputs.platform }} \
+          --pull \
+          --load \
+          --build-arg "CI_ARCH=${{ inputs.platform }}" \
+          --build-arg "GIT_BRANCH=${{ inputs.git_branch }}" \
+          --build-arg "GIT_TAG=${{ inputs.git_tag }}" \
+          --build-arg "BUILD_OPTS=${{ inputs.build_opts }}" \
+          --tag ftl-builder:local \
+          --file "${{ inputs.dockerfile }}" "${{ inputs.context }}"
 
     - name: Test FTL
       if: inputs.run_tests == 'true' && steps.build-ftl.outcome == 'success'
-      uses: docker/build-push-action@v6
-      env:
-        DOCKER_BUILD_SUMMARY: false
-      with:
-        platforms: "${{ inputs.platform }}"
-        pull: true
-        push: false
-        context: "${{ inputs.context }}"
-        target: tests
-        file: "${{ inputs.dockerfile }}"
-        build-args: |
-          "CI_ARCH=${{ inputs.platform }}"
+      working-directory: ${{ inputs.context }}
+      shell: bash
+      run: |
+        docker run --rm \
+          --platform ${{ inputs.platform }} \
+          --env CI_ARCH=${{ inputs.platform }} \
+          --env BUILD_OPTS=${{ inputs.build_opts }} \
+          --env STATIC=true \
+          ftl-builder:local \
+          /bin/bash -c "test/arch_test.sh && test/run.sh"
+
+    - name: Extract FTL binary
+      if: inputs.extract_binary == 'true' && steps.build-ftl.outcome == 'success'
+      working-directory: ${{ inputs.context }}
+      shell: bash
+      run: |
+        docker create --platform ${{ inputs.platform }} --name temp-container ftl-builder:local
+        docker cp temp-container:/pihole-FTL ./pihole-FTL
+        docker rm temp-container
