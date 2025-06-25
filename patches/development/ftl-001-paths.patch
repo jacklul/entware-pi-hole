@@ -6,8 +6,8 @@ index 138c1c6c..89ac3a1d 100644
  
  int api_action_gravity(struct ftl_conn *api)
  {
--	return run_and_stream_command(api, "/usr/local/bin/pihole", (const char *const []){ "pihole", "-g", NULL });
-+	return run_and_stream_command(api, "/opt/bin/pihole", (const char *const []){ "pihole", "-g", NULL });
+-	return run_and_stream_command(api, "/usr/local/bin/pihole", (const char *const []){ "pihole", "-g", NULL }, "FORCE_COLOR");
++	return run_and_stream_command(api, "/opt/bin/pihole", (const char *const []){ "pihole", "-g", NULL }, "FORCE_COLOR");
  }
  
  int api_action_restartDNS(struct ftl_conn *api)
