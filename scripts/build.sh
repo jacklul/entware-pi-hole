@@ -19,7 +19,7 @@ search_dir="$(realpath "$search_dir")"
 
 core_path="$(find "$search_dir" -type f -name "gravity.sh" -print -quit)"
 web_path="$(find "$search_dir" -type f -name "index.lp" -print -quit)"
-ftl_path="$(find "$search_dir" -type f -name "pihole-FTL" -print -quit)"
+ftl_path="$(find "$search_dir" -type f -name "pihole-FTL" -size +1M -print -quit)"
 
 [ -z "$core_path" ] && { echo "Error: Could not find Pi-hole's core directory"; exit 1; }
 [ -z "$web_path" ] && { echo "Error: Could not find Pi-hole's web directory"; exit 1; }
