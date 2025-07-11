@@ -286,7 +286,7 @@ index c50223b1..8e0700f9 100644
  		fputs("\n", pihole_conf);
 @@ -512,7 +512,7 @@ bool __attribute__((const)) write_dnsmasq_config(struct config *conf, bool test_
  	{
- 		fputs("# Never forward A or AAAA queries for plain names, without\n",pihole_conf);
+ 		fputs("# Never forward queries for plain names, without\n",pihole_conf);
  		fputs("# dots or domain parts, to upstream nameservers. If the name\n", pihole_conf);
 -		fputs("# is not known from /etc/hosts or DHCP, NXDOMAIN is returned\n", pihole_conf);
 +		fputs("# is not known from /opt/etc/hosts or DHCP, NXDOMAIN is returned\n", pihole_conf);
