@@ -1,8 +1,17 @@
 diff --git a/advanced/Scripts/api.sh b/advanced/Scripts/api.sh
-index 5843c585..32628042 100755
+index e5eacd41..3f44c7e0 100755
 --- a/advanced/Scripts/api.sh
 +++ b/advanced/Scripts/api.sh
-@@ -92,8 +92,8 @@ LoginAPI() {
+@@ -22,7 +22,7 @@ TestAPIAvailability() {
+     local chaos_api_list authResponse authStatus authData apiAvailable DNSport
+ 
+     # as we are running locally, we can get the port value from FTL directly
+-    PI_HOLE_SCRIPT_DIR="/opt/pihole"
++    PI_HOLE_SCRIPT_DIR="/opt/share/pihole"
+     utilsfile="${PI_HOLE_SCRIPT_DIR}/utils.sh"
+     # shellcheck source=./advanced/Scripts/utils.sh
+     . "${utilsfile}"
+@@ -118,8 +118,8 @@ LoginAPI() {
      fi
  
      # Try to read the CLI password (if enabled and readable by the current user)
@@ -486,9 +495,9 @@ index d1664394..a9adf9c0 100755
  
  # Check gravity temp directory
  if [ ! -d "${GRAVITY_TMPDIR}" ] || [ ! -w "${GRAVITY_TMPDIR}" ]; then
--  echo -e "  ${COL_LIGHT_RED}Gravity temporary directory does not exist or is not a writeable directory, falling back to /tmp. ${COL_NC}"
+-  echo -e "  ${COL_RED}Gravity temporary directory does not exist or is not a writeable directory, falling back to /tmp. ${COL_NC}"
 -  GRAVITY_TMPDIR="/tmp"
-+  echo -e "  ${COL_LIGHT_RED}Gravity temporary directory does not exist or is not a writeable directory, falling back to /opt/tmp. ${COL_NC}"
++  echo -e "  ${COL_RED}Gravity temporary directory does not exist or is not a writeable directory, falling back to /opt/tmp. ${COL_NC}"
 +  GRAVITY_TMPDIR="/opt/tmp"
  fi
  
