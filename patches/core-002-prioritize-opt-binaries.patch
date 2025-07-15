@@ -9,6 +9,6 @@ index 98f478a3..8eb89d39 100755
 +# Prioritize /opt binaries
 +PATH="/opt/sbin:/opt/bin:$PATH:/opt/share/pihole/polyfill"
 +
- readonly PI_HOLE_SCRIPT_DIR="/opt/share/pihole"
+ PI_HOLE_SCRIPT_DIR="/opt/share/pihole"
  
  # PI_HOLE_BIN_DIR is not readonly here because in some functions (checkout),
