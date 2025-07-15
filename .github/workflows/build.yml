@@ -263,11 +263,10 @@ jobs:
           git_branch: ${{ steps.variables.outputs.GIT_BRANCH }}
           git_tag: ${{ steps.variables.outputs.GIT_TAG }}
 
-      - name: Extract FTL binary and generate checksum file
+      - name: Rename FTL binary and generate checksum file
         if: steps.cache.outputs.cache-hit != 'true'
         working-directory: ./stage
         run: |
-          tar -xf ./build.tar pihole-FTL
           mv pihole-FTL "pihole-FTL-${{ matrix.architecture }}"
           sha1sum pihole-FTL-* > "pihole-FTL-${{ matrix.architecture }}.sha1"
 
