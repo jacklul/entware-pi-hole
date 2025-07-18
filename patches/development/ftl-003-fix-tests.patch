@@ -63,108 +63,92 @@ diff --git a/test/pihole.toml b/test/pihole.toml
 index 0b433266..85d8a45c 100644
 --- a/test/pihole.toml
 +++ b/test/pihole.toml
-@@ -108,8 +108,8 @@
-   # upstream nameservers
+@@ -137,7 +137,7 @@
+   #     true or false
    domainNeeded = false
  
 -  # If set, the domain is added to simple names (without a period) in /etc/hosts in the
--  # same way as for DHCP-derived names
-+  # If set, the domain is added to simple names (without a period) in /opt/etc/hosts in
-+  # the same way as for DHCP-derived names
-   expandHosts = false
- 
-   # The DNS domain used by your Pi-hole.
-@@ -134,8 +134,8 @@
++  # If set, the domain is added to simple names (without a period) in /opt/etc/hosts in the
+   # same way as for DHCP-derived names
+   #
+   # Allowed values are:
+@@ -171,7 +171,7 @@
    domain = "lan"
  
    # Should all reverse lookups for private IP ranges (i.e., 192.168.x.y, etc) which are
 -  # not found in /etc/hosts or the DHCP leases file be answered with "no such domain"
--  # rather than being forwarded upstream?
-+  # not found in /opt/etc/hosts or the DHCP leases file be answered with "no such
-+  # domain" rather than being forwarded upstream?
-   bogusPriv = true
- 
-   # Validate DNS replies using DNSSEC?
-@@ -388,13 +388,13 @@
++  # not found in /opt/etc/hosts or the DHCP leases file be answered with "no such domain"
+   # rather than being forwarded upstream?
+   #
+   # Allowed values are:
+@@ -501,7 +501,7 @@
      # to when FTL has finished starting (start of the daemon + possible delay by
      # DELAY_STARTUP) then it will advance in steps of the rate-limiting interval. If a
      # client reaches the maximum number of queries it will be blocked until the end of the
 -    # current interval. This will be logged to /var/log/pihole/FTL.log, e.g. Rate-limiting
--    # 10.0.1.39 for at least 44 seconds. If the client continues to send queries while
--    # being blocked already and this number of queries during the blocking exceeds the
--    # limit the client will continue to be blocked until the end of the next interval
--    # (FTL.log will contain lines like Still rate-limiting 10.0.1.39 as it made additional
--    # 5007 queries). As soon as the client requests less than the set limit, it will be
--    # unblocked (Ending rate-limitation of 10.0.1.39).
-+    # current interval. This will be logged to /opt/var/log/pihole/FTL.log, e.g.
-+    # Rate-limiting 10.0.1.39 for at least 44 seconds. If the client continues to send
-+    # queries while being blocked already and this number of queries during the blocking
-+    # exceeds the limit the client will continue to be blocked until the end of the next
-+    # interval (FTL.log will contain lines like Still rate-limiting 10.0.1.39 as it made
-+    # additional 5007 queries). As soon as the client requests less than the set limit, it
-+    # will be unblocked (Ending rate-limitation of 10.0.1.39).
-     # Rate-limiting may be disabled altogether by setting both values to zero (this
-     # results in the same behavior as before FTL v5.7).
-     # How many queries are permitted...
++    # current interval. This will be logged to /opt/var/log/pihole/FTL.log, e.g. Rate-limiting
+     # 10.0.1.39 for at least 44 seconds. If the client continues to send queries while
+     # being blocked already and this number of queries during the blocking exceeds the
+     # limit the client will continue to be blocked until the end of the next interval
 @@ -665,14 +665,14 @@
      #
-     # Possible values are:
-     #     <valid TLS certificate file (*.pem)>
+     # Allowed values are:
+     #     A valid TLS certificate file (*.pem)
 -    cert = "/etc/pihole/test.pem" ### CHANGED, default = "/etc/pihole/tls.pem"
 +    cert = "/etc/pihole/test.pem" ### CHANGED, default = "/opt/etc/pihole/tls.pem"
  
    [webserver.paths]
      # Server root on the host
      #
-     # Possible values are:
-     #     <valid path>
+     # Allowed values are:
+     #     A valid path
 -    webroot = "/var/www/html"
 +    webroot = "/opt/share/pihole/www"
  
      # Sub-directory of the root containing the web interface
      #
-@@ -749,7 +749,7 @@
-     app_sudo = false
+@@ -1095,7 +1095,7 @@
  
-     # Should FTL create a temporary CLI password? This password is stored in clear in
--    # /etc/pihole and can be used by the CLI (pihole ...  commands) to authenticate
-+    # /opt/etc/pihole and can be used by the CLI (pihole ...  commands) to authenticate
-     # against the API. Note that the password is only valid for the current session and
-     # regenerated on each FTL restart. Sessions initiated with this password cannot modify
-     # the Pi-hole configuration (change passwords, etc.) for security reasons but can
+     # Should FTL create a temporary CLI password?
+     #
+-    # This password is stored in clear in /etc/pihole and can be used by the CLI (pihole
++    # This password is stored in clear in /opt/etc/pihole and can be used by the CLI (pihole
+     # ...  commands) to authenticate against the API. Note that the password is only valid
+     # for the current session and regenerated on each FTL restart. Sessions initiated with
+     # this password cannot modify the Pi-hole configuration (change passwords, etc.) for
 @@ -822,32 +822,32 @@
    #
-   # Possible values are:
-   #     <any writable file>
+   # Allowed values are:
+   #     Any writable file
 -  pid = "/run/pihole-FTL.pid"
 +  pid = "/opt/var/run/pihole-FTL.pid"
  
    # The location of FTL's long-term database
    #
-   # Possible values are:
-   #     <any FTL database>
+   # Allowed values are:
+   #     Any FTL database
 -  database = "/etc/pihole/pihole-FTL.db"
 +  database = "/opt/etc/pihole/pihole-FTL.db"
  
    # The location of Pi-hole's gravity database
    #
-   # Possible values are:
-   #     <any Pi-hole gravity database>
+   # Allowed values are:
+   #     Any Pi-hole gravity database
 -  gravity = "/etc/pihole/gravity.db"
 +  gravity = "/opt/etc/pihole/gravity.db"
  
    # A temporary directory where Pi-hole can store files during gravity updates. This
    # directory must be writable by the user running gravity (typically pihole).
    #
-   # Possible values are:
-   #     <any existing world-writable writable directory>
+   # Allowed values are:
+   #     Any existing world-writable writable directory
 -  gravity_tmp = "/tmp"
 +  gravity_tmp = "/opt/tmp"
  
    # The database containing MAC -> Vendor information for the network table
    #
-   # Possible values are:
-   #     <any Pi-hole macvendor database>
+   # Allowed values are:
+   #     Any Pi-hole macvendor database
 -  macvendor = "/etc/pihole/macvendor.db"
 +  macvendor = "/opt/etc/pihole/macvendor.db"
  
@@ -172,50 +156,51 @@ index 0b433266..85d8a45c 100644
    # for debugging purposes only. If you don't know what this is, you don't need it.
 @@ -871,19 +871,19 @@
      #
-     # Possible values are:
-     #     <any writable file>
+     # Allowed values are:
+     #     any writable file
 -    ftl = "/var/log/pihole/FTL.log"
 +    ftl = "/opt/var/log/pihole/FTL.log"
  
      # The log file used by the embedded dnsmasq DNS server
      #
-     # Possible values are:
-     #     <any writable file>
+     # Allowed values are:
+     #     Any writable file
 -    dnsmasq = "/var/log/pihole/pihole.log"
 +    dnsmasq = "/opt/var/log/pihole/pihole.log"
  
      # The log file used by the webserver
      #
-     # Possible values are:
-     #     <any writable file>
+     # Allowed values are:
+     #     Any writable file
 -    webserver = "/var/log/pihole/webserver.log"
 +    webserver = "/opt/var/log/pihole/webserver.log"
  
  [misc]
    # Using privacy levels you can specify which level of detail you want to see in your
-@@ -994,11 +994,11 @@
-   # malfunctioning addr2line can prevent from generating any backtrace at all.
+@@ -1298,12 +1298,12 @@
+   #     true or false
    addr2line = true
  
 -  # Should FTL load additional dnsmasq configuration files from /etc/dnsmasq.d/?
 +  # Should FTL load additional dnsmasq configuration files from /opt/etc/dnsmasq.d/?
+   #
    # Warning: This is an advanced setting and should only be used with care.
    # Incorrectly formatted or config files specifying options which can only be defined
    # once can result in conflicts with the automatic configuration of Pi-hole (see
 -  # /etc/pihole/dnsmasq.conf) and may stop DNS resolution from working.
 +  # /opt/etc/pihole/dnsmasq.conf) and may stop DNS resolution from working.
-   etc_dnsmasq_d = true ### CHANGED, default = false
- 
-   # Additional lines to inject into the generated dnsmasq configuration.
-@@ -1079,7 +1079,7 @@
-   # Print config parsing details
+   #
+   # Allowed values are:
+   #     true or false
+@@ -1547,7 +1547,7 @@
+   #     true or false
    config = true ### CHANGED, default = false
  
 -  # Debug monitoring of /etc/pihole filesystem events
 +  # Debug monitoring of /opt/etc/pihole filesystem events
-   inotify = true ### CHANGED, default = false
- 
-   # Debug monitoring of the webserver (CivetWeb) events
+   #
+   # Allowed values are:
+   #     true or false
 diff --git a/test/test_suite.bats b/test/test_suite.bats
 index 1891abde..52aa6f3d 100644
 --- a/test/test_suite.bats
