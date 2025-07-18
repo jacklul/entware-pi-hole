@@ -63,33 +63,49 @@ diff --git a/test/pihole.toml b/test/pihole.toml
 index 0b433266..85d8a45c 100644
 --- a/test/pihole.toml
 +++ b/test/pihole.toml
-@@ -137,7 +137,7 @@
+@@ -137,8 +137,8 @@
    #     true or false
    domainNeeded = false
  
 -  # If set, the domain is added to simple names (without a period) in /etc/hosts in the
-+  # If set, the domain is added to simple names (without a period) in /opt/etc/hosts in the
-   # same way as for DHCP-derived names
+-  # same way as for DHCP-derived names
++  # If set, the domain is added to simple names (without a period) in /opt/etc/hosts in
++  # the same way as for DHCP-derived names
    #
    # Allowed values are:
-@@ -171,7 +171,7 @@
+   #     true or false
+@@ -171,8 +171,8 @@
    domain = "lan"
  
    # Should all reverse lookups for private IP ranges (i.e., 192.168.x.y, etc) which are
 -  # not found in /etc/hosts or the DHCP leases file be answered with "no such domain"
-+  # not found in /opt/etc/hosts or the DHCP leases file be answered with "no such domain"
-   # rather than being forwarded upstream?
+-  # rather than being forwarded upstream?
++  # not found in /opt/etc/hosts or the DHCP leases file be answered with "no such
++  # domain" rather than being forwarded upstream?
    #
    # Allowed values are:
-@@ -501,7 +501,7 @@
+   #     true or false
+@@ -501,13 +501,13 @@
      # to when FTL has finished starting (start of the daemon + possible delay by
      # DELAY_STARTUP) then it will advance in steps of the rate-limiting interval. If a
      # client reaches the maximum number of queries it will be blocked until the end of the
 -    # current interval. This will be logged to /var/log/pihole/FTL.log, e.g. Rate-limiting
-+    # current interval. This will be logged to /opt/var/log/pihole/FTL.log, e.g. Rate-limiting
-     # 10.0.1.39 for at least 44 seconds. If the client continues to send queries while
-     # being blocked already and this number of queries during the blocking exceeds the
-     # limit the client will continue to be blocked until the end of the next interval
+-    # 10.0.1.39 for at least 44 seconds. If the client continues to send queries while
+-    # being blocked already and this number of queries during the blocking exceeds the
+-    # limit the client will continue to be blocked until the end of the next interval
+-    # (FTL.log will contain lines like Still rate-limiting 10.0.1.39 as it made additional
+-    # 5007 queries). As soon as the client requests less than the set limit, it will be
+-    # unblocked (Ending rate-limitation of 10.0.1.39).
++    # current interval. This will be logged to /opt/var/log/pihole/FTL.log, e.g.
++    # Rate-limiting 10.0.1.39 for at least 44 seconds. If the client continues to send
++    # queries while being blocked already and this number of queries during the blocking
++    # exceeds the limit the client will continue to be blocked until the end of the next
++    # interval (FTL.log will contain lines like Still rate-limiting 10.0.1.39 as it made
++    # additional 5007 queries). As soon as the client requests less than the set limit, it
++    # will be unblocked (Ending rate-limitation of 10.0.1.39).
+     #
+     # Rate-limiting may be disabled altogether by setting both values to zero (this
+     # results in the same behavior as before FTL v5.7).
 @@ -665,14 +665,14 @@
      #
      # Allowed values are:
@@ -107,15 +123,24 @@ index 0b433266..85d8a45c 100644
  
      # Sub-directory of the root containing the web interface
      #
-@@ -1095,7 +1095,7 @@
+@@ -1095,11 +1095,12 @@
  
      # Should FTL create a temporary CLI password?
      #
 -    # This password is stored in clear in /etc/pihole and can be used by the CLI (pihole
-+    # This password is stored in clear in /opt/etc/pihole and can be used by the CLI (pihole
-     # ...  commands) to authenticate against the API. Note that the password is only valid
-     # for the current session and regenerated on each FTL restart. Sessions initiated with
-     # this password cannot modify the Pi-hole configuration (change passwords, etc.) for
+-    # ...  commands) to authenticate against the API. Note that the password is only valid
+-    # for the current session and regenerated on each FTL restart. Sessions initiated with
+-    # this password cannot modify the Pi-hole configuration (change passwords, etc.) for
+-    # security reasons but can still use the API to query data and manage lists.
++    # This password is stored in clear in /opt/etc/pihole and can be used by the CLI
++    # (pihole ...  commands) to authenticate against the API. Note that the password is
++    # only valid for the current session and regenerated on each FTL restart. Sessions
++    # initiated with this password cannot modify the Pi-hole configuration (change
++    # passwords, etc.) for security reasons but can still use the API to query data and
++    # manage lists.
+     #
+     # Allowed values are:
+     #     true or false
 @@ -822,32 +822,32 @@
    #
    # Allowed values are:
