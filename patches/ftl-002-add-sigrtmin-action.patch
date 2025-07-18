@@ -6,7 +6,7 @@ index 363da394..02d6ae2f 100644
  	if(argc == 2 && strcmp(argv[1], "sigtest") == 0)
  		exit(sigtest());
  
-+	// Print SIGRTMIN value (for use with pihole reload-lists)
++	// Print SIGRTMIN value (for use with 'pihole reloadlists' command)
 +	if(argc == 2 && strcmp(argv[1], "sigrtmin") == 0)
 +		exit(sigrtmin());
 +
