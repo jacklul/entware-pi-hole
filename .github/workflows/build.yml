@@ -16,8 +16,6 @@ on:
       - tests/**
       - files/**
       - build.env
-    #tags:
-    #  - '[0-9]+.[0-9]+.[0-9]+-*'
   pull_request:
     paths:
       - .github/actions/**/*.yml
@@ -29,27 +27,33 @@ on:
       - tests/**
       - files/**
       - build.env
-  #release:
-  #  types: [published]
   workflow_dispatch:
     inputs:
       CORE_REF:
+        type: string
         required: false
         default: ''
+        description: Commit, branch or tag (pi-hole/pi-hole)
       WEB_REF:
+        type: string
         required: false
         default: ''
+        description: Commit, branch or tag (pi-hole/web)
       FTL_REF:
+        type: string
         required: false
         default: ''
-
-env:
-  SELF_REF: ${{ github.event_name == 'schedule' && 'develop' || github.ref_name }}
+        description: Commit, branch or tag (pi-hole/FTL)
+      SCHEDULED:
+        type: boolean
+        required: false
+        default: false
+        description: Build 'dev' packages (schedule)
 
 jobs:
   variables:
-    concurrency: variables-${{ github.run_id }}
     runs-on: ubuntu-latest
+    if: github.event_name != 'schedule'
 
     env:
       ENV_FILE: ./build.env
@@ -63,8 +67,6 @@ jobs:
     steps:
       - name: Checkout own repository
         uses: actions/checkout@v4
-        with:
-          ref: ${{ env.SELF_REF }}
 
       - name: Set outputs
         id: variables
@@ -75,6 +77,18 @@ jobs:
           export FTL_REF_OVERRIDE=${{ github.event.inputs.FTL_REF }}
           bash ./.github/variables.sh
           cat $GITHUB_OUTPUT
+
+  schedule:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+
+    steps:
+      - name: Trigger build on develop branch
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: build.yml
+          ref: develop
+          inputs: '{ "SCHEDULED": true }'
 
   build-core:
     concurrency: build-core-${{ github.run_id }}
@@ -87,8 +101,6 @@ jobs:
     steps:
       - name: Checkout own repository
         uses: actions/checkout@v4
-        with:
-          ref: ${{ env.SELF_REF }}
 
       - name: Checkout pi-hole/pi-hole repository
         uses: actions/checkout@v4
@@ -106,7 +118,7 @@ jobs:
         with:
           key_prefix: core-
           patches_prefix: core
-          ref: ${{ env.SELF_REF }}
+          ref: ${{ github.ref_name }}
 
       - name: Apply patches
         if: steps.cache.outputs.cache-hit != 'true'
@@ -135,8 +147,6 @@ jobs:
     steps:
       - name: Checkout own repository
         uses: actions/checkout@v4
-        with:
-          ref: ${{ env.SELF_REF }}
 
       - name: Checkout pi-hole/web repository
         uses: actions/checkout@v4
@@ -154,7 +164,7 @@ jobs:
         with:
           key_prefix: web-
           patches_prefix: web
-          ref: ${{ env.SELF_REF }}
+          ref: ${{ github.ref_name }}
 
       - name: Apply patches
         if: steps.cache.outputs.cache-hit != 'true'
@@ -216,8 +226,6 @@ jobs:
     steps:
       - name: Checkout own repository
         uses: actions/checkout@v4
-        with:
-          ref: ${{ env.SELF_REF }}
 
       - name: Checkout pi-hole/FTL repository
         uses: actions/checkout@v4
@@ -235,7 +243,7 @@ jobs:
         with:
           key_prefix: ftl-${{ matrix.architecture }}-
           patches_prefix: ftl
-          ref: ${{ env.SELF_REF }}
+          ref: ${{ github.ref_name }}
           files: |
             ./stage/pihole-FTL-*
             ./stage/.version
@@ -297,8 +305,6 @@ jobs:
     steps:
       - name: Checkout own repository
         uses: actions/checkout@v4
-        with:
-          ref: ${{ env.SELF_REF }}
 
       - name: Download core artifact
         uses: actions/download-artifact@v4
@@ -319,7 +325,7 @@ jobs:
           path: ./artifacts/ftl
 
       - name: Add '-dev' to package name
-        if: github.ref_name == 'develop' || github.event_name == 'schedule'
+        if: github.ref_name == 'develop'
         run: sed '/^Package:/ s/$/-dev/' -i ./files/CONTROL/control
 
       - name: Build packages
@@ -347,12 +353,12 @@ jobs:
           include-hidden-files: true
 
       - name: Check if same dev package was already built
-        if: github.event_name == 'schedule'
+        if: github.event.inputs.SCHEDULED
         id: check
         uses: ./.github/actions/dev-check
 
       - name: Set versions
-        if: github.event_name != 'schedule' || steps.check.outputs.cache-hit != 'true'
+        if: ${{ !github.event.inputs.SCHEDULED || steps.check.outputs.cache-hit != 'true' }}
         id: versions
         run: |
           if [ -f ./.versions ]; then
@@ -406,7 +412,7 @@ jobs:
   upload:
     concurrency: upload
     needs: [build-packages]
-    if: needs.build-packages.outputs.IPK_VERSION != '' && (startsWith(github.ref, 'refs/tags/') || github.event_name == 'schedule' || github.ref_name == 'develop' || (github.ref_name == 'master' && github.event_name == 'workflow_dispatch')) && (github.event.inputs.CORE_REF == '' && github.event.inputs.WEB_REF == '' && github.event.inputs.FTL_REF == '')
+    if: needs.build-packages.outputs.IPK_VERSION != '' && (startsWith(github.ref, 'refs/tags/') || github.ref_name == 'develop' || (github.ref_name == 'master' && github.event_name == 'workflow_dispatch')) && (github.event.inputs.CORE_REF == '' && github.event.inputs.WEB_REF == '' && github.event.inputs.FTL_REF == '')
     runs-on: ubuntu-latest
 
     permissions:
@@ -416,7 +422,6 @@ jobs:
       - name: Checkout own repository
         uses: actions/checkout@v4
         with:
-          ref: ${{ env.SELF_REF }}
           fetch-depth: 0
           sparse-checkout: /.github/*
           sparse-checkout-cone-mode: false
@@ -491,7 +496,7 @@ jobs:
           ls -aAlv --group-directories-first . || true
 
       - name: Upload packages
-        if: github.ref_name != 'master' || github.event_name == 'schedule'
+        if: github.ref_name != 'master'
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages
