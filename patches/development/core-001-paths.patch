@@ -75,11 +75,11 @@ index 8c930f04..efb9dab1 100755
  source ${colfile}
  
  helpFunc() {
-diff --git a/advanced/Scripts/piholeARPTable.sh b/advanced/Scripts/piholeARPTable.sh
-index c04c5b33..ecf5365e 100755
---- a/advanced/Scripts/piholeARPTable.sh
-+++ b/advanced/Scripts/piholeARPTable.sh
-@@ -10,21 +10,21 @@
+diff --git a/advanced/Scripts/piholeNetworkFlush.sh b/advanced/Scripts/piholeNetworkFlush.sh
+index a8721476..df887226 100755
+--- a/advanced/Scripts/piholeNetworkFlush.sh
++++ b/advanced/Scripts/piholeNetworkFlush.sh
+@@ -9,13 +9,13 @@
  # This file is copyright under the latest version of the EUPL.
  # Please see LICENSE file for your rights under this license.
  
@@ -95,15 +95,6 @@ index c04c5b33..ecf5365e 100755
  utilsfile="${PI_HOLE_SCRIPT_DIR}/utils.sh"
  # shellcheck source=./advanced/Scripts/utils.sh
  source "${utilsfile}"
-
- # Determine database location
- DBFILE=$(getFTLConfigValue "files.database")
- if [ -z "$DBFILE" ]; then
--    DBFILE="/etc/pihole/pihole-FTL.db"
-+    DBFILE="/opt/etc/pihole/pihole-FTL.db"
- fi
- 
- flushARP(){
 diff --git a/advanced/Scripts/piholeDebug.sh b/advanced/Scripts/piholeDebug.sh
 index 7c558127..d2942f01 100755
 --- a/advanced/Scripts/piholeDebug.sh

@@ -1,0 +1,112 @@
+diff --git a/advanced/Scripts/piholeDebug.sh b/advanced/Scripts/piholeDebug.sh
+index f4226299..88df162e 100755
+--- a/advanced/Scripts/piholeDebug.sh
++++ b/advanced/Scripts/piholeDebug.sh
+@@ -1323,7 +1323,7 @@ upload_to_tricorder() {
+     local username="pihole"
+     # Set the permissions and owner
+     chmod 640 ${PIHOLE_DEBUG_LOG}
+-    chown "$USER":"${username}" ${PIHOLE_DEBUG_LOG}
++    chown "$USER":"$USER" ${PIHOLE_DEBUG_LOG}
+ 
+     # Let the user know debugging is complete with something strikingly visual
+     log_write ""
+diff --git a/advanced/Scripts/utils.sh b/advanced/Scripts/utils.sh
+index 63d51f87..c0dd180c 100755
+--- a/advanced/Scripts/utils.sh
++++ b/advanced/Scripts/utils.sh
+@@ -93,3 +93,35 @@ setFTLConfigValue(){
+         exit 1
+     esac
+ }
++
++# Return the user for chown operations
++getRunAsUser(){
++    # Forced by user
++    if [ -f /opt/etc/pihole/run_as_user ]; then
++        cat /opt/etc/pihole/run_as_user
++        return
++    fi
++
++    if [ -n "$(id -u pihole 2> /dev/null)" ] && [ -n "$(id -g pihole 2> /dev/null)" ]; then
++        echo "pihole"
++        return
++    fi
++
++    if [ -n "$(id -u nobody 2> /dev/null)" ] && [ -n "$(id -g nobody 2> /dev/null)" ]; then
++        echo "nobody"
++        return
++    fi
++}
++
++# Get user for chown operations
++#shellcheck disable=SC2155
++getChownUser(){
++    local chown_user="$(getRunAsUser)"
++
++    # Fallback to root user as this function must return something valid
++    if [ -z "$chown_user" ]; then
++        chown_user=0
++    fi
++
++    echo "$chown_user"
++}
+diff --git a/advanced/Templates/pihole-FTL-prestart.sh b/advanced/Templates/pihole-FTL-prestart.sh
+index 49b0f0d4..dde8214e 100755
+--- a/advanced/Templates/pihole-FTL-prestart.sh
++++ b/advanced/Templates/pihole-FTL-prestart.sh
+@@ -6,12 +6,14 @@ utilsfile="${PI_HOLE_SCRIPT_DIR}/utils.sh"
+ # shellcheck source="./advanced/Scripts/utils.sh"
+ . "${utilsfile}"
+ 
++chown_user="$(getChownUser)"
++
+ # Get file paths
+ FTL_PID_FILE="$(getFTLConfigValue files.pid)"
+ 
+ # Ensure that permissions are set so that pihole-FTL can edit all necessary files
+ mkdir -p /opt/var/log/pihole
+-chown -R pihole:pihole /opt/etc/pihole/ /opt/var/log/pihole/
++chown -R "$chown_user:$chown_user" /opt/etc/pihole/ /opt/var/log/pihole/
+ 
+ # allow all users read version file (and use pihole -v)
+ chmod 0644 /opt/etc/pihole/versions
+@@ -20,11 +22,11 @@ find /opt/etc/pihole/ /var/log/pihole/ -type f ! \( -name '*.pem' -o -name '*.crt' \
+ find /opt/etc/pihole/ -type f \( -name '*.pem' -o -name '*.crt' \) -exec chmod 0600 {} +
+ 
+ # Logrotate config file need to be owned by root
+-chown root:root /opt/etc/pihole/logrotate
++chown 0:0 /opt/etc/pihole/logrotate
+ 
+ # Touch files to ensure they exist (create if non-existing, preserve if existing)
+-[ -f "${FTL_PID_FILE}" ] || install -D -m 644 -o pihole -g pihole /dev/null "${FTL_PID_FILE}"
+-[ -f /opt/var/log/pihole/FTL.log ] || install -m 640 -o pihole -g pihole /dev/null /opt/var/log/pihole/FTL.log
+-[ -f /opt/var/log/pihole/pihole.log ] || install -m 640 -o pihole -g pihole /dev/null /opt/var/log/pihole/pihole.log
+-[ -f /opt/var/log/pihole/webserver.log ] || install -m 640 -o pihole -g pihole /dev/null /opt/var/log/pihole/webserver.log
+-[ -f /opt/etc/pihole/dhcp.leases ] || install -m 644 -o pihole -g pihole /dev/null /opt/etc/pihole/dhcp.leases
++[ -f "${FTL_PID_FILE}" ] || install -D -m 644 -o "$chown_user" -g "$chown_user" /dev/null "${FTL_PID_FILE}"
++[ -f /opt/var/log/pihole/FTL.log ] || install -m 640 -o "$chown_user" -g "$chown_user" /dev/null /opt/var/log/pihole/FTL.log
++[ -f /opt/var/log/pihole/pihole.log ] || install -m 640 -o "$chown_user" -g "$chown_user" /dev/null /opt/var/log/pihole/pihole.log
++[ -f /opt/var/log/pihole/webserver.log ] || install -m 640 -o "$chown_user" -g "$chown_user" /dev/null /opt/var/log/pihole/webserver.log
++[ -f /opt/etc/pihole/dhcp.leases ] || install -m 644 -o "$chown_user" -g "$chown_user" /dev/null /opt/etc/pihole/dhcp.leases
+diff --git a/gravity.sh b/gravity.sh
+index 3a7db5ae..56c9fd91 100755
+--- a/gravity.sh
++++ b/gravity.sh
+@@ -65,11 +65,14 @@ gravityOLDfile="${gravityDIR}/gravity_old.db"
+ gravityBCKdir="${gravityDIR}/gravity_backups"
+ gravityBCKfile="${gravityBCKdir}/gravity.db"
+ 
+-fix_owner_permissions() {
++# Set user:group for chown operations
++chown_user="$(getChownUser)"
++
++fix_owner_permissions() {
+   # Fix ownership and permissions for the specified file
+   # User and group are set to pihole:pihole
+   # Permissions are set to 664 (rw-rw-r--)
+-  chown pihole:pihole "${1}"
++  chown "$chown_user:$chown_user" "${1}"
+   chmod 664 "${1}"
+ 
+   # Ensure the containing directory is group writable
