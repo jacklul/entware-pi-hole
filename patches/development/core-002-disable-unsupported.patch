@@ -16,8 +16,8 @@ index 7c84771..f4125a9 100755
    exit 0
  }
  
-@@ -578,17 +578,17 @@ case "${1}" in
-   "--allow-wild" | "allow-wild"   ) listFunc "$@";;
+@@ -600,15 +600,15 @@ fi
+ case "${1}" in
    "-d" | "debug"                  ) debugFunc "$@";;
    "-f" | "flush"                  ) flushFunc "$@";;
 -  "-up" | "updatePihole"          ) updatePiholeFunc "$@";;
@@ -28,8 +28,6 @@ index 7c84771..f4125a9 100755
    "-l" | "logging"                ) piholeLogging "$@";;
 -  "uninstall"                     ) uninstallFunc;;
 +  "uninstall"                     ) unsupportedFunc;;
-   "enable"                        ) piholeEnable true "$2";;
-   "disable"                       ) piholeEnable false "$2";;
    "reloaddns"                     ) reloadDNS "reload";;
    "reloadlists"                   ) reloadDNS "reload-lists";;
    "setpassword"                   ) SetWebPassword "$@";;
@@ -38,4 +36,3 @@ index 7c84771..f4125a9 100755
    "updatechecker"                 ) shift; updateCheckFunc "$@";;
    "arpflush"                      ) arpFunc "$@";; # Deprecated, use networkflush instead
    "networkflush"                  ) networkFlush "$@";;
-   "-t" | "tail"                   ) tailFunc "$2";;

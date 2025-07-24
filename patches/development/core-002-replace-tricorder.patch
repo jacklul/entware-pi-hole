@@ -1,0 +1,105 @@
+diff --git a/advanced/Scripts/piholeDebug.sh b/advanced/Scripts/piholeDebug.sh
+index 741ff2f4..264e0e89 100755
+--- a/advanced/Scripts/piholeDebug.sh
++++ b/advanced/Scripts/piholeDebug.sh
+@@ -128,7 +128,7 @@ REQUIRED_FILES=("${PIHOLE_CRON_FILE}"
+ "${DNSMASQ_CONF}"
+ "${PIHOLE_VERSIONS_FILE}")
+ 
+-DISCLAIMER="This process collects information from your Pi-hole, and optionally uploads it to a unique and random directory on tricorder.pi-hole.net.
++DISCLAIMER="This process collects information from your Pi-hole, and optionally uploads it to a unique and random directory on lurking-cat.appspot.com/upload.
+ 
+ The intent of this script is to allow users to self-diagnose their installations.  This is accomplished by running tests against our software and providing the user with links to FAQ articles when a problem is detected.  Since we are a small team and Pi-hole has been growing steadily, it is our hope that this will help us spend more time on development.
+ 
+@@ -1307,8 +1362,8 @@ curl_to_tricorder() {
+     # Users can submit their debug logs using curl (encrypted)
+     log_write "    * Using ${COL_GREEN}curl${COL_NC} for transmission."
+     # transmit the log via TLS and store the token returned in a variable
+-    tricorder_token=$(curl --silent --fail --show-error --upload-file ${PIHOLE_DEBUG_LOG} https://tricorder.pi-hole.net 2>&1)
+-    if [[ "${tricorder_token}" != "https://tricorder.pi-hole.net/"* ]]; then
++    tricorder_token=$(curl --silent --fail --show-error --upload-file ${PIHOLE_DEBUG_LOG} https://lurking-cat.appspot.com/upload 2>&1)
++    if [[ "${tricorder_token}" != "https://lurking-cat.appspot.com/upload/"* ]]; then
+         log_write "    * ${COL_GREEN}curl${COL_NC} failed, contact Pi-hole support for assistance."
+         # Log curl error (if available)
+         if [ -n "${tricorder_token}" ]; then
+@@ -1332,7 +1387,7 @@ upload_to_tricorder() {
+     log_write "${TICK} ${COL_GREEN}** FINISHED DEBUGGING! **${COL_NC}\\n"
+ 
+     # Provide information on what they should do with their token
+-    log_write "   * The debug log can be uploaded to tricorder.pi-hole.net for sharing with developers only."
++    log_write "   * The debug log can be uploaded for sharing with Entware package developers only."
+ 
+     # If pihole -d is running automatically
+     if [[ "${AUTOMATED}" ]]; then
+@@ -1350,7 +1405,7 @@ upload_to_tricorder() {
+             # If they say yes, run our function for uploading the log
+             [yY][eE][sS]|[yY]) curl_to_tricorder;;
+             # If they choose no, just exit out of the script
+-            *) log_write "    * Log will ${COL_GREEN}NOT${COL_NC} be uploaded to tricorder.\\n    * A local copy of the debug log can be found at: ${COL_CYAN}${PIHOLE_DEBUG_LOG}${COL_NC}\\n";exit;
++            *) log_write "    * Log will ${COL_GREEN}NOT${COL_NC} be uploaded.\\n    * A local copy of the debug log can be found at: ${COL_CYAN}${PIHOLE_DEBUG_LOG}${COL_NC}\\n";exit;
+         esac
+     fi
+     # Check if tricorder.pi-hole.net is reachable and provide token
+@@ -1366,16 +1421,18 @@ upload_to_tricorder() {
+         log_write "${COL_PURPLE}*****************************************************************${COL_NC}"
+         log_write "${COL_PURPLE}*****************************************************************${COL_NC}"
+         log_write ""
+-        log_write "   * Provide the token above to the Pi-hole team for assistance at ${FORUMS_URL}"
++        log_write "   * Provide the token above to the developers for assistance at ${FORUMS_URL}"
+ 
+     # If no token was generated
+     else
+         # Show an error and some help instructions
+         log_write "${CROSS} ${COL_RED}There was an error uploading your debug log.${COL_NC}"
+-        log_write "   * Please try again or contact the Pi-hole team for assistance."
++        log_write "   * Please try again or contact the developers for assistance."
+     fi
+     # Finally, show where the log file is no matter the outcome of the function so users can look at it
+     log_write "   * A local copy of the debug log can be found at: ${COL_CYAN}${PIHOLE_DEBUG_LOG}${COL_NC}\\n"
++    log_write " ${COL_YELLOW}If you wish to share this log with the official Pi-hole developers then execute the following command:${COL_NC}"
++    log_write "  ${COL_CYAN}cat /opt/var/log/pihole/pihole_debug.log | pihole tricorder original${COL_NC}\\n"
+ }
+ 
+ # Run through all the functions we made
+diff --git a/pihole b/pihole
+index 1dfab754..0f253258 100755
+--- a/pihole
++++ b/pihole
+@@ -445,8 +445,17 @@ tricorderFunc() {
+     exit 1
+   fi
+ 
+-  tricorder_token=$(curl --silent --fail --show-error --upload-file "-" https://tricorder.pi-hole.net/upload < /dev/stdin 2>&1)
+-  if [[ "${tricorder_token}" != "https://tricorder.pi-hole.net/"* ]]; then
++  if [ "$1" = "original" ]; then
++    echo -e "${INFO} Uploading file to original Tricorder server"
++    tricorder_url="https://tricorder.pi-hole.net/upload"
++    tricorder_token_url="https://tricorder.pi-hole.net/"
++  else
++    tricorder_url="https://lurking-cat.appspot.com/upload"
++    tricorder_token_url="https://lurking-cat.appspot.com/upload/"
++  fi
++
++  tricorder_token=$(curl --silent --fail --show-error --upload-file "-" "$tricorder_url" < /dev/stdin 2>&1)
++  if [[ "${tricorder_token}" != "$tricorder_token_url"* ]]; then
+       echo -e "${CROSS} uploading failed, contact Pi-hole support for assistance."
+       # Log curl error (if available)
+       if [ -n "${tricorder_token}" ]; then
+@@ -486,7 +495,7 @@ Domain Options:
+ Debugging Options:
+   -d, debug           Start a debugging session
+                         Add '-c' or '--check-database' to include a Pi-hole database integrity check
+-                        Add '-a' to automatically upload the log to tricorder.pi-hole.net
++                        Add '-a' to automatically upload the log to lurking-cat.appspot.com/upload
+   -f, flush           Flush the Pi-hole log
+   -r, repair          Repair Pi-hole subsystems
+   -t, tail [arg]      View the live output of the Pi-hole log.
+@@ -551,7 +551,7 @@ case "${1}" in
+   "-c" | "chronometer"            ) chronometerFunc "$@";;
+   "-q" | "query"                  ) queryFunc "$@";;
+   "status"                        ) statusFunc "$2";;
+-  "tricorder"                     ) tricorderFunc;;
++  "tricorder"                     ) tricorderFunc "$2";;
+   "allow" | "allowlist"           ) listFunc "$@";;
+   "deny" | "denylist"             ) listFunc "$@";;
+   "--wild" | "wildcard"           ) listFunc "$@";;
