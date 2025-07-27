@@ -265,7 +265,7 @@ index 1891abde..52aa6f3d 100644
 -  run bash -c 'grep -c "INFO: Config file written to /etc/pihole/pihole.toml" /var/log/pihole/FTL.log'
 +  run bash -c 'grep -c "INFO: Config file written to /opt/etc/pihole/pihole.toml" /var/log/pihole/FTL.log'
    printf "%s\n" "${lines[@]}"
-   [[ ${lines[0]} == "2" ]]
+   [[ ${lines[0]} == "3" ]]
 -  run bash -c 'grep -c "DEBUG_CONFIG: Config file written to /etc/pihole/dnsmasq.conf" /var/log/pihole/FTL.log'
 +  run bash -c 'grep -c "DEBUG_CONFIG: Config file written to /opt/etc/pihole/dnsmasq.conf" /var/log/pihole/FTL.log'
    printf "%s\n" "${lines[@]}"
