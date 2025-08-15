@@ -1,7 +1,8 @@
 #!/bin/sh
+# This file is executed by /opt/etc/init.d/S65pihole-FTL
 
 case $1 in
-    start | restart)
+    start|restart)
         if [ -z "$ARGS" ] && [ -z "$PREARGS" ]; then
             root_user="$(id -nu 0 2> /dev/null)"
             root_group="$(id -ng 0 2> /dev/null)"
