@@ -1,14 +1,9 @@
 #!/usr/bin/env bash
 # 'getent hosts' - used by gravity.sh
-# 'getent group' - used by basic-install.sh
 
 case "$1" in
     hosts)
         nslookup "$2" && exit 0
-        exit 1
-    ;;
-    group)
-        id -gn "$2" && exit 0
         exit 1
     ;;
 esac
