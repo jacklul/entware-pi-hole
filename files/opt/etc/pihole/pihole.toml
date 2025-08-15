@@ -1,0 +1,42 @@
+[dns]
+  # Most devices will be already running a DNS server, so it is recommended to change the listening port and/or interface to bind to
+  # When changing the port, you will have to find a way of forwarding DNS requests to the new port
+  #interface = "lo"
+  #listeningMode = "BIND"
+  #port = 5053
+
+# Disable NTP feature as it may conflict with build-in time synchronization
+[ntp]
+  [ntp.ipv4]
+    active = false # Disable IPv4 NTP server
+  [ntp.ipv6]
+    active = false # Disable IPv6 NTP server
+  [ntp.sync]
+    active = false # Disable NTP synchronization
+
+[database]
+  # Reduce the maximum number of days to keep the queries in the database (default is 91)
+  # This will reduce the size of the query database
+  maxDBdays = 31
+
+[webserver]
+  # By default the webserver will try to listen on either 80 or 8080 for HTTP and 443 or 8443 for HTTPS
+  # Most devices will be already using those ports, so it is recommended to change them
+  #port = "5080,5443s"
+
+  # Reduce the maximum number of threads for the webserver (default is 50)
+  # Value of 1-2 should also be fine when low on resources or when
+  # putting the webserver behind a reverse proxy
+  threads = 10 
+
+  [webserver.api]
+    # Reduce the maximum number of concurrent API sessions (default is 16)
+    max_sessions = 4
+
+    # Disallow destructive API calls (default is true)
+    # "Restart DNS resolver" button may crash the DNS thread due to unknown bug
+    allow_destructive = false
+
+[misc]
+  # Do not change the priority of the process (default is -10)
+  nice = -999
