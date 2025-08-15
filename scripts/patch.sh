@@ -18,6 +18,11 @@ branch=$(git -C "$target" rev-parse --abbrev-ref HEAD)
 if [ "$3" != "no-patches" ]; then
     patches_dir="$(readlink -f "$script_dir/../patches")"
 
+    # Use development patches when there are no patches for the current branch (excluding master)
+    if [ "$branch" != "master" ] && [ ! -d "$patches_dir/$branch" ]; then
+        branch="development"
+    fi
+
     files="$(find "$patches_dir" -maxdepth 1 -type f \( -name "$prefix-*.patch" -or -name "$prefix-*.diff" \) | sort)"
     for file in $files; do
         basename="$(basename "$file")"
