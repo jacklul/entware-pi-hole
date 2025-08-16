@@ -129,6 +129,8 @@ fi
         sleep 1
     done
 
+    sleep 15 # Wait for 15 seconds to let the system IO settle down
+
     bash /opt/share/pihole/updatecheck.sh
 } > /dev/null 2>&1 &
 
