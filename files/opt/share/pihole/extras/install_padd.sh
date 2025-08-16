@@ -7,7 +7,7 @@ echo "This script will install and patch PADD."
 read -rp "Press Enter to continue..."
 
 set -e
-cd /opt/share/pihole
+cd /opt/share/pihole/extras
 wget -O padd.sh https://install.padd.sh
 chmod +x padd.sh
 git apply --include=padd.sh padd.patch
