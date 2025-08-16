@@ -1,0 +1,102 @@
+diff --git a/advanced/Scripts/piholeDebug.sh b/advanced/Scripts/piholeDebug.sh
+index 741ff2f4..264e0e89 100755
+--- a/advanced/Scripts/piholeDebug.sh
++++ b/advanced/Scripts/piholeDebug.sh
+@@ -59,7 +59,7 @@ FAQ_HARDWARE_REQUIREMENTS_FIREWALLD="${COL_CYAN}https://docs.pi-hole.net/main/pr
+ FAQ_GATEWAY="${COL_CYAN}https://discourse.pi-hole.net/t/why-is-a-default-gateway-important-for-pi-hole/3546${COL_NC}"
+ 
+ # Other URLs we may use
+-FORUMS_URL="${COL_CYAN}https://discourse.pi-hole.net${COL_NC}"
++FORUMS_URL="${COL_CYAN}https://github.com/jacklul/entware-pi-hole${COL_NC}"
+ 
+ # Directories required by Pi-hole
+ # https://discourse.pi-hole.net/t/what-files-does-pi-hole-use/1684
+@@ -289,11 +289,22 @@ check_ftl_version() {
+ # Checks the core version of the Pi-hole codebase
+ check_component_versions() {
+     # Check the Web version, branch, and commit
+-    compare_local_version_to_git_version "${CORE_GIT_DIRECTORY}" "Core"
++    #compare_local_version_to_git_version "${CORE_GIT_DIRECTORY}" "Core"
+     # Check the Web version, branch, and commit
+-    compare_local_version_to_git_version "${WEB_GIT_DIRECTORY}" "Web"
++    #compare_local_version_to_git_version "${WEB_GIT_DIRECTORY}" "Web"
+     # Check the FTL version
+-    check_ftl_version
++    #check_ftl_version
++
++    if [ -f /opt/etc/opkg.conf ]; then
++        echo_current_diagnostic "Entware package"
++
++        local package="$(opkg list-installed pi-hole*)"
++        if [ -n "$package" ]; then
++            log_write "${TICK} $package"
++        else
++            log_write "${CROSS} ${COL_RED}Package not found${COL_NC}"
++        fi
++    fi
+ }
+ 
+ diagnose_operating_system() {
+@@ -395,6 +445,11 @@ diagnose_operating_system() {
+         # If it doesn't exist, it's not a system we currently support and link to FAQ
+         log_write "${CROSS} ${COL_RED}${error_msg}${COL_NC} (${FAQ_HARDWARE_REQUIREMENTS})"
+     fi
++
++    if [ -f /opt/etc/entware_release ]; then
++        echo_current_diagnostic "Entware release"
++        make_array_from_file "/opt/etc/entware_release"
++    fi
+ }
+ 
+ check_selinux() {
+@@ -581,7 +581,7 @@ check_required_ports() {
+     # Sort the addresses and remove duplicates
+     while IFS= read -r line; do
+         ports_in_use+=( "$line" )
+-    done < <( ss --listening --numeric --tcp --udp --processes --no-header )
++    done < <( ss --listening --numeric --tcp --udp --processes | tail -n +2 )
+ 
+     local ports_configured
+     # Get all configured ports
+@@ -592,6 +608,12 @@ check_required_ports() {
+     # Add port 53
+     ports_configured+=("53")
+ 
++    local custom_dns_port
++    custom_dns_port="$(pihole-FTL --config "dns.port")"
++    if [ "$custom_dns_port" != "53" ]; then
++        ports_configured+=("${custom_dns_port}")
++    fi
++
+     # Now that we have the values stored,
+     for i in "${!ports_in_use[@]}"; do
+         # loop through them and assign some local variables
+@@ -804,7 +804,9 @@ ftl_full_status(){
+     # if using systemd print the full status of pihole-FTL
+     echo_current_diagnostic "Pi-hole-FTL full status"
+     local FTL_status
+-    if command -v systemctl &> /dev/null; then
++    if [ -f /opt/etc/opkg.conf ]; then
++        log_write "${INFO} unsupported ${COL_YELLOW}(skipped)${COL_NC}"
++    elif command -v systemctl &> /dev/null; then
+       FTL_status=$(systemctl status --full --no-pager pihole-FTL.service)
+       log_write "   ${FTL_status}"
+     elif [ -n "${DOCKER_VERSION}" ]; then
+@@ -1056,6 +1056,17 @@ show_content_of_pihole_files() {
+     show_content_of_files_in_dir "${LOG_DIRECTORY}"
+     show_content_of_files_in_dir "${SHM_DIRECTORY}"
+     show_content_of_files_in_dir "${ETC}"
++
++    if [ -n "$(id -u pihole 2> /dev/null)" ]; then
++        echo_current_diagnostic "${COL_CYAN}User 'pihole' is available!${COL_NC}"
++    fi
++
++    # Show contents of /opt/etc/pihole/run_as_user if it exists
++    if [ -f /opt/etc/pihole/run_as_user ]; then
++        echo_current_diagnostic "contents of ${COL_CYAN}/opt/etc/pihole/run_as_user${COL_NC}"
++        log_write "\\n${COL_GREEN}$(ls -lhd "/opt/etc/pihole/run_as_user")${COL_NC}"
++        make_array_from_file "/opt/etc/pihole/run_as_user";
++    fi
+ }
+ 
+ head_tail_log() {

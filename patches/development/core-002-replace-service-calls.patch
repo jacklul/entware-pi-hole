@@ -2,84 +2,22 @@ diff --git a/advanced/Scripts/piholeDebug.sh b/advanced/Scripts/piholeDebug.sh
 index 741ff2f4..1e9513b3 100755
 --- a/advanced/Scripts/piholeDebug.sh
 +++ b/advanced/Scripts/piholeDebug.sh
-@@ -769,6 +769,12 @@ process_status(){
-         if command -v systemctl &> /dev/null; then
+@@ -766,8 +766,14 @@ process_status(){
+     for i in "${PIHOLE_PROCESSES[@]}"; do
+         local status_of_process
+ 
++        if [ -f /opt/etc/opkg.conf ]; then
++            status_of_process="inactive"
++
++            if [ "${i}" == "pihole-FTL" ] && /opt/etc/init.d/S65pihole-FTL check | grep -q 'alive' &> /dev/null; then
++                status_of_process="active"
++            fi
+         # If systemd
+-        if command -v systemctl &> /dev/null; then
++        elif command -v systemctl &> /dev/null; then
              # get its status via systemctl
              status_of_process=$(systemctl is-active "${i}")
-+        elif [ -f /opt/etc/opkg.conf ]; then
-+            if /opt/etc/init.d/S65pihole-FTL check | grep -q 'alive' &> /dev/null; then
-+                status_of_process="active"
-+            else
-+                status_of_process="inactive"
-+            fi
          else
-             # Otherwise, use the service command and mock the output of `systemctl is-active`
- 
-diff --git a/automated install/basic-install.sh b/automated install/basic-install.sh
-index 6cc69008..c103d528 100755
---- a/automated install/basic-install.sh	
-+++ b/automated install/basic-install.sh	
-@@ -1234,6 +1234,13 @@ stop_service() {
-     printf "  %b %s..." "${INFO}" "${str}"
-     if is_command systemctl; then
-         systemctl -q stop "${1}" || true
-+    elif [ -f /opt/etc/opkg.conf ]; then
-+        if [ "${1}" == "pihole-FTL" ]; then
-+            /opt/etc/init.d/S65pihole-FTL stop &>/dev/null || true
-+        else
-+            printf "%b  %b %s...\\n" "${OVER}" "${CROSS}" "${str}"
-+            return
-+        fi
-     else
-         service "${1}" stop >/dev/null || true
-     fi
-@@ -1249,6 +1256,13 @@ restart_service() {
-     if is_command systemctl; then
-         # use that to restart the service
-         systemctl -q restart "${1}"
-+    elif [ -f /opt/etc/opkg.conf ]; then
-+        if [ "${1}" == "pihole-FTL" ]; then
-+            /opt/etc/init.d/S65pihole-FTL restart &>/dev/null || true
-+        else
-+            printf "%b  %b %s...\\n" "${OVER}" "${CROSS}" "${str}"
-+            return
-+        fi
-     else
-         # Otherwise, fall back to the service command
-         service "${1}" restart >/dev/null
-@@ -1265,6 +1279,9 @@ enable_service() {
-     if is_command systemctl; then
-         # use that to enable the service
-         systemctl -q enable "${1}"
-+    elif [ -f /opt/etc/opkg.conf ]; then
-+        printf "%b  %b %s...\\n" "${OVER}" "${CROSS}" "${str}"
-+        return
-     else
-         #  Otherwise, use update-rc.d to accomplish this
-         update-rc.d "${1}" defaults >/dev/null
-@@ -1281,6 +1298,9 @@ disable_service() {
-     if is_command systemctl; then
-         # use that to disable the service
-         systemctl -q disable "${1}"
-+    elif [ -f /opt/etc/opkg.conf ]; then
-+        printf "%b  %b %s...\\n" "${OVER}" "${CROSS}" "${str}"
-+        return
-     else
-         # Otherwise, use update-rc.d to accomplish this
-         update-rc.d "${1}" disable >/dev/null
-@@ -1293,6 +1313,12 @@ check_service_active() {
-     if is_command systemctl; then
-         # use that to check the status of the service
-         systemctl -q is-enabled "${1}" 2>/dev/null
-+    elif [ -f /opt/etc/opkg.conf ]; then
-+        if [ "${1}" == "pihole-FTL" ]; then
-+            /opt/etc/init.d/S65pihole-FTL check | grep -q 'alive' &> /dev/null
-+        else
-+            return 1
-+        fi
-     else
-         # Otherwise, fall back to service command
-         service "${1}" status &>/dev/null
 diff --git a/advanced/Scripts/piholeLogFlush.sh b/advanced/Scripts/piholeLogFlush.sh
 index 34d96318..f905f045 100755
 --- a/advanced/Scripts/piholeLogFlush.sh
@@ -101,3 +39,82 @@ index 34d96318..f905f045 100755
      if [[ "$*" != *"quiet"* ]]; then
          echo -e "${OVER}  ${TICK} Deleted ${deleted} queries from long-term query database"
      fi
+diff --git a/automated install/basic-install.sh b/automated install/basic-install.sh
+index 6cc69008..c103d528 100755
+--- a/automated install/basic-install.sh	
++++ b/automated install/basic-install.sh	
+@@ -1232,7 +1232,14 @@ stop_service() {
+     # Can softfail, as process may not be installed when this is called
+     local str="Stopping ${1} service"
+     printf "  %b %s..." "${INFO}" "${str}"
+-    if is_command systemctl; then
++    if [ -f /opt/etc/opkg.conf ]; then
++        if [ "${1}" == "pihole-FTL" ]; then
++            /opt/etc/init.d/S65pihole-FTL stop &>/dev/null || true
++        else
++            printf "%b  %b %s...\\n" "${OVER}" "${CROSS}" "${str}"
++            return
++        fi
++    elif is_command systemctl; then
+         systemctl -q stop "${1}" || true
+     else
+         service "${1}" stop >/dev/null || true
+@@ -1245,8 +1252,15 @@ restart_service() {
+     # Local, named variables
+     local str="Restarting ${1} service"
+     printf "  %b %s..." "${INFO}" "${str}"
++    if [ -f /opt/etc/opkg.conf ]; then
++        if [ "${1}" == "pihole-FTL" ]; then
++            /opt/etc/init.d/S65pihole-FTL restart &>/dev/null || true
++        else
++            printf "%b  %b %s...\\n" "${OVER}" "${CROSS}" "${str}"
++            return
++        fi
+     # If systemctl exists,
+-    if is_command systemctl; then
++    elif is_command systemctl; then
+         # use that to restart the service
+         systemctl -q restart "${1}"
+     else
+@@ -1261,8 +1275,11 @@ enable_service() {
+     # Local, named variables
+     local str="Enabling ${1} service to start on reboot"
+     printf "  %b %s..." "${INFO}" "${str}"
++    if [ -f /opt/etc/opkg.conf ]; then
++        printf "%b  %b %s...\\n" "${OVER}" "${CROSS}" "${str}"
++        return
+     # If systemctl exists,
+-    if is_command systemctl; then
++    elif is_command systemctl; then
+         # use that to enable the service
+         systemctl -q enable "${1}"
+     else
+@@ -1277,8 +1294,11 @@ disable_service() {
+     # Local, named variables
+     local str="Disabling ${1} service"
+     printf "  %b %s..." "${INFO}" "${str}"
++    if [ -f /opt/etc/opkg.conf ]; then
++        printf "%b  %b %s...\\n" "${OVER}" "${CROSS}" "${str}"
++        return
+     # If systemctl exists,
+-    if is_command systemctl; then
++    elif is_command systemctl; then
+         # use that to disable the service
+         systemctl -q disable "${1}"
+     else
+@@ -1289,8 +1309,14 @@ disable_service() {
+ }
+ 
+ check_service_active() {
++    if [ -f /opt/etc/opkg.conf ]; then
++        if [ "${1}" == "pihole-FTL" ]; then
++            /opt/etc/init.d/S65pihole-FTL check | grep -q 'alive' &> /dev/null
++        else
++            return 1
++        fi
+     # If systemctl exists,
+-    if is_command systemctl; then
++    elif is_command systemctl; then
+         # use that to check the status of the service
+         systemctl -q is-enabled "${1}" 2>/dev/null
+     else
