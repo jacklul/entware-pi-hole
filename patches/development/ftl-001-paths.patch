@@ -24,65 +24,10 @@ index 581fc0b7..bd0d08b0 100644
  
  int api_info_client(struct ftl_conn *api)
  {
-diff --git a/src/args.c b/src/args.c
-index a261d3be..2b0cda3a 100644
---- a/src/args.c
-+++ b/src/args.c
-@@ -357,9 +357,9 @@ void parse_args(int argc, char* argv[])
- 		if(argc < 3 || argc > 5)
- 		{
- 			printf("Usage: %s --gen-x509 <output file> [<domain>] [rsa]\n", argv[0]);
--			printf("Example:          %s --gen-x509 /etc/pihole/tls.pem\n", argv[0]);
--			printf(" with domain:     %s --gen-x509 /etc/pihole/tls.pem pi.hole\n", argv[0]);
--			printf(" RSA with domain: %s --gen-x509 /etc/pihole/tls.pem nanopi.lan rsa\n", argv[0]);
-+			printf("Example:          %s --gen-x509 /opt/etc/pihole/tls.pem\n", argv[0]);
-+			printf(" with domain:     %s --gen-x509 /opt/etc/pihole/tls.pem pi.hole\n", argv[0]);
-+			printf(" RSA with domain: %s --gen-x509 /opt/etc/pihole/tls.pem nanopi.lan rsa\n", argv[0]);
- 			exit(EXIT_FAILURE);
- 		}
- 		// Enable stdout printing
-@@ -378,8 +378,8 @@ void parse_args(int argc, char* argv[])
- 		if(argc > 4)
- 		{
- 			printf("Usage: %s %s [<input file>] [<domain>]\n", argv[0], argv[1]);
--			printf("Example: %s %s /etc/pihole/tls.pem\n", argv[0], argv[1]);
--			printf(" with domain: %s %s /etc/pihole/tls.pem pi.hole\n", argv[0], argv[1]);
-+			printf("Example: %s %s /opt/etc/pihole/tls.pem\n", argv[0], argv[1]);
-+			printf(" with domain: %s %s /opt/etc/pihole/tls.pem pi.hole\n", argv[0], argv[1]);
- 			exit(EXIT_FAILURE);
- 		}
- 
 diff --git a/src/config/config.c b/src/config/config.c
 index eee5a8c0..51c882cd 100644
 --- a/src/config/config.c
 +++ b/src/config/config.c
-@@ -481,7 +481,7 @@ void initConfig(struct config *conf)
- 	conf->dns.domainNeeded.c = validate_stub; // Only type-based checking
- 
- 	conf->dns.expandHosts.k = "dns.expandHosts";
--	conf->dns.expandHosts.h = "If set, the domain is added to simple names (without a period) in /etc/hosts in the same way as for DHCP-derived names";
-+	conf->dns.expandHosts.h = "If set, the domain is added to simple names (without a period) in /opt/etc/hosts in the same way as for DHCP-derived names";
- 	conf->dns.expandHosts.t = CONF_BOOL;
- 	conf->dns.expandHosts.f = FLAG_RESTART_FTL;
- 	conf->dns.expandHosts.d.b = false;
-@@ -496,7 +496,7 @@ void initConfig(struct config *conf)
- 	conf->dns.domain.c = validate_dns_domain;
- 
- 	conf->dns.bogusPriv.k = "dns.bogusPriv";
--	conf->dns.bogusPriv.h = "Should all reverse lookups for private IP ranges (i.e., 192.168.x.y, etc) which are not found in /etc/hosts or the DHCP leases file be answered with \"no such domain\" rather than being forwarded upstream?";
-+	conf->dns.bogusPriv.h = "Should all reverse lookups for private IP ranges (i.e., 192.168.x.y, etc) which are not found in /opt/etc/hosts or the DHCP leases file be answered with \"no such domain\" rather than being forwarded upstream?";
- 	conf->dns.bogusPriv.t = CONF_BOOL;
- 	conf->dns.bogusPriv.f = FLAG_RESTART_FTL;
- 	conf->dns.bogusPriv.d.b = true;
-@@ -614,7 +614,7 @@ void initConfig(struct config *conf)
- 
- 	// sub-struct dns.rate_limit
- 	conf->dns.rateLimit.count.k = "dns.rateLimit.count";
--	conf->dns.rateLimit.count.h = "Rate-limited queries are answered with a REFUSED reply and not further processed by FTL.\n\n The default settings for FTL's rate-limiting are to permit no more than 1000 queries in 60 seconds. Both numbers can be customized independently. It is important to note that rate-limiting is happening on a per-client basis. Other clients can continue to use FTL while rate-limited clients are short-circuited at the same time.\n\n For this setting, both numbers, the maximum number of queries within a given time, and the length of the time interval (seconds) have to be specified. For instance, if you want to set a rate limit of 1 query per hour, the option should look like dns.rateLimit.count=1 and dns.rateLimit.interval=3600. The time interval is relative to when FTL has finished starting (start of the daemon + possible delay by DELAY_STARTUP) then it will advance in steps of the rate-limiting interval. If a client reaches the maximum number of queries it will be blocked until the end of the current interval. This will be logged to /var/log/pihole/FTL.log, e.g. Rate-limiting 10.0.1.39 for at least 44 seconds. If the client continues to send queries while being blocked already and this number of queries during the blocking exceeds the limit the client will continue to be blocked until the end of the next interval (FTL.log will contain lines like Still rate-limiting 10.0.1.39 as it made additional 5007 queries). As soon as the client requests less than the set limit, it will be unblocked (Ending rate-limitation of 10.0.1.39).\n\n Rate-limiting may be disabled altogether by setting both values to zero (this results in the same behavior as before FTL v5.7).\n\n How many queries are permitted...";
-+	conf->dns.rateLimit.count.h = "Rate-limited queries are answered with a REFUSED reply and not further processed by FTL.\n\n The default settings for FTL's rate-limiting are to permit no more than 1000 queries in 60 seconds. Both numbers can be customized independently. It is important to note that rate-limiting is happening on a per-client basis. Other clients can continue to use FTL while rate-limited clients are short-circuited at the same time.\n\n For this setting, both numbers, the maximum number of queries within a given time, and the length of the time interval (seconds) have to be specified. For instance, if you want to set a rate limit of 1 query per hour, the option should look like dns.rateLimit.count=1 and dns.rateLimit.interval=3600. The time interval is relative to when FTL has finished starting (start of the daemon + possible delay by DELAY_STARTUP) then it will advance in steps of the rate-limiting interval. If a client reaches the maximum number of queries it will be blocked until the end of the current interval. This will be logged to /opt/var/log/pihole/FTL.log, e.g. Rate-limiting 10.0.1.39 for at least 44 seconds. If the client continues to send queries while being blocked already and this number of queries during the blocking exceeds the limit the client will continue to be blocked until the end of the next interval (FTL.log will contain lines like Still rate-limiting 10.0.1.39 as it made additional 5007 queries). As soon as the client requests less than the set limit, it will be unblocked (Ending rate-limitation of 10.0.1.39).\n\n Rate-limiting may be disabled altogether by setting both values to zero (this results in the same behavior as before FTL v5.7).\n\n How many queries are permitted...";
- 	conf->dns.rateLimit.count.a = cJSON_CreateStringReference("A positive integer value");
- 	conf->dns.rateLimit.count.t = CONF_UINT;
- 	conf->dns.rateLimit.count.d.ui = 1000;
 @@ -983,7 +983,7 @@ void initConfig(struct config *conf)
  	conf->webserver.tls.cert.a = cJSON_CreateStringReference("A valid TLS certificate file (*.pem)");
  	conf->webserver.tls.cert.f = FLAG_RESTART_FTL;
@@ -101,15 +46,6 @@ index eee5a8c0..51c882cd 100644
  	conf->webserver.paths.webroot.c = validate_filepath;
  
  	conf->webserver.paths.webhome.k = "webserver.paths.webhome";
-@@ -1090,7 +1090,7 @@ void initConfig(struct config *conf)
- 	conf->webserver.api.app_sudo.c = validate_stub; // Only type-based checking
- 
- 	conf->webserver.api.cli_pw.k = "webserver.api.cli_pw";
--	conf->webserver.api.cli_pw.h = "Should FTL create a temporary CLI password?\n\n This password is stored in clear in /etc/pihole and can be used by the CLI (pihole ...  commands) to authenticate against the API. Note that the password is only valid for the current session and regenerated on each FTL restart. Sessions initiated with this password cannot modify the Pi-hole configuration (change passwords, etc.) for security reasons but can still use the API to query data and manage lists.";
-+	conf->webserver.api.cli_pw.h = "Should FTL create a temporary CLI password?\n\n This password is stored in clear in /opt/etc/pihole and can be used by the CLI (pihole ...  commands) to authenticate against the API. Note that the password is only valid for the current session and regenerated on each FTL restart. Sessions initiated with this password cannot modify the Pi-hole configuration (change passwords, etc.) for security reasons but can still use the API to query data and manage lists.";
- 	conf->webserver.api.cli_pw.t = CONF_BOOL;
- 	conf->webserver.api.cli_pw.f = FLAG_RESTART_FTL;
- 	conf->webserver.api.cli_pw.d.b = true;
 @@ -1161,14 +1161,14 @@ void initConfig(struct config *conf)
  	conf->files.pid.a = cJSON_CreateStringReference("Any writable file");
  	conf->files.pid.t = CONF_STRING;
@@ -171,24 +107,6 @@ index eee5a8c0..51c882cd 100644
  	conf->files.log.dnsmasq.c = validate_filepath_dash;
  
  	conf->files.log.webserver.k = "files.log.webserver";
-@@ -1266,7 +1266,7 @@ void initConfig(struct config *conf)
- 	conf->misc.addr2line.c = validate_stub; // Only type-based checking
- 
- 	conf->misc.etc_dnsmasq_d.k = "misc.etc_dnsmasq_d";
--	conf->misc.etc_dnsmasq_d.h = "Should FTL load additional dnsmasq configuration files from /etc/dnsmasq.d/?\n\n Warning: This is an advanced setting and should only be used with care.\n Incorrectly formatted or config files specifying options which can only be defined once can result in conflicts with the automatic configuration of Pi-hole (see "DNSMASQ_PH_CONFIG") and may stop DNS resolution from working.";
-+	conf->misc.etc_dnsmasq_d.h = "Should FTL load additional dnsmasq configuration files from /opt/etc/dnsmasq.d/?\n\n Warning: This is an advanced setting and should only be used with care.\n Incorrectly formatted or config files specifying options which can only be defined once can result in conflicts with the automatic configuration of Pi-hole (see "DNSMASQ_PH_CONFIG") and may stop DNS resolution from working.";
- 	conf->misc.etc_dnsmasq_d.t = CONF_BOOL;
- 	conf->misc.etc_dnsmasq_d.f = FLAG_RESTART_FTL;
- 	conf->misc.etc_dnsmasq_d.d.b = false;
-@@ -1454,7 +1454,7 @@ void initConfig(struct config *conf)
- 	conf->debug.config.c = validate_stub; // Only type-based checking
- 
- 	conf->debug.inotify.k = "debug.inotify";
--	conf->debug.inotify.h = "Debug monitoring of /etc/pihole filesystem events";
-+	conf->debug.inotify.h = "Debug monitoring of /opt/etc/pihole filesystem events";
- 	conf->debug.inotify.t = CONF_BOOL;
- 	conf->debug.inotify.d.b = false;
- 	conf->debug.inotify.c = validate_stub; // Only type-based checking
 @@ -1689,7 +1689,7 @@ bool getLogFilePath(void)
  	config.files.log.ftl.h = "The location of FTL's log file";
  	config.files.log.ftl.a = cJSON_CreateStringReference("any writable file");
@@ -232,76 +150,6 @@ diff --git a/src/config/dnsmasq_config.c b/src/config/dnsmasq_config.c
 index c50223b1..8e0700f9 100644
 --- a/src/config/dnsmasq_config.c
 +++ b/src/config/dnsmasq_config.c
-@@ -207,12 +207,12 @@ static void write_config_header(FILE *fp, const char *description)
- 	CONFIG_CENTER(fp, HEADER_WIDTH, "%s", "ANY CHANGES MADE TO THIS FILE WILL BE LOST WHEN THE CONFIGURATION CHANGES");
- 	CONFIG_CENTER(fp, HEADER_WIDTH, "%s", "");
- 	CONFIG_CENTER(fp, HEADER_WIDTH, "%s", "IF YOU WISH TO CHANGE ANY OF THESE VALUES, CHANGE THEM IN");
--	CONFIG_CENTER(fp, HEADER_WIDTH, "%s", "/etc/pihole/pihole.toml");
-+	CONFIG_CENTER(fp, HEADER_WIDTH, "%s", "/opt/etc/pihole/pihole.toml");
- 	CONFIG_CENTER(fp, HEADER_WIDTH, "%s", "and restart pihole-FTL");
- 	CONFIG_CENTER(fp, HEADER_WIDTH, "%s", "");
- 	CONFIG_CENTER(fp, HEADER_WIDTH, "%s", "ANY OTHER CHANGES SHOULD BE MADE IN A SEPARATE CONFIG FILE");
--	CONFIG_CENTER(fp, HEADER_WIDTH, "%s", "WITHIN /etc/dnsmasq.d/yourname.conf");
--	CONFIG_CENTER(fp, HEADER_WIDTH, "%s", "(make sure misc.etc_dnsmasq_d is set to true in /etc/pihole/pihole.toml)");
-+	CONFIG_CENTER(fp, HEADER_WIDTH, "%s", "WITHIN /opt/etc/dnsmasq.d/yourname.conf");
-+	CONFIG_CENTER(fp, HEADER_WIDTH, "%s", "(make sure misc.etc_dnsmasq_d is set to true in /opt/etc/pihole/pihole.toml)");
- 	CONFIG_CENTER(fp, HEADER_WIDTH, "%s", "");
- 	CONFIG_CENTER(fp, HEADER_WIDTH, "Last updated: %s", timestring);
- 	CONFIG_CENTER(fp, HEADER_WIDTH, "by FTL version %s", get_FTL_version());
-@@ -309,7 +309,7 @@ bool __attribute__((const)) write_dnsmasq_config(struct config *conf, bool test_
- 	write_config_header(pihole_conf, "Dnsmasq config for Pi-hole's FTLDNS");
- 	fputs("hostsdir="DNSMASQ_HOSTSDIR"\n", pihole_conf);
- 	fputs("\n", pihole_conf);
--	fputs("# Don't read /etc/resolv.conf. Get upstream servers only from the configuration\n", pihole_conf);
-+	fputs("# Don't read /opt/etc/resolv.conf. Get upstream servers only from the configuration\n", pihole_conf);
- 	fputs("no-resolv\n", pihole_conf);
- 	fputs("\n", pihole_conf);
- 	fputs("# DNS port to be used\n", pihole_conf);
-@@ -353,7 +353,7 @@ bool __attribute__((nonnull(1,3))) write_dnsmasq_config(struct config *conf, boo
- 
- 	if(conf->dns.localise.v.b)
- 	{
--		fputs("# Return answers to DNS queries from /etc/hosts and interface-name and\n", pihole_conf);
-+		fputs("# Return answers to DNS queries from /opt/etc/hosts and interface-name and\n", pihole_conf);
- 		fputs("# dynamic-host which depend on the interface over which the query was\n", pihole_conf);
- 		fputs("# received. If a name has more than one address associated with it, and\n", pihole_conf);
- 		fputs("# at least one of those addresses is on the same subnet as the interface\n", pihole_conf);
-@@ -371,7 +371,7 @@ bool __attribute__((const)) write_dnsmasq_config(struct config *conf, bool test_
- 	if(conf->dns.bogusPriv.v.b)
- 	{
- 		fputs("# Bogus private reverse lookups. All reverse lookups for private IP\n", pihole_conf);
--		fputs("# ranges (ie 192.168.x.x, etc) which are not found in /etc/hosts or the\n", pihole_conf);
-+		fputs("# ranges (ie 192.168.x.x, etc) which are not found in /opt/etc/hosts or the\n", pihole_conf);
- 		fputs("# DHCP leases file are answered with NXDOMAIN rather than being forwarded\n", pihole_conf);
- 		fputs("bogus-priv\n", pihole_conf);
- 		fputs("\n", pihole_conf);
-@@ -379,7 +379,7 @@ bool __attribute__((const)) write_dnsmasq_config(struct config *conf, bool test_
- 
- 	if(conf->dns.domainNeeded.v.b)
- 	{
--		fputs("# Add the domain to simple names (without a period) in /etc/hosts in\n", pihole_conf);
-+		fputs("# Add the domain to simple names (without a period) in /opt/etc/hosts in\n", pihole_conf);
- 		fputs("# the same way as for DHCP-derived names\n", pihole_conf);
- 		fputs("domain-needed\n", pihole_conf);
- 		fputs("\n", pihole_conf);
-@@ -512,7 +512,7 @@ bool __attribute__((const)) write_dnsmasq_config(struct config *conf, bool test_
- 	{
- 		fputs("# Never forward queries for plain names, without\n",pihole_conf);
- 		fputs("# dots or domain parts, to upstream nameservers. If the name\n", pihole_conf);
--		fputs("# is not known from /etc/hosts or DHCP, NXDOMAIN is returned\n", pihole_conf);
-+		fputs("# is not known from /opt/etc/hosts or DHCP, NXDOMAIN is returned\n", pihole_conf);
- 		fputs("local=//\n\n", pihole_conf);
- 	}
- 
-@@ -524,7 +524,7 @@ bool __attribute__((const)) write_dnsmasq_config(struct config *conf, bool test_
- 		if(!domain_revServer)
- 		{
- 			fputs("# This DNS domain is purely local. FTL may answer queries from\n", pihole_conf);
--			fputs("# /etc/hosts or DHCP but should never forward queries on that\n", pihole_conf);
-+			fputs("# /opt/etc/hosts or DHCP but should never forward queries on that\n", pihole_conf);
- 			fputs("# domain to any upstream servers\n", pihole_conf);
- 			fprintf(pihole_conf, "domain=%s\n", conf->dns.domain.v.s);
- 			fprintf(pihole_conf, "local=/%s/\n\n", conf->dns.domain.v.s);
 @@ -701,13 +701,13 @@ bool __attribute__((nonnull(1,3))) write_dnsmasq_config(struct config *conf, boo
  	fputs("server=/onion/\n", pihole_conf);
  	fputs("\n", pihole_conf);
@@ -497,28 +345,6 @@ index b04f964f..7e161a74 100644
  #    endif
  #endif
  
-diff --git a/src/dnsmasq/option.c b/src/dnsmasq/option.c
-index d075ad0a..ac064e09 100644
---- a/src/dnsmasq/option.c
-+++ b/src/dnsmasq/option.c
-@@ -417,7 +417,7 @@ static struct {
-   { 'd', OPT_DEBUG, NULL, gettext_noop("Do NOT fork into the background: run in debug mode."), NULL },
-   { 'D', OPT_NODOTS_LOCAL, NULL, gettext_noop("Do NOT forward queries with no domain part."), NULL }, 
-   { 'e', OPT_SELFMX, NULL, gettext_noop("Return self-pointing MX records for local hosts."), NULL },
--  { 'E', OPT_EXPAND, NULL, gettext_noop("Expand simple names in /etc/hosts with domain-suffix."), NULL },
-+  { 'E', OPT_EXPAND, NULL, gettext_noop("Expand simple names in /opt/etc/hosts with domain-suffix."), NULL },
-   { 'f', OPT_FILTER, NULL, gettext_noop("Don't forward spurious DNS requests from Windows hosts."), NULL },
-   { LOPT_FILTER_A, ARG_DUP, NULL, gettext_noop("Don't include IPv4 addresses in DNS answers."), NULL },
-   { LOPT_FILTER_AAAA, ARG_DUP, NULL, gettext_noop("Don't include IPv6 addresses in DNS answers."), NULL },
-@@ -467,7 +467,7 @@ static struct {
-   { LOPT_LOCAL, ARG_DUP, "/<domain>/", gettext_noop("Never forward queries to specified domains."), NULL },
-   { 's', ARG_DUP, "<domain>[,<range>]", gettext_noop("Specify the domain to be assigned in DHCP leases."), NULL },
-   { 't', ARG_ONE, "<host_name>", gettext_noop("Specify default target in an MX record."), NULL },
--  { 'T', ARG_ONE, "<integer>", gettext_noop("Specify time-to-live in seconds for replies from /etc/hosts."), NULL },
-+  { 'T', ARG_ONE, "<integer>", gettext_noop("Specify time-to-live in seconds for replies from /opt/etc/hosts."), NULL },
-   { LOPT_NEGTTL, ARG_ONE, "<integer>", gettext_noop("Specify time-to-live in seconds for negative caching."), NULL },
-   { LOPT_MAXTTL, ARG_ONE, "<integer>", gettext_noop("Specify time-to-live in seconds for maximum TTL to send to clients."), NULL },
-   { LOPT_MAXCTTL, ARG_ONE, "<integer>", gettext_noop("Specify time-to-live ceiling for cache."), NULL },
 diff --git a/src/files.h b/src/files.h
 index fc10ad23..839cde69 100644
 --- a/src/files.h

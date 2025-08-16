@@ -1,11 +1,12 @@
-diff --git a/test/opt.sh b/test/opt.sh
-new file mode 100644
-index 00000000..3364c495
---- /dev/null
-+++ b/test/opt.sh
-@@ -0,0 +1,28 @@
-+#!/bin/bash
-+
+diff --git a/test/run.sh b/test/run.sh
+index 5d490a82..dfd08dac 100755
+--- a/test/run.sh
++++ b/test/run.sh
+@@ -83,6 +83,34 @@ export FTLCONF_files_pcap='*123#./test/pcap'
+ # Prepare gdb session
+ echo "handle SIGHUP nostop SIGPIPE nostop SIGTERM nostop SIG32 nostop SIG33 nostop SIG34 nostop SIG35 nostop SIG41 nostop" > /root/.gdbinit
+ 
++# Set up virtual /opt directories
 +declare -A LINKS=(
 +    ["/etc/pihole"]="/opt/etc/pihole"
 +    ["/var/log/pihole"]="/opt/var/log/pihole"
@@ -32,16 +33,6 @@ index 00000000..3364c495
 +        ln -sv "$KEY" "${LINKS[$KEY]}"
 +    fi
 +done
-diff --git a/test/run.sh b/test/run.sh
-index 5d490a82..dfd08dac 100755
---- a/test/run.sh
-+++ b/test/run.sh
-@@ -77,6 +77,9 @@ export FTLCONF_debug_api="not_a_bool"
- # Prepare gdb session
- echo "handle SIGHUP nostop SIGPIPE nostop SIGTERM nostop SIG32 nostop SIG33 nostop SIG34 nostop SIG35 nostop SIG41 nostop" > /root/.gdbinit
- 
-+# Set up virtual /opt directories
-+bash test/opt.sh
 +
  # Start FTL
  if ! su pihole -s /bin/sh -c /home/pihole/pihole-FTL; then
@@ -51,11 +42,11 @@ index 5d490a82..dfd08dac 100755
  
  curl_to_tricorder() {
 -  curl --silent --upload-file "${1}" https://tricorder.pi-hole.net
-+  curl --silent --upload-file "${1}" https://lurking-cat.appspot.com/upload
++  echo "null"
  }
  
 -if [[ $RET != 0 ]]; then
-+if [[ $RET != 0 ]] && [ ! -f test/opt.sh ]; then
++if false && [[ $RET != 0 ]]; then
    echo -n "pihole/pihole.log: "
    curl_to_tricorder /var/log/pihole/pihole.log
    echo ""
@@ -63,49 +54,6 @@ diff --git a/test/pihole.toml b/test/pihole.toml
 index 0b433266..85d8a45c 100644
 --- a/test/pihole.toml
 +++ b/test/pihole.toml
-@@ -137,8 +137,8 @@
-   #     true or false
-   domainNeeded = false
- 
--  # If set, the domain is added to simple names (without a period) in /etc/hosts in the
--  # same way as for DHCP-derived names
-+  # If set, the domain is added to simple names (without a period) in /opt/etc/hosts in
-+  # the same way as for DHCP-derived names
-   #
-   # Allowed values are:
-   #     true or false
-@@ -171,8 +171,8 @@
-   domain = "lan"
- 
-   # Should all reverse lookups for private IP ranges (i.e., 192.168.x.y, etc) which are
--  # not found in /etc/hosts or the DHCP leases file be answered with "no such domain"
--  # rather than being forwarded upstream?
-+  # not found in /opt/etc/hosts or the DHCP leases file be answered with "no such
-+  # domain" rather than being forwarded upstream?
-   #
-   # Allowed values are:
-   #     true or false
-@@ -501,13 +501,13 @@
-     # to when FTL has finished starting (start of the daemon + possible delay by
-     # DELAY_STARTUP) then it will advance in steps of the rate-limiting interval. If a
-     # client reaches the maximum number of queries it will be blocked until the end of the
--    # current interval. This will be logged to /var/log/pihole/FTL.log, e.g. Rate-limiting
--    # 10.0.1.39 for at least 44 seconds. If the client continues to send queries while
--    # being blocked already and this number of queries during the blocking exceeds the
--    # limit the client will continue to be blocked until the end of the next interval
--    # (FTL.log will contain lines like Still rate-limiting 10.0.1.39 as it made additional
--    # 5007 queries). As soon as the client requests less than the set limit, it will be
--    # unblocked (Ending rate-limitation of 10.0.1.39).
-+    # current interval. This will be logged to /opt/var/log/pihole/FTL.log, e.g.
-+    # Rate-limiting 10.0.1.39 for at least 44 seconds. If the client continues to send
-+    # queries while being blocked already and this number of queries during the blocking
-+    # exceeds the limit the client will continue to be blocked until the end of the next
-+    # interval (FTL.log will contain lines like Still rate-limiting 10.0.1.39 as it made
-+    # additional 5007 queries). As soon as the client requests less than the set limit, it
-+    # will be unblocked (Ending rate-limitation of 10.0.1.39).
-     #
-     # Rate-limiting may be disabled altogether by setting both values to zero (this
-     # results in the same behavior as before FTL v5.7).
 @@ -665,14 +665,14 @@
      #
      # Allowed values are:
@@ -123,24 +71,6 @@ index 0b433266..85d8a45c 100644
  
      # Sub-directory of the root containing the web interface
      #
-@@ -1095,11 +1095,12 @@
- 
-     # Should FTL create a temporary CLI password?
-     #
--    # This password is stored in clear in /etc/pihole and can be used by the CLI (pihole
--    # ...  commands) to authenticate against the API. Note that the password is only valid
--    # for the current session and regenerated on each FTL restart. Sessions initiated with
--    # this password cannot modify the Pi-hole configuration (change passwords, etc.) for
--    # security reasons but can still use the API to query data and manage lists.
-+    # This password is stored in clear in /opt/etc/pihole and can be used by the CLI
-+    # (pihole ...  commands) to authenticate against the API. Note that the password is
-+    # only valid for the current session and regenerated on each FTL restart. Sessions
-+    # initiated with this password cannot modify the Pi-hole configuration (change
-+    # passwords, etc.) for security reasons but can still use the API to query data and
-+    # manage lists.
-     #
-     # Allowed values are:
-     #     true or false
 @@ -822,32 +822,32 @@
    #
    # Allowed values are:
@@ -202,27 +132,12 @@ index 0b433266..85d8a45c 100644
  
  [misc]
    # Using privacy levels you can specify which level of detail you want to see in your
-@@ -1298,12 +1298,12 @@
-   #     true or false
-   addr2line = true
- 
--  # Should FTL load additional dnsmasq configuration files from /etc/dnsmasq.d/?
-+  # Should FTL load additional dnsmasq configuration files from /opt/etc/dnsmasq.d/?
-   #
+@@ -1305,7 +1305,7 @@
    # Warning: This is an advanced setting and should only be used with care.
    # Incorrectly formatted or config files specifying options which can only be defined
    # once can result in conflicts with the automatic configuration of Pi-hole (see
 -  # /etc/pihole/dnsmasq.conf) and may stop DNS resolution from working.
 +  # /opt/etc/pihole/dnsmasq.conf) and may stop DNS resolution from working.
-   #
-   # Allowed values are:
-   #     true or false
-@@ -1547,7 +1547,7 @@
-   #     true or false
-   config = true ### CHANGED, default = false
- 
--  # Debug monitoring of /etc/pihole filesystem events
-+  # Debug monitoring of /opt/etc/pihole filesystem events
    #
    # Allowed values are:
    #     true or false
