@@ -8,53 +8,68 @@ readonly repository_web="https://github.com/pi-hole/web.git"
 readonly repository_ftl="https://github.com/pi-hole/FTL.git"
 readonly repository_padd="https://github.com/pi-hole/PADD.git"
 
-shallow=true
-[ -f "$script_dir/../dev/noshallow" ] && shallow=false
+[ -f "$script_dir/../dev/.shallow" ] && shallow=true
 
 #shellcheck disable=SC2086
 function install_or_update_repository() {
     local repository="$1"
     local destination="$2"
     local new_branch="$3"
-    local shallow_arg="--depth 1"
-
-    if [ "$shallow" = false ]; then
-        shallow_arg=
-    fi
+    local shallow_part=""
 
     echo "Working with repository: $repository"
 
-    if [ ! -f "$destination/.git/config" ]; then
+    if [ ! -d "$destination" ]; then
         mkdir -pv "$destination"
+    fi
+
+    if [ "$shallow" = true ]; then
+        shallow_part="--depth 1"
+        echo "Shallow clone enabled"
+    fi
+
+    if [ -z "$new_branch" ]; then
+        new_branch="$(git -C "$destination" remote show "$repository" | grep 'HEAD branch' | cut -d':' -f2 | tr -d ' ')"
+        echo "No branch specified, using remote HEAD branch: $new_branch"
+    fi
+
+    if [ ! -f "$destination/.git/config" ]; then
         git -C "$destination" init
         git -C "$destination" remote add origin "$repository"
-        git -C "$destination" fetch $shallow_arg
-
-        main_branch="$(git -C "$destination" remote show "$repository" | grep 'HEAD branch' | cut -d':' -f2 | tr -d ' ')"
-
-        if [ -n "$new_branch" ]; then
-            main_branch=$new_branch
-        fi
-
-        git -C "$destination" checkout "$main_branch"
-        git -C "$destination" branch --set-upstream-to="origin/$main_branch"
+        git -C "$destination" fetch $shallow_part
+        git -C "$destination" checkout -b "$new_branch" --track "origin/$new_branch"
     else
         local current_branch="$(git -C "$destination" rev-parse --abbrev-ref HEAD)"
 
-        if [ -z "$new_branch" ]; then
-            new_branch="$(git -C "$destination" remote show "$repository" | grep 'HEAD branch' | cut -d':' -f2 | tr -d ' ')"
-        fi
-
         git -C "$destination" clean -fd
 
-        if [ "$current_branch" = "$new_branch" ]; then
-            git -C "$destination" fetch $shallow_arg
-            git -C "$destination" reset --hard HEAD
-            git -C "$destination" pull --rebase --allow-unrelated-histories $shallow_arg
+        is_shallow=$(git -C "$destination" rev-parse --is-shallow-repository)
+
+        if [ -z "$shallow_part" ]; then
+            if [ "$is_shallow" = "true" ]; then
+                git -C "$destination" fetch --unshallow
+                git -C "$destination" gc --prune=now --aggressive
+            else
+                git -C "$destination" fetch
+            fi
         else
-            git -C "$destination" fetch $shallow_arg
-            git -C "$destination" checkout -f "$new_branch"
-            git -C "$destination" branch --set-upstream-to="origin/$new_branch"
+            git -C "$destination" fetch $shallow_part
+
+            if [ "$is_shallow" = "false" ]; then
+                git -C "$destination" gc --prune=now --aggressive
+            fi
+        fi
+
+        if [ "$current_branch" = "$new_branch" ]; then
+            git -C "$destination" reset --hard HEAD
+            git -C "$destination" pull --rebase --allow-unrelated-histories $shallow_part
+        else
+            if git -C "$destination" branch --list "$new_branch" | grep -Fq "$new_branch"; then
+                git -C "$destination" checkout -f "$new_branch"
+            else
+                git -C "$destination" checkout -f -b "$new_branch" --track "origin/$new_branch"
+            fi
+
             git -C "$destination" reset --hard HEAD
         fi
     fi
@@ -68,10 +83,6 @@ branch="$1"
 repo=all
 [ -n "$2" ] && repo="$2"
 
-if [ ! -d "$script_dir/../dev" ]; then
-    mkdir -pv "$script_dir/../dev"
-fi
-
 case $branch in
     "master"|"release")
         core_branch=master
@@ -79,7 +90,7 @@ case $branch in
         ftl_branch=master
         padd_branch=master
     ;;
-    "dev")
+    "development"|"dev")
         core_branch=development
         web_branch=development
         ftl_branch=development
