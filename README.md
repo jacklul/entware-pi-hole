@@ -26,11 +26,18 @@ src/gz pi-hole https://jacklul.github.io/entware-pi-hole/[architecture]
 
 - Install the package: `opkg update && opkg install pi-hole`
 
+> [!NOTE]
+> For device or firmware specific setup instructions check the [wiki](https://github.com/jacklul/entware-pi-hole/wiki).
+
+## Running
+
+- Add `pihole` user to the system, preferably as a non-login one **(optional but recommended)**
+  - This can be as simple as `useradd --system --no-create-home --shell /sbin/nologin pihole` but on most embedded devices this will not persist after reboot so you will have to do a research on your own
+
 - Start `pihole-FTL` daemon: `/opt/etc/init.d/S65pihole-FTL start`
 
 > [!IMPORTANT]
-> The service might initially not start due to ports being in use - make adjustments in `/opt/etc/pihole/pihole.toml` when necessary.  
-> For device or firmware specific setup instructions check the [wiki](https://github.com/jacklul/entware-pi-hole/wiki).
+> The service might initially not start due to ports being in use - check the logs in `/opt/var/log/pihole` directory and make adjustments in `/opt/etc/pihole/pihole.toml` when necessary.  
 
 ## Support
 
