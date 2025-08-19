@@ -76,7 +76,7 @@ for key in "${!architectures[@]}"; do
     # Cleanup after previous build
     #shellcheck disable=SC2115
     #rm -fr "$package_dir"/* # This is currently not necessary
-    rm -f "$package_dir/bin/pihole-FTL" "$package_dir/opt/etc/pihole/versions"
+    rm -f "$package_dir/opt/bin/pihole-FTL" "$package_dir/opt/etc/pihole/versions"
 
     echo "Building for $entware_architecture..."
 
