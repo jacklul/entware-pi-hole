@@ -52,6 +52,7 @@ fi
 if [ ! -f "$destination_dir/opt/bin/pihole-FTL" ]; then
     echo "Copying FTL binary..."
     cp --update=none "$ftl_path/pihole-FTL" "$destination_dir/opt/bin/pihole-FTL"
+    file "$destination_dir/opt/bin/pihole-FTL"
 fi
 
 if [ ! -d "$destination_dir/CONTROL" ]; then
