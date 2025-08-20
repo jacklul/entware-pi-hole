@@ -8,7 +8,7 @@ case $1 in
                 echo "Warning: User 'pihole' does not exist!" >&2
             fi
 
-            #shellcheck disable=SC1091
+            #shellcheck source=../../../../dev/core/advanced/Scripts/utils.sh
             . /opt/share/pihole/utils.sh
             run_as_user="$(getRunAsUser)"
 

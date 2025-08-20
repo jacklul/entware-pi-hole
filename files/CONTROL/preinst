@@ -93,4 +93,13 @@ EOT
     exit 1
 fi
 
+# Stop the service before unpacking
+if [ -f /opt/etc/init.d/S65pihole-FTL ] && /opt/etc/init.d/S65pihole-FTL check | grep -q 'alive'; then
+    /opt/etc/init.d/S65pihole-FTL stop
+
+    # Write a temporary file so that postinst script knows that the service was running
+    [ ! -d /opt/tmp ] && mkdir -p /opt/tmp
+    touch /opt/tmp/pihole_was_running.tmp
+fi
+
 exit 0

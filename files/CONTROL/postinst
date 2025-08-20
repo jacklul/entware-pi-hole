@@ -5,7 +5,7 @@ PATH="/opt/sbin:/opt/bin:$PATH:/opt/share/pihole/polyfill"
 
 # Fancy console output
 if [ -f /opt/share/pihole/COL_TABLE ]; then
-    # shellcheck disable=SC1091
+    #shellcheck source=../../dev/core/advanced/Scripts/COL_TABLE
     . "/opt/share/pihole/COL_TABLE"
 else
     TICK="[✓]"
@@ -45,8 +45,7 @@ fi
 
 # Set user and group used for rotating the logs by logrotate
 if [ -f /opt/etc/pihole/logrotate ]; then
-    #shellcheck disable=SC2010
-    log_user_group="$(ls -al "/opt/var/log" | grep ' \.$' | awk '{print $3 " " $4}')"
+    log_user_group="$(stat -c '%U %G' /opt/var/log)"
 
     if [ -n "$log_user_group" ]; then
         echo "  ${INFO} Setting user and group in logrotate file..."
@@ -101,16 +100,23 @@ fi
 # Restart the service if it's already running
 if /opt/etc/init.d/S65pihole-FTL check | grep -q 'alive'; then
     str="Restarting pihole-FTL service"
+    action="restart"
+elif [ -f /opt/tmp/pihole_was_running.tmp ]; then # If the service was running before unpacking, we need to start it mow
+    str="Starting pihole-FTL service"
+    action="start"
+fi
+
+# Remove the temporary file
+rm -f /opt/tmp/pihole_was_running.tmp
+
+if [ -n "$str" ] && [ -n "$action" ]; then
     printf "  %s %s..." "${INFO}" "$str"
 
-    if /opt/etc/init.d/S65pihole-FTL restart > /dev/null; then
+    if /opt/etc/init.d/S65pihole-FTL "$action" > /dev/null; then
         printf "%b  %b %s...\\n" "${OVER}" "${TICK}" "${str}"
     else
         printf "%b  %b %s...\\n" "${OVER}" "${CROSS}" "${str}"
     fi
-else
-    # Otherwise just run the prestart script to set required permissions
-    bash /opt/share/pihole/pihole-FTL-prestart.sh
 fi
 
 # Make sure gravity database exists and that
