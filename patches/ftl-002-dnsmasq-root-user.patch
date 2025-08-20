@@ -1,0 +1,32 @@
+diff --git a/src/dnsmasq/dnsmasq.c b/src/dnsmasq/dnsmasq.c
+index 707ce9fc..ee5066ea 100644
+--- a/src/dnsmasq/dnsmasq.c
++++ b/src/dnsmasq/dnsmasq.c
+@@ -503,6 +503,18 @@ int main_dnsmasq (int argc, char **argv)
+     }
+ #endif
+   
++  struct passwd *tmp_pw = getpwuid(0);
++  struct group *tmp_gp = getgrgid(0);
++  char *rootgrp = CHGRP;
++
++  if (tmp_pw->pw_name != CHUSER && daemon->username == CHUSER) {
++    daemon->username = tmp_pw->pw_name;
++  }
++
++  if (tmp_gp->gr_name != CHGRP) {
++    rootgrp = tmp_gp->gr_name;
++  }
++
+   if (daemon->username && !(ent_pw = getpwnam(daemon->username)))
+     baduser = daemon->username;
+   else if (daemon->groupname && !(gp = getgrnam(daemon->groupname)))
+@@ -514,7 +526,7 @@ int main_dnsmasq (int argc, char **argv)
+   /* implement group defaults, "dip" if available, or group associated with uid */
+   if (!daemon->group_set && !gp)
+     {
+-      if (!(gp = getgrnam(CHGRP)) && ent_pw)
++      if (!(gp = getgrnam(rootgrp)) && ent_pw)
+ 	gp = getgrgid(ent_pw->pw_gid);
+       
+       /* for error message */

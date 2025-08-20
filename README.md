@@ -31,8 +31,8 @@ src/gz pi-hole https://jacklul.github.io/entware-pi-hole/[architecture]
 
 ## Running
 
-- Add `pihole` user to the system, preferably as a non-login one **(optional but recommended)**
-  - This can be as simple as `useradd --system --no-create-home --shell /sbin/nologin pihole` but on most embedded devices this will not persist after reboot so you will have to do a research on your own
+- Add `pihole` system user, preferably without a shell
+  - This can be as simple as `useradd --system --no-create-home --shell /usr/sbin/nologin pihole` but on most embedded devices this will not persist after reboot so you will have to do a research on your own on how to do it
 
 - Start `pihole-FTL` daemon: `/opt/etc/init.d/S65pihole-FTL start`
 

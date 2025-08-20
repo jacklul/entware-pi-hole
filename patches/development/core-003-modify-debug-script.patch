@@ -87,8 +87,8 @@ index 741ff2f4..264e0e89 100755
      show_content_of_files_in_dir "${SHM_DIRECTORY}"
      show_content_of_files_in_dir "${ETC}"
 +
-+    if [ -n "$(id -u pihole 2> /dev/null)" ]; then
-+        echo_current_diagnostic "${COL_CYAN}User 'pihole' is available!${COL_NC}"
++    if [ -z "$(id -u pihole 2> /dev/null)" ]; then
++        echo_current_diagnostic "${COL_RED}User 'pihole' is not available!${COL_NC}"
 +    fi
 +
 +    # Show contents of /opt/etc/pihole/run_as_user if it exists
