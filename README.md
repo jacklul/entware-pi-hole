@@ -15,6 +15,9 @@ Swap file is **recommended**.
 
 ## Installation
 
+> [!NOTE]
+> For device or firmware specific setup instructions [check the wiki](https://github.com/jacklul/entware-pi-hole/wiki).
+
 - Install Entware - check [their wiki](https://github.com/Entware/Entware/wiki) for instructions
 
 - Add this repository to your `opkg.conf` configuration:
@@ -26,13 +29,11 @@ src/gz pi-hole https://jacklul.github.io/entware-pi-hole/[architecture]
 
 - Install the package: `opkg update && opkg install pi-hole`
 
-> [!NOTE]
-> For device or firmware specific setup instructions check the [wiki](https://github.com/jacklul/entware-pi-hole/wiki).
-
 ## Running
 
 - Add `pihole` system user, preferably without a shell
   - This can be as simple as `useradd --system --no-create-home --shell /usr/sbin/nologin pihole` but on most embedded devices this will not persist after reboot so you will have to do a research on your own on how to do it
+  - As a fallback, the init script will start the service as the user `nobody`, note that this is an unsupported method and some issues may occur
 
 - Start `pihole-FTL` daemon: `/opt/etc/init.d/S65pihole-FTL start`
 
