@@ -1,4 +1,4 @@
-# This is not a full configuration file, but rather a set of recommended initial changes.
+# This is not a full configuration file, but rather a set of recommended initial settings.
 # This file will be rewritten when pihole-FTL service starts.
 
 [dns]
@@ -23,9 +23,9 @@
   # This will reduce the size of the query database (pihole-FTL.db).
   maxDBdays = 31
 
-  # Reduce the interval at which data is written to the database. (default is 60)
-  # Increasing this can potentially reduce the write wear on the storage device but with added risk of
-  # losing the query log data in case of a process crash or power failure.
+  # Increase the interval at which data is written to the database. (default is 60)
+  # This can potentially reduce the write wear on the storage device but with added risk of losing
+  # the query log data in case of a process crash or power failure.
   #DBinterval = 300
 
   [database.network]
@@ -47,7 +47,7 @@
   # Reduce the maximum number of threads for the webserver. (default is 50)
   # Value of 1-2 should also be fine when low on resources or when putting the webserver behind a
   # reverse proxy.
-  threads = 10 
+  threads = 10
 
   [webserver.api]
     # Reduce the maximum number of concurrent API sessions. (default is 16)
