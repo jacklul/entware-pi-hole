@@ -6,7 +6,6 @@ readonly script_dir="$(dirname "$(readlink -f "$0")")"
 readonly repository_core="https://github.com/pi-hole/pi-hole.git"
 readonly repository_web="https://github.com/pi-hole/web.git"
 readonly repository_ftl="https://github.com/pi-hole/FTL.git"
-readonly repository_padd="https://github.com/pi-hole/PADD.git"
 
 [ -f "$script_dir/../dev/.shallow" ] && shallow=true
 
@@ -88,19 +87,16 @@ case $branch in
         core_branch=master
         web_branch=master
         ftl_branch=master
-        padd_branch=master
     ;;
     "development"|"dev")
         core_branch=development
         web_branch=development
         ftl_branch=development
-        padd_branch=development
     ;;
     *)
         core_branch=$branch
         web_branch=$branch
         ftl_branch=$branch
-        padd_branch=$branch
     ;;
 esac
 
@@ -109,7 +105,6 @@ case $repo in
         install_or_update_repository "$repository_core" "$script_dir/../dev/core" "$core_branch"
         install_or_update_repository "$repository_web" "$script_dir/../dev/web" "$web_branch"
         install_or_update_repository "$repository_ftl" "$script_dir/../dev/FTL" "$ftl_branch"
-        install_or_update_repository "$repository_padd" "$script_dir/../dev/PADD" "master"
     ;;
     core)
         install_or_update_repository "$repository_core" "$script_dir/../dev/core" "$core_branch"
@@ -119,9 +114,6 @@ case $repo in
     ;;
     ftl|FTL)
         install_or_update_repository "$repository_ftl" "$script_dir/../dev/FTL" "$ftl_branch"
-    ;;
-    pad|PADD)
-        install_or_update_repository "$repository_web" "$script_dir/../dev/PADD" "$padd_branch"
     ;;
     *)
         echo "Invalid repo selected, valid values: all, core, web, FTL"
