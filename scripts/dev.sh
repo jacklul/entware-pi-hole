@@ -7,7 +7,7 @@ readonly repository_core="https://github.com/pi-hole/pi-hole.git"
 readonly repository_web="https://github.com/pi-hole/web.git"
 readonly repository_ftl="https://github.com/pi-hole/FTL.git"
 
-[ -f "$script_dir/../dev/.shallow" ] && shallow=true
+[ -f "$script_dir/../dev/.shallow" ] && shallow=true && echo "Shallow clone enabled"
 
 #shellcheck disable=SC2086
 function install_or_update_repository() {
@@ -24,7 +24,6 @@ function install_or_update_repository() {
 
     if [ "$shallow" = true ]; then
         shallow_part="--depth 1"
-        echo "Shallow clone enabled"
     fi
 
     if [ -z "$new_branch" ]; then
