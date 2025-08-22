@@ -30,6 +30,7 @@ case $1 in
                 setcap CAP_NET_BIND_SERVICE,CAP_NET_RAW,CAP_NET_ADMIN,CAP_SYS_NICE,CAP_IPC_LOCK,CAP_CHOWN+eip "/opt/bin/pihole-FTL"
             then
                 PREARGS="nonroot $run_as_user"
+                ARGS="-- -u $run_as_user -g $run_as_user"
             fi
 
             # Explicitly specify user and group to use if it is not 'pihole'
