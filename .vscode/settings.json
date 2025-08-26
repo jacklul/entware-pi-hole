@@ -7,4 +7,5 @@
         "control": "yaml",
         "S65pihole-FTL": "shellscript",
     },
+    "markdown.extension.toc.levels": "2..2",
 }
