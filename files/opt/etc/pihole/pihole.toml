@@ -1,13 +1,9 @@
-# This is not a full configuration file, but rather a set of recommended initial settings.
-# This file will be rewritten when pihole-FTL service starts.
+# This is not a full configuration file, just a set of initial changes.
+# This file will be rewritten when pihole-FTL starts.
 
 [dns]
-  # Most devices will be already running a DNS server, so it is recommended to change the listening port
-  # and/or interface to bind to.
-  # When changing the port, you will have to find a way of forwarding DNS requests to the new port.
-  #interface = "lo"
-  #listeningMode = "BIND"
-  #port = 5053
+  # Change DNS port as most devices will use the default port already (default is 53).
+  port = 5053
 
 # Disable NTP feature as it may conflict with system's build-in time synchronization.
 [ntp]
@@ -20,33 +16,17 @@
 
 [database]
   # Reduce the maximum number of days to keep the queries in the database. (default is 91)
-  # This will reduce the size of the query database (pihole-FTL.db).
   maxDBdays = 31
 
-  # Increase the interval at which data is written to the database. (default is 60)
-  # This can potentially reduce the write wear on the storage device but with added risk of losing
-  # the query log data in case of a process crash or power failure.
-  #DBinterval = 300
-
   [database.network]
-    # When running on a gateway device (like a router) you may want to disable parsing of the ARP cache
-    # to prevent creation of weird entries in the network table.
-    # As a side effect to this it will also prevent hostnames from being discovered unless you have
-    # a reverse server defined (in 'dns.revServers').
-    #parseARPcache = false
-
     # Reduce the maximum number of days to keep the addresses in the network table. (default is 91)
-    # Entries that have not been active for this many days will be removed.
     expire = 31
 
 [webserver]
-  # By default the webserver will try to listen on either 80 or 8080 for HTTP and 443 or 8443 for HTTPS.
-  # Most devices will be already using those ports, so it is recommended to change them.
-  #port = "5080,5443s"
+  # Change web UI ports as most devices will use the default ports already (default are 80 and 443).
+  port = "5080,5443s"
 
   # Reduce the maximum number of threads for the webserver. (default is 50)
-  # Value of 1-2 should also be fine when low on resources or when putting the webserver behind a
-  # reverse proxy.
   threads = 10
 
   [webserver.api]
