@@ -104,6 +104,9 @@ if /opt/etc/init.d/S65pihole-FTL check | grep -q 'alive'; then
 elif [ -f /opt/tmp/pihole_was_running.tmp ]; then # If the service was running before unpacking, we need to start it now
     str="Starting pihole-FTL service"
     action="start"
+else # Make sure full config file is created for new installs
+    echo "  ${INFO} Initializing config file..."
+    pihole-FTL test -f >/dev/null 2>&1
 fi
 
 # Remove the temporary file
