@@ -101,7 +101,7 @@ fi
 if /opt/etc/init.d/S65pihole-FTL check | grep -q 'alive'; then
     str="Restarting pihole-FTL service"
     action="restart"
-elif [ -f /opt/tmp/pihole_was_running.tmp ]; then # If the service was running before unpacking, we need to start it mow
+elif [ -f /opt/tmp/pihole_was_running.tmp ]; then # If the service was running before unpacking, we need to start it now
     str="Starting pihole-FTL service"
     action="start"
 fi
