@@ -1,0 +1,28 @@
+diff --git a/advanced/Scripts/api.sh b/advanced/Scripts/api.sh
+index 7589d3ff..f5b44628 100755
+--- a/advanced/Scripts/api.sh
++++ b/advanced/Scripts/api.sh
+@@ -19,7 +19,7 @@
+ 
+ TestAPIAvailability() {
+ 
+-    local chaos_api_list authResponse authStatus authData apiAvailable DNSport
++    local chaos_api_list authResponse authStatus authData apiAvailable DNSport DNSip
+ 
+     # as we are running locally, we can get the port value from FTL directly
+     PI_HOLE_SCRIPT_DIR="/opt/share/pihole"
+@@ -28,11 +28,13 @@ TestAPIAvailability() {
+     . "${utilsfile}"
+ 
+     DNSport=$(getFTLConfigValue dns.port)
++    DNSip=$(ss --ipv4 --listening --numeric --tcp --udp src :${DNSport} --processes | grep '"pihole-FTL"' | awk '{split($5, a, ":"); print a[1]}' | head -n 1)
++    [ -z "$DNSip" ] && DNSip="127.0.0.1"
+ 
+     # Query the API URLs from FTL using CHAOS TXT local.api.ftl
+     # The result is a space-separated enumeration of full URLs
+     # e.g., "http://localhost:80/api/" "https://localhost:443/api/"
+-    chaos_api_list="$(dig +short -p "${DNSport}" chaos txt local.api.ftl @127.0.0.1)"
++    chaos_api_list="$(dig +short -p "${DNSport}" chaos txt local.api.ftl @${DNSip})"
+ 
+     # If the query was not successful, the variable is empty
+     if [ -z "${chaos_api_list}" ]; then
