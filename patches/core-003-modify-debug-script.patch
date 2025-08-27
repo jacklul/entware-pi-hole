@@ -71,13 +71,24 @@ index 741ff2f4..264e0e89 100755
      # Now that we have the values stored,
      for i in "${!ports_in_use[@]}"; do
          # loop through them and assign some local variables
+@@ -804,7 +804,9 @@ ftl_full_status(){
+     # if using systemd print the full status of pihole-FTL
+     echo_current_diagnostic "Pi-hole-FTL full status"
+     local FTL_status
+-    if command -v systemctl &> /dev/null; then
++    if [ -f /opt/etc/opkg.conf ]; then
++        log_write "${INFO} unsupported ${COL_YELLOW}(skipped)${COL_NC}"
++    elif command -v systemctl &> /dev/null; then
+       FTL_status=$(systemctl status --full --no-pager pihole-FTL.service)
+       log_write "   ${FTL_status}"
+     elif [ -n "${DOCKER_VERSION}" ]; then
 @@ -1056,6 +1056,17 @@ show_content_of_pihole_files() {
      show_content_of_files_in_dir "${LOG_DIRECTORY}"
      show_content_of_files_in_dir "${SHM_DIRECTORY}"
      show_content_of_files_in_dir "${ETC}"
 +
-+    if [ -n "$(id -u pihole 2> /dev/null)" ]; then
-+        echo_current_diagnostic "${COL_CYAN}User 'pihole' is available!${COL_NC}"
++    if [ -z "$(id -u pihole 2> /dev/null)" ]; then
++        echo_current_diagnostic "${COL_RED}User 'pihole' is not available!${COL_NC}"
 +    fi
 +
 +    # Show contents of /opt/etc/pihole/run_as_user if it exists
