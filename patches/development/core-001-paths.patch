@@ -203,7 +203,7 @@ index 34d96318..b4ffc79b 100755
  fi
  
  # Helper function to handle log rotation for a single file
-@@ -78,13 +78,13 @@ flush_log() {
+@@ -78,14 +78,14 @@ flush_log() {
  
  if [[ "$*" == *"once"* ]]; then
      # Nightly logrotation
@@ -214,6 +214,7 @@ index 34d96318..b4ffc79b 100755
          if [[ "$*" != *"quiet"* ]]; then
              echo -ne "  ${INFO} Running logrotate ..."
          fi
+         mkdir -p "${STATEFILE%/*}"
 -        /usr/sbin/logrotate --force --state "${STATEFILE}" /etc/pihole/logrotate
 +        /opt/sbin/logrotate --force --state "${STATEFILE}" /opt/etc/pihole/logrotate
      else
