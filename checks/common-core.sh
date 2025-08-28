@@ -9,8 +9,16 @@ $(find "$TARGET_DIR" \
     -type f \
     -name "*" \
     -not -name ".*" \
+    -not -name "LICENSE" \
+    -not -name "*.md" \
     -not -path "$TARGET_DIR/.*" \
     -not -path "$TARGET_DIR/automated install/*" \
+    -not -path "$TARGET_DIR/advanced/bash-completion/*" \
+    -not -path "$TARGET_DIR/advanced/Scripts/database_migration/gravity/*" \
+    -not -path "$TARGET_DIR/test/*" \
+    -not -path "$TARGET_DIR/manpages/*" \
+    -not -name "pihole-FTL.systemd" \
     -not -name "pihole-FTL.service" \
+    -not -name "pihole-FTL.openrc" \
 | sort)
 EOT

@@ -6,7 +6,7 @@
 
 [ -z "$FILES" ] && exit 1
 for file in $FILES; do
-    { [ ! -f "$file" ] || { [ "$(head -c 3 "$file")" != "#!/" ] && ! grep -q '; then' "$file" ; } ; } && continue
+    { [ ! -f "$file" ] || [ "$(head -c 3 "$file")" != "#!/" ] ; } && continue
 
     echo "Checking $file..."
 
