@@ -25,6 +25,27 @@ gravitydb_version() {
     pihole-FTL sqlite3 -ni "$1" "SELECT \"value\" FROM \"info\" WHERE \"property\" = 'version';" || echo 0
 }
 
+run_service_action() {
+    case "$1" in
+        "start")
+            _str="Starting pihole-FTL service"
+        ;;
+        "restart")
+            _str="Restarting pihole-FTL service"
+        ;;
+    esac
+
+    if [ -n "$_str" ]; then
+        printf "  %s %s..." "${INFO}" "$_str"
+
+        if /opt/etc/init.d/S65pihole-FTL "$1" > /dev/null; then
+            printf "%b  %b %s...\\n" "${OVER}" "${TICK}" "$_str"
+        else
+            printf "%b  %b %s...\\n" "${OVER}" "${CROSS}" "$_str"
+        fi
+    fi
+}
+
 ##########
 
 echo "  ${INFO} ${COL_BOLD}Running Pi-hole install/upgrade tasks...${COL_NC}"
@@ -73,15 +94,14 @@ if [ "$root_user" != "root" ]; then
     fi
 fi
 
-# Add a password for the web interface if the config file doesn't exist (new install)
-if [ ! -f /opt/etc/pihole/pihole.toml ]; then
-    # same code as in Pi-hole's basic-install.sh
+# Add a password for the web interface for new installs
+if [ ! -f /opt/etc/pihole/pihole.toml ] || grep -Fq 'This file will be rewritten' /opt/etc/pihole/pihole.toml; then
     new_password=$(tr -dc _A-Z-a-z-0-9 </dev/urandom | head -c 8)
     pihole setpassword "$new_password" > /dev/null
 
     echo "  ${INFO} ${COL_LIGHT_GREEN}Generated password for the web interface: $new_password${COL_NC}"
     echo "  ${INFO} ${COL_BOLD}It can be changed using 'pihole setpassword' command.${COL_NC}"
-elif [ -z "$(pihole-FTL --config webserver.api.pwhash)" ]; then # Show a warning if the password is not set
+elif [ -z "$(pihole-FTL --config -q webserver.api.pwhash)" ]; then # or show a warning if the password is not set
     echo "  ${INFO} ${COL_LIGHT_RED}Password for the web interface is not set - this is a security risk!${COL_NC}"
     echo "  ${INFO} ${COL_BOLD}Please set it using 'pihole setpassword' command.${COL_NC}"
 fi
@@ -94,47 +114,29 @@ if [ -n "$gravitydb_file" ] && [ -f "$gravitydb_file" ]; then
     gravitydb_version="$(gravitydb_version "$gravitydb_file")"
     bash /opt/share/pihole/gravity.sh --upgrade
 
-    [ "$(gravitydb_version "$gravitydb_file")" != "$gravitydb_version" ] && run_gravity=true
+    # Force update gravity if database version has changed
+    [ "$(gravitydb_version "$gravitydb_file")" != "$gravitydb_version" ] && gravitydb_upgraded=true
 fi
 
 # Restart the service if it's already running
 if /opt/etc/init.d/S65pihole-FTL check | grep -q 'alive'; then
-    str="Restarting pihole-FTL service"
-    action="restart"
-elif [ -f /opt/tmp/pihole_was_running.tmp ]; then # If the service was running before unpacking, we need to start it now
-    str="Starting pihole-FTL service"
-    action="start"
-else # Make sure full config file is created for new installs
-    echo "  ${INFO} Initializing config file..."
-    pihole-FTL test -f >/dev/null 2>&1
+    run_service_action "restart"
+elif [ -f /opt/tmp/pihole_was_running.tmp ]; then # or start it if it was running before
+    rm -f /opt/tmp/pihole_was_running.tmp
+    run_service_action "start"
 fi
 
-# Remove the temporary file
-rm -f /opt/tmp/pihole_was_running.tmp
-
-if [ -n "$str" ] && [ -n "$action" ]; then
-    printf "  %s %s..." "${INFO}" "$str"
-
-    if /opt/etc/init.d/S65pihole-FTL "$action" > /dev/null; then
-        printf "%b  %b %s...\\n" "${OVER}" "${TICK}" "${str}"
-    else
-        printf "%b  %b %s...\\n" "${OVER}" "${CROSS}" "${str}"
-    fi
-fi
-
-# Make sure gravity database exists and that
-# gravity is rebuilt after database upgrade
-if [ -n "$run_gravity" ] || { [ -n "$gravitydb_file" ] && [ ! -f "$gravitydb_file" ] ; }; then
-    if ! timeout 3600 bash /opt/share/pihole/gravity.sh --force; then
-        echo "  ${CROSS} ${COL_LIGHT_RED}Gravity database rebuild failed - waited 1 hour for it to complete!${COL_NC}"
-    fi
+# Run gravity update if database was upgraded or does not exist
+if [ -n "$gravitydb_upgraded" ] || { [ -n "$gravitydb_file" ] && [ ! -f "$gravitydb_file" ] ; }; then
+    bash /opt/share/pihole/gravity.sh
 fi
 
 # Update remote versions via updatechecker
 # We cannot execute it now because opkg is running
 {
-    start_time=$(date +%s)
-    while [ -f /opt/tmp/opkg.lock ] && [ $(( $(date +%s) - start_time )) -le 300 ]; do
+    timeout=300
+    while [ -f /opt/tmp/opkg.lock ] && [ "$timeout" -gt 0 ] ; do
+        timeout=$((timeout-1))
         sleep 1
     done
 
