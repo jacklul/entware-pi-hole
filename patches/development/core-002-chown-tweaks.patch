@@ -15,14 +15,12 @@ diff --git a/advanced/Scripts/utils.sh b/advanced/Scripts/utils.sh
 index 63d51f87..c0dd180c 100755
 --- a/advanced/Scripts/utils.sh
 +++ b/advanced/Scripts/utils.sh
-@@ -93,3 +93,35 @@ setFTLConfigValue(){
+@@ -93,3 +93,30 @@ setFTLConfigValue(){
          exit 1
      esac
  }
 +
-+# Return the user for chown operations
-+getRunAsUser(){
-+    # Forced by user
++getRunAsUser() {
 +    if [ -f /opt/etc/pihole/run_as_user ]; then
 +        cat /opt/etc/pihole/run_as_user
 +        return
@@ -39,12 +37,9 @@ index 63d51f87..c0dd180c 100755
 +    fi
 +}
 +
-+# Get user for chown operations
-+#shellcheck disable=SC2155
-+getChownUser(){
++getChownUser() {
 +    local chown_user="$(getRunAsUser)"
 +
-+    # Fallback to root user as this function must return something valid
 +    if [ -z "$chown_user" ]; then
 +        chown_user=0
 +    fi
@@ -93,12 +88,11 @@ diff --git a/gravity.sh b/gravity.sh
 index 3a7db5ae..56c9fd91 100755
 --- a/gravity.sh
 +++ b/gravity.sh
-@@ -65,11 +65,14 @@ gravityOLDfile="${gravityDIR}/gravity_old.db"
+@@ -65,11 +65,13 @@ gravityOLDfile="${gravityDIR}/gravity_old.db"
  gravityBCKdir="${gravityDIR}/gravity_backups"
  gravityBCKfile="${gravityBCKdir}/gravity.db"
  
 -fix_owner_permissions() {
-+# Set user:group for chown operations
 +chown_user="$(getChownUser)"
 +
 +fix_owner_permissions() {

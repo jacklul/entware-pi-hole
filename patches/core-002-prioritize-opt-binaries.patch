@@ -2,11 +2,10 @@ diff --git a/pihole b/pihole
 index 98f478a3..8eb89d39 100755
 --- a/pihole
 +++ b/pihole
-@@ -9,6 +9,9 @@
+@@ -9,6 +9,8 @@
  # This file is copyright under the latest version of the EUPL.
  # Please see LICENSE file for your rights under this license.
  
-+# Prioritize /opt binaries
 +PATH="/opt/sbin:/opt/bin:$PATH:/opt/share/pihole/polyfill"
 +
  PI_HOLE_SCRIPT_DIR="/opt/share/pihole"

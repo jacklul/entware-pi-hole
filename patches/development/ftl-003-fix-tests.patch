@@ -2,11 +2,10 @@ diff --git a/test/run.sh b/test/run.sh
 index 5d490a82..dfd08dac 100755
 --- a/test/run.sh
 +++ b/test/run.sh
-@@ -83,6 +83,34 @@ export FTLCONF_files_pcap='*123#./test/pcap'
+@@ -83,6 +83,33 @@ export FTLCONF_files_pcap='*123#./test/pcap'
  # Prepare gdb session
  echo "handle SIGHUP nostop SIGPIPE nostop SIGTERM nostop SIG32 nostop SIG33 nostop SIG34 nostop SIG35 nostop SIG41 nostop" > /root/.gdbinit
  
-+# Set up virtual /opt directories
 +declare -A LINKS=(
 +    ["/etc/pihole"]="/opt/etc/pihole"
 +    ["/var/log/pihole"]="/opt/var/log/pihole"

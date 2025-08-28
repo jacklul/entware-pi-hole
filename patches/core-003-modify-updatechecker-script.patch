@@ -17,13 +17,11 @@ index b325ee9c..2ab983c1 100755
  function get_remote_hash() {
      git ls-remote "https://github.com/pi-hole/${1}" --tags "${2}" | awk '{print substr($0, 1,8);}' || return 1
  }
-@@ -61,6 +69,12 @@ if [[ ! "${DOCKER_TAG}" =~ $regex ]]; then
+@@ -61,6 +69,10 @@ if [[ ! "${DOCKER_TAG}" =~ $regex ]]; then
      unset DOCKER_TAG
  fi
  
-+# load current versions when running in Entware since we don't have locally cloned repos in this case
 +if [ -f "${VERSION_FILE}" ]; then
-+    # shellcheck disable=SC1090
 +    . "${VERSION_FILE}"
 +fi
 +
@@ -96,12 +94,10 @@ index b325ee9c..2ab983c1 100755
  GITHUB_FTL_VERSION="$(get_remote_version FTL "${FTL_BRANCH}")"
  addOrEditKeyValPair "${VERSION_FILE}" "GITHUB_FTL_VERSION" "${GITHUB_FTL_VERSION}"
  
-@@ -131,3 +118,21 @@ if [[ "${DOCKER_TAG}" ]]; then
+@@ -131,3 +118,18 @@ if [[ "${DOCKER_TAG}" ]]; then
      GITHUB_DOCKER_VERSION="$(get_remote_version docker-pi-hole "${docker_branch}")"
      addOrEditKeyValPair "${VERSION_FILE}" "GITHUB_DOCKER_VERSION" "${GITHUB_DOCKER_VERSION}"
  fi
-+
-+# get Entware package versions
 +
 +if [ -f /opt/etc/opkg.conf ]; then
 +    ENTWARE_PACKAGE="$(opkg list-installed pi-hole* | awk '{print $1}' | head -n 1)"
@@ -110,7 +106,6 @@ index b325ee9c..2ab983c1 100755
 +    ENTWARE_VERSION="$(opkg list-installed "${ENTWARE_PACKAGE}" | awk '{print $3}')"
 +    addOrEditKeyValPair "${VERSION_FILE}" "ENTWARE_VERSION" "${ENTWARE_VERSION}"
 +
-+    # Check if the version is in the release version format
 +    if [ "$ENTWARE_PACKAGE" = "pi-hole" ] && [[ ! "${ENTWARE_VERSION}" =~ $release_regex ]]; then
 +        unset ENTWARE_PACKAGE
 +    fi

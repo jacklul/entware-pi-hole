@@ -82,7 +82,7 @@ index 741ff2f4..264e0e89 100755
        FTL_status=$(systemctl status --full --no-pager pihole-FTL.service)
        log_write "   ${FTL_status}"
      elif [ -n "${DOCKER_VERSION}" ]; then
-@@ -1056,6 +1056,17 @@ show_content_of_pihole_files() {
+@@ -1056,6 +1056,16 @@ show_content_of_pihole_files() {
      show_content_of_files_in_dir "${LOG_DIRECTORY}"
      show_content_of_files_in_dir "${SHM_DIRECTORY}"
      show_content_of_files_in_dir "${ETC}"
@@ -91,7 +91,6 @@ index 741ff2f4..264e0e89 100755
 +        echo_current_diagnostic "${COL_RED}User 'pihole' is not available!${COL_NC}"
 +    fi
 +
-+    # Show contents of /opt/etc/pihole/run_as_user if it exists
 +    if [ -f /opt/etc/pihole/run_as_user ]; then
 +        echo_current_diagnostic "contents of ${COL_CYAN}/opt/etc/pihole/run_as_user${COL_NC}"
 +        log_write "\\n${COL_GREEN}$(ls -lhd "/opt/etc/pihole/run_as_user")${COL_NC}"
