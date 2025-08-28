@@ -2,6 +2,9 @@
 # This file will be rewritten when pihole-FTL starts.
 
 [dns]
+  # Let FTL pick the interface as the default might not exist (default is eth0).
+  interface = ""
+
   # Change DNS port as most devices will use the default port already (default is 53).
   port = 5053
 
