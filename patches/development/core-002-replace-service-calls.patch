@@ -100,7 +100,7 @@ index 6cc69008..c103d528 100755
 -    if is_command systemctl; then
 +    elif is_command systemctl; then
          # use that to disable the service
-         systemctl -q disable "${1}"
+         systemctl -q disable --now "${1}"
      elif is_command openrc; then
 @@ -1289,8 +1309,14 @@ disable_service() {
  }
