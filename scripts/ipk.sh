@@ -83,7 +83,7 @@ echo "2.0" > "$tmp_dir/debian-binary"
 
 # package everything into single ipk archive
 archives="./debian-binary ./control.tar.gz"
-[ -f ./data.tar.gz ] && archives="$archives ./data.tar.gz"
+[ -f "$tmp_dir/data.tar.gz" ] && archives="$archives ./data.tar.gz"
 rm -f "$package_file"
 #shellcheck disable=SC2086
 ( cd "$tmp_dir" && tar --format=gnu --numeric-owner --owner=0 --group=0 --sort=name -cf - --mtime="$timestamp" $archives | gzip -n - > "$package_file" )
