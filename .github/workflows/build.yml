@@ -350,7 +350,6 @@ jobs:
         with:
           name: packages
           path: ./packages/*
-          include-hidden-files: true
 
       - name: Check if same dev package was already built
         if: github.event.inputs.SCHEDULED
