@@ -49,6 +49,11 @@ on:
         required: false
         default: false
         description: Build 'dev' packages (schedule)
+      TEST_FTL:
+        type: boolean
+        required: false
+        default: true
+        description: Run FTL tests (FTL build)
 
 jobs:
   variables:
@@ -270,6 +275,7 @@ jobs:
           platform: ${{ matrix.docker_platform }}
           git_branch: ${{ steps.variables.outputs.GIT_BRANCH }}
           git_tag: ${{ steps.variables.outputs.GIT_TAG }}
+          run_tests: ${{ github.event.inputs.TEST_FTL || 'true' }}
 
       - name: Rename FTL binary and generate checksum file
         if: steps.cache.outputs.cache-hit != 'true'
