@@ -2,11 +2,14 @@
 # This file will be rewritten when pihole-FTL starts.
 
 [dns]
-  # Let FTL pick the interface as the default might not exist (default is eth0).
-  interface = ""
+  # Unset this variable as the default interface set here might not exist (default is eth0).
+  #interface = ""
+
+  # Do not log DNS queries and replies to pihole.log (default is true).
+  queryLogging = false
 
   # Change DNS port as most devices will use the default port already (default is 53).
-  port = 5053
+  #port = 5053
 
 # Disable NTP feature as it may conflict with system's build-in time synchronization.
 [ntp]
@@ -27,7 +30,7 @@
 
 [webserver]
   # Change web UI ports as most devices will use the default ports already (default are 80 and 443).
-  port = "5080,5443s"
+  #port = "5080o,5443so"
 
   # Reduce the maximum number of threads for the webserver. (default is 50)
   threads = 10

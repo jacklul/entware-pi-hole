@@ -60,9 +60,11 @@ tmp_dir="/tmp/IPKG_BUILD.$$"
 [ ! -w /tmp ] && tmp_dir="$(dirname "$script_dir")/tmp/IPKG_BUILD.$$"
 mkdir -p "$tmp_dir"
 
-# create data archive
-#sudo chown -R 0:0 "$package_dir/opt"
-tar --exclude CONTROL --exclude '*.ipk' --format=gnu --numeric-owner --owner=0 --group=0 --sort=name -cpf - --mtime="$timestamp" . | gzip -n - > "$tmp_dir/data.tar.gz"
+installed_size=0
+if [ -d "$package_dir/opt" ]; then
+    # create data archive
+    tar --exclude CONTROL --exclude '*.ipk' --format=gnu --numeric-owner --owner=0 --group=0 --sort=name -cpf - --mtime="$timestamp" . | gzip -n - > "$tmp_dir/data.tar.gz"
+fi
 
 # update/set variables in control file
 installed_size=$(zcat < "$tmp_dir"/data.tar.gz | wc -c)
@@ -74,16 +76,17 @@ sed -e "s/^Installed-Size:.*/Installed-Size: $installed_size/" -i "$package_dir/
 find "$package_dir/CONTROL" -type f \( -name "post*" -o -name "pre*" \) -exec chmod 0755 {} \;
 
 # create control archive
-#sudo chown -R 0:0 "$package_dir/CONTROL"
 ( cd "$package_dir/CONTROL" && tar --format=gnu --numeric-owner --owner=0 --group=0 --sort=name -cf - --mtime="$timestamp" . | gzip -n - > "$tmp_dir/control.tar.gz" )
 
 # package format version
 echo "2.0" > "$tmp_dir/debian-binary"
 
 # package everything into single ipk archive
+archives="./debian-binary ./control.tar.gz"
+[ -f ./data.tar.gz ] && archives="$archives ./data.tar.gz"
 rm -f "$package_file"
-#sudo chown 0:0 "$tmp_dir"/*
-( cd "$tmp_dir" && tar --format=gnu --numeric-owner --owner=0 --group=0 --sort=name -cf - --mtime="$timestamp" ./debian-binary ./data.tar.gz ./control.tar.gz | gzip -n - > "$package_file" )
+#shellcheck disable=SC2086
+( cd "$tmp_dir" && tar --format=gnu --numeric-owner --owner=0 --group=0 --sort=name -cf - --mtime="$timestamp" $archives | gzip -n - > "$package_file" )
 
 # cleanup
 rm -fr "$tmp_dir"

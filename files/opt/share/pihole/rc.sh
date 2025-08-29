@@ -18,16 +18,14 @@ case $1 in
             fi
 
             # Update permissions of /dev/shm to allow non-root users to create and delete own files
-            if [ -n "$run_as_user" ] && [ "$(stat -c "%a" /dev/shm)" != "1777" ]; then
-                if ! chmod 1777 /dev/shm; then
-                    echo "Warning: Failed to update permissions of /dev/shm!" >&2
-                fi
+            if [ -n "$run_as_user" ] && [ "$(stat -c "%a" /dev/shm)" != "1777" ] && ! chmod 1777 /dev/shm; then
+                echo "Warning: Failed to update permissions of /dev/shm!" >&2
             fi
 
             # Check if we can start the daemon the intended way (setting capabilities on the binary)
             if
                 [ -n "$run_as_user" ] && \
-                setcap CAP_NET_BIND_SERVICE,CAP_NET_RAW,CAP_NET_ADMIN,CAP_SYS_NICE,CAP_IPC_LOCK,CAP_CHOWN+eip "/opt/bin/pihole-FTL"
+                setcap CAP_NET_BIND_SERVICE,CAP_NET_RAW,CAP_NET_ADMIN,CAP_SYS_NICE,CAP_IPC_LOCK,CAP_CHOWN+eip /opt/bin/pihole-FTL
             then
                 PREARGS="nonroot $run_as_user"
             fi

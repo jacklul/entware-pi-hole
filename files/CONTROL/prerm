@@ -1,0 +1,12 @@
+#!/bin/sh
+
+# Stop the service before removal
+if [ -f /opt/etc/init.d/S65pihole-FTL ] && /opt/etc/init.d/S65pihole-FTL check | grep -q 'alive'; then
+    /opt/etc/init.d/S65pihole-FTL stop
+
+    # Create a temporary file for postinst script to know it was running
+    [ ! -d /opt/tmp ] && mkdir -p /opt/tmp
+    date '+%Y-%m-%d' > /opt/tmp/pihole_was_running.tmp
+fi
+
+exit 0

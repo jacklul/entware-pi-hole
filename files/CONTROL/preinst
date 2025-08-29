@@ -1,37 +1,40 @@
 #!/bin/sh
 
+# Allow skipping this script
+[ -n "$PIHOLE_SKIP_DEPS_CHECK" ] && exit 0
+
 # Prioritize /opt binaries
 PATH="/opt/sbin:/opt/bin:$PATH"
 
 # Some of these commands might be missing depending on the system
-# so we check if they exist and then prompt the user to install them
+# so we check if they exist and then prompt the user to install them.
 # These were not added to package dependencies as they should be included
-# in busybox on most systems and their usage is not version dependent
+# in busybox on most systems and their usage is not version dependent.
 command_deps="" # Format: command or command:package
 coreutils_deps="basename cat chmod chown cp date df dirname echo false head kill ln mkdir mv pwd rm tail test touch true uptime"
 
 command_exists() {
     _command=$1
 
-    if [ -z "$_check_command" ]; then
-        type 2> /dev/null && _check_command="type"
-        which --help > /dev/null 2>&1 && _check_command="which"
-        whereis --help > /dev/null 2>&1 && _check_command="whereis"
+    if [ -z "$check_command" ]; then
+        whereis --help > /dev/null 2>&1 && check_command="whereis"
+        which --help > /dev/null 2>&1 && check_command="which"
+        type 2> /dev/null && check_command="type"
 
-        if [ -z "$_check_command" ]; then
+        if [ -z "$check_command" ]; then
             echo "Unable to check for missing dependencies - 'type', 'which' or 'whereis' command is required!"
             exit 1
         fi
     fi
 
-    case $_check_command in
+    case $check_command in
         "type")
-            if [ -n "$(type "$_command" 2>/dev/null | awk '{print $3}')" ]; then
+            if type "$_command" >/dev/null 2>&1; then
                 return 0
             fi
         ;;
         "which")
-            if [ -n "$(which "$_command" 2>/dev/null)" ]; then
+            if which "$_command" >/dev/null 2>&1; then
                 return 0
             fi
         ;;
@@ -40,9 +43,6 @@ command_exists() {
                 return 0
             fi
         ;;
-        *)
-            echo "Unable to check for missing dependencies - 'type', 'which' or 'whereis' command is required!"
-            exit 1
     esac
 
     return 1
@@ -91,15 +91,6 @@ Install them by running the following command:
 EOT
 
     exit 1
-fi
-
-# Stop the service before unpacking
-if [ -f /opt/etc/init.d/S65pihole-FTL ] && /opt/etc/init.d/S65pihole-FTL check | grep -q 'alive'; then
-    /opt/etc/init.d/S65pihole-FTL stop
-
-    # Write a temporary file so that postinst script knows that the service was running
-    [ ! -d /opt/tmp ] && mkdir -p /opt/tmp
-    touch /opt/tmp/pihole_was_running.tmp
 fi
 
 exit 0

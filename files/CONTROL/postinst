@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# Drop caches, to make sure checks here are done on the updated files
+sync
+echo 3 > /proc/sys/vm/drop_caches
+
 # Prioritize /opt binaries
 PATH="/opt/sbin:/opt/bin:$PATH:/opt/share/pihole/polyfill"
 
@@ -7,7 +11,7 @@ PATH="/opt/sbin:/opt/bin:$PATH:/opt/share/pihole/polyfill"
 if [ -f /opt/share/pihole/COL_TABLE ]; then
     #shellcheck source=../../dev/core/advanced/Scripts/COL_TABLE
     . "/opt/share/pihole/COL_TABLE"
-else
+else # fallback
     TICK="[✓]"
     CROSS="[✗]"
     INFO="[i]"
@@ -25,7 +29,7 @@ gravitydb_version() {
     pihole-FTL sqlite3 -ni "$1" "SELECT \"value\" FROM \"info\" WHERE \"property\" = 'version';" || echo 0
 }
 
-run_service_action() {
+service_action() {
     case "$1" in
         "start")
             _str="Starting pihole-FTL service"
@@ -48,7 +52,7 @@ run_service_action() {
 
 ##########
 
-echo "  ${INFO} ${COL_BOLD}Running Pi-hole install/upgrade tasks...${COL_NC}"
+echo "  ${INFO} ${COL_BOLD}Running Pi-hole install tasks...${COL_NC}"
 
 # Make links to system files if they don't exist in /opt/etc
 [ ! -f /opt/etc/hosts ] && [ -f /etc/hosts ] && ln -s /etc/hosts /opt/etc/hosts && symlinks="$symlinks /opt/etc/hosts"
@@ -71,59 +75,79 @@ if [ -f /opt/etc/pihole/logrotate ]; then
     if [ -n "$log_user_group" ]; then
         echo "  ${INFO} Setting user and group in logrotate file..."
 
-        if grep -q "# su #" /opt/etc/pihole/logrotate; then
-            sed "s/# su #/su $log_user_group/g;" -i /opt/etc/pihole/logrotate
-        else
-            sed "s/su.*$/su $log_user_group/g;" -i /opt/etc/pihole/logrotate
-        fi
+        sed "s/# su #/su $log_user_group/g;" -i /opt/etc/pihole/logrotate
     fi
 fi
 
-# Apply possible workarounds
+# Show a warning when root user is not called 'root' and update the crontab file
 root_user="$(id -nu 0 2> /dev/null)"
 if [ "$root_user" != "root" ]; then
     echo "  ${INFO} ${COL_YELLOW}It looks like the root user is not called 'root' - this can cause issues!${COL_NC}"
-
     echo "  ${INFO} ${COL_BOLD}Correcting username in crontab file...${COL_NC}"
-    sed "s/ root / $root_user /g" -i /opt/etc/cron.d/pihole
 
-    separator="### Pi-hole crontab - do not modify ###"
-    if grep -Fq "$separator" "/opt/var/spool/cron/crontabs/$root_user" 2> /dev/null; then
-        echo "  ${INFO} ${COL_BOLD}Crontab workaround is no longer required, removing it...${COL_NC}"
-        sed "/$separator/,/$separator/d" -i "/opt/var/spool/cron/crontabs/$root_user"
-    fi
+    sed "s/ root / $root_user /g" -i /opt/etc/cron.d/pihole
 fi
 
-# Add a password for the web interface for new installs
-if [ ! -f /opt/etc/pihole/pihole.toml ] || grep -Fq 'This file will be rewritten' /opt/etc/pihole/pihole.toml; then
-    new_password=$(tr -dc _A-Z-a-z-0-9 </dev/urandom | head -c 8)
-    pihole setpassword "$new_password" > /dev/null
+# Check if config file exists
+if [ -f /opt/etc/pihole/pihole.toml ]; then
+    config_exists=true
+elif [ -f /opt/share/pihole/pihole.toml.dist ]; then # Copy our starting config for new installs
+    echo "  ${INFO} ${COL_BOLD}Initializing configuration file...${COL_NC}"
+    cp /opt/share/pihole/pihole.toml.dist /opt/etc/pihole/pihole.toml
+    chmod 0640 /opt/etc/pihole/pihole.toml
+fi
 
-    echo "  ${INFO} ${COL_LIGHT_GREEN}Generated password for the web interface: $new_password${COL_NC}"
-    echo "  ${INFO} ${COL_BOLD}It can be changed using 'pihole setpassword' command.${COL_NC}"
+# Set a password for the web interface on new installs
+if [ -z "$config_exists" ]; then
+    new_password=$(tr -dc _A-Z-a-z-0-9 < /dev/urandom | head -c 8)
+
+    if pihole setpassword "$new_password" > /dev/null; then
+        echo "  ${INFO} ${COL_LIGHT_GREEN}Generated password for the web interface: ${COL_YELLOW}$new_password${COL_NC}"
+        echo "  ${INFO} ${COL_BOLD}It can be changed using 'pihole setpassword' command.${COL_NC}"
+    else
+        echo "  ${INFO} ${COL_LIGHT_RED}Failed to set a password for the web interface!${COL_NC}"
+        no_password=true
+    fi
 elif [ -z "$(pihole-FTL --config -q webserver.api.pwhash)" ]; then # or show a warning if the password is not set
     echo "  ${INFO} ${COL_LIGHT_RED}Password for the web interface is not set - this is a security risk!${COL_NC}"
-    echo "  ${INFO} ${COL_BOLD}Please set it using 'pihole setpassword' command.${COL_NC}"
+    no_password=true
 fi
 
-# Gravity database file path
+# Insist on setting the password manually
+[ -n "$no_password" ] && echo "  ${INFO} ${COL_BOLD}Please set it using 'pihole setpassword' command.${COL_NC}"
+
+# Get gravity database file path
 gravitydb_file="$(pihole-FTL --config -q files.gravity)"
 
-# Upgrade existing gravity database
+# Upgrade existing gravity database if needed
 if [ -n "$gravitydb_file" ] && [ -f "$gravitydb_file" ]; then
     gravitydb_version="$(gravitydb_version "$gravitydb_file")"
     bash /opt/share/pihole/gravity.sh --upgrade
 
-    # Force update gravity if database version has changed
+    # Force gravity update if database version has changed
     [ "$(gravitydb_version "$gravitydb_file")" != "$gravitydb_version" ] && gravitydb_upgraded=true
+
+    # This file should be present only if gravity database is missing at this point
+    if [ -f /opt/etc/pihole/adlists.list ]; then # Move it to location expected by Pi-hole
+        [ ! -d /opt/etc/pihole/migration_backup ] && mkdir /opt/etc/pihole/migration_backup
+        mv -f /opt/etc/pihole/adlists.list /opt/etc/pihole/migration_backup/adlists.list
+    fi
+fi
+
+# Check if the service is currently running
+/opt/etc/init.d/S65pihole-FTL check | grep -q 'alive' && is_running=true
+
+# Check if service was running before package upgrade
+if [ -f /opt/tmp/pihole_was_running.tmp ]; then
+    [ "$(cat /opt/tmp/pihole_was_running.tmp)" = "$(date '+%Y-%m-%d')" ] && was_running=true
+    rm -f /opt/tmp/pihole_was_running.tmp
 fi
 
 # Restart the service if it's already running
-if /opt/etc/init.d/S65pihole-FTL check | grep -q 'alive'; then
-    run_service_action "restart"
-elif [ -f /opt/tmp/pihole_was_running.tmp ]; then # or start it if it was running before
-    rm -f /opt/tmp/pihole_was_running.tmp
-    run_service_action "start"
+if [ -n "$is_running" ]; then
+    service_action "restart"
+elif [ -n "$was_running" ]; then # or start it if it was running before
+    service_action "start"
 fi
 
 # Run gravity update if database was upgraded or does not exist
@@ -131,8 +155,27 @@ if [ -n "$gravitydb_upgraded" ] || { [ -n "$gravitydb_file" ] && [ ! -f "$gravit
     bash /opt/share/pihole/gravity.sh
 fi
 
-# Update remote versions via updatechecker
-# We cannot execute it now because opkg is running
+# Perform a port check on new installs
+if [ -z "$config_exists" ]; then
+    dns_port="$(pihole-FTL --config -q dns.port)"
+    web_ports=$(pihole-FTL --config -q webserver.port | sed 's/[^0-9,]//g' | tr ',' ' ')
+    listening="$(ss --listening --numeric --tcp --udp --processes | grep -Fv '"pihole-FTL"')"
+    ports_in_use=
+
+    for port in $dns_port $web_ports; do
+        echo "$listening" | grep -qF ":$port " && ports_in_use="$ports_in_use $port"
+    done
+
+    # Show a warning if something is already listening on one of the ports
+    if [ -n "$ports_in_use" ]; then
+        echo "  ${INFO} ${COL_LIGHT_RED}The following required ports are already in use:${COL_YELLOW}$ports_in_use${COL_NC}"
+        echo "  ${INFO} ${COL_BOLD}Pi-hole will not work out of the box - configuration changes are required!${COL_NC}"
+        echo "  ${INFO} ${COL_BOLD}Please see ${COL_CYAN}https://github.com/jacklul/entware-pi-hole/wiki${COL_BOLD} for help.${COL_NC}"
+    fi
+fi
+
+# Update remote versions via updatechecker (/opt/etc/pihole/versions)
+# We cannot execute it now because it calls opkg and it is running right now
 {
     timeout=300
     while [ -f /opt/tmp/opkg.lock ] && [ "$timeout" -gt 0 ] ; do
