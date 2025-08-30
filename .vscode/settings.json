@@ -8,5 +8,5 @@
         "S65pihole-FTL": "shellscript",
         "pihole.toml.dist": "toml",
     },
-    "markdown.extension.toc.levels": "2..2",
+    "markdown.extension.toc.levels": "2..3",
 }
