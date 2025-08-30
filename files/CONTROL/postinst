@@ -83,7 +83,7 @@ fi
 root_user="$(id -nu 0 2> /dev/null)"
 if [ "$root_user" != "root" ]; then
     echo "  ${INFO} ${COL_BOLD}${COL_YELLOW}It looks like the root user is not called 'root' - this can cause issues!${COL_NC}"
-    echo "  ${INFO} Correcting username in crontab file..."
+    echo "  ${INFO} Correcting root user name in crontab file..."
 
     sed "s/ root / $root_user /g" -i /opt/etc/cron.d/pihole
 fi
