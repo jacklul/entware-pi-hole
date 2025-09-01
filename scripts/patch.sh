@@ -11,9 +11,19 @@ if [ -z "$prefix" ] || [ -z "$target" ] || [ ! -d "$target" ]; then
     exit 1
 fi
 
-target="$(realpath "$target")"
 prefix="${prefix,,}" # Force prefix to be lowercase
+target="$(realpath "$target")"
 branch=$(git -C "$target" rev-parse --abbrev-ref HEAD)
+tag=$(git -C "$target" describe --tags --always 2> /dev/null)
+
+echo "Branch: $branch"
+echo "Tag: $tag"
+
+# If we are on a detached HEAD and the tag is not matching a tag with a -gHASH suffix then assume master
+if [ "$branch" = "HEAD" ] && [ -n "$tag" ] && ! grep -Eq '\-[gG][0-9a-fA-F]+$' <<< "$tag"; then
+    branch="master"
+    echo "Release tag detected, assuming branch 'master'"
+fi
 
 if [ "$3" != "no-patches" ]; then
     patches_dir="$(readlink -f "$script_dir/../patches")"
