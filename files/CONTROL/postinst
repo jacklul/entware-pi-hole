@@ -155,13 +155,8 @@ if [ -n "$fresh_install" ]; then
 
     echo "  ${INFO} ${COL_BOLD}${COL_GREEN}Generated password for the web interface: ${COL_NC}${COL_CYAN}$new_password${COL_NC}"
     echo "  ${INFO} It can be changed using '${COL_BOLD}pihole setpassword${COL_NC}' command."
-elif [ -z "$(pihole-FTL --config -q webserver.api.pwhash)" ]; then # Show a warning if the password is not set
-    echo "  ${INFO} ${COL_RED}Password for the web interface is not set - this is a security risk!${COL_NC}"
-    echo "  ${INFO} ${COL_YELLOW}Please set it using '${COL_NC}${COL_BOLD}pihole setpassword${COL_NC}${COL_YELLOW}' command.${COL_NC}"
-fi
 
-# Perform a port check on new installs
-if [ -n "$fresh_install" ]; then
+    # Perform a ports check
     dns_port="$(pihole-FTL --config -q dns.port)"
     web_ports="$(pihole-FTL --config -q webserver.port | sed 's/[^0-9,]//g' | tr ',' ' ')"
     listening="$(ss --listening --numeric --tcp --udp --processes | grep -Fv '"pihole-FTL"')"
@@ -178,6 +173,9 @@ if [ -n "$fresh_install" ]; then
         echo "  ${INFO} ${COL_RED}The following ports are already in use:${COL_NC}${COL_CYAN}$ports_in_use${COL_NC}"
         echo "  ${INFO} ${COL_BOLD}Pi-hole might not start - check the wiki for help.${COL_NC}"
     fi
+elif [ -z "$(pihole-FTL --config -q webserver.api.pwhash)" ]; then # Show a warning if the password is not set
+    echo "  ${INFO} ${COL_RED}Password for the web interface is not set - this is a security risk!${COL_NC}"
+    echo "  ${INFO} ${COL_YELLOW}Please set it using '${COL_NC}${COL_BOLD}pihole setpassword${COL_NC}${COL_YELLOW}' command.${COL_NC}"
 fi
 
 # Update remote versions via updatechecker (/opt/etc/pihole/versions)
