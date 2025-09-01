@@ -35,7 +35,7 @@ case "$1" in
         stty size | cut -d' ' -f1
     ;;
     *)
-        echo "'tput $1' - polyfill not implemented" >&2
+        echo "'tput $*' - polyfill not implemented" >&2
         exit 1
     ;;
 esac

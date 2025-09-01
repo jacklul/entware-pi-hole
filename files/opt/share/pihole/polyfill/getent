@@ -8,5 +8,5 @@ case "$1" in
     ;;
 esac
 
-echo "'getent $1' - polyfill not implemented" >&2
+echo "'getent $*' - polyfill not implemented" >&2
 exit 1

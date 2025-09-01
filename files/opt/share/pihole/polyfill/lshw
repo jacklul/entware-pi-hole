@@ -22,5 +22,5 @@ case "$1" in
     ;;
 esac
 
-echo "'lshw $1' - polyfill not implemented" >&2
+echo "'lshw $*' - polyfill not implemented" >&2
 exit 1
