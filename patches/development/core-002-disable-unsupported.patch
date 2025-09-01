@@ -2,16 +2,49 @@ diff --git a/pihole b/pihole
 index 7c84771..f4125a9 100755
 --- a/pihole
 +++ b/pihole
-@@ -465,7 +469,12 @@ updateCheckFunc() {
+@@ -479,8 +479,46 @@ updateCheckFunc() {
+   exit 0
  }
  
++opkgFunc(){
++    local package="$(opkg list-installed pi-hole* | awk '{print $1}' | head -n 1)"
++
++    if [ -t 0 ]; then
++        read -rp "  ${QST} Are you sure? [y/N] " answer
++        case $answer in
++            [Yy]*) ;;
++            *) return;;
++        esac
++    fi
++
++    case "$1" in
++        update)
++            opkg update
++            opkg upgrade "$package"
++            exit $?
++        ;;
++        reinstall)
++            opkg update # current version might not be the latest
++            opkg install "$package" --force-reinstall
++            exit $?
++        ;;
++        remove)
++            opkg remove "$package" --autoremove
++            exit $?
++        ;;
++        *)
++            echo "Invalid action: $1"
++            exit 1
++        ;;
++    esac
++}
++
  unsupportedFunc(){
--  echo "Function not supported in Docker images"
-+  if [ -n "${DOCKER_VERSION}" ]; then
-+    echo "Function not supported in Docker images"
-+  elif [ -f /opt/etc/opkg.conf ]; then
-+    echo "Function not supported in unofficial Entware package release"
-+  fi
++    if [ -n "${DOCKER_VERSION}" ]; then
+   echo "Function not supported in Docker images"
++    elif [ -f /opt/etc/opkg.conf ]; then
++        echo "Function not supported in unofficial Entware package release"
++    fi
 +
    exit 0
  }
@@ -22,12 +55,12 @@ index 7c84771..f4125a9 100755
    "-f" | "flush"                  ) flushFunc "$@";;
 -  "-up" | "updatePihole"          ) updatePiholeFunc "$@";;
 -  "-r"  | "repair"                ) repairPiholeFunc;;
-+  "-up" | "updatePihole"          ) unsupportedFunc;;
-+  "-r"  | "repair"                ) unsupportedFunc;;
++  "-up" | "updatePihole"          ) opkgFunc update;;
++  "-r"  | "repair"                ) opkgFunc reinstall;;
    "-g" | "updateGravity"          ) updateGravityFunc "$@";;
    "-l" | "logging"                ) piholeLogging "$@";;
 -  "uninstall"                     ) uninstallFunc;;
-+  "uninstall"                     ) unsupportedFunc;;
++  "uninstall"                     ) opkgFunc remove;;
    "reloaddns"                     ) reloadDNS "reload";;
    "reloadlists"                   ) reloadDNS "reload-lists";;
    "setpassword"                   ) SetWebPassword "$@";;

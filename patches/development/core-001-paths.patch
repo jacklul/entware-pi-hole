@@ -438,6 +438,50 @@ index c62d31ab..403ffe97 100644
 -@reboot root    PATH="$PATH:/usr/sbin:/usr/local/bin/" pihole updatechecker reboot
 +59 17  * * *   root    PATH="$PATH:/opt/bin" pihole updatechecker
 +@reboot root    PATH="$PATH:/opt/bin" pihole updatechecker reboot
+diff --git a/automated install/basic-install.sh b/automated install/basic-install.sh
+index 318107c1..1f2f0a34 100755
+--- a/automated install/basic-install.sh	
++++ b/automated install/basic-install.sh	
+@@ -69,10 +69,10 @@ EOM
+ # Location for final installation log storage
+ installLogLoc="/etc/pihole/install.log"
+ # This is a file used for the colorized output
+-coltable="/opt/pihole/COL_TABLE"
++coltable="/opt/share/pihole/COL_TABLE"
+ 
+ # Root of the web server
+-webroot="/var/www/html"
++webroot="/opt/share/pihole/www"
+ 
+ # We clone (or update) two git repositories during the install. This helps to make sure that we always have the latest versions of the relevant files.
+ # web is used to set up the Web admin interface.
+@@ -86,13 +86,13 @@ PI_HOLE_LOCAL_REPO="/etc/.pihole"
+ # List of pihole scripts, stored in an array
+ PI_HOLE_FILES=(list piholeDebug piholeLogFlush setupLCD update version gravity uninstall webpage)
+ # This directory is where the Pi-hole scripts will be installed
+-PI_HOLE_INSTALL_DIR="/opt/pihole"
+-PI_HOLE_CONFIG_DIR="/etc/pihole"
+-PI_HOLE_BIN_DIR="/usr/local/bin"
++PI_HOLE_INSTALL_DIR="/opt/share/pihole"
++PI_HOLE_CONFIG_DIR="/opt/etc/pihole"
++PI_HOLE_BIN_DIR="/opt/bin"
+ PI_HOLE_V6_CONFIG="${PI_HOLE_CONFIG_DIR}/pihole.toml"
+ fresh_install=true
+ 
+-adlistFile="/etc/pihole/adlists.list"
++adlistFile="/opt/etc/pihole/adlists.list"
+ # Pi-hole needs an IP address; to begin, these variables are empty since we don't know what the IP is until this script can run
+ IPV4_ADDRESS=${IPV4_ADDRESS}
+ IPV6_ADDRESS=${IPV6_ADDRESS}
+@@ -102,7 +102,7 @@ PRIVACY_LEVEL=
+ PIHOLE_INTERFACE=
+ 
+ # Where old configs go to if a v6 migration is performed
+-V6_CONF_MIGRATION_DIR="/etc/pihole/migration_backup_v6"
++V6_CONF_MIGRATION_DIR="/opt/etc/pihole/migration_backup_v6"
+ 
+ if [ -z "${USER}" ]; then
+     USER="$(id -un)"
 diff --git a/gravity.sh b/gravity.sh
 index d1664394..a9adf9c0 100755
 --- a/gravity.sh
