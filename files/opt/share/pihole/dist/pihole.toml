@@ -2,13 +2,19 @@
 # This file will be rewritten when pihole-FTL starts.
 
 [dns]
-  # Unset this variable as the default interface set here might not exist (default is eth0).
-  #interface = ""
+  # Set Cloudflare DNS servers as the default upstream servers. (default is empty)
+  upstreams = [ 
+    "1.1.1.1",
+    "1.0.0.1"
+  ]
 
-  # Do not log DNS queries and replies to pihole.log (default is true).
+  # Empty this as the default interface set here might not exist. (default is eth0)
+  interface = ""
+
+  # Do not log DNS queries and replies to pihole.log. (default is true)
   queryLogging = false
 
-  # Change DNS port as most devices will use the default port already (default is 53).
+  # Change DNS port as most devices will use the default port already). (default is 53)
   #port = 5053
 
 # Disable NTP feature as it may conflict with system's build-in time synchronization.
@@ -24,20 +30,12 @@
   # Reduce the maximum number of days to keep the queries in the database. (default is 91)
   maxDBdays = 31
 
-  [database.network]
-    # Reduce the maximum number of days to keep the addresses in the network table. (default is 91)
-    expire = 31
-
 [webserver]
-  # Change web UI ports as most devices will use the default ports already (default are 80 and 443).
+  # Change web UI ports as most devices will use the default ports already. (default are 80 and 443)
   #port = "5080o,5443so"
 
   # Reduce the maximum number of threads for the webserver. (default is 50)
   threads = 10
-
-  [webserver.api]
-    # Reduce the maximum number of concurrent API sessions. (default is 16)
-    max_sessions = 8
 
 [misc]
   # Do not change the priority of the process. (default is -10)

@@ -40,6 +40,7 @@ if [ -z "$(ls -A "$destination_dir/opt/share/pihole")" ]; then
     cp --update=none "$core_path/advanced/Templates/pihole.cron" "$destination_dir/opt/etc/cron.d/pihole"
     cp --update=none "$core_path/advanced/Templates/logrotate" "$destination_dir/opt/etc/pihole"
     cp --update=none "$core_path/gravity.sh" "$destination_dir/opt/share/pihole/gravity.sh"
+    cp --update=none "$core_path/automated install/basic-install.sh" "$destination_dir/opt/share/pihole/basic-install.sh"
     cp --update=none "$core_path/pihole" "$destination_dir/opt/bin/pihole"
 fi
 
@@ -94,34 +95,6 @@ if [ ! -f "$destination_dir/opt/etc/pihole/versions" ]; then
             } >> "$destination_dir/opt/etc/pihole/versions"
         fi
     done
-fi
-
-#shellcheck disable=SC2034
-SKIP_INSTALL=true # Allows sourcing installer without running it
-#shellcheck disable=SC1091
-source "$core_path/automated install/basic-install.sh"
-
-if [ ! -f "$destination_dir/opt/etc/pihole/dns-servers.conf" ]; then
-    echo "Creating dns-servers.conf file..."
-
-    if [ -z "$DNS_SERVERS" ]; then
-        echo "Error: Could not load DNS_SERVERS variable from basic-install.sh"
-        exit 1
-    fi
-
-    echo "$DNS_SERVERS" > "$destination_dir/opt/etc/pihole/dns-servers.conf"
-fi
-
-if [ ! -f "$destination_dir/opt/etc/pihole/adlists.list" ]; then
-    echo "Creating adlists.list file..."
-
-    #shellcheck disable=SC2034
-    adlistFile="$destination_dir/opt/etc/pihole/adlists.list"
-
-    if ! installDefaultBlocklists; then
-        echo "Error: Could not install default adlists using basic-install.sh"
-        exit 1
-    fi
 fi
 
 echo "Setting permissions..."
