@@ -19,10 +19,15 @@ else # fallback
 fi
 
 random_number() {
-    _base=$1
+    _min=$1
     _max=$2
+    _tmp=$((_max - _min + 1))
 
-    bash -c "echo \$(($_base + RANDOM % $_max))"
+    bash -c "echo \$(($_min + RANDOM % $_tmp))"
+}
+
+add_leading_zero() {
+    [ "$1" -lt 10 ] && echo "0$1" || echo "$1"
 }
 
 gravitydb_version() {
@@ -65,7 +70,6 @@ root_user="$(id -nu 0 2> /dev/null)"
 if [ "$root_user" != "root" ]; then
     echo "  ${INFO} ${COL_BOLD}${COL_YELLOW}It looks like the root user is not called 'root' - this can cause issues!${COL_NC}"
     echo "  ${INFO} Correcting username in crontab file..."
-
     sed "s/ root / $root_user /g" -i /opt/etc/cron.d/pihole
 fi
 
@@ -75,29 +79,34 @@ fi
 [ ! -f /opt/etc/resolv.conf ] && [ -f /etc/resolv.conf ] && ln -s /etc/resolv.conf /opt/etc/resolv.conf && symlinks="$symlinks /opt/etc/resolv.conf"
 [ -n "$symlinks" ] && echo "  ${INFO} Created symlinks:${COL_BOLD}$symlinks${COL_NC}"
 
-# Set random gravity update and updatechecker times
-if [ -f /opt/etc/cron.d/pihole ] && grep -q "59 1 \|59 17 " /opt/etc/cron.d/pihole; then
-    echo "  ${INFO} Setting random gravity update and updatechecker times..."
-
-    sed "s/59 1 /$(random_number 1 58) $(random_number 3 2) /" -i /opt/etc/cron.d/pihole
-    sed "s/59 17 /$(random_number 1 58) $(random_number 12 8) /" -i /opt/etc/cron.d/pihole
-fi
-
-# Set user and group used for rotating the logs by logrotate
+# Set user and group used by logrotate, inherited from /opt/var/log
 if [ -f /opt/etc/pihole/logrotate ]; then
     log_user_group="$(stat -c '%U %G' /opt/var/log)"
 
     if [ -n "$log_user_group" ]; then
         echo "  ${INFO} Setting user and group in logrotate file..."
-
         sed "s/# su #/su $log_user_group/g;" -i /opt/etc/pihole/logrotate
     fi
+fi
+
+# Set random gravity update and updatechecker times
+if [ -f /opt/etc/cron.d/pihole ] && grep -q "59 1 \|59 17 " /opt/etc/cron.d/pihole; then
+    echo "  ${INFO} Setting random gravity update and updatechecker times..."
+
+    ga_time_h="$(random_number 3 4)"
+    ga_time_m="$(random_number 1 58)"
+    sed "s/59 1 /$ga_time_m $ga_time_h /" -i /opt/etc/cron.d/pihole
+    echo "  ${INFO} Gravity update time: ${COL_CYAN}$(add_leading_zero "$ga_time_h"):$(add_leading_zero "$ga_time_m")${COL_NC}"
+
+    uc_time_h="$(random_number 12 19)"
+    uc_time_m="$(random_number 1 58)"
+    sed "s/59 17 /$uc_time_m $uc_time_h /" -i /opt/etc/cron.d/pihole
+    echo "  ${INFO} Update checker time: ${COL_CYAN}$(add_leading_zero "$uc_time_h"):$(add_leading_zero "$uc_time_m")${COL_NC}"
 fi
 
 # Initialize pihole.toml using our starting config on fresh installs
 if [ -n "$fresh_install" ] && [ -f /opt/share/pihole/dist/pihole.toml ]; then
     echo "  ${INFO} ${COL_BOLD}Creating configuration file...${COL_NC}"
-
     install -m 644 /opt/share/pihole/dist/pihole.toml /opt/etc/pihole/pihole.toml
 fi
 
