@@ -1,0 +1,56 @@
+cron
+ - needed to run scheduled tasks
+
+libcap-bin, nonroot
+ - used by rc.sh script to launch the service the intended way
+
+bash
+ - scripting language required by scripts
+
+ncurses-bin
+ - provides 'tput' command which is used by COL_TABLE script
+
+curl, ca-bundle
+ - used by gravity.sh, api.sh, piholeDebug.sh, updatecheck.sh and 'pihole' command
+
+git-http
+ - used by updatecheck.sh and piholeDebug.sh
+
+bind-dig
+ - used by gravity.sh, api.sh and piholeDebug.sh
+
+ss
+ - used by piholeDebug.sh and 'pihole' command
+
+findutils, grep, sed, jq, coreutils-cut, coreutils-ls, coreutils-printf, coreutils-sleep
+ - these are installed because scripts expect the latest versions of these
+
+coreutils-expr
+ - used by utils.sh
+
+coreutils-id
+ - used by rc.sh and postinst script
+
+coreutils-install
+ - used by pihole-FTL-prestart.sh and postinst script
+
+coreutils-mktemp, coreutils-sha1sum, coreutils-timeout
+ - used by gravity.sh
+
+coreutils-stat
+ - used by gravity.sh, rc.sh and postinst script
+
+coreutils-seq
+ - used by list.sh
+
+coreutils-stty
+ - used by api.sh
+
+coreutils-tr
+ - used by gravity.sh, api.sh, utils.sh and piholeDebug.sh
+
+coreutils-whoami
+ - used by 'pihole' command
+
+rev, lscpu, iputils-ping, coreutils-tee, coreutils-tty
+ - only used by piholeDebug.sh
