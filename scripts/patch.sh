@@ -18,6 +18,7 @@ tag=$(git -C "$target" describe --tags --always 2> /dev/null)
 
 echo "Branch: $branch"
 echo "Tag: $tag"
+echo
 
 # If we are on a detached HEAD and the tag is not matching a tag with a -gHASH suffix then assume master
 if [ "$branch" = "HEAD" ] && [ -n "$tag" ] && ! grep -Eq '\-[gG][0-9a-fA-F]+$' <<< "$tag"; then
