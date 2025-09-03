@@ -65,28 +65,18 @@ else
     echo "  ${INFO} ${COL_BOLD}Running Pi-hole upgrade tasks...${COL_NC}"
 fi
 
-# Show a warning when root user is not called 'root' and update the crontab file
-root_user="$(id -nu 0 2> /dev/null)"
-if [ "$root_user" != "root" ]; then
-    echo "  ${INFO} ${COL_BOLD}${COL_YELLOW}It looks like the root user is not called 'root' - this can cause issues!${COL_NC}"
-    echo "  ${INFO} Correcting username in crontab file..."
-    sed "s/ root / $root_user /g" -i /opt/etc/cron.d/pihole
-fi
-
 # Make links to system files if they don't exist in /opt/etc
 [ ! -f /opt/etc/hosts ] && [ -f /etc/hosts ] && ln -s /etc/hosts /opt/etc/hosts && symlinks="$symlinks /opt/etc/hosts"
 [ ! -f /opt/etc/ethers ] && [ -f /etc/ethers ] && ln -s /etc/ethers /opt/etc/ethers && symlinks="$symlinks /opt/etc/ethers"
 [ ! -f /opt/etc/resolv.conf ] && [ -f /etc/resolv.conf ] && ln -s /etc/resolv.conf /opt/etc/resolv.conf && symlinks="$symlinks /opt/etc/resolv.conf"
 [ -n "$symlinks" ] && echo "  ${INFO} Created symlinks:${COL_BOLD}$symlinks${COL_NC}"
 
-# Set user and group used by logrotate, inherited from /opt/var/log
-if [ -f /opt/etc/pihole/logrotate ]; then
-    log_user_group="$(stat -c '%U %G' /opt/var/log)"
-
-    if [ -n "$log_user_group" ]; then
-        echo "  ${INFO} Setting user and group in logrotate file..."
-        sed "s/# su #/su $log_user_group/g;" -i /opt/etc/pihole/logrotate
-    fi
+# Show a warning when root user is not called 'root' and update the crontab file
+root_user="$(id -nu 0 2> /dev/null)"
+if [ "$root_user" != "root" ]; then
+    echo "  ${INFO} ${COL_BOLD}${COL_YELLOW}It looks like the root user is not called 'root' - this can cause issues!${COL_NC}"
+    echo "  ${INFO} Correcting username in crontab file..."
+    sed "s/ root / $root_user /g" -i /opt/etc/cron.d/pihole
 fi
 
 # Set random gravity update and updatechecker times
@@ -102,6 +92,16 @@ if [ -f /opt/etc/cron.d/pihole ] && grep -q "59 1 \|59 17 " /opt/etc/cron.d/piho
     uc_time_m="$(random_number 1 58)"
     sed "s/59 17 /$uc_time_m $uc_time_h /" -i /opt/etc/cron.d/pihole
     echo "  ${INFO} Update checker time: ${COL_CYAN}$(add_leading_zero "$uc_time_h"):$(add_leading_zero "$uc_time_m")${COL_NC}"
+fi
+
+# Set user and group used by logrotate, inherited from /opt/var/log
+if [ -f /opt/etc/pihole/logrotate ]; then
+    log_user_group="$(stat -c '%U %G' /opt/var/log)"
+
+    if [ -n "$log_user_group" ]; then
+        echo "  ${INFO} Setting user and group (${COL_CYAN}$(echo "$log_user_group" | tr  -s ' ' ':')${COL_NC}) in logrotate file..."
+        sed "s/# su #/su $log_user_group/g;" -i /opt/etc/pihole/logrotate
+    fi
 fi
 
 # Initialize pihole.toml using our starting config on fresh installs
