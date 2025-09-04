@@ -33,7 +33,8 @@ runs:
         fi
         echo "GIT_BRANCH=$([ -n "$GIT_TAG" ] && echo "master" || git -C "${{ inputs.git_path }}" rev-parse --abbrev-ref HEAD)" >> $GITHUB_OUTPUT
         echo "GIT_HASH=$(git -C "${{ inputs.git_path }}" rev-parse HEAD | cut -c1-8)" >> $GITHUB_OUTPUT
-        CHECKSUM_PATCHES="$(find ./patches/ -type f \( -name '${{ inputs.patches_prefix }}-*.patch' -o -name '${{ inputs.patches_prefix }}-*.sh' \) -print0 | xargs -0 sha1sum 2> /dev/null)"
+        [ "$GIT_BRANCH" == "master" ] && FINDEPTH="-maxdepth 1"
+        CHECKSUM_PATCHES="$(find ./patches/ $FINDEPTH -type f \( -name '${{ inputs.patches_prefix }}-*.patch' -o -name '${{ inputs.patches_prefix }}-*.sh' \) -print0 | xargs -0 sha1sum 2> /dev/null)"
         CHECKSUM_CHECKS="$(find ./checks/ -type f -name '${{ inputs.patches_prefix }}-*.sh' -print0 | xargs -0 sha1sum 2> /dev/null)"
         #CHECKSUM_SCRIPTS="$(find  ./scripts/ ./.github/ -type f -name '*.sh' -not -name 'dev.sh' -print0 | xargs -0 sha1sum 2> /dev/null)"
         #CHECKSUM_WORKFLOWS="$(find ./.github/workflows/ ./.github/actions/ -type f -name '*.yml' -not -name 'update.yml' -print0 | xargs -0 sha1sum 2> /dev/null)"
