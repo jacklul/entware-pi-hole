@@ -100,9 +100,6 @@ jobs:
     needs: [variables]
     runs-on: ubuntu-latest
 
-    outputs:
-      VERSION: ${{ steps.version.outputs.OUTPUT }}
-
     steps:
       - name: Checkout own repository
         uses: actions/checkout@v4
@@ -145,9 +142,6 @@ jobs:
     concurrency: build-web-${{ github.run_id }}
     needs: [variables]
     runs-on: ubuntu-latest
-
-    outputs:
-      VERSION: ${{ steps.version.outputs.OUTPUT }}
 
     steps:
       - name: Checkout own repository
@@ -192,9 +186,6 @@ jobs:
     needs: [variables]
     runs-on: ${{ matrix.machine }}
     continue-on-error: ${{ matrix.allow-failure }}
-
-    outputs:
-      VERSION: ${{ steps.version.outputs.OUTPUT }}
 
     strategy:
       fail-fast: false
