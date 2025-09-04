@@ -93,7 +93,7 @@ jobs:
         with:
           workflow: build.yml
           ref: develop
-          inputs: '{ "SCHEDULED": true }'
+          inputs: '{ "SCHEDULED": "true" }'
 
   build-core:
     concurrency: build-core-${{ github.run_id }}
@@ -358,12 +358,12 @@ jobs:
           path: ./packages/*
 
       - name: Check if same dev package was already built
-        if: github.event.inputs.SCHEDULED
+        if: github.event.inputs.SCHEDULED == 'true'
         id: check
         uses: ./.github/actions/dev-check
 
       - name: Set versions
-        if: ${{ !github.event.inputs.SCHEDULED || steps.check.outputs.cache-hit != 'true' }}
+        if: github.event.inputs.SCHEDULED != 'true' || steps.check.outputs.cache-hit != 'true'
         id: versions
         run: |
           if [ -f ./.versions ]; then
