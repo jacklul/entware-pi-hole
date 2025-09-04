@@ -16,17 +16,6 @@ on:
       - checks/**
       - files/**
       - build.env
-  pull_request:
-    paths:
-      - .github/actions/**/*.yml
-      - .github/workflows/build.yml
-      - .github/*.sh
-      - scripts/**
-      - '!scripts/dev.sh'
-      - patches/**
-      - checks/**
-      - files/**
-      - build.env
   workflow_dispatch:
     inputs:
       CORE_REF:
