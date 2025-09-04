@@ -25,9 +25,11 @@ case $1 in
             # Check if we can start the daemon the intended way (setting capabilities on the binary)
             if
                 [ -n "$run_as_user" ] && \
-                setcap CAP_NET_BIND_SERVICE,CAP_NET_RAW,CAP_NET_ADMIN,CAP_SYS_NICE,CAP_IPC_LOCK,CAP_CHOWN+eip /opt/bin/pihole-FTL
+                setcap CAP_NET_BIND_SERVICE,CAP_NET_RAW,CAP_NET_ADMIN,CAP_SYS_NICE,CAP_IPC_LOCK,CAP_CHOWN,CAP_SYS_TIME+eip /opt/bin/pihole-FTL
             then
                 PREARGS="nonroot $run_as_user"
+            else
+                echo "Warning: Setting capabilities is not supported on this system" >&2
             fi
 
             # Explicitly specify user and group to use if it is not 'pihole'
