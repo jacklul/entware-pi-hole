@@ -35,7 +35,17 @@ runs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
+    # @TODO remove after new FTL release
+    - name: Fix for building v6.2.3 on new workflow
+      id: old-release-fix
+      shell: bash
+      run: |
+        if git -C "${{ inputs.context }}" rev-parse HEAD | grep -q '88737f6248cd3df3202eed72aeec89b9fb572631'; then
+          echo "USE=true" >> $GITHUB_OUTPUT
+        fi
+
     - name: Build FTL 
+      if: steps.old-release-fix.outputs.USE != 'true'
       id: build-ftl
       shell: bash
       run: |
@@ -51,7 +61,7 @@ runs:
           --file "${{ inputs.dockerfile }}" "${{ inputs.context }}"
 
     - name: Test FTL
-      if: inputs.run_tests == 'true' && steps.build-ftl.outcome == 'success'
+      if: inputs.run_tests == 'true' && steps.build-ftl.outcome == 'success' && steps.old-release-fix.outputs.USE != 'true'
       working-directory: ${{ inputs.context }}
       shell: bash
       run: |
@@ -64,10 +74,54 @@ runs:
           /bin/bash -c "test/arch_test.sh && test/run.sh"
 
     - name: Extract FTL binary
-      if: inputs.extract_binary == 'true' && steps.build-ftl.outcome == 'success'
+      if: inputs.extract_binary == 'true' && steps.build-ftl.outcome == 'success' && steps.old-release-fix.outputs.USE != 'true'
       working-directory: ${{ inputs.context }}
       shell: bash
       run: |
         docker create --platform ${{ inputs.platform }} --name temp-container ftl-builder:local
         docker cp temp-container:/pihole-FTL ./pihole-FTL
         docker rm temp-container
+
+    # @TODO remove after new FTL release, don't forget about conditions 'steps.old-release-fix.outputs.USE' above!
+    - name: Build FTL (old release)
+      if: steps.old-release-fix.outputs.USE == 'true'
+      id: build-ftl-old
+      uses: docker/build-push-action@v5
+      env:
+        DOCKER_BUILD_SUMMARY: false
+      with:
+        platforms: "${{ inputs.platform }}"
+        pull: true
+        push: false
+        context: "${{ inputs.context }}"
+        target: result
+        file: "${{ inputs.dockerfile }}"
+        outputs: |
+          type=tar,dest=${{ inputs.context }}/build.tar
+        build-args: |
+          "CI_ARCH=${{ inputs.platform }}"
+          "GIT_BRANCH=${{ inputs.git_branch }}"
+          "GIT_TAG=${{ inputs.git_tag }}"
+          "BUILD_OPTS=${{ inputs.build_opts }}"
+
+    - name: Test FTL (old release)
+      if: inputs.run_tests == 'true' && steps.build-ftl-old.outcome == 'success' && steps.old-release-fix.outputs.USE == 'true'
+      uses: docker/build-push-action@v5
+      env:
+        DOCKER_BUILD_SUMMARY: false
+      with:
+        platforms: "${{ inputs.platform }}"
+        pull: true
+        push: false
+        context: "${{ inputs.context }}"
+        target: tests
+        file: "${{ inputs.dockerfile }}"
+        build-args: |
+          "CI_ARCH=${{ inputs.platform }}"
+
+    - name: Extract FTL binary (old release)
+      if: inputs.extract_binary == 'true' && steps.build-ftl-old.outcome == 'success' && steps.old-release-fix.outputs.USE == 'true'
+      working-directory: ${{ inputs.context }}
+      shell: bash
+      run: |
+        [ -f ./build.tar ] && tar -xf ./build.tar pihole-FTL
