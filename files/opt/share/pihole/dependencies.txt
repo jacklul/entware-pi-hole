@@ -23,7 +23,7 @@ ss
  - used by piholeDebug.sh and 'pihole' command
 
 findutils, grep, sed, jq, coreutils-cut, coreutils-ls, coreutils-printf, coreutils-sleep
- - these are installed because scripts expect the latest versions of these
+ - these are installed because scripts expect more recent versions of these
 
 coreutils-expr
  - used by utils.sh
