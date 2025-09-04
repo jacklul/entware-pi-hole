@@ -331,7 +331,7 @@ jobs:
           path: ./artifacts/ftl
 
       - name: Add '-dev' to package name
-        if: github.ref_name != 'master'
+        if: github.ref_name != 'master' && !startsWith(github.ref, 'refs/tags/')
         run: sed '/^Package:/ s/$/-dev/' -i ./files/CONTROL/control
 
       - name: Build packages
