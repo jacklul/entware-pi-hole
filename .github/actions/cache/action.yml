@@ -18,14 +18,14 @@ inputs:
 
 outputs:
   cache-hit:
-    value: ${{ steps.cache-check.outputs.cache-hit }}
+    value: ${{ steps.check.outputs.cache-hit }}
 
 runs:
   using: composite
 
   steps:
-    - name: Create hashes and set variables
-      id: hashes
+    - name: Set required variables
+      id: vars
       shell: bash
       run: |
         if [ "${{ inputs.ref }}" != "develop" ] && ([[ "$GITHUB_REF" == refs/tags/* ]] || [ "$GITHUB_REF" == "refs/heads/master" ]; ); then
@@ -35,20 +35,20 @@ runs:
         echo "GIT_HASH=$(git -C "${{ inputs.git_path }}" rev-parse HEAD | cut -c1-8)" >> $GITHUB_OUTPUT
         CHECKSUM_PATCHES="$(find ./patches/ -type f \( -name '${{ inputs.patches_prefix }}-*.patch' -o -name '${{ inputs.patches_prefix }}-*.sh' \) -print0 | xargs -0 sha1sum 2> /dev/null)"
         CHECKSUM_CHECKS="$(find ./checks/ -type f -name '${{ inputs.patches_prefix }}-*.sh' -print0 | xargs -0 sha1sum 2> /dev/null)"
-        #CHECKSUM_SCRIPTS="$(find  ./scripts/ ./.github/ -type f -name '*.sh' -print0 | xargs -0 sha1sum 2> /dev/null)"
-        #CHECKSUM_WORKFLOWS="$(find ./.github/workflows/ ./.github/actions/ -type f -name '*.yml' -print0 | xargs -0 sha1sum 2> /dev/null)"
-        CHECKSUM="$CHECKSUM_PATCHES\n$CHECKSUM_CHECKS"
+        CHECKSUM_SCRIPTS="$(find  ./scripts/ ./.github/ -type f -name '*.sh' -not -name 'dev.sh' -print0 | xargs -0 sha1sum 2> /dev/null)"
+        CHECKSUM_WORKFLOWS="$(find ./.github/workflows/ ./.github/actions/ -type f -name '*.yml' -not -name 'update.yml' -print0 | xargs -0 sha1sum 2> /dev/null)"
+        CHECKSUM="$CHECKSUM_PATCHES\n$CHECKSUM_CHECKS\n$CHECKSUM_SCRIPTS\n$CHECKSUM_WORKFLOWS"
         echo -e "$CHECKSUM"
-        echo "HASHES=$(echo -e "$CHECKSUM" | sha1sum | cut -c1-8)" >> $GITHUB_OUTPUT
+        echo "HASH=$(echo -e "$CHECKSUM" | sha1sum | cut -c1-8)" >> $GITHUB_OUTPUT
         cat $GITHUB_OUTPUT
 
     - name: Build cache key
       id: key
       shell: bash
-      run: echo "CACHE_KEY=${{ inputs.key_prefix }}${{ steps.hashes.outputs.GIT_BRANCH }}-${{ steps.hashes.outputs.GIT_HASH }}-${{ steps.hashes.outputs.HASHES }}" >> $GITHUB_OUTPUT
+      run: echo "CACHE_KEY=${{ inputs.key_prefix }}${{ steps.vars.outputs.GIT_BRANCH }}-${{ steps.vars.outputs.GIT_HASH }}-${{ steps.vars.outputs.HASH }}" >> $GITHUB_OUTPUT
 
     - name: Check if cache already exists
-      id: cache-check
+      id: check
       uses: actions/cache/restore@v4
       with:
         key: ${{ steps.key.outputs.CACHE_KEY }}
@@ -56,7 +56,7 @@ runs:
         lookup-only: true
 
     - name: Clean up directory before restoring
-      if: steps.cache-check.outputs.cache-hit == 'true'
+      if: steps.check.outputs.cache-hit == 'true'
       working-directory: ${{ inputs.git_path }}
       shell: bash
       run: find . -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -fr {} \;

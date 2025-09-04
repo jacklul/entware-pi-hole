@@ -2,14 +2,14 @@ name: Check if same dev package was already built
 
 outputs:
   cache-hit:
-    value: ${{ steps.versions_last.outputs.cache-hit }}
+    value: ${{ steps.last.outputs.cache-hit }}
 
 runs:
   using: composite
 
   steps:
     - name: Create hash of .versions file
-      id: versions_hash
+      id: hash
       shell: bash
       run: |
         [ ! -f ./.versions ] && { echo "Error: ./.versions file not found."; exit 1; }
@@ -17,15 +17,15 @@ runs:
         cat $GITHUB_OUTPUT
 
     - uses: actions/cache/restore@v4
-      id: versions_last
+      id: last
       with:
         path: ./.versions
-        key: last-dev-versions-${{ steps.versions_hash.outputs.HASH }}
+        key: last-dev-versions-${{ steps.hash.outputs.HASH }}
         fail-on-cache-miss: false
         lookup-only: true
 
     - uses: actions/cache/save@v4
-      if: steps.versions_last.outputs.cache-hit != 'true'
+      if: steps.last.outputs.cache-hit != 'true'
       with:
         path: ./.versions
-        key: last-dev-versions-${{ steps.versions_hash.outputs.HASH }}
+        key: last-dev-versions-${{ steps.hash.outputs.HASH }}
