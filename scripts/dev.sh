@@ -78,6 +78,7 @@ function install_or_update_repository() {
 set -e
 
 branch="$1"
+[ -z "$1" ] && branch=dev
 repo=all
 [ -n "$2" ] && repo="$2"
 
