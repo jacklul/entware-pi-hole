@@ -39,13 +39,13 @@ runs:
         CHECKSUM_WORKFLOWS="$(find ./.github/workflows/ ./.github/actions/ -type f -name '*.yml' -not -name 'update.yml' -print0 | xargs -0 sha1sum 2> /dev/null)"
         CHECKSUM="$CHECKSUM_PATCHES\n$CHECKSUM_CHECKS\n$CHECKSUM_SCRIPTS\n$CHECKSUM_WORKFLOWS"
         echo -e "$CHECKSUM"
-        echo "HASH=$(echo -e "$CHECKSUM" | sha1sum | cut -c1-8)" >> $GITHUB_OUTPUT
+        echo "CHECKSUM=$(echo -e "$CHECKSUM" | sha1sum | cut -c1-8)" >> $GITHUB_OUTPUT
         cat $GITHUB_OUTPUT
 
     - name: Build cache key
       id: key
       shell: bash
-      run: echo "CACHE_KEY=${{ inputs.key_prefix }}${{ steps.vars.outputs.GIT_BRANCH }}-${{ steps.vars.outputs.GIT_HASH }}-${{ steps.vars.outputs.HASH }}" >> $GITHUB_OUTPUT
+      run: echo "CACHE_KEY=${{ inputs.key_prefix }}${{ steps.vars.outputs.GIT_BRANCH }}-${{ steps.vars.outputs.GIT_HASH }}-${{ steps.vars.outputs.CHECKSUM }}" >> $GITHUB_OUTPUT
 
     - name: Check if cache already exists
       id: check
