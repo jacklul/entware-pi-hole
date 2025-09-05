@@ -16,6 +16,17 @@ on:
       - checks/**
       - files/**
       - build.env
+  pull_request:
+    paths:
+      - .github/actions/**/*.yml
+      - .github/workflows/build.yml
+      - .github/*.sh
+      - scripts/**
+      - '!scripts/dev.sh'
+      - patches/**
+      - checks/**
+      - files/**
+      - build.env
   workflow_dispatch:
     inputs:
       CORE_REF:
@@ -33,16 +44,16 @@ on:
         required: false
         default: ''
         description: Commit, branch or tag (pi-hole/FTL)
-      SCHEDULED:
-        type: boolean
-        required: false
-        default: false
-        description: Build 'dev' packages (schedule)
       TEST_FTL:
         type: boolean
         required: false
         default: true
-        description: Run FTL tests (FTL build)
+        description: Run FTL tests
+      NIGHTLY:
+        type: boolean
+        required: false
+        default: false
+        description: Is nightly
 
 jobs:
   variables:
@@ -76,13 +87,16 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'schedule'
 
+    permissions:
+      actions: write
+
     steps:
       - name: Trigger build on develop branch
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: build.yml
           ref: develop
-          inputs: '{ "SCHEDULED": "true" }'
+          inputs: '{ "NIGHTLY": "true" }'
 
   build-core:
     concurrency: build-core-${{ github.run_id }}
@@ -184,15 +198,6 @@ jobs:
             docker_platform: linux/amd64
             allow-failure: false
             machine: ubuntu-24.04
-        #  - architecture: 386
-        #    docker_platform: linux/386 # EOS by Entware team
-        #    allow-failure: true
-        #    machine: ubuntu-24.04
-        #  - architecture: armv5
-        #    docker_platform: linux/arm/v5 # EOS by Entware team / Not supported by Pi-hole
-        #    allow-failure: true
-        #    machine: ubuntu-24.04-arm
-        #  - architecture: armv6
           - architecture: armv7
             docker_platform: linux/arm/v7
             machine: ubuntu-24.04-arm
@@ -201,12 +206,6 @@ jobs:
             docker_platform: linux/arm64/v8
             allow-failure: false
             machine: ubuntu-24.04-arm
-        #  - architecture: mipsel
-        #    docker_platform: linux/mipsel # Not supported by Pi-hole
-        #    allow-failure: true
-        #  - architecture: mips
-        #    docker_platform: linux/mips # Not supported by Pi-hole
-        #    allow-failure: true
 
     steps:
       - name: Checkout own repository
@@ -311,6 +310,7 @@ jobs:
           path: ./artifacts/ftl
 
       - name: Add '-dev' to package name
+        id: dev-package
         if: github.ref_name != 'master' && !startsWith(github.ref, 'refs/tags/')
         run: sed '/^Package:/ s/$/-dev/' -i ./files/CONTROL/control
 
@@ -337,13 +337,14 @@ jobs:
           name: packages
           path: ./packages/*
 
-      - name: Check if same dev package was already built
-        if: github.event.inputs.SCHEDULED == 'true'
-        id: check
+      - name: Check if same '-dev' package was already built
+        if: steps.dev-package.outcome == 'success' && github.event.inputs.NIGHTLY == 'true'
+        id: dev-check
         uses: ./.github/actions/dev-check
 
-      - name: Set versions
-        if: github.event.inputs.SCHEDULED != 'true' || steps.check.outputs.cache-hit != 'true'
+      # Condition in this step decides whenever package will be released (tag) or uploaded (tag or develop) 
+      - name: Set versions for release and/or upload
+        if: (github.event.inputs.NIGHTLY != 'true' || steps.dev-check.outputs.cache-hit == 'false') && (github.event.inputs.CORE_REF == '' && github.event.inputs.WEB_REF == '' && github.event.inputs.FTL_REF == '') && github.event_name != 'pull_request'
         id: versions
         run: |
           if [ -f ./.versions ]; then
@@ -397,7 +398,7 @@ jobs:
   upload:
     concurrency: upload
     needs: [build-packages]
-    if: needs.build-packages.outputs.IPK_VERSION != '' && (startsWith(github.ref, 'refs/tags/') || github.ref_name == 'develop') && (github.event.inputs.CORE_REF == '' && github.event.inputs.WEB_REF == '' && github.event.inputs.FTL_REF == '')
+    if: needs.build-packages.outputs.IPK_VERSION != '' && (startsWith(github.ref, 'refs/tags/') || github.ref_name == 'develop')
     runs-on: ubuntu-latest
 
     permissions:

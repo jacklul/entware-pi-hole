@@ -1,4 +1,4 @@
-name: Apply patches
+name: Apply patches and dump infos to '.version' file
 
 inputs:
   patches_prefix:
@@ -16,7 +16,7 @@ runs:
       run: |
         bash ./scripts/patch.sh "${{ inputs.patches_prefix }}" "${{ inputs.git_path }}"
 
-    - name: Dump version infos
+    - name: Dump infos (version, branch, commit)
       shell: bash
       run: |
         bash ./scripts/version.sh "${{ inputs.git_path }}"
