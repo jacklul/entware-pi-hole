@@ -1,0 +1,36 @@
+Package: pi-hole
+Version: 2025.09.04-2
+Depends: bash, bind-dig, ca-bundle, coreutils-cut, coreutils-expr, coreutils-id, coreutils-install, coreutils-ls, coreutils-mktemp, coreutils-printf, coreutils-seq, coreutils-sha1sum, coreutils-sleep, coreutils-stat, coreutils-stty, coreutils-tee, coreutils-timeout, coreutils-tr, coreutils-tty, coreutils-whoami, cron, curl, findutils, git-http, grep, iputils-ping, jq, libcap-bin, lscpu, ncurses-bin, nonroot, rev, sed, ss
+Suggests: logrotate
+Source: https://github.com/jacklul/entware-pi-hole
+License: EUPL-1.2
+LicenseFiles: LICENSE
+Section: net
+URL: https://github.com/pi-hole/pi-hole
+Maintainer: Jack'lul, https://jacklul.github.io
+Architecture: x64-3.2
+Installed-Size: 34908160
+Filename: pi-hole_2025.09.04-2_x64-3.2.ipk
+Size: 14409097
+SHA256sum: 258ca88530d95b21ea3f4aee215d8bb39bbffdf39f6b76724ced79f94bd5918d
+Description:  The Pi-hole is a DNS sinkhole that protects your devices from unwanted content without installing any client-side software.
+ This is an unofficial package not supported by the Pi-hole developers!
+
+Package: pi-hole-dev
+Version: 2025.09.06-071635-f9a078d3
+Depends: bash, bind-dig, ca-bundle, coreutils-cut, coreutils-expr, coreutils-id, coreutils-install, coreutils-ls, coreutils-mktemp, coreutils-printf, coreutils-seq, coreutils-sha1sum, coreutils-sleep, coreutils-stat, coreutils-stty, coreutils-tee, coreutils-timeout, coreutils-tr, coreutils-tty, coreutils-whoami, cron, curl, findutils, git-http, grep, iputils-ping, jq, libcap-bin, lscpu, ncurses-bin, nonroot, rev, sed, ss
+Suggests: logrotate
+Source: https://github.com/jacklul/entware-pi-hole
+License: EUPL-1.2
+LicenseFiles: LICENSE
+Section: net
+URL: https://github.com/pi-hole/pi-hole
+Maintainer: Jack'lul, https://jacklul.github.io
+Architecture: x64-3.2
+Installed-Size: 35072000
+Filename: pi-hole-dev_2025.09.06-071635-f9a078d3_x64-3.2.ipk
+Size: 14492827
+SHA256sum: b594d5ad1105a69f4e75d30ba3514cf04c34f177b05ab4433cfab448ee823768
+Description:  The Pi-hole is a DNS sinkhole that protects your devices from unwanted content without installing any client-side software.
+ This is an unofficial package not supported by the Pi-hole developers!
+
