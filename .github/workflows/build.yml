@@ -82,6 +82,8 @@ jobs:
           export FTL_REF_OVERRIDE=${{ github.event.inputs.FTL_REF }}
           bash ./.github/variables.sh
           cat $GITHUB_OUTPUT
+          echo "TEST_FTL"=${{ github.event.inputs.TEST_FTL || 'true' }}"
+          echo "NIGHTLY"=${{ github.event.inputs.NIGHTLY || 'false' }}"
 
   schedule:
     runs-on: ubuntu-latest
@@ -342,9 +344,9 @@ jobs:
         id: dev-check
         uses: ./.github/actions/dev-check
 
-      # Condition in this step decides whenever package will be released (tag) or uploaded (tag or develop) 
+      # Condition in this step decides whenever workflow continues to release/upload or not
       - name: Set versions for release and/or upload
-        if: (github.event.inputs.NIGHTLY != 'true' || steps.dev-check.outputs.cache-hit == 'false') && (github.event.inputs.CORE_REF == '' && github.event.inputs.WEB_REF == '' && github.event.inputs.FTL_REF == '') && github.event_name != 'pull_request'
+        if: (github.event.inputs.NIGHTLY != 'true' || steps.dev-check.outputs.cache-hit != 'true') && (github.event.inputs.CORE_REF == '' && github.event.inputs.WEB_REF == '' && github.event.inputs.FTL_REF == '') && github.event_name != 'pull_request'
         id: versions
         run: |
           if [ -f ./.versions ]; then
