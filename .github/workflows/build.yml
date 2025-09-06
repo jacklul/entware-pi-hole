@@ -82,8 +82,8 @@ jobs:
           export FTL_REF_OVERRIDE=${{ github.event.inputs.FTL_REF }}
           bash ./.github/variables.sh
           cat $GITHUB_OUTPUT
-          echo "TEST_FTL"=${{ github.event.inputs.TEST_FTL || 'true' }}"
-          echo "NIGHTLY"=${{ github.event.inputs.NIGHTLY || 'false' }}"
+          echo "TEST_FTL=${{ github.event.inputs.TEST_FTL || 'true' }}"
+          echo "NIGHTLY=${{ github.event.inputs.NIGHTLY || 'false' }}"
 
   schedule:
     runs-on: ubuntu-latest
