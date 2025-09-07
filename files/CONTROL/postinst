@@ -187,6 +187,12 @@ elif [ -z "$(pihole-FTL --config -q webserver.api.pwhash)" ]; then # Show a warn
     echo "  ${INFO} ${COL_YELLOW}Please set it using '${COL_NC}${COL_BOLD}pihole setpassword${COL_NC}${COL_YELLOW}' command.${COL_NC}"
 fi
 
+# Run custom post install script if it exists
+if [ -x /opt/etc/pihole/postinstall.sh ]; then
+    echo "  ${INFO} ${COL_BOLD}Running custom post install script...${COL_NC}"
+    bash /opt/etc/pihole/postinstall.sh
+fi
+
 # Update remote versions via updatechecker (/opt/etc/pihole/versions)
 # We cannot execute it now because it calls opkg and it is running right now
 {
