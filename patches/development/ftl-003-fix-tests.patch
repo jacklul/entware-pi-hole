@@ -53,13 +53,28 @@ diff --git a/test/pihole.toml b/test/pihole.toml
 index 0b433266..85d8a45c 100644
 --- a/test/pihole.toml
 +++ b/test/pihole.toml
-@@ -665,14 +665,14 @@
+@@ -665,29 +665,29 @@
      #
      # Allowed values are:
      #     A valid TLS certificate file (*.pem)
 -    cert = "/etc/pihole/test.pem" ### CHANGED, default = "/etc/pihole/tls.pem"
 +    cert = "/etc/pihole/test.pem" ### CHANGED, default = "/opt/etc/pihole/tls.pem"
  
+     # Number of days the automatically generated self-signed TLS/SSL certificate will be
+     # valid for.
+     #
+     # Defaults to 47 days. A minimum of 7 days is enforced.
+     # Some devices may enforce shorter validity ranges. Note that defining a lower
+     # validity range may require you to accept the self-signed certificate more often in
+     # your browser.
+     # Pi-hole will regenerate certificates it created itself two days prior to expiration.
+     # If you are using your own certificate, you need to regenerate it yourself. In this
+     # case, it is advised to set the validity range to 0 days, so that Pi-hole does not
+     # try to regenerate your certificate. If you set the validity range to 0 days and
+     # still try to generate a certificate, Pi-hole will set a fixed validity range of
+     # roughly 30 years for the certificate.
+     validity = 47
+
    [webserver.paths]
      # Server root on the host
      #
@@ -187,5 +202,5 @@ index 1891abde..52aa6f3d 100644
 -  run bash -c 'grep -c "DEBUG_CONFIG: HOSTS file written to /etc/pihole/hosts/custom.list" /var/log/pihole/FTL.log'
 +  run bash -c 'grep -c "DEBUG_CONFIG: HOSTS file written to /opt/etc/pihole/hosts/custom.list" /var/log/pihole/FTL.log'
    printf "%s\n" "${lines[@]}"
-   [[ ${lines[0]} == "1" ]]
+   [[ ${lines[0]} == "2" ]]
  }
