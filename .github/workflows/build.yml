@@ -1,8 +1,6 @@
 name: Build, Release and Upload
 
 on:
-  schedule:
-    - cron: 0 0 * * *
   push:
     branches-ignore:
       - gh-pages
@@ -54,11 +52,16 @@ on:
         required: false
         default: false
         description: Is nightly
+  workflow_call:
+    inputs:
+      NIGHTLY:
+        type: boolean
+        required: false
+        default: false
 
 jobs:
   variables:
     runs-on: ubuntu-latest
-    if: github.event_name != 'schedule'
 
     env:
       ENV_FILE: ./build.env
@@ -68,6 +71,8 @@ jobs:
       CORE_REF: ${{ steps.variables.outputs.CORE_REF }}
       WEB_REF: ${{ steps.variables.outputs.WEB_REF }}
       FTL_REF: ${{ steps.variables.outputs.FTL_REF }}
+      TEST_FTL: ${{ steps.variables.outputs.TEST_FTL }}
+      NIGHTLY: ${{ steps.variables.outputs.NIGHTLY }}
 
     steps:
       - name: Checkout own repository
@@ -81,24 +86,9 @@ jobs:
           export WEB_REF_OVERRIDE=${{ github.event.inputs.WEB_REF }}
           export FTL_REF_OVERRIDE=${{ github.event.inputs.FTL_REF }}
           bash ./.github/variables.sh
+          echo "TEST_FTL=${{ github.event.inputs.TEST_FTL || 'true' }}" >> $GITHUB_OUTPUT
+          echo "NIGHTLY=${{ github.event.inputs.NIGHTLY || inputs.NIGHTLY || 'false' }}" >> $GITHUB_OUTPUT
           cat $GITHUB_OUTPUT
-          echo "TEST_FTL=${{ github.event.inputs.TEST_FTL || 'true' }}"
-          echo "NIGHTLY=${{ github.event.inputs.NIGHTLY || 'false' }}"
-
-  schedule:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'schedule'
-
-    permissions:
-      actions: write
-
-    steps:
-      - name: Trigger build on develop branch
-        uses: benc-uk/workflow-dispatch@v1
-        with:
-          workflow: build.yml
-          ref: develop
-          inputs: '{ "NIGHTLY": "true" }'
 
   build-core:
     concurrency: build-core-${{ github.run_id }}
@@ -256,7 +246,7 @@ jobs:
           platform: ${{ matrix.docker_platform }}
           git_branch: ${{ steps.variables.outputs.GIT_BRANCH }}
           git_tag: ${{ steps.variables.outputs.GIT_TAG }}
-          run_tests: ${{ github.event.inputs.TEST_FTL || 'true' }}
+          run_tests: ${{ needs.variables.outputs.TEST_FTL || 'true' }}
 
       - name: Rename FTL binary and generate checksum file
         if: steps.cache.outputs.cache-hit != 'true'
@@ -340,13 +330,13 @@ jobs:
           path: ./packages/*
 
       - name: Check if same '-dev' package was already built
-        if: steps.dev-package.outcome == 'success' && github.event.inputs.NIGHTLY == 'true'
+        if: steps.dev-package.outcome == 'success' && needs.variables.outputs.NIGHTLY == 'true'
         id: dev-check
         uses: ./.github/actions/dev-check
 
       # Condition in this step decides whenever workflow continues to release/upload or not
       - name: Set versions for release and/or upload
-        if: (github.event.inputs.NIGHTLY != 'true' || steps.dev-check.outputs.cache-hit != 'true') && (github.event.inputs.CORE_REF == '' && github.event.inputs.WEB_REF == '' && github.event.inputs.FTL_REF == '') && github.event_name != 'pull_request'
+        if: (needs.variables.outputs.NIGHTLY != 'true' || steps.dev-check.outputs.cache-hit != 'true') && (github.event.inputs.CORE_REF == '' && github.event.inputs.WEB_REF == '' && github.event.inputs.FTL_REF == '') && github.event_name != 'pull_request'
         id: versions
         run: |
           if [ -f ./.versions ]; then
