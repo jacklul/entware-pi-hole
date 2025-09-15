@@ -2,10 +2,10 @@
 
 Run [Pi-hole](https://pi-hole.net) directly on your [Entware](https://github.com/Entware/Entware) supported device.
 
+**For installation and setup instructions - please [check the wiki](https://github.com/jacklul/entware-pi-hole/wiki).**
+
 > [!IMPORTANT]
 > **Releases here are unofficial and not supported by the Pi-hole developers.**
-
-### For installation and setup instructions - please [check the wiki](https://github.com/jacklul/entware-pi-hole/wiki).
 
 ## License
 
