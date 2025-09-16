@@ -7,9 +7,9 @@
 [ -z "$GITHUB_REF_NAME" ] && { echo "GITHUB_REF_NAME is not set"; exit 1; }
 
 # Scheduled runs build develop package
-if [ "$GITHUB_EVENT_NAME" = "schedule" ]; then
-    GITHUB_REF_NAME="develop"
+if [ "$GITHUB_EVENT_NAME" = "schedule" ] || [ "$NIGHTLY" = true ]; then
     GITHUB_REF="refs/heads/develop"
+    GITHUB_REF_NAME="develop"
 fi
 
 if [[ "$GITHUB_REF" =~ ^refs/tags/.* ]]; then
@@ -20,7 +20,7 @@ elif [[ "$GITHUB_REF" =~ ^refs/heads/.* ]]; then
     version="$(date +%Y.%m.%d)-$(date +%H%M%S)"
 
     if git rev-parse --is-inside-work-tree &>/dev/null; then
-        version="${version}-$(git describe --always --abbrev=8)"
+        version="${version}-$(git rev-parse --short=8 HEAD)"
     fi
 fi
 
@@ -63,6 +63,7 @@ fi
 [ -n "$FTL_REF_OVERRIDE" ] && FTL_REF="$FTL_REF_OVERRIDE"
 
 {
+    echo "SELF_REF=$GITHUB_REF_NAME"
     echo "CORE_REF=$CORE_REF"
     echo "WEB_REF=$WEB_REF"
     echo "FTL_REF=$FTL_REF"

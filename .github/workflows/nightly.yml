@@ -7,21 +7,21 @@ on:
 
 jobs:
   nightly:
-    runs-on: ubuntu-latest
+    if: github.repository == 'jacklul/entware-pi-hole'
     permissions:
-      actions: write
-    steps:
-      - name: Trigger build on develop branch
-        uses: benc-uk/workflow-dispatch@v1
-        with:
-          workflow: build.yml
-          ref: develop
-          inputs: '{ "NIGHTLY": "true" }'
-
-    #if: github.repository == 'jacklul/entware-pi-hole'
-    #permissions:
-    #  contents: write
-    #uses: jacklul/entware-pi-hole/.github/workflows/build.yml@develop
-    #with:
-    #  NIGHTLY: true
+      contents: write
+    uses: jacklul/entware-pi-hole/.github/workflows/build.yml@develop
+    with:
+      NIGHTLY: true
     #secrets: inherit
+
+    #runs-on: ubuntu-latest
+    #permissions:
+    #  actions: write
+    #steps:
+    #  - name: Trigger build on develop branch
+    #    uses: benc-uk/workflow-dispatch@v1
+    #    with:
+    #      workflow: build.yml
+    #      ref: develop
+    #      inputs: '{ "NIGHTLY": "true" }'

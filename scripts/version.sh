@@ -10,8 +10,11 @@ fi
 
 repository="$(realpath "$repository")"
 
-if [[ "$GITHUB_EVENT_NAME" != "schedule" ]] && { [[ "$GITHUB_REF" == refs/tags/* ]] || [[ "$GITHUB_REF" == "refs/heads/master" ]] ; }; then
-    GIT_TAG=$(git -C "$repository" describe --tags --abbrev=0 2> /dev/null || echo "")
+GIT_TAG=$(git -C "$repository" describe --tags 2> /dev/null || echo "")
+
+# If the tag is not exact, ignore it
+if [[ "$GIT_TAG" == *"-"*"-g"* ]]; then
+    GIT_TAG=""
 fi
 
 #shellcheck disable=SC2015
