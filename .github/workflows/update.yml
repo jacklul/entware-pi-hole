@@ -138,7 +138,7 @@ jobs:
           git_tag: ''
           context: ./dev/FTL
           dockerfile: ./dev/FTL/.github/Dockerfile
-          run_tests: false
+          run_tests: true
           extract_binary: false
 
       - name: Set ok status
