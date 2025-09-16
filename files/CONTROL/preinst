@@ -29,12 +29,12 @@ command_exists() {
 
     case $check_command in
         "type")
-            if type "$_command" >/dev/null 2>&1; then
+            if type "$_command" > /dev/null 2>&1; then
                 return 0
             fi
         ;;
         "which")
-            if which "$_command" >/dev/null 2>&1; then
+            if which "$_command" > /dev/null 2>&1; then
                 return 0
             fi
         ;;

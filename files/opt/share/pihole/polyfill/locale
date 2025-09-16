@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # 'locale' - used by piholeDebug.sh
 
-if command -v locale.new &>/dev/null; then
+if command -v locale.new &> /dev/null; then
     locale.new "$@"
 else
     echo "'locale.new' - command not found" >&2

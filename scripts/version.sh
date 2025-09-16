@@ -18,7 +18,7 @@ if [[ "$GIT_TAG" == *"-"*"-g"* ]]; then
 fi
 
 #shellcheck disable=SC2015
-echo "VERSION=$([ -n "$GIT_TAG" ] && echo "$GIT_TAG" || git -C "$repository" describe --tags --always 2>/dev/null)" > "$repository/.version"
+echo "VERSION=$([ -n "$GIT_TAG" ] && echo "$GIT_TAG" || git -C "$repository" describe --tags --always 2> /dev/null)" > "$repository/.version"
 
 #shellcheck disable=SC2015
 echo "BRANCH=$([ -n "$GIT_TAG" ] && echo "master" || git -C "$repository" rev-parse --abbrev-ref HEAD)" >> "$repository/.version"

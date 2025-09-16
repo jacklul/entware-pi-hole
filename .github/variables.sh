@@ -19,7 +19,7 @@ elif [[ "$GITHUB_REF" =~ ^refs/pull/.* ]]; then
 elif [[ "$GITHUB_REF" =~ ^refs/heads/.* ]]; then
     version="$(date +%Y.%m.%d)-$(date +%H%M%S)"
 
-    if git rev-parse --is-inside-work-tree &>/dev/null; then
+    if git rev-parse --is-inside-work-tree &> /dev/null; then
         version="${version}-$(git rev-parse --short=8 HEAD)"
     fi
 fi
