@@ -202,5 +202,5 @@ index 1891abde..52aa6f3d 100644
 -  run bash -c 'grep -c "DEBUG_CONFIG: HOSTS file written to /etc/pihole/hosts/custom.list" /var/log/pihole/FTL.log'
 +  run bash -c 'grep -c "DEBUG_CONFIG: HOSTS file written to /opt/etc/pihole/hosts/custom.list" /var/log/pihole/FTL.log'
    printf "%s\n" "${lines[@]}"
-   [[ ${lines[0]} == "2" ]]
+   [[ ${lines[0]} == "3" ]]
  }
