@@ -195,8 +195,8 @@ index dfb3837c..9131b932 100644
 --- a/src/config/inotify.c
 +++ b/src/config/inotify.c
 @@ -14,7 +14,7 @@
- // NAME_MAX
- #include <linux/limits.h>
+ // free()
+ #include <stdlib.h>
  
 -#define WATCHDIR "/etc/pihole"
 +#define WATCHDIR "/opt/etc/pihole"

@@ -156,10 +156,19 @@ index 0b433266..85d8a45c 100644
    # Allowed values are:
    #     true or false
 diff --git a/test/test_suite.bats b/test/test_suite.bats
-index 1891abde..52aa6f3d 100644
+index 021530bd..2a84e4ea 100644
 --- a/test/test_suite.bats
 +++ b/test/test_suite.bats
-@@ -1755,15 +1755,15 @@
+@@ -1504,7 +1504,7 @@
+   run bash -c 'curl -s -X PATCH http://127.0.0.1/api/config -d "{\"config\":{\"dns\":{\"reply\":{\"host\":{\"force4\":true,\"IPv4\":\"10.100.0.10\",\"force6\":true,\"IPv6\":\"fe80::10\"}}}}}"'
+ 
+   # Wait for change to be applied
+-  run bash -c "./pihole-FTL wait-for 'INFO: Config file written to /etc/pihole/pihole.toml' /var/log/pihole/FTL.log 5 $logsize_before"
++  run bash -c "./pihole-FTL wait-for 'INFO: Config file written to /opt/etc/pihole/pihole.toml' /var/log/pihole/FTL.log 5 $logsize_before"
+   printf "%s\n" "${lines[@]}"
+   [[ $status == 0 ]]
+ 
+@@ -1876,15 +1876,15 @@
    printf "%s\n" "${lines[@]}"
    [[ ${lines[0]} == 'Hello, world 1!' ]]
    [[ ${lines[1]} == 'Hello, world 2!' ]]
@@ -178,7 +187,7 @@ index 1891abde..52aa6f3d 100644
    [[ $status == 0 ]]
  }
  
-@@ -1522,7 +1522,7 @@
+@@ -1949,7 +1949,7 @@
  
    run bash -c './pihole-FTL --config dns.revServers "[\"true,1.1.1.1,def,ghi\"]"'
    printf "%s\n" "${lines[@]}"
@@ -187,10 +196,28 @@ index 1891abde..52aa6f3d 100644
    [[ $status == 3 ]]
  
    run bash -c './pihole-FTL --config webserver.api.excludeClients "[\".*\",\"$$$\",\"[[[\"]"'
-@@ -1774,13 +1774,13 @@
- }
+@@ -1965,7 +1965,7 @@
+   [[ $status == 0 ]]
  
- @test "Expected number of config file rotations" {
+   # Wait for change to become effective
+-  run bash -c "./pihole-FTL wait-for 'HOSTS file written to /etc/pihole/hosts/custom.list' /var/log/pihole/FTL.log 5 $logsize_before"
++  run bash -c "./pihole-FTL wait-for 'HOSTS file written to /opt/etc/pihole/hosts/custom.list' /var/log/pihole/FTL.log 5 $logsize_before"
+   printf "%s\n" "${lines[@]}"
+   [[ $status == 0 ]]
+ 
+@@ -1982,7 +1982,7 @@
+   [[ $status == 0 ]]
+ 
+   # Wait for change to become effective
+-  run bash -c "./pihole-FTL wait-for 'HOSTS file written to /etc/pihole/hosts/custom.list' /var/log/pihole/FTL.log 5 $logsize_before"
++  run bash -c "./pihole-FTL wait-for 'HOSTS file written to /opt/etc/pihole/hosts/custom.list' /var/log/pihole/FTL.log 5 $logsize_before"
+   printf "%s\n" "${lines[@]}"
+   [[ $status == 0 ]]
+ 
+@@ -2279,13 +2279,13 @@
+   # 1. Setting force4 = true (and others)
+   # 2. Setting dns.blocking.mode = "IP"
+   # 3. PATCH /api/config/webserver/api/password
 -  run bash -c 'grep -c "INFO: Config file written to /etc/pihole/pihole.toml" /var/log/pihole/FTL.log'
 +  run bash -c 'grep -c "INFO: Config file written to /opt/etc/pihole/pihole.toml" /var/log/pihole/FTL.log'
    printf "%s\n" "${lines[@]}"
