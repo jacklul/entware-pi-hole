@@ -115,7 +115,7 @@ index eee5a8c0..51c882cd 100644
 +	config.files.log.ftl.d.s = (char*)"/opt/var/log/pihole/FTL.log";
  	config.files.log.ftl.v.s = config.files.log.ftl.d.s;
  	config.files.log.ftl.c = validate_filepath;
- 
+ 	config.files.log.ftl.f = FLAG_FTL_LOG;
 diff --git a/src/config/config.h b/src/config/config.h
 index 81d4a15f..86c0a75f 100644
 --- a/src/config/config.h
