@@ -1,11 +1,11 @@
-diff --git a/test/opt.sh b/test/opt.sh
-new file mode 100644
-index 00000000..3364c495
---- /dev/null
-+++ b/test/opt.sh
-@@ -0,0 +1,28 @@
-+#!/bin/bash
-+
+diff --git a/test/run.sh b/test/run.sh
+index 5d490a82..dfd08dac 100755
+--- a/test/run.sh
++++ b/test/run.sh
+@@ -83,6 +83,33 @@ export FTLCONF_files_pcap='*123#./test/pcap'
+ # Prepare gdb session
+ echo "handle SIGHUP nostop SIGPIPE nostop SIGTERM nostop SIG32 nostop SIG33 nostop SIG34 nostop SIG35 nostop SIG41 nostop" > /root/.gdbinit
+ 
 +declare -A LINKS=(
 +    ["/etc/pihole"]="/opt/etc/pihole"
 +    ["/var/log/pihole"]="/opt/var/log/pihole"
@@ -32,15 +32,6 @@ index 00000000..3364c495
 +        ln -sv "$KEY" "${LINKS[$KEY]}"
 +    fi
 +done
-diff --git a/test/run.sh b/test/run.sh
-index 5d490a82..dfd08dac 100755
---- a/test/run.sh
-+++ b/test/run.sh
-@@ -77,6 +77,8 @@ export FTLCONF_debug_api="not_a_bool"
- # Prepare gdb session
- echo "handle SIGHUP nostop SIGPIPE nostop SIGTERM nostop SIG32 nostop SIG33 nostop SIG34 nostop SIG35 nostop SIG41 nostop" > /root/.gdbinit
- 
-+bash test/opt.sh
 +
  # Start FTL
  if ! su pihole -s /bin/sh -c /home/pihole/pihole-FTL; then
@@ -50,11 +41,11 @@ index 5d490a82..dfd08dac 100755
  
  curl_to_tricorder() {
 -  curl --silent --upload-file "${1}" https://tricorder.pi-hole.net
-+  curl --silent --upload-file "${1}" https://lurking-cat.appspot.com/upload
++  echo "null"
  }
  
 -if [[ $RET != 0 ]]; then
-+if [[ $RET != 0 ]] && [ ! -f test/opt.sh ]; then
++if false && [[ $RET != 0 ]]; then
    echo -n "pihole/pihole.log: "
    curl_to_tricorder /var/log/pihole/pihole.log
    echo ""
@@ -62,108 +53,71 @@ diff --git a/test/pihole.toml b/test/pihole.toml
 index 0b433266..85d8a45c 100644
 --- a/test/pihole.toml
 +++ b/test/pihole.toml
-@@ -108,8 +108,8 @@
-   # forwarded to upstream nameservers
-   domainNeeded = false
- 
--  # If set, the domain is added to simple names (without a period) in /etc/hosts in the
--  # same way as for DHCP-derived names
-+  # If set, the domain is added to simple names (without a period) in /opt/etc/hosts in
-+  # the same way as for DHCP-derived names
-   expandHosts = false
- 
-   # The DNS domain used by your Pi-hole.
-@@ -134,8 +134,8 @@
-   domain = "lan"
- 
-   # Should all reverse lookups for private IP ranges (i.e., 192.168.x.y, etc) which are
--  # not found in /etc/hosts or the DHCP leases file be answered with "no such domain"
--  # rather than being forwarded upstream?
-+  # not found in /opt/etc/hosts or the DHCP leases file be answered with "no such
-+  # domain" rather than being forwarded upstream?
-   bogusPriv = true
- 
-   # Validate DNS replies using DNSSEC?
-@@ -388,13 +388,13 @@
-     # to when FTL has finished starting (start of the daemon + possible delay by
-     # DELAY_STARTUP) then it will advance in steps of the rate-limiting interval. If a
-     # client reaches the maximum number of queries it will be blocked until the end of the
--    # current interval. This will be logged to /var/log/pihole/FTL.log, e.g. Rate-limiting
--    # 10.0.1.39 for at least 44 seconds. If the client continues to send queries while
--    # being blocked already and this number of queries during the blocking exceeds the
--    # limit the client will continue to be blocked until the end of the next interval
--    # (FTL.log will contain lines like Still rate-limiting 10.0.1.39 as it made additional
--    # 5007 queries). As soon as the client requests less than the set limit, it will be
--    # unblocked (Ending rate-limitation of 10.0.1.39).
-+    # current interval. This will be logged to /opt/var/log/pihole/FTL.log, e.g.
-+    # Rate-limiting 10.0.1.39 for at least 44 seconds. If the client continues to send
-+    # queries while being blocked already and this number of queries during the blocking
-+    # exceeds the limit the client will continue to be blocked until the end of the next
-+    # interval (FTL.log will contain lines like Still rate-limiting 10.0.1.39 as it made
-+    # additional 5007 queries). As soon as the client requests less than the set limit, it
-+    # will be unblocked (Ending rate-limitation of 10.0.1.39).
-     # Rate-limiting may be disabled altogether by setting both values to zero (this
-     # results in the same behavior as before FTL v5.7).
-     # How many queries are permitted...
-@@ -665,14 +665,14 @@
+@@ -665,29 +665,29 @@
      #
-     # Possible values are:
-     #     <valid TLS certificate file (*.pem)>
+     # Allowed values are:
+     #     A valid TLS certificate file (*.pem)
 -    cert = "/etc/pihole/test.pem" ### CHANGED, default = "/etc/pihole/tls.pem"
 +    cert = "/etc/pihole/test.pem" ### CHANGED, default = "/opt/etc/pihole/tls.pem"
  
+     # Number of days the automatically generated self-signed TLS/SSL certificate will be
+     # valid for.
+     #
+     # Defaults to 47 days. A minimum of 7 days is enforced.
+     # Some devices may enforce shorter validity ranges. Note that defining a lower
+     # validity range may require you to accept the self-signed certificate more often in
+     # your browser.
+     # Pi-hole will regenerate certificates it created itself two days prior to expiration.
+     # If you are using your own certificate, you need to regenerate it yourself. In this
+     # case, it is advised to set the validity range to 0 days, so that Pi-hole does not
+     # try to regenerate your certificate. If you set the validity range to 0 days and
+     # still try to generate a certificate, Pi-hole will set a fixed validity range of
+     # roughly 30 years for the certificate.
+     validity = 47
+
    [webserver.paths]
      # Server root on the host
      #
-     # Possible values are:
-     #     <valid path>
+     # Allowed values are:
+     #     A valid path
 -    webroot = "/var/www/html"
 +    webroot = "/opt/share/pihole/www"
  
      # Sub-directory of the root containing the web interface
      #
-@@ -749,7 +749,7 @@
-     app_sudo = false
- 
-     # Should FTL create a temporary CLI password? This password is stored in clear in
--    # /etc/pihole and can be used by the CLI (pihole ...  commands) to authenticate
-+    # /opt/etc/pihole and can be used by the CLI (pihole ...  commands) to authenticate
-     # against the API. Note that the password is only valid for the current session and
-     # regenerated on each FTL restart. Sessions initiated with this password cannot modify
-     # the Pi-hole configuration (change passwords, etc.) for security reasons but can
 @@ -822,32 +822,32 @@
    #
-   # Possible values are:
-   #     <any writable file>
+   # Allowed values are:
+   #     Any writable file
 -  pid = "/run/pihole-FTL.pid"
 +  pid = "/opt/var/run/pihole-FTL.pid"
  
    # The location of FTL's long-term database
    #
-   # Possible values are:
-   #     <any FTL database>
+   # Allowed values are:
+   #     Any FTL database
 -  database = "/etc/pihole/pihole-FTL.db"
 +  database = "/opt/etc/pihole/pihole-FTL.db"
  
    # The location of Pi-hole's gravity database
    #
-   # Possible values are:
-   #     <any Pi-hole gravity database>
+   # Allowed values are:
+   #     Any Pi-hole gravity database
 -  gravity = "/etc/pihole/gravity.db"
 +  gravity = "/opt/etc/pihole/gravity.db"
  
    # A temporary directory where Pi-hole can store files during gravity updates. This
    # directory must be writable by the user running gravity (typically pihole).
    #
-   # Possible values are:
-   #     <any existing world-writable writable directory>
+   # Allowed values are:
+   #     Any existing world-writable writable directory
 -  gravity_tmp = "/tmp"
 +  gravity_tmp = "/opt/tmp"
  
    # The database containing MAC -> Vendor information for the network table
    #
-   # Possible values are:
-   #     <any Pi-hole macvendor database>
+   # Allowed values are:
+   #     Any Pi-hole macvendor database
 -  macvendor = "/etc/pihole/macvendor.db"
 +  macvendor = "/opt/etc/pihole/macvendor.db"
  
@@ -171,55 +125,50 @@ index 0b433266..85d8a45c 100644
    # for debugging purposes only. If you don't know what this is, you don't need it.
 @@ -871,19 +871,19 @@
      #
-     # Possible values are:
-     #     <any writable file>
+     # Allowed values are:
+     #     any writable file
 -    ftl = "/var/log/pihole/FTL.log"
 +    ftl = "/opt/var/log/pihole/FTL.log"
  
      # The log file used by the embedded dnsmasq DNS server
      #
-     # Possible values are:
-     #     <any writable file>
+     # Allowed values are:
+     #     Any writable file
 -    dnsmasq = "/var/log/pihole/pihole.log"
 +    dnsmasq = "/opt/var/log/pihole/pihole.log"
  
      # The log file used by the webserver
      #
-     # Possible values are:
-     #     <any writable file>
+     # Allowed values are:
+     #     Any writable file
 -    webserver = "/var/log/pihole/webserver.log"
 +    webserver = "/opt/var/log/pihole/webserver.log"
  
  [misc]
    # Using privacy levels you can specify which level of detail you want to see in your
-@@ -994,11 +994,11 @@
-   # malfunctioning addr2line can prevent from generating any backtrace at all.
-   addr2line = true
- 
--  # Should FTL load additional dnsmasq configuration files from /etc/dnsmasq.d/?
-+  # Should FTL load additional dnsmasq configuration files from /opt/etc/dnsmasq.d/?
+@@ -1305,7 +1305,7 @@
    # Warning: This is an advanced setting and should only be used with care.
    # Incorrectly formatted or config files specifying options which can only be defined
    # once can result in conflicts with the automatic configuration of Pi-hole (see
 -  # /etc/pihole/dnsmasq.conf) and may stop DNS resolution from working.
 +  # /opt/etc/pihole/dnsmasq.conf) and may stop DNS resolution from working.
-   etc_dnsmasq_d = true ### CHANGED, default = false
- 
-   # Additional lines to inject into the generated dnsmasq configuration.
-@@ -1079,7 +1079,7 @@
-   # Print config parsing details
-   config = true ### CHANGED, default = false
- 
--  # Debug monitoring of /etc/pihole filesystem events
-+  # Debug monitoring of /opt/etc/pihole filesystem events
-   inotify = true ### CHANGED, default = false
- 
-   # Debug monitoring of the webserver (CivetWeb) events
+   #
+   # Allowed values are:
+   #     true or false
 diff --git a/test/test_suite.bats b/test/test_suite.bats
-index 1891abde..52aa6f3d 100644
+index 021530bd..2a84e4ea 100644
 --- a/test/test_suite.bats
 +++ b/test/test_suite.bats
-@@ -1755,15 +1755,15 @@
+@@ -1504,7 +1504,7 @@
+   run bash -c 'curl -s -X PATCH http://127.0.0.1/api/config -d "{\"config\":{\"dns\":{\"reply\":{\"host\":{\"force4\":true,\"IPv4\":\"10.100.0.10\",\"force6\":true,\"IPv6\":\"fe80::10\"}}}}}"'
+ 
+   # Wait for change to be applied
+-  run bash -c "./pihole-FTL wait-for 'INFO: Config file written to /etc/pihole/pihole.toml' /var/log/pihole/FTL.log 5 $logsize_before"
++  run bash -c "./pihole-FTL wait-for 'INFO: Config file written to /opt/etc/pihole/pihole.toml' /var/log/pihole/FTL.log 5 $logsize_before"
+   printf "%s\n" "${lines[@]}"
+   [[ $status == 0 ]]
+ 
+@@ -1876,15 +1876,15 @@
    printf "%s\n" "${lines[@]}"
    [[ ${lines[0]} == 'Hello, world 1!' ]]
    [[ ${lines[1]} == 'Hello, world 2!' ]]
@@ -238,7 +187,7 @@ index 1891abde..52aa6f3d 100644
    [[ $status == 0 ]]
  }
  
-@@ -1522,7 +1522,7 @@
+@@ -1949,7 +1949,7 @@
  
    run bash -c './pihole-FTL --config dns.revServers "[\"true,1.1.1.1,def,ghi\"]"'
    printf "%s\n" "${lines[@]}"
@@ -247,14 +196,32 @@ index 1891abde..52aa6f3d 100644
    [[ $status == 3 ]]
  
    run bash -c './pihole-FTL --config webserver.api.excludeClients "[\".*\",\"$$$\",\"[[[\"]"'
-@@ -1774,13 +1774,13 @@
- }
+@@ -1965,7 +1965,7 @@
+   [[ $status == 0 ]]
  
- @test "Expected number of config file rotations" {
+   # Wait for change to become effective
+-  run bash -c "./pihole-FTL wait-for 'HOSTS file written to /etc/pihole/hosts/custom.list' /var/log/pihole/FTL.log 5 $logsize_before"
++  run bash -c "./pihole-FTL wait-for 'HOSTS file written to /opt/etc/pihole/hosts/custom.list' /var/log/pihole/FTL.log 5 $logsize_before"
+   printf "%s\n" "${lines[@]}"
+   [[ $status == 0 ]]
+ 
+@@ -1982,7 +1982,7 @@
+   [[ $status == 0 ]]
+ 
+   # Wait for change to become effective
+-  run bash -c "./pihole-FTL wait-for 'HOSTS file written to /etc/pihole/hosts/custom.list' /var/log/pihole/FTL.log 5 $logsize_before"
++  run bash -c "./pihole-FTL wait-for 'HOSTS file written to /opt/etc/pihole/hosts/custom.list' /var/log/pihole/FTL.log 5 $logsize_before"
+   printf "%s\n" "${lines[@]}"
+   [[ $status == 0 ]]
+ 
+@@ -2279,13 +2279,13 @@
+   # 1. Setting force4 = true (and others)
+   # 2. Setting dns.blocking.mode = "IP"
+   # 3. PATCH /api/config/webserver/api/password
 -  run bash -c 'grep -c "INFO: Config file written to /etc/pihole/pihole.toml" /var/log/pihole/FTL.log'
 +  run bash -c 'grep -c "INFO: Config file written to /opt/etc/pihole/pihole.toml" /var/log/pihole/FTL.log'
    printf "%s\n" "${lines[@]}"
-   [[ ${lines[0]} == "2" ]]
+   [[ ${lines[0]} == "3" ]]
 -  run bash -c 'grep -c "DEBUG_CONFIG: Config file written to /etc/pihole/dnsmasq.conf" /var/log/pihole/FTL.log'
 +  run bash -c 'grep -c "DEBUG_CONFIG: Config file written to /opt/etc/pihole/dnsmasq.conf" /var/log/pihole/FTL.log'
    printf "%s\n" "${lines[@]}"
@@ -262,5 +229,17 @@ index 1891abde..52aa6f3d 100644
 -  run bash -c 'grep -c "DEBUG_CONFIG: HOSTS file written to /etc/pihole/hosts/custom.list" /var/log/pihole/FTL.log'
 +  run bash -c 'grep -c "DEBUG_CONFIG: HOSTS file written to /opt/etc/pihole/hosts/custom.list" /var/log/pihole/FTL.log'
    printf "%s\n" "${lines[@]}"
-   [[ ${lines[0]} == "1" ]]
+   [[ ${lines[0]} == "3" ]]
  }
+@@ -2313,9 +2313,9 @@
+ }
+ 
+ @test "Webserver options are logged as expected" {
+-  run bash -c 'grep -F "Webserver option 0/12: document_root=/var/www/html" /var/log/pihole/FTL.log'
++  run bash -c 'grep -F "Webserver option 0/12: document_root=/opt/share/pihole/www" /var/log/pihole/FTL.log'
+   [[ $status == 0 ]]
+-  run bash -c 'grep -F "Webserver option 1/12: error_pages=/var/www/html/admin/" /var/log/pihole/FTL.log'
++  run bash -c 'grep -F "Webserver option 1/12: error_pages=/opt/share/pihole/www/admin/" /var/log/pihole/FTL.log'
+   [[ $status == 0 ]]
+   run bash -c 'grep -F "Webserver option 2/12: listening_ports=80o,443os,[::]:80o,[::]:443os" /var/log/pihole/FTL.log'
+   [[ $status == 0 ]]

@@ -43,9 +43,9 @@ index 8c930f04..efb9dab1 100755
  # This file is copyright under the latest version of the EUPL.
  # Please see LICENSE file for your rights under this license.
  
--readonly PI_HOLE_SCRIPT_DIR="/opt/pihole"
-+readonly PI_HOLE_SCRIPT_DIR="/opt/share/pihole"
- readonly utilsfile="${PI_HOLE_SCRIPT_DIR}/utils.sh"
+-PI_HOLE_SCRIPT_DIR="/opt/pihole"
++PI_HOLE_SCRIPT_DIR="/opt/share/pihole"
+ utilsfile="${PI_HOLE_SCRIPT_DIR}/utils.sh"
  # shellcheck source="./advanced/Scripts/utils.sh"
  source "${utilsfile}"
  
@@ -75,11 +75,11 @@ index 8c930f04..efb9dab1 100755
  source ${colfile}
  
  helpFunc() {
-diff --git a/advanced/Scripts/piholeARPTable.sh b/advanced/Scripts/piholeARPTable.sh
-index c04c5b33..ecf5365e 100755
---- a/advanced/Scripts/piholeARPTable.sh
-+++ b/advanced/Scripts/piholeARPTable.sh
-@@ -10,21 +10,21 @@
+diff --git a/advanced/Scripts/piholeNetworkFlush.sh b/advanced/Scripts/piholeNetworkFlush.sh
+index a8721476..df887226 100755
+--- a/advanced/Scripts/piholeNetworkFlush.sh
++++ b/advanced/Scripts/piholeNetworkFlush.sh
+@@ -9,13 +9,13 @@
  # This file is copyright under the latest version of the EUPL.
  # Please see LICENSE file for your rights under this license.
  
@@ -95,15 +95,6 @@ index c04c5b33..ecf5365e 100755
  utilsfile="${PI_HOLE_SCRIPT_DIR}/utils.sh"
  # shellcheck source=./advanced/Scripts/utils.sh
  source "${utilsfile}"
-
- # Determine database location
- DBFILE=$(getFTLConfigValue "files.database")
- if [ -z "$DBFILE" ]; then
--    DBFILE="/etc/pihole/pihole-FTL.db"
-+    DBFILE="/opt/etc/pihole/pihole-FTL.db"
- fi
- 
- flushARP(){
 diff --git a/advanced/Scripts/piholeDebug.sh b/advanced/Scripts/piholeDebug.sh
 index 7c558127..d2942f01 100755
 --- a/advanced/Scripts/piholeDebug.sh
@@ -212,7 +203,7 @@ index 34d96318..b4ffc79b 100755
  fi
  
  # Helper function to handle log rotation for a single file
-@@ -78,13 +78,13 @@ flush_log() {
+@@ -78,14 +78,14 @@ flush_log() {
  
  if [[ "$*" == *"once"* ]]; then
      # Nightly logrotation
@@ -223,6 +214,7 @@ index 34d96318..b4ffc79b 100755
          if [[ "$*" != *"quiet"* ]]; then
              echo -ne "  ${INFO} Running logrotate ..."
          fi
+         mkdir -p "${STATEFILE%/*}"
 -        /usr/sbin/logrotate --force --state "${STATEFILE}" /etc/pihole/logrotate
 +        /opt/sbin/logrotate --force --state "${STATEFILE}" /opt/etc/pihole/logrotate
      else
@@ -479,8 +471,8 @@ index 318107c1..1f2f0a34 100755
 -adlistFile="/etc/pihole/adlists.list"
 +adlistFile="/opt/etc/pihole/adlists.list"
  # Pi-hole needs an IP address; to begin, these variables are empty since we don't know what the IP is until this script can run
- IPV4_ADDRESS=${IPV4_ADDRESS}
- IPV6_ADDRESS=${IPV6_ADDRESS}
+ IPV4_ADDRESS=
+ IPV6_ADDRESS=
 @@ -102,7 +102,7 @@ PRIVACY_LEVEL=
  PIHOLE_INTERFACE=
  

@@ -16,8 +16,8 @@ index 63d51f87..c0dd180c 100755
 --- a/advanced/Scripts/utils.sh
 +++ b/advanced/Scripts/utils.sh
 @@ -93,3 +93,30 @@ setFTLConfigValue(){
-     exit 5
-   fi
+         exit 1
+     esac
  }
 +
 +getRunAsUser() {

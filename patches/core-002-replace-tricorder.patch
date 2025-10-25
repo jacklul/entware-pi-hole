@@ -94,11 +94,12 @@ index 1dfab754..0f253258 100755
    -f, flush           Flush the Pi-hole log
    -r, repair          Repair Pi-hole subsystems
    -t, tail [arg]      View the live output of the Pi-hole log.
-@@ -536,6 +545,6 @@ case "${1}" in
+@@ -551,7 +551,7 @@ case "${1}" in
+   "-c" | "chronometer"            ) chronometerFunc "$@";;
    "-q" | "query"                  ) queryFunc "$@";;
    "status"                        ) statusFunc "$2";;
 -  "tricorder"                     ) tricorderFunc;;
 +  "tricorder"                     ) tricorderFunc "$2";;
- 
-   # we need to add all arguments that require sudo power to not trigger the * argument
-   "allow" | "allowlist"           ) need_root=0;;
+   "allow" | "allowlist"           ) listFunc "$@";;
+   "deny" | "denylist"             ) listFunc "$@";;
+   "--wild" | "wildcard"           ) listFunc "$@";;

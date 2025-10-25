@@ -18,28 +18,6 @@ index 741ff2f4..1e9513b3 100755
              # get its status via systemctl
              status_of_process=$(systemctl is-active "${i}")
          else
-diff --git a/advanced/Scripts/piholeARPTable.sh b/advanced/Scripts/piholeARPTable.sh
-index f55b1320..6f984bbb 100755
---- a/advanced/Scripts/piholeARPTable.sh
-+++ b/advanced/Scripts/piholeARPTable.sh
-@@ -32,7 +32,7 @@ flushARP(){
-     fi
- 
-     # Stop FTL to prevent database access
--    if ! output=$(service pihole-FTL stop 2>&1); then
-+    if ! output=$(/opt/etc/init.d/S65pihole-FTL stop 2>&1); then
-         echo -e "${OVER}  ${CROSS} Failed to stop FTL"
-         echo "  Output: ${output}"
-         return 1
-@@ -64,7 +64,7 @@ flushARP(){
-     fi
- 
-     # Start FTL again
--    if ! output=$(service pihole-FTL restart 2>&1); then
-+    if ! output=$(/opt/etc/init.d/S65pihole-FTL restart 2>&1); then
-         echo -e "${OVER}  ${CROSS} Failed to restart FTL"
-         echo "  Output: ${output}"
-         return 1
 diff --git a/advanced/Scripts/piholeLogFlush.sh b/advanced/Scripts/piholeLogFlush.sh
 index 34d96318..f905f045 100755
 --- a/advanced/Scripts/piholeLogFlush.sh
@@ -110,7 +88,7 @@ index 6cc69008..c103d528 100755
 +    elif is_command systemctl; then
          # use that to enable the service
          systemctl -q enable "${1}"
-     else
+     elif is_command openrc; then
 @@ -1277,8 +1294,11 @@ disable_service() {
      # Local, named variables
      local str="Disabling ${1} service"
@@ -122,8 +100,8 @@ index 6cc69008..c103d528 100755
 -    if is_command systemctl; then
 +    elif is_command systemctl; then
          # use that to disable the service
-         systemctl -q disable "${1}"
-     else
+         systemctl -q disable --now "${1}"
+     elif is_command openrc; then
 @@ -1289,8 +1309,14 @@ disable_service() {
  }
  
@@ -139,4 +117,4 @@ index 6cc69008..c103d528 100755
 +    elif is_command systemctl; then
          # use that to check the status of the service
          systemctl -q is-enabled "${1}" 2>/dev/null
-     else
+     elif is_command openrc; then
