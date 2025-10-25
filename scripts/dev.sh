@@ -69,6 +69,7 @@ function install_or_update_repository() {
             fi
 
             git -C "$destination" reset --hard HEAD
+            git -C "$destination" pull --rebase --allow-unrelated-histories $shallow_part
         fi
     fi
 }
