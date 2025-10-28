@@ -375,8 +375,18 @@ index c604d5d4..a6e9274d 100755
 +PI_HOLE_SCRIPT_DIR='/opt/share/pihole'
  utilsfile="${PI_HOLE_SCRIPT_DIR}/utils.sh"
  # shellcheck source="./advanced/Scripts/utils.sh"
-@@ -10,26 +10,26 @@ PIHOLE_LOG_FILE="${PIHOLE_LOG_FILE:-/var/log/pihole/pihole.log}"
- WEBSERVER_LOG_FILE="${WEBSERVER_LOG_FILE:-/var/log/pihole/webserver.log}"
+@@ -11,32 +11,32 @@ FTL_PID_FILE="$(getFTLConfigValue files.pid)"
+ FTL_LOG_FILE="$(getFTLConfigValue files.log.ftl)"
+ PIHOLE_LOG_FILE="$(getFTLConfigValue files.log.dnsmasq)"
+ WEBSERVER_LOG_FILE="$(getFTLConfigValue files.log.webserver)"
+-FTL_PID_FILE="${FTL_PID_FILE:-/run/pihole-FTL.pid}"
+-FTL_LOG_FILE="${FTL_LOG_FILE:-/var/log/pihole/FTL.log}"
+-PIHOLE_LOG_FILE="${PIHOLE_LOG_FILE:-/var/log/pihole/pihole.log}"
+-WEBSERVER_LOG_FILE="${WEBSERVER_LOG_FILE:-/var/log/pihole/webserver.log}"
++FTL_PID_FILE="${FTL_PID_FILE:-/opt/var/run/pihole-FTL.pid}"
++FTL_LOG_FILE="${FTL_LOG_FILE:-/opt/var/log/pihole/FTL.log}"
++PIHOLE_LOG_FILE="${PIHOLE_LOG_FILE:-/opt/var/log/pihole/pihole.log}"
++WEBSERVER_LOG_FILE="${WEBSERVER_LOG_FILE:-/opt/var/log/pihole/webserver.log}"
  
  # Ensure that permissions are set so that pihole-FTL can edit all necessary files
 -mkdir -p /var/log/pihole
@@ -386,10 +396,10 @@ index c604d5d4..a6e9274d 100755
  
  # allow all users read version file (and use pihole -v)
 -touch /etc/pihole/versions
-+touch /opt/etc/pihole/versions
 -chmod 0644 /etc/pihole/versions
++touch /opt/etc/pihole/versions
 +chmod 0644 /opt/etc/pihole/versions
-
+ 
  # allow pihole to access subdirs in /etc/pihole (sets execution bit on dirs)
 -find /etc/pihole/ /var/log/pihole/ -type d -exec chmod 0755 {} +
 +find /opt/etc/pihole/ /opt/var/log/pihole/ -type d -exec chmod 0755 {} +
