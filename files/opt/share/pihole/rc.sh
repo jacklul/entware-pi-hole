@@ -17,19 +17,20 @@ case $1 in
                 run_as_user=
             fi
 
-            # Update permissions of /dev/shm to allow non-root users to create and delete own files
-            if [ -n "$run_as_user" ] && [ "$(stat -c "%a" /dev/shm)" != "1777" ] && ! chmod 1777 /dev/shm; then
-                echo "Warning: Failed to update permissions of /dev/shm!" >&2
-            fi
+            if [ -n "$run_as_user" ]; then
+                # Update permissions of /dev/shm to allow non-root users to create and delete own files
+                if [ "$(stat -c "%a" /dev/shm)" != "1777" ] && ! chmod 1777 /dev/shm; then
+                    echo "Warning: Failed to update permissions of /dev/shm!" >&2
+                fi
 
-            # Check if we can start the daemon the intended way (setting capabilities on the binary)
-            if
-                [ -n "$run_as_user" ] && \
-                setcap CAP_NET_BIND_SERVICE,CAP_NET_RAW,CAP_NET_ADMIN,CAP_SYS_NICE,CAP_IPC_LOCK,CAP_CHOWN,CAP_SYS_TIME+eip /opt/bin/pihole-FTL
-            then
-                PREARGS="nonroot $run_as_user"
-            else
-                echo "Warning: Setting capabilities is not supported on this system" >&2
+                # Check if we can start the daemon the intended way (setting capabilities on the binary)
+                if
+                    setcap CAP_NET_BIND_SERVICE,CAP_NET_RAW,CAP_NET_ADMIN,CAP_SYS_NICE,CAP_IPC_LOCK,CAP_CHOWN,CAP_SYS_TIME+eip /opt/bin/pihole-FTL
+                then
+                    PREARGS="nonroot $run_as_user"
+                else
+                    echo "Warning: Setting capabilities is not supported on this system" >&2
+                fi
             fi
 
             # Explicitly specify user and group to use if it is not 'pihole'
@@ -40,6 +41,8 @@ case $1 in
 
                 echo "Warning: Starting in an unsupported way - expect issues to happen!" >&2
             fi
+
+            export USER="$run_as_user"
         fi
 
         [ -n "$PRECMD" ] && PRECMD_USER="$PRECMD"
