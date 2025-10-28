@@ -50,7 +50,7 @@ diff --git a/advanced/Templates/pihole-FTL-prestart.sh b/advanced/Templates/piho
 index 49b0f0d4..dde8214e 100755
 --- a/advanced/Templates/pihole-FTL-prestart.sh
 +++ b/advanced/Templates/pihole-FTL-prestart.sh
-@@ -6,12 +6,14 @@ utilsfile="${PI_HOLE_SCRIPT_DIR}/utils.sh"
+@@ -6,6 +6,8 @@ utilsfile="${PI_HOLE_SCRIPT_DIR}/utils.sh"
  # shellcheck source="./advanced/Scripts/utils.sh"
  . "${utilsfile}"
  
@@ -58,6 +58,8 @@ index 49b0f0d4..dde8214e 100755
 +
  # Get file paths
  FTL_PID_FILE="$(getFTLConfigValue files.pid)"
+ FTL_LOG_FILE="$(getFTLConfigValue files.log.ftl)"
+@@ -18,7 +20,7 @@ WEBSERVER_LOG_FILE="${WEBSERVER_LOG_FILE:-/var/log/pihole/webserver.log}"
  
  # Ensure that permissions are set so that pihole-FTL can edit all necessary files
  mkdir -p /opt/var/log/pihole
@@ -65,8 +67,8 @@ index 49b0f0d4..dde8214e 100755
 +chown -R "$chown_user:$chown_user" /opt/etc/pihole/ /opt/var/log/pihole/
  
  # allow all users read version file (and use pihole -v)
- chmod 0644 /opt/etc/pihole/versions
-@@ -20,11 +22,11 @@ find /opt/etc/pihole/ /var/log/pihole/ -type f ! \( -name '*.pem' -o -name '*.crt' \
+ touch /opt/etc/pihole/versions
+@@ -32,11 +34,11 @@ find /opt/etc/pihole/ /opt/var/log/pihole/ -type f ! \( -name '*.pem' -o -name '*.crt' \
  find /opt/etc/pihole/ -type f \( -name '*.pem' -o -name '*.crt' \) -exec chmod 0600 {} +
  
  # Logrotate config file need to be owned by root
@@ -75,14 +77,14 @@ index 49b0f0d4..dde8214e 100755
  
  # Touch files to ensure they exist (create if non-existing, preserve if existing)
 -[ -f "${FTL_PID_FILE}" ] || install -D -m 644 -o pihole -g pihole /dev/null "${FTL_PID_FILE}"
--[ -f /opt/var/log/pihole/FTL.log ] || install -m 640 -o pihole -g pihole /dev/null /opt/var/log/pihole/FTL.log
--[ -f /opt/var/log/pihole/pihole.log ] || install -m 640 -o pihole -g pihole /dev/null /opt/var/log/pihole/pihole.log
--[ -f /opt/var/log/pihole/webserver.log ] || install -m 640 -o pihole -g pihole /dev/null /opt/var/log/pihole/webserver.log
+-[ -f "${FTL_LOG_FILE}" ] || install -m 640 -o pihole -g pihole /dev/null "${FTL_LOG_FILE}"
+-[ -f "${PIHOLE_LOG_FILE}" ] || install -m 640 -o pihole -g pihole /dev/null "${PIHOLE_LOG_FILE}"
+-[ -f "${WEBSERVER_LOG_FILE}" ] || install -m 640 -o pihole -g pihole /dev/null "${WEBSERVER_LOG_FILE}"
 -[ -f /opt/etc/pihole/dhcp.leases ] || install -m 644 -o pihole -g pihole /dev/null /opt/etc/pihole/dhcp.leases
 +[ -f "${FTL_PID_FILE}" ] || install -D -m 644 -o "$chown_user" -g "$chown_user" /dev/null "${FTL_PID_FILE}"
-+[ -f /opt/var/log/pihole/FTL.log ] || install -m 640 -o "$chown_user" -g "$chown_user" /dev/null /opt/var/log/pihole/FTL.log
-+[ -f /opt/var/log/pihole/pihole.log ] || install -m 640 -o "$chown_user" -g "$chown_user" /dev/null /opt/var/log/pihole/pihole.log
-+[ -f /opt/var/log/pihole/webserver.log ] || install -m 640 -o "$chown_user" -g "$chown_user" /dev/null /opt/var/log/pihole/webserver.log
++[ -f "${FTL_LOG_FILE}" ] || install -m 640 -o "$chown_user" -g "$chown_user" /dev/null "${FTL_LOG_FILE}"
++[ -f "${PIHOLE_LOG_FILE}" ] || install -m 640 -o "$chown_user" -g "$chown_user" /dev/null "${PIHOLE_LOG_FILE}"
++[ -f "${WEBSERVER_LOG_FILE}" ] || install -m 640 -o "$chown_user" -g "$chown_user" /dev/null "${WEBSERVER_LOG_FILE}"
 +[ -f /opt/etc/pihole/dhcp.leases ] || install -m 644 -o "$chown_user" -g "$chown_user" /dev/null /opt/etc/pihole/dhcp.leases
 diff --git a/gravity.sh b/gravity.sh
 index 3a7db5ae..56c9fd91 100755
