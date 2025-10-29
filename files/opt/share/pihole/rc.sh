@@ -42,6 +42,7 @@ case $1 in
                 echo "Warning: Starting in an unsupported way - expect issues to happen!" >&2
             fi
 
+            # Prevent processes started by FTL from inheriting USER variable with wrong value
             export USER="$run_as_user"
         fi
 
