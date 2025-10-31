@@ -68,7 +68,7 @@ index 63197d35..171ab748 100644
 -    else if (updateAvailable)
 +    else if (entwareUpdate)
 +      $("#update-hint").html(
-+        'To install updates, run <code><a href="https://github.com/jacklul/entware-pi-hole#installation" rel="noopener" target="_blank">opkg update && opkg upgrade pi-hole</a></code>.'
++        'To install updates, run <code><a href="https://github.com/jacklul/entware-pi-hole/wiki#installation" rel="noopener" target="_blank">opkg update && opkg upgrade pi-hole</a></code>.'
 +      );
 +    else if (updateAvailable && !packaged)
        $("#update-hint").html(
