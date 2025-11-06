@@ -71,6 +71,11 @@ fi
 [ ! -f /opt/etc/resolv.conf ] && [ -f /etc/resolv.conf ] && ln -s /etc/resolv.conf /opt/etc/resolv.conf && symlinks="$symlinks /opt/etc/resolv.conf"
 [ -n "$symlinks" ] && echo "  ${INFO} Created symlinks:${COL_BOLD}$symlinks${COL_NC}"
 
+# Show a warning when required 'pihole' user does not exist
+if [ -z "$(id -u pihole 2> /dev/null)" ]; then
+    echo "  ${INFO} ${COL_BOLD}${COL_YELLOW}User 'pihole' does not exist - expect issues!${COL_NC}"
+fi
+
 # Show a warning when root user is not called 'root' and update the crontab file
 root_user="$(id -nu 0 2> /dev/null)"
 if [ "$root_user" != "root" ]; then
