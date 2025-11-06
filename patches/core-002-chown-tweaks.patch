@@ -64,7 +64,7 @@ index 49b0f0d4..dde8214e 100755
  # Ensure that permissions are set so that pihole-FTL can edit all necessary files
  mkdir -p /opt/var/log/pihole
 -chown -R pihole:pihole /opt/etc/pihole/ /opt/var/log/pihole/
-+chown -R "$chown_user:$chown_user" /opt/etc/pihole/ /opt/var/log/pihole/
++chown -R "$chown_user":"$chown_user" /opt/etc/pihole/ /opt/var/log/pihole/
  
  # allow all users read version file (and use pihole -v)
  touch /opt/etc/pihole/versions
@@ -102,7 +102,7 @@ index 3a7db5ae..56c9fd91 100755
    # User and group are set to pihole:pihole
    # Permissions are set to 664 (rw-rw-r--)
 -  chown pihole:pihole "${1}"
-+  chown "$chown_user:$chown_user" "${1}"
++  chown "$chown_user":"$chown_user" "${1}"
    chmod 664 "${1}"
  
    # Ensure the containing directory is group writable
@@ -111,7 +111,7 @@ index 3a7db5ae..56c9fd91 100755
      # Check if the backup directory exists
      if [ ! -d "${gravityBCKdir}" ]; then
 -      mkdir -p "${gravityBCKdir}" && chown pihole:pihole "${gravityBCKdir}"
-+      mkdir -p "${gravityBCKdir}" && chown "$chown_user:$chown_user" "${gravityBCKdir}"
++      mkdir -p "${gravityBCKdir}" && chown "$chown_user":"$chown_user" "${gravityBCKdir}"
      fi
  
      # If multiple gravityBCKfile's are present (appended with a number), rotate them
@@ -120,7 +120,7 @@ index 3a7db5ae..56c9fd91 100755
    local str="Migrating the list's cache directory to new location"
    echo -ne "  ${INFO} ${str}..."
 -  mkdir -p "${listsCacheDir}" && chown pihole:pihole "${listsCacheDir}"
-+  mkdir -p "${listsCacheDir}" && chown "$chown_user:$chown_user" "${listsCacheDir}"
++  mkdir -p "${listsCacheDir}" && chown "$chown_user":"$chown_user" "${listsCacheDir}"
  
    # Move the old files to the new directory
    if mv "${piholeDir}"/list.* "${listsCacheDir}/" 2>/dev/null; then
