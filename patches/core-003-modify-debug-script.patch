@@ -82,13 +82,15 @@ index 741ff2f4..264e0e89 100755
        FTL_status=$(systemctl status --full --no-pager pihole-FTL.service)
        log_write "   ${FTL_status}"
      elif [ -n "${DOCKER_VERSION}" ]; then
-@@ -1056,6 +1056,18 @@ show_content_of_pihole_files() {
+@@ -1056,6 +1056,20 @@ show_content_of_pihole_files() {
      show_content_of_files_in_dir "${LOG_DIRECTORY}"
      show_content_of_files_in_dir "${SHM_DIRECTORY}"
      show_content_of_files_in_dir "${ETC}"
 +
-+    if [ -n "$(id -u pihole 2> /dev/null)" ]; then
-+        echo_current_diagnostic "${COL_GREEN}User 'pihole' is available!${COL_NC}"
++    local pihole_id=$(id -u pihole 2> /dev/null)
++
++    if [ -n "$pihole_id" ]; then
++        echo_current_diagnostic "${COL_GREEN}User 'pihole' is available! ($pihole_id)${COL_NC}"
 +    else
 +        echo_current_diagnostic "${COL_RED}User 'pihole' is not available!${COL_NC}"
 +    fi
