@@ -39,7 +39,7 @@ case $1 in
                     ARGS="-- -u $run_as_user -g $run_as_user"
                 fi
 
-                echo "Warning: Starting in an unsupported way - expect issues to happen!" >&2
+                echo "Warning: Starting in an unsupported way - expect issues!" >&2
             fi
 
             # Prevent processes started by FTL from inheriting USER variable with wrong value
