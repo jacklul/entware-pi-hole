@@ -103,3 +103,12 @@ index 741ff2f4..264e0e89 100755
  }
  
  head_tail_log() {
+@@ -1323,7 +1323,7 @@ upload_to_tricorder() {
+     local username="pihole"
+     # Set the permissions and owner
+     chmod 640 ${PIHOLE_DEBUG_LOG}
+-    chown "$USER":"${username}" ${PIHOLE_DEBUG_LOG}
++    chown "$USER":"$USER" ${PIHOLE_DEBUG_LOG}
+ 
+     # Let the user know debugging is complete with something strikingly visual
+     log_write ""

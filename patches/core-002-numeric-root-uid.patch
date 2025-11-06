@@ -1,0 +1,13 @@
+diff --git a/advanced/Templates/pihole-FTL-prestart.sh b/advanced/Templates/pihole-FTL-prestart.sh
+index 095c0d2d..f67ddd64 100755
+--- a/advanced/Templates/pihole-FTL-prestart.sh
++++ b/advanced/Templates/pihole-FTL-prestart.sh
+@@ -32,7 +32,7 @@ find /opt/etc/pihole/ /opt/var/log/pihole/ -type f ! \( -name '*.pem' -o -name '*.crt' \
+ find /opt/etc/pihole/ -type f \( -name '*.pem' -o -name '*.crt' \) -exec chmod 0600 {} +
+ 
+ # Logrotate config file need to be owned by root
+-chown root:root /opt/etc/pihole/logrotate
++chown 0:0 /opt/etc/pihole/logrotate
+ 
+ # Touch files to ensure they exist (create if non-existing, preserve if existing)
+ [ -f "${FTL_PID_FILE}" ] || install -D -m 644 -o pihole -g pihole /dev/null "${FTL_PID_FILE}"

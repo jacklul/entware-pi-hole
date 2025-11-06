@@ -4,20 +4,13 @@
 case $1 in
     start|restart)
         if [ -z "$ARGS" ] && [ -z "$PREARGS" ]; then
-            if [ -z "$(id -u pihole 2> /dev/null)" ]; then
+            pihole_uid="$(id -u pihole 2> /dev/null)"
+
+            if [ -z "$pihole_uid" ]; then
                 echo "Warning: User 'pihole' does not exist!" >&2
             fi
 
-            #shellcheck source=../../../../dev/core/advanced/Scripts/utils.sh
-            . /opt/share/pihole/utils.sh
-            run_as_user="$(getRunAsUser)"
-
-            # User can choose to force to run as root...
-            if [ "$run_as_user" = "root" ] || [ "$run_as_user" = "$(id -nu 0 2> /dev/null)" ]; then
-                run_as_user=
-            fi
-
-            if [ -n "$run_as_user" ]; then
+            if [ -n "$pihole_uid" ]; then
                 # Update permissions of /dev/shm to allow non-root users to create and delete own files
                 if [ "$(stat -c "%a" /dev/shm)" != "1777" ] && ! chmod 1777 /dev/shm; then
                     echo "Warning: Failed to update permissions of /dev/shm!" >&2
@@ -27,23 +20,21 @@ case $1 in
                 if
                     setcap CAP_NET_BIND_SERVICE,CAP_NET_RAW,CAP_NET_ADMIN,CAP_SYS_NICE,CAP_IPC_LOCK,CAP_CHOWN,CAP_SYS_TIME+eip /opt/bin/pihole-FTL
                 then
-                    PREARGS="nonroot $run_as_user"
+                    PREARGS="nonroot pihole"
                 else
                     echo "Warning: Setting capabilities is not supported on this system" >&2
                 fi
+            else
+                echo "Warning: Starting as root user - this is unsupported and will cause issues!" >&2
+
+                root_user="$(id -un 0 2> /dev/null)"
+                root_group="$(id -gn 0 2> /dev/null)"
+
+                ARGS="-- -u $root_user -g $root_group"
             fi
 
-            # Explicitly specify user and group to use if it is not 'pihole'
-            if [ "$run_as_user" != "pihole" ]; then
-                if [ -n "$run_as_user" ]; then
-                    ARGS="-- -u $run_as_user -g $run_as_user"
-                fi
-
-                echo "Warning: Starting in an unsupported way - expect issues!" >&2
-            fi
-
-            # Prevent processes started by FTL from inheriting USER variable with wrong value
-            export USER="$run_as_user"
+            # Prevent processes started by FTL from inheriting USER variable
+            export USER=""
         fi
 
         [ -n "$PRECMD" ] && PRECMD_USER="$PRECMD"
