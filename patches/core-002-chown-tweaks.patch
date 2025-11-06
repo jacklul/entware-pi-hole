@@ -106,3 +106,21 @@ index 3a7db5ae..56c9fd91 100755
    chmod 664 "${1}"
  
    # Ensure the containing directory is group writable
+@@ -142,7 +142,7 @@ gravity_swap_databases() {
+   else
+     # Check if the backup directory exists
+     if [ ! -d "${gravityBCKdir}" ]; then
+-      mkdir -p "${gravityBCKdir}" && chown pihole:pihole "${gravityBCKdir}"
++      mkdir -p "${gravityBCKdir}" && chown "$chown_user:$chown_user" "${gravityBCKdir}"
+     fi
+ 
+     # If multiple gravityBCKfile's are present (appended with a number), rotate them
+@@ -1025,7 +1025,7 @@ migrate_to_listsCache_dir() {
+   # If not, we need to migrate the old files to the new directory
+   local str="Migrating the list's cache directory to new location"
+   echo -ne "  ${INFO} ${str}..."
+-  mkdir -p "${listsCacheDir}" && chown pihole:pihole "${listsCacheDir}"
++  mkdir -p "${listsCacheDir}" && chown "$chown_user:$chown_user" "${listsCacheDir}"
+ 
+   # Move the old files to the new directory
+   if mv "${piholeDir}"/list.* "${listsCacheDir}/" 2>/dev/null; then
