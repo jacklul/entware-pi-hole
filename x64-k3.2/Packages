@@ -1,0 +1,30 @@
+Package: pi-hole
+Version: 2025.11.06-2
+Depends: bash, bind-dig, ca-bundle, coreutils-cut, coreutils-expr, coreutils-id, coreutils-install, coreutils-ls, coreutils-mktemp, coreutils-printf, coreutils-seq, coreutils-sha1sum, coreutils-sleep, coreutils-stat, coreutils-stty, coreutils-tee, coreutils-timeout, coreutils-tr, coreutils-tty, coreutils-whoami, cron, curl, findutils, git-http, grep, iputils-ping, jq, libcap-bin, lscpu, ncurses-bin, nonroot, rev, sed, ss
+Suggests: logrotate
+License: EUPL-1.2
+Section: net
+URL: https://github.com/pi-hole/pi-hole
+Architecture: x64-3.2
+Installed-Size: 35194880
+Filename: pi-hole_2025.11.06-2_x64-3.2.ipk
+Size: 14533533
+SHA256sum: 70467aa08fb9ed4111b7c9cb6dd2f4d1a826231daa693d22dcd4813c2f2a23e7
+Description:  The Pi-hole is a DNS sinkhole that protects your devices from unwanted content without installing any client-side software.
+ This is an unofficial package not supported by the Pi-hole developers!
+
+Package: pi-hole-dev
+Version: 2025.11.22-005603-45b36ab4
+Depends: bash, bind-dig, ca-bundle, coreutils-cut, coreutils-expr, coreutils-id, coreutils-install, coreutils-ls, coreutils-mktemp, coreutils-printf, coreutils-seq, coreutils-sha1sum, coreutils-sleep, coreutils-stat, coreutils-stty, coreutils-tee, coreutils-timeout, coreutils-tr, coreutils-tty, coreutils-whoami, cron, curl, findutils, git-http, grep, iputils-ping, jq, libcap-bin, lscpu, ncurses-bin, nonroot, rev, sed, ss
+Suggests: logrotate
+License: EUPL-1.2
+Section: net
+URL: https://github.com/pi-hole/pi-hole
+Architecture: x64-3.2
+Installed-Size: 35297280
+Filename: pi-hole-dev_2025.11.22-005603-45b36ab4_x64-3.2.ipk
+Size: 14579010
+SHA256sum: 7956fad777faf0cc4713e1762682a04db04e79a2ab106badd1b0ef47043851fd
+Description:  The Pi-hole is a DNS sinkhole that protects your devices from unwanted content without installing any client-side software.
+ This is an unofficial package not supported by the Pi-hole developers!
+
