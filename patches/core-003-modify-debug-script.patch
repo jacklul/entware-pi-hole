@@ -68,9 +68,9 @@ index 741ff2f4..264e0e89 100755
 +        ports_configured+=("${custom_dns_port}")
 +    fi
 +
+     local protocol_type port_number service_name
      # Now that we have the values stored,
      for i in "${!ports_in_use[@]}"; do
-         # loop through them and assign some local variables
 @@ -804,7 +804,9 @@ ftl_full_status(){
      # if using systemd print the full status of pihole-FTL
      echo_current_diagnostic "Pi-hole-FTL full status"
