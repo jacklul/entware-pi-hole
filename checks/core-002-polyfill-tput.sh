@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Make sure sockstat calls have not changed
+# Make sure there is no unknown call to 'tput'
 
 #shellcheck disable=SC1091
 . "$(dirname "$(readlink -f "$0")")/common-core.sh"
