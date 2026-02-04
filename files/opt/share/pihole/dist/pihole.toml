@@ -14,10 +14,10 @@
   # Do not log DNS queries and replies to pihole.log. (default is true)
   queryLogging = false
 
-  # Change DNS port as most devices will use the default port already). (default is 53)
+  # Change DNS port as most devices will use the default port already. (default is 53)
   #port = 5053
 
-# Disable NTP feature as it may conflict with system's build-in time synchronization.
+# Disable NTP features as it may conflict with system's build-in time synchronization.
 [ntp]
   [ntp.ipv4]
     active = false # Disable IPv4 NTP server
