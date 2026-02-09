@@ -85,7 +85,7 @@ index 0b433266..85d8a45c 100644
  
      # Sub-directory of the root containing the web interface
      #
-@@ -822,32 +822,32 @@
+@@ -822,39 +822,39 @@
    #
    # Allowed values are:
    #     Any writable file
@@ -98,6 +98,14 @@ index 0b433266..85d8a45c 100644
    #     Any FTL database
 -  database = "/etc/pihole/pihole-FTL.db"
 +  database = "/opt/etc/pihole/pihole-FTL.db"
+ 
+   # The location of FTL's short-term temporary database (only used when
+   # database.forceDisk is true)
+   #
+   # Allowed values are:
+   #     Any FTL database
+-  tmp_db = "/etc/pihole/pihole-tmp.db"
++  tmp_db = "/opt/etc/pihole/pihole-tmp.db"
  
    # The location of Pi-hole's gravity database
    #
