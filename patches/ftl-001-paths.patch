@@ -46,7 +46,7 @@ index eee5a8c0..51c882cd 100644
  	conf->webserver.paths.webroot.c = validate_filepath;
  
  	conf->webserver.paths.webhome.k = "webserver.paths.webhome";
-@@ -1161,14 +1161,14 @@ void initConfig(struct config *conf)
+@@ -1161,23 +1161,23 @@ void initConfig(struct config *conf)
  	conf->files.pid.a = cJSON_CreateStringReference("Any writable file");
  	conf->files.pid.t = CONF_STRING;
  	conf->files.pid.f = FLAG_RESTART_FTL;
@@ -58,9 +58,19 @@ index eee5a8c0..51c882cd 100644
  	conf->files.database.h = "The location of FTL's long-term database";
  	conf->files.database.a = cJSON_CreateStringReference("Any FTL database");
  	conf->files.database.t = CONF_STRING;
+ 	conf->files.database.f = FLAG_RESTART_FTL;
 -	conf->files.database.d.s = (char*)"/etc/pihole/pihole-FTL.db";
 +	conf->files.database.d.s = (char*)"/opt/etc/pihole/pihole-FTL.db";
  	conf->files.database.c = validate_filepath;
+ 
+ 	conf->files.tmp_db.k = "files.tmp_db";
+ 	conf->files.tmp_db.h = "The location of FTL's short-term temporary database (only used when database.forceDisk is true)";
+ 	conf->files.tmp_db.a = cJSON_CreateStringReference("Any FTL database");
+ 	conf->files.tmp_db.t = CONF_STRING;
+ 	conf->files.tmp_db.f = FLAG_RESTART_FTL;
+-	conf->files.tmp_db.d.s = (char*)"/etc/pihole/pihole-tmp.db";
++	conf->files.tmp_db.d.s = (char*)"/opt/etc/pihole/pihole-tmp.db";
+ 	conf->files.tmp_db.c = validate_filepath;
  
  	conf->files.gravity.k = "files.gravity";
 @@ -1176,7 +1176,7 @@ void initConfig(struct config *conf)
@@ -388,7 +398,7 @@ diff --git a/src/zip/teleporter.c b/src/zip/teleporter.c
 index 47f2edc3..48410465 100644
 --- a/src/zip/teleporter.c
 +++ b/src/zip/teleporter.c
-@@ -168,23 +168,23 @@ const char *generate_teleporter_zip(mz_zip_archive *zip, char filename[128], voi
+@@ -170,23 +170,23 @@ const char *generate_teleporter_zip(mz_zip_archive *zip, char filename[128], voi
  
  	// Add /etc/hosts to the ZIP archive
  	file_comment = "System's HOSTS file";
@@ -417,6 +427,56 @@ index 47f2edc3..48410465 100644
  	if(directory_exists(directory))
  	{
  		// Loop over all files and add them to the ZIP archive
+@@ -290,12 +290,12 @@ static const char *test_and_import_pihole_toml(void *ptr, size_t size, char * co
+ {
+ 	// Check if the file is empty
+ 	if(size == 0)
+-		return "File etc/pihole/pihole.toml in ZIP archive is empty";
++		return "File opt/etc/pihole/pihole.toml in ZIP archive is empty";
+ 
+ 	// Create a memory copy that is null-terminated
+ 	char *buffer = calloc(size+1, sizeof(char));
+ 	if(buffer == NULL)
+-		return "Failed to allocate memory for null-terminated copy of etc/pihole/pihole.toml in ZIP archive";
++		return "Failed to allocate memory for null-terminated copy of opt/etc/pihole/pihole.toml in ZIP archive";
+ 	memcpy(buffer, ptr, size);
+ 	buffer[size] = '\0';
+ 
+@@ -305,7 +305,7 @@ static const char *test_and_import_pihole_toml(void *ptr, size_t size, char * co
+ 	{
+ 		free(buffer);
+ 		log_err("ZIP TOML file is not valid: %s", toml.errmsg);
+-		return "File etc/pihole/pihole.toml in ZIP archive is not a valid TOML file";
++		return "File opt/etc/pihole/pihole.toml in ZIP archive is not a valid TOML file";
+ 	}
+ 	free(buffer);
+ 
+@@ -314,12 +314,12 @@ static const char *test_and_import_pihole_toml(void *ptr, size_t size, char * co
+ 	struct config teleporter_config = { 0 };
+ 	duplicate_config(&teleporter_config, &config);
+ 	if(!readFTLtoml(NULL, &teleporter_config, toml.toptab, true, NULL, 0, true))
+-		return "File etc/pihole/pihole.toml in ZIP archive contains invalid TOML configuration";
++		return "File opt/etc/pihole/pihole.toml in ZIP archive contains invalid TOML configuration";
+ 
+ 	// Test dnsmasq config in the imported configuration
+ 	// The dnsmasq configuration will be overwritten if the test succeeds
+ 	if(!write_dnsmasq_config(&teleporter_config, true, hint))
+-		return "File etc/pihole/pihole.toml in ZIP archive contains invalid dnsmasq configuration";
++		return "File opt/etc/pihole/pihole.toml in ZIP archive contains invalid dnsmasq configuration";
+ 
+ 	// When we reach this point, we know that the file is a valid TOML file and contains
+ 	// a valid configuration for Pi-hole. We can now safely overwrite the current
+@@ -554,8 +554,8 @@ const char *read_teleporter_zip(uint8_t *buffer, const size_t buflen, char * con
+ 
+ 		// List of files to process from a Teleporter ZIP archive
+ 		const char *extract_files[] = {
+-			"etc/pihole/pihole.toml",
+-			"etc/pihole/dhcp.leases",
++			"opt/etc/pihole/pihole.toml",
++			"opt/etc/pihole/dhcp.leases",
+ 			config.files.gravity.v.s[0] == '/' ? config.files.gravity.v.s + 1 : config.files.gravity.v.s
+ 		};
+ 
 diff --git a/src/shmem.c b/src/shmem.c
 index e1569f34..dd58d88d 100644
 --- a/src/shmem.c
