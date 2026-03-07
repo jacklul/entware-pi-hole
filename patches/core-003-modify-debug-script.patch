@@ -77,7 +77,7 @@ index 741ff2f4..264e0e89 100755
      local FTL_status
 -    if command -v systemctl &> /dev/null; then
 +    if [ -f /opt/etc/opkg.conf ]; then
-+        log_write "${INFO} unsupported ${COL_YELLOW}(skipped)${COL_NC}"
++        log_write "${INFO} unsupported"
 +    elif command -v systemctl &> /dev/null; then
        FTL_status=$(systemctl status --full --no-pager pihole-FTL.service)
        log_write "   ${FTL_status}"
