@@ -2,15 +2,15 @@ diff --git a/scripts/js/footer.js b/scripts/js/footer.js
 index 63197d35..171ab748 100644
 --- a/scripts/js/footer.js
 +++ b/scripts/js/footer.js
-@@ -479,6 +479,8 @@ function updateVersionInfo() {
+@@ -479,6 +479,8 @@ }).done(data => {
      const version = data.version;
      let updateAvailable = false;
      let dockerUpdate = false;
 +    let entwareUpdate = false;
 +    let packaged = version.docker.local || version.entware.local;
      let isDocker = false;
+     let versionWarning = false;
      $("#versions").empty();
-     $("#update-hint").empty();
 @@ -491,6 +493,14 @@ function updateVersionInfo() {
          hash: null,
          url: "https://github.com/pi-hole/docker-pi-hole/releases",
