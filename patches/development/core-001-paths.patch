@@ -109,11 +109,12 @@ index 7c558127..d2942f01 100755
  
  # These provide the colors we need for making the log more readable
 @@ -42,7 +42,7 @@ else
- fi
+ # shellcheck source=./advanced/Scripts/utils.sh
+-source /opt/pihole/utils.sh
++source /opt/share/pihole/utils.sh
  
- # shellcheck source=/dev/null
--. /etc/pihole/versions
-+. /opt/etc/pihole/versions
+-loadVersionFile /etc/pihole/versions
++loadVersionFile /opt/etc/pihole/versions
  
  # Read the value of an FTL config key. The value is printed to stdout.
  get_ftl_conf_value() {
@@ -290,21 +291,21 @@ diff --git a/advanced/Scripts/version.sh b/advanced/Scripts/version.sh
 index 2b0883af..f1f2fa22 100755
 --- a/advanced/Scripts/version.sh
 +++ b/advanced/Scripts/version.sh
-@@ -13,12 +13,12 @@
- # Please see LICENSE file for your rights under this license.
+@@ -13,11 +13,11 @@
+-. /opt/pihole/utils.sh
++. /opt/share/pihole/utils.sh
  
- # Source the versions file populated by updatechecker.sh
+ # Load the versions file populated by updatechecker.sh
 -cachedVersions="/etc/pihole/versions"
 +cachedVersions="/opt/etc/pihole/versions"
  
- if [ -f ${cachedVersions} ]; then
-     # shellcheck source=/dev/null
-     . "$cachedVersions"
+ if [ -f "${cachedVersions}" ]; then
+     loadVersionFile "${cachedVersions}"
  else
 -    echo "Could not find /etc/pihole/versions. Running update now."
 +    echo "Could not find /opt/etc/pihole/versions. Running update now."
      pihole updatechecker
-      # shellcheck source=/dev/null
+     loadVersionFile "${cachedVersions}"
 diff --git a/advanced/Templates/gravity_copy.sql b/advanced/Templates/gravity_copy.sql
 index ed11b61a..b27bd6e5 100644
 --- a/advanced/Templates/gravity_copy.sql
@@ -574,9 +575,9 @@ index 4bb7d5e5..fcc988ad 100755
  
 -versionsfile="/etc/pihole/versions"
 +versionsfile="/opt/etc/pihole/versions"
- if [ -f "${versionsfile}" ]; then
-     # Only source versionsfile if the file exits
-     # fixes a warning during installation where versionsfile does not exist yet
+ # Load version variables without executing file content as shell code.
+ # loadVersionFile() only assigns known keys with validated values.
+ loadVersionFile "${versionsfile}"
 @@ -113,7 +113,7 @@ repairPiholeFunc() {
    if [ -n "${DOCKER_VERSION}" ]; then
      unsupportedFunc
