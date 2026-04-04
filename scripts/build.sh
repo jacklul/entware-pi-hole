@@ -92,7 +92,7 @@ if [ ! -f "$destination_dir/opt/etc/pihole/versions" ]; then
                 echo "${part}_VERSION=$VERSION"
                 echo "${part}_BRANCH=$BRANCH"
                 echo "${part}_HASH=$HASH"
-            } >> "$destination_dir/opt/etc/pihole/versions"
+            } >> "$destination_dir/opt/share/pihole/versions"
         fi
     done
 fi
