@@ -102,7 +102,7 @@ jobs:
 
       - name: Commit development patches
         if: ${{ steps.hashes-have-tags.outputs.RESULT == 'ok' }}
-        run: cp -f ./patches/development/* ./patches/
+        uses: ./.github/actions/commit-dev-patches
 
       - name: Apply patches (core)
         id: patch-core
@@ -162,6 +162,9 @@ jobs:
         with:
           ref: develop
 
+      - name: Commit development patches
+        uses: ./.github/actions/commit-dev-patches
+
       - name: Replace hashes in env file
         run: |
           sed 's/CORE_REF=.*$/CORE_REF=${{ needs.check.outputs.CORE_HASH }}/' -i ${{ env.ENV_FILE }}
@@ -198,7 +201,7 @@ jobs:
           base: develop
           delete-branch: true
           sign-commits: true
-          commit-message: 'Update release build refs'
+          commit-message: 'Prepare for new release'
           title: 'Update package to ${{ steps.tag.outputs.RESULT }}'
           body: |
             Release tag: `${{ steps.tag.outputs.RESULT }}`

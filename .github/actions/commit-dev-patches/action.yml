@@ -1,0 +1,11 @@
+name: Commit development patches
+
+runs:
+  using: composite
+
+  steps:
+    - name: Commit development patches
+      shell: bash
+      run: 
+        cp -fv ./patches/development/* ./patches/
+        find ./patches/ -type f \( -name "*.sh" -o -name "*.patch" \) -empty -print -delete
