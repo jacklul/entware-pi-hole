@@ -375,18 +375,13 @@ index c604d5d4..a6e9274d 100755
 +PI_HOLE_SCRIPT_DIR='/opt/share/pihole'
  utilsfile="${PI_HOLE_SCRIPT_DIR}/utils.sh"
  # shellcheck source="./advanced/Scripts/utils.sh"
-@@ -11,32 +11,32 @@ FTL_PID_FILE="$(getFTLConfigValue files.pid)"
- FTL_LOG_FILE="$(getFTLConfigValue files.log.ftl)"
- PIHOLE_LOG_FILE="$(getFTLConfigValue files.log.dnsmasq)"
- WEBSERVER_LOG_FILE="$(getFTLConfigValue files.log.webserver)"
+@@ -8,27 +8,27 @@ utilsfile="${PI_HOLE_SCRIPT_DIR}/utils.sh"
+ 
+ # Get file paths
+ FTL_PID_FILE="$(getFTLConfigValue files.pid)"
 -FTL_PID_FILE="${FTL_PID_FILE:-/run/pihole-FTL.pid}"
--FTL_LOG_FILE="${FTL_LOG_FILE:-/var/log/pihole/FTL.log}"
--PIHOLE_LOG_FILE="${PIHOLE_LOG_FILE:-/var/log/pihole/pihole.log}"
--WEBSERVER_LOG_FILE="${WEBSERVER_LOG_FILE:-/var/log/pihole/webserver.log}"
 +FTL_PID_FILE="${FTL_PID_FILE:-/opt/var/run/pihole-FTL.pid}"
-+FTL_LOG_FILE="${FTL_LOG_FILE:-/opt/var/log/pihole/FTL.log}"
-+PIHOLE_LOG_FILE="${PIHOLE_LOG_FILE:-/opt/var/log/pihole/pihole.log}"
-+WEBSERVER_LOG_FILE="${WEBSERVER_LOG_FILE:-/opt/var/log/pihole/webserver.log}"
+ 
  
  # Ensure that permissions are set so that pihole-FTL can edit all necessary files
 -mkdir -p /var/log/pihole
@@ -416,9 +411,6 @@ index c604d5d4..a6e9274d 100755
  
  # Touch files to ensure they exist (create if non-existing, preserve if existing)
  [ -f "${FTL_PID_FILE}" ] || install -D -m 644 -o pihole -g pihole /dev/null "${FTL_PID_FILE}"
- [ -f "${FTL_LOG_FILE}" ] || install -m 640 -o pihole -g pihole /dev/null "${FTL_LOG_FILE}"
- [ -f "${PIHOLE_LOG_FILE}" ] || install -m 640 -o pihole -g pihole /dev/null "${PIHOLE_LOG_FILE}"
- [ -f "${WEBSERVER_LOG_FILE}" ] || install -m 640 -o pihole -g pihole /dev/null "${WEBSERVER_LOG_FILE}"
 -[ -f /etc/pihole/dhcp.leases ] || install -m 644 -o pihole -g pihole /dev/null /etc/pihole/dhcp.leases
 +[ -f /opt/etc/pihole/dhcp.leases ] || install -m 644 -o pihole -g pihole /dev/null /opt/etc/pihole/dhcp.leases
 diff --git a/advanced/Templates/pihole.cron b/advanced/Templates/pihole.cron
