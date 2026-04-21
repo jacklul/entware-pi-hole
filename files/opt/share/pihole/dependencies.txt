@@ -25,6 +25,9 @@ ss
 findutils, grep, sed, jq, coreutils-cut, coreutils-ls, coreutils-printf, coreutils-sleep
  - these are installed because scripts expect more recent versions of these
 
+logrotate
+ - used by piholeLogFlush.sh and cron tasks
+
 coreutils-expr
  - used by utils.sh
 

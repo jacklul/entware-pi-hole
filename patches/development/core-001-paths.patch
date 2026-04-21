@@ -158,7 +158,8 @@ diff --git a/advanced/Scripts/piholeLogFlush.sh b/advanced/Scripts/piholeLogFlus
 index 34d96318..b4ffc79b 100755
 --- a/advanced/Scripts/piholeLogFlush.sh
 +++ b/advanced/Scripts/piholeLogFlush.sh
-@@ -8,38 +8,38 @@
++++ b/advanced/Scripts/piholeLogFlush.sh
+@@ -8,11 +8,11 @@
  # This file is copyright under the latest version of the EUPL.
  # Please see LICENSE file for your rights under this license.
  
@@ -172,7 +173,7 @@ index 34d96318..b4ffc79b 100755
  utilsfile="${PI_HOLE_SCRIPT_DIR}/utils.sh"
  # shellcheck source="./advanced/Scripts/utils.sh"
  source "${utilsfile}"
- 
+@@ -20,26 +20,26 @@ source "${utilsfile}"
  # In case we're running at the same time as a system logrotate, use a
  # separate logrotate state file to prevent stepping on each other's
  # toes.
@@ -203,24 +204,16 @@ index 34d96318..b4ffc79b 100755
 +    WEBFILE="/opt/var/log/pihole/webserver.log"
  fi
  
- # Helper function to handle log rotation for a single file
-@@ -78,14 +78,14 @@ flush_log() {
- 
- if [[ "$*" == *"once"* ]]; then
-     # Nightly logrotation
--    if command -v /usr/sbin/logrotate >/dev/null; then
-+    if command -v /opt/sbin/logrotate >/dev/null; then
-         # Logrotate once
- 
-         if [[ "$*" != *"quiet"* ]]; then
-             echo -ne "  ${INFO} Running logrotate ..."
-         fi
-         mkdir -p "${STATEFILE%/*}"
--        /usr/sbin/logrotate --force --state "${STATEFILE}" /etc/pihole/logrotate
-+        /opt/sbin/logrotate --force --state "${STATEFILE}" /opt/etc/pihole/logrotate
-     else
-         # Handle rotation for each log file
-         rotate_log "${LOGFILE}"
+ # Helper function to handle log flushing for a single file
+@@ -66,7 +66,7 @@ if [[ "$*" == *"once"* ]]; then
+         echo -ne "  ${INFO} Running logrotate ..."
+     fi
+     mkdir -p "${STATEFILE%/*}"
+-    /usr/sbin/logrotate --force --state "${STATEFILE}" /etc/pihole/logrotate
++    /opt/sbin/logrotate --force --state "${STATEFILE}" /opt/etc/pihole/logrotate
+ else
+     # Manual flushing
+     flush_log "${LOGFILE}"
 diff --git a/advanced/Scripts/query.sh b/advanced/Scripts/query.sh
 index 3340bdd2..a2b5802d 100755
 --- a/advanced/Scripts/query.sh
@@ -421,11 +414,11 @@ index c62d31ab..403ffe97 100644
  #          early morning. Download any updates from the adlists
  #          Squash output to log, then splat the log to stdout on error to allow for
  #          standard crontab job error handling.
--59 1    * * 7   root    PATH="$PATH:/usr/sbin:/usr/local/bin/" pihole updateGravity >/var/log/pihole/pihole_updateGravity.log || cat /var/log/pihole/pihole_updateGravity.log
-+59 1    * * 7   root    PATH="$PATH:/opt/bin" pihole updateGravity >/opt/var/log/pihole/pihole_updateGravity.log || cat /opt/var/log/pihole/pihole_updateGravity.log
+-59 1    * * 7   pihole    PATH="$PATH:/usr/sbin:/usr/local/bin/" pihole updateGravity >/var/log/pihole/pihole_updateGravity.log || cat /var/log/pihole/pihole_updateGravity.log
++59 1    * * 7   pihole    PATH="$PATH:/opt/bin" pihole updateGravity >/opt/var/log/pihole/pihole_updateGravity.log || cat /opt/var/log/pihole/pihole_updateGravity.log
  
  # Pi-hole: Flush the log daily at 00:00
- #          The flush script will use logrotate if available
+ #          The flush script uses logrotate
  #          parameter "once": logrotate only once (default is twice)
  #          parameter "quiet": don't print messages
 -00 00   * * *   root    PATH="$PATH:/usr/sbin:/usr/local/bin/" pihole flush once quiet
