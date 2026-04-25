@@ -145,6 +145,15 @@ index 7c558127..d2942f01 100755
  
  # Files required by Pi-hole
  # https://discourse.pi-hole.net/t/what-files-does-pi-hole-use/1684
+@@ -95,7 +95,7 @@ PIHOLE_FTL_DB_FILE="$(get_ftl_conf_value "files.database")"
+ 
+ PIHOLE_COMMAND="${BIN_DIRECTORY}/pihole"
+ 
+-FTL_PID="/run/pihole-FTL.pid" # Hardcoded PID path — see GHSA-6w8x-p785-6pm4
++FTL_PID="/opt/var/run/pihole-FTL.pid" # Hardcoded PID path — see GHSA-6w8x-p785-6pm4
+ 
+ PIHOLE_LOG="${LOG_DIRECTORY}/pihole.log"
+ PIHOLE_LOG_GZIPS="${LOG_DIRECTORY}/pihole.log.[0-9].*"
 @@ -139,7 +139,7 @@ show_disclaimer(){
  
  make_temporary_log() {
@@ -342,39 +351,18 @@ diff --git a/advanced/Templates/pihole-FTL-poststop.sh b/advanced/Templates/piho
 index b5ddbc97..4d7a10e3 100755
 --- a/advanced/Templates/pihole-FTL-poststop.sh
 +++ b/advanced/Templates/pihole-FTL-poststop.sh
-@@ -1,6 +1,6 @@
- #!/usr/bin/env sh
- 
- # Source utils.sh for getFTLConfigValue()
--PI_HOLE_SCRIPT_DIR='/opt/pihole'
-+PI_HOLE_SCRIPT_DIR='/opt/share/pihole'
- utilsfile="${PI_HOLE_SCRIPT_DIR}/utils.sh"
- # shellcheck source="./advanced/Scripts/utils.sh"
-@@ -10,4 +10,4 @@ utilsfile="${PI_HOLE_SCRIPT_DIR}/utils.sh"
- FTL_PID_FILE="$(getFTLConfigValue files.pid)"
+@@ -2,4 +2,4 @@
  
  # Cleanup
--rm -f /run/pihole/FTL.sock /dev/shm/FTL-* "${FTL_PID_FILE}"
-+rm -f /opt/var/run/pihole/FTL.sock /dev/shm/FTL-* "${FTL_PID_FILE}"
+ # Hardcoded PID path — see GHSA-6w8x-p785-6pm4
+-rm -f /run/pihole/FTL.sock /dev/shm/FTL-* /run/pihole-FTL.pid
++rm -f /opt/var/run/pihole/FTL.sock /dev/shm/FTL-* /opt/var/run/pihole-FTL.pid
 diff --git a/advanced/Templates/pihole-FTL-prestart.sh b/advanced/Templates/pihole-FTL-prestart.sh
 index c604d5d4..a6e9274d 100755
 --- a/advanced/Templates/pihole-FTL-prestart.sh
 +++ b/advanced/Templates/pihole-FTL-prestart.sh
-@@ -1,6 +1,6 @@
+@@ -1,24 +1,24 @@
  #!/usr/bin/env sh
- 
- # Source utils.sh for getFTLConfigValue()
--PI_HOLE_SCRIPT_DIR='/opt/pihole'
-+PI_HOLE_SCRIPT_DIR='/opt/share/pihole'
- utilsfile="${PI_HOLE_SCRIPT_DIR}/utils.sh"
- # shellcheck source="./advanced/Scripts/utils.sh"
-@@ -8,27 +8,27 @@ utilsfile="${PI_HOLE_SCRIPT_DIR}/utils.sh"
- 
- # Get file paths
- FTL_PID_FILE="$(getFTLConfigValue files.pid)"
--FTL_PID_FILE="${FTL_PID_FILE:-/run/pihole-FTL.pid}"
-+FTL_PID_FILE="${FTL_PID_FILE:-/opt/var/run/pihole-FTL.pid}"
- 
  
  # Ensure that permissions are set so that pihole-FTL can edit all necessary files
 -mkdir -p /var/log/pihole
@@ -388,8 +376,9 @@ index c604d5d4..a6e9274d 100755
 +touch /opt/etc/pihole/versions
 +chmod 0644 /opt/etc/pihole/versions
  
- # allow pihole to access subdirs in /etc/pihole (sets execution bit on dirs)
+-# allow pihole to access subdirs in /etc/pihole (sets execution bit on dirs)
 -find /etc/pihole/ /var/log/pihole/ -type d -exec chmod 0755 {} +
++# allow pihole to access subdirs in /opt/etc/pihole (sets execution bit on dirs)
 +find /opt/etc/pihole/ /opt/var/log/pihole/ -type d -exec chmod 0755 {} +
  # Set all files (except TLS-related ones) to u+rw g+r
 -find /etc/pihole/ /var/log/pihole/ -type f ! \( -name '*.pem' -o -name '*.crt' \) -exec chmod 0640 {} +
@@ -403,8 +392,10 @@ index c604d5d4..a6e9274d 100755
 +chown root:root /opt/etc/pihole/logrotate
  
  # Touch files to ensure they exist (create if non-existing, preserve if existing)
- [ -f "${FTL_PID_FILE}" ] || install -D -m 644 -o pihole -g pihole /dev/null "${FTL_PID_FILE}"
+ # Hardcoded PID path — see GHSA-6w8x-p785-6pm4
+-[ -f /run/pihole-FTL.pid ] || install -D -m 644 -o pihole -g pihole /dev/null /run/pihole-FTL.pid
 -[ -f /etc/pihole/dhcp.leases ] || install -m 644 -o pihole -g pihole /dev/null /etc/pihole/dhcp.leases
++[ -f /opt/var/run/pihole-FTL.pid ] || install -D -m 644 -o pihole -g pihole /dev/null /opt/var/run/pihole-FTL.pid
 +[ -f /opt/etc/pihole/dhcp.leases ] || install -m 644 -o pihole -g pihole /dev/null /opt/etc/pihole/dhcp.leases
 diff --git a/advanced/Templates/pihole.cron b/advanced/Templates/pihole.cron
 index c62d31ab..403ffe97 100644
@@ -477,10 +468,10 @@ index 318107c1..1f2f0a34 100755
  if [ -z "${USER}" ]; then
      USER="$(id -un)"
 diff --git a/gravity.sh b/gravity.sh
-index d1664394..a9adf9c0 100755
+index 71f428fb..d96c040c 100755
 --- a/gravity.sh
 +++ b/gravity.sh
-@@ -13,7 +13,7 @@
+@@ -12,7 +12,7 @@
  
  export LC_ALL=C
  
@@ -489,13 +480,12 @@ index d1664394..a9adf9c0 100755
  # Source utils.sh for GetFTLConfigValue
  utilsfile="${PI_HOLE_SCRIPT_DIR}/utils.sh"
  # shellcheck source=./advanced/Scripts/utils.sh
-@@ -23,13 +23,13 @@
- coltable="${PI_HOLE_SCRIPT_DIR}/COL_TABLE"
+@@ -22,12 +22,12 @@ coltable="${PI_HOLE_SCRIPT_DIR}/COL_TABLE"
  # shellcheck source=./advanced/Scripts/COL_TABLE
  . "${coltable}"
  # shellcheck source=./advanced/Scripts/database_migration/gravity-db.sh
 -. "/etc/.pihole/advanced/Scripts/database_migration/gravity-db.sh"
-+. "/opt/share/pihole/database_migration/gravity-db.sh"
++. "${PI_HOLE_SCRIPT_DIR}/database_migration/gravity-db.sh"
  
  basename="pihole"
 -PIHOLE_COMMAND="/usr/local/bin/${basename}"
@@ -506,7 +496,7 @@ index d1664394..a9adf9c0 100755
  
  # Gravity aux files directory
  listsCacheDir="${piholeDir}/listsCache"
-@@ -36,20 +36,20 @@ blacklistFile="${piholeDir}/blacklist.txt"
+@@ -38,11 +38,11 @@ blacklistFile="${piholeDir}/blacklist.txt"
  regexFile="${piholeDir}/regex.list"
  adListFile="${piholeDir}/adlists.list"
  
@@ -521,7 +511,7 @@ index d1664394..a9adf9c0 100755
  
  domainsExtension="domains"
  curl_connect_timeout=10
- etag_support=false
+@@ -50,8 +50,8 @@ etag_support=false
  
  # Check gravity temp directory
  if [ ! -d "${GRAVITY_TMPDIR}" ] || [ ! -w "${GRAVITY_TMPDIR}" ]; then
@@ -532,12 +522,11 @@ index d1664394..a9adf9c0 100755
  fi
  
  # Set this only after sourcing pihole-FTL.conf as the gravity database path may
- # have changed
 diff --git a/pihole b/pihole
 index 4bb7d5e5..fcc988ad 100755
 --- a/pihole
 +++ b/pihole
-@@ -9,12 +9,12 @@
+@@ -9,15 +9,15 @@
  # This file is copyright under the latest version of the EUPL.
  # Please see LICENSE file for your rights under this license.
  
@@ -549,6 +538,10 @@ index 4bb7d5e5..fcc988ad 100755
  # error due to modifying a readonly variable.
 -PI_HOLE_BIN_DIR="/usr/local/bin"
 +PI_HOLE_BIN_DIR="/opt/bin"
+ 
+ # Hardcoded PID path — see GHSA-6w8x-p785-6pm4
+-readonly FTL_PID_FILE="/run/pihole-FTL.pid"
++readonly FTL_PID_FILE="/opt/var/run/pihole-FTL.pid"
  
  readonly colfile="${PI_HOLE_SCRIPT_DIR}/COL_TABLE"
  # shellcheck source=./advanced/Scripts/COL_TABLE

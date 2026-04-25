@@ -85,14 +85,7 @@ index 0b433266..85d8a45c 100644
  
      # Sub-directory of the root containing the web interface
      #
-@@ -822,39 +822,39 @@
-   #
-   # Allowed values are:
-   #     Any writable file
--  pid = "/run/pihole-FTL.pid"
-+  pid = "/opt/var/run/pihole-FTL.pid"
- 
-   # The location of FTL's long-term database
+@@ -822,33 +822,33 @@
    #
    # Allowed values are:
    #     Any FTL database

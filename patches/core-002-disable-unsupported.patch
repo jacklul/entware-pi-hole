@@ -2,33 +2,31 @@ diff --git a/pihole b/pihole
 index 7c84771..f4125a9 100755
 --- a/pihole
 +++ b/pihole
-@@ -479,8 +479,46 @@ updateCheckFunc() {
+@@ -479,8 +479,44 @@ updateCheckFunc() {
    exit 0
  }
  
 +opkgFunc(){
 +    local package="$(opkg list-installed pi-hole* | awk '{print $1}' | head -n 1)"
 +
-+    if [ -t 0 ]; then
-+        read -rp "  ${QST} Are you sure? [y/N] " answer
-+        case $answer in
-+            [Yy]*) ;;
-+            *) return;;
-+        esac
-+    fi
-+
 +    case "$1" in
 +        update)
 +            opkg update
-+            opkg upgrade "$package"
++            opkg install "$package"
 +            exit $?
 +        ;;
 +        reinstall)
-+            opkg update # current version might not be the latest
++            opkg update
 +            opkg install "$package" --force-reinstall
 +            exit $?
 +        ;;
 +        remove)
++            read -rp "Are you sure? [y/N] " answer
++            case $answer in
++                [Yy]*) ;;
++                *) return;;
++            esac
++
 +            opkg remove "$package" --autoremove
 +            exit $?
 +        ;;
