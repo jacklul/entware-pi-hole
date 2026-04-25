@@ -46,16 +46,7 @@ index eee5a8c0..51c882cd 100644
  	conf->webserver.paths.webroot.c = validate_filepath;
  
  	conf->webserver.paths.webhome.k = "webserver.paths.webhome";
-@@ -1161,23 +1161,23 @@ void initConfig(struct config *conf)
- 	conf->files.pid.a = cJSON_CreateStringReference("Any writable file");
- 	conf->files.pid.t = CONF_STRING;
- 	conf->files.pid.f = FLAG_RESTART_FTL;
--	conf->files.pid.d.s = (char*)"/run/pihole-FTL.pid";
-+	conf->files.pid.d.s = (char*)"/opt/var/run/pihole-FTL.pid";
- 	conf->files.pid.c = validate_filepath;
- 
- 	conf->files.database.k = "files.database";
- 	conf->files.database.h = "The location of FTL's long-term database";
+@@ -1161,15 +1161,15 @@ void initConfig(struct config *conf)
  	conf->files.database.a = cJSON_CreateStringReference("Any FTL database");
  	conf->files.database.t = CONF_STRING;
  	conf->files.database.f = FLAG_RESTART_FTL;
@@ -130,6 +121,15 @@ diff --git a/src/config/config.h b/src/config/config.h
 index 81d4a15f..86c0a75f 100644
 --- a/src/config/config.h
 +++ b/src/config/config.h
+@@ -11,7 +11,7 @@
+ #define CONFIG_H
+ 
+ // Hardcoded PID path — see GHSA-6w8x-p785-6pm4
+-#define FTL_PID_FILE "/run/pihole-FTL.pid"
++#define FTL_PID_FILE "/opt/var/run/pihole-FTL.pid"
+ 
+ // enum privacy_level
+ #include "enums.h"
 @@ -28,7 +28,7 @@
  // enum web_theme
  #include "api/theme.h"

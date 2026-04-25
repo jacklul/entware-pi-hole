@@ -1,8 +1,53 @@
 diff --git a/advanced/Scripts/updatecheck.sh b/advanced/Scripts/updatecheck.sh
-index b325ee9c..2ab983c1 100755
+index 23abf7a6..904920be 100755
 --- a/advanced/Scripts/updatecheck.sh
 +++ b/advanced/Scripts/updatecheck.sh
-@@ -34,6 +34,14 @@ function get_remote_version() {
+@@ -9,20 +9,36 @@
+ set -o pipefail
+ 
+ function get_local_branch() {
+-    # Return active branch
+-    cd "${1}" 2>/dev/null || { echo "null"; return; }
+-    git rev-parse --abbrev-ref HEAD || echo "null"
++    case "$1" in
++        "/opt/etc/.pihole")
++            sed -n 's/^CORE_BRANCH=//p' /opt/share/pihole/versions || echo "null"
++        ;;
++        "${ADMIN_INTERFACE_DIR}")
++            sed -n 's/^WEB_BRANCH=//p' /opt/share/pihole/versions || echo "null"
++        ;;
++    esac
+ }
+ 
+ function get_local_version() {
+-    # Return active version
+-    cd "${1}" 2>/dev/null || { echo "null"; return; }
+-    git describe --tags --always 2>/dev/null || echo "null"
++    case "$1" in
++        "/opt/etc/.pihole")
++            sed -n 's/^CORE_VERSION=//p' /opt/share/pihole/versions || echo "null"
++        ;;
++        "${ADMIN_INTERFACE_DIR}")
++            sed -n 's/^WEB_VERSION=//p' /opt/share/pihole/versions || echo "null"
++        ;;
++    esac
+ }
+ 
+ function get_local_hash() {
+-    cd "${1}" 2>/dev/null || { echo "null"; return; }
+-    git rev-parse --short=8 HEAD || echo "null"
++    case "$1" in
++        "/opt/etc/.pihole")
++            sed -n 's/^CORE_HASH=//p' /opt/share/pihole/versions || echo "null"
++        ;;
++        "${ADMIN_INTERFACE_DIR}")
++            sed -n 's/^WEB_HASH=//p' /opt/share/pihole/versions || echo "null"
++        ;;
++    esac
+ }
+ 
+ function get_remote_version() {
+@@ -34,6 +59,14 @@ function get_remote_version() {
      fi
  }
  
@@ -15,86 +60,9 @@ index b325ee9c..2ab983c1 100755
 +}
 +
  function get_remote_hash() {
-     git ls-remote "https://github.com/pi-hole/${1}" --tags "${2}" | awk '{print substr($0, 1,8);}' || return 1
+     git ls-remote "https://github.com/pi-hole/${1}" --tags "${2}" | awk '{print substr($0, 1,8);}' || echo "null"
  }
-@@ -61,6 +69,10 @@ if [[ ! "${DOCKER_TAG}" =~ $regex ]]; then
-     unset DOCKER_TAG
- fi
- 
-+if [ -f "${VERSION_FILE}" ]; then
-+    . "${VERSION_FILE}"
-+fi
-+
- # used in cronjob
- if [[ "$1" == "reboot" ]]; then
-     sleep 30
-@@ -68,15 +82,15 @@ fi
- 
- # get Core versions
- 
--CORE_VERSION="$(get_local_version /opt/etc/.pihole)"
-+#CORE_VERSION="$(get_local_version /opt/etc/.pihole)"
--addOrEditKeyValPair "${VERSION_FILE}" "CORE_VERSION" "${CORE_VERSION}"
-+#addOrEditKeyValPair "${VERSION_FILE}" "CORE_VERSION" "${CORE_VERSION}"
- 
--CORE_BRANCH="$(get_local_branch /opt/etc/.pihole)"
-+#CORE_BRANCH="$(get_local_branch /opt/etc/.pihole)"
--addOrEditKeyValPair "${VERSION_FILE}" "CORE_BRANCH" "${CORE_BRANCH}"
-+#addOrEditKeyValPair "${VERSION_FILE}" "CORE_BRANCH" "${CORE_BRANCH}"
- 
--CORE_HASH="$(get_local_hash /opt/etc/.pihole)"
-+#CORE_HASH="$(get_local_hash /opt/etc/.pihole)"
--addOrEditKeyValPair "${VERSION_FILE}" "CORE_HASH" "${CORE_HASH}"
-+#addOrEditKeyValPair "${VERSION_FILE}" "CORE_HASH" "${CORE_HASH}"
- 
- GITHUB_CORE_VERSION="$(get_remote_version pi-hole "${CORE_BRANCH}")"
- addOrEditKeyValPair "${VERSION_FILE}" "GITHUB_CORE_VERSION" "${GITHUB_CORE_VERSION}"
- 
-@@ -85,15 +90,15 @@ addOrEditKeyValPair "${VERSION_FILE}" "GITHUB_CORE_HASH" "${GITHUB_CORE_HASH}"
- 
- # get Web versions
- 
--WEB_VERSION="$(get_local_version "${ADMIN_INTERFACE_DIR}")"
-+#WEB_VERSION="$(get_local_version "${ADMIN_INTERFACE_DIR}")"
--addOrEditKeyValPair "${VERSION_FILE}" "WEB_VERSION" "${WEB_VERSION}"
-+#addOrEditKeyValPair "${VERSION_FILE}" "WEB_VERSION" "${WEB_VERSION}"
- 
--WEB_BRANCH="$(get_local_branch "${ADMIN_INTERFACE_DIR}")"
-+#WEB_BRANCH="$(get_local_branch "${ADMIN_INTERFACE_DIR}")"
--addOrEditKeyValPair "${VERSION_FILE}" "WEB_BRANCH" "${WEB_BRANCH}"
-+#addOrEditKeyValPair "${VERSION_FILE}" "WEB_BRANCH" "${WEB_BRANCH}"
- 
--WEB_HASH="$(get_local_hash "${ADMIN_INTERFACE_DIR}")"
-+#WEB_HASH="$(get_local_hash "${ADMIN_INTERFACE_DIR}")"
--addOrEditKeyValPair "${VERSION_FILE}" "WEB_HASH" "${WEB_HASH}"
-+#addOrEditKeyValPair "${VERSION_FILE}" "WEB_HASH" "${WEB_HASH}"
- 
- GITHUB_WEB_VERSION="$(get_remote_version web "${WEB_BRANCH}")"
- addOrEditKeyValPair "${VERSION_FILE}" "GITHUB_WEB_VERSION" "${GITHUB_WEB_VERSION}"
- 
-@@ -102,15 +98,15 @@ addOrEditKeyValPair "${VERSION_FILE}" "GITHUB_WEB_HASH" "${GITHUB_WEB_HASH}"
- 
- # get FTL versions
- 
--FTL_VERSION="$(pihole-FTL version)"
-+#FTL_VERSION="$(pihole-FTL version)"
--addOrEditKeyValPair "${VERSION_FILE}" "FTL_VERSION" "${FTL_VERSION}"
-+#addOrEditKeyValPair "${VERSION_FILE}" "FTL_VERSION" "${FTL_VERSION}"
- 
--FTL_BRANCH="$(pihole-FTL branch)"
-+#FTL_BRANCH="$(pihole-FTL branch)"
--addOrEditKeyValPair "${VERSION_FILE}" "FTL_BRANCH" "${FTL_BRANCH}"
-+#addOrEditKeyValPair "${VERSION_FILE}" "FTL_BRANCH" "${FTL_BRANCH}"
- 
--FTL_HASH="$(pihole-FTL --hash)"
-+#FTL_HASH="$(pihole-FTL --hash)"
--addOrEditKeyValPair "${VERSION_FILE}" "FTL_HASH" "${FTL_HASH}"
-+#addOrEditKeyValPair "${VERSION_FILE}" "FTL_HASH" "${FTL_HASH}"
- 
- GITHUB_FTL_VERSION="$(get_remote_version FTL "${FTL_BRANCH}")"
- addOrEditKeyValPair "${VERSION_FILE}" "GITHUB_FTL_VERSION" "${GITHUB_FTL_VERSION}"
- 
-@@ -131,3 +118,18 @@ if [[ "${DOCKER_TAG}" ]]; then
+@@ -135,3 +168,18 @@ if [[ "${DOCKER_TAG}" ]]; then
      GITHUB_DOCKER_VERSION="$(get_remote_version docker-pi-hole "${docker_branch}")"
      addOrEditKeyValPair "${VERSION_FILE}" "GITHUB_DOCKER_VERSION" "${GITHUB_DOCKER_VERSION}"
  fi

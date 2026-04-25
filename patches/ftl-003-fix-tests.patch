@@ -2,9 +2,9 @@ diff --git a/test/run.sh b/test/run.sh
 index 5d490a82..dfd08dac 100755
 --- a/test/run.sh
 +++ b/test/run.sh
-@@ -83,6 +83,33 @@ export FTLCONF_files_pcap='*123#./test/pcap'
- # Prepare gdb session
- echo "handle SIGHUP nostop SIGPIPE nostop SIGTERM nostop SIG32 nostop SIG33 nostop SIG34 nostop SIG35 nostop SIG41 nostop" > /root/.gdbinit
+@@ -73,6 +73,33 @@ bash test/pdns/setup.sh
+ OLDUMASK=$(umask)
+ umask 0022
  
 +declare -A LINKS=(
 +    ["/etc/pihole"]="/opt/etc/pihole"
@@ -33,11 +33,11 @@ index 5d490a82..dfd08dac 100755
 +    fi
 +done
 +
- # Start FTL
- if ! su pihole -s /bin/sh -c /home/pihole/pihole-FTL; then
-   echo "pihole-FTL failed to start"
+ # Set exemplary config value by environment variable
+ export FTLCONF_misc_nice="-11"
+ export FTLCONF_dns_upstrrr="-11"
 @@ -119,10 +119,10 @@ $BATS -p "test/test_suite.bats"
- RET=$?
+ fi
  
  curl_to_tricorder() {
 -  curl --silent --upload-file "${1}" https://tricorder.pi-hole.net
@@ -85,14 +85,7 @@ index 0b433266..85d8a45c 100644
  
      # Sub-directory of the root containing the web interface
      #
-@@ -822,39 +822,39 @@
-   #
-   # Allowed values are:
-   #     Any writable file
--  pid = "/run/pihole-FTL.pid"
-+  pid = "/opt/var/run/pihole-FTL.pid"
- 
-   # The location of FTL's long-term database
+@@ -822,33 +822,33 @@
    #
    # Allowed values are:
    #     Any FTL database
@@ -167,34 +160,6 @@ diff --git a/test/test_suite.bats b/test/test_suite.bats
 index 021530bd..2a84e4ea 100644
 --- a/test/test_suite.bats
 +++ b/test/test_suite.bats
-@@ -1504,7 +1504,7 @@
-   run bash -c 'curl -s -X PATCH http://127.0.0.1/api/config -d "{\"config\":{\"dns\":{\"reply\":{\"host\":{\"force4\":true,\"IPv4\":\"10.100.0.10\",\"force6\":true,\"IPv6\":\"fe80::10\"}}}}}"'
- 
-   # Wait for change to be applied
--  run bash -c "./pihole-FTL wait-for 'INFO: Config file written to /etc/pihole/pihole.toml' /var/log/pihole/FTL.log 5 $logsize_before"
-+  run bash -c "./pihole-FTL wait-for 'INFO: Config file written to /opt/etc/pihole/pihole.toml' /var/log/pihole/FTL.log 5 $logsize_before"
-   printf "%s\n" "${lines[@]}"
-   [[ $status == 0 ]]
- 
-@@ -1876,15 +1876,15 @@
-   printf "%s\n" "${lines[@]}"
-   [[ ${lines[0]} == 'Hello, world 1!' ]]
-   [[ ${lines[1]} == 'Hello, world 2!' ]]
--  [[ ${lines[2]} == '[string "/var/www/html/broken_lua_2.lp"]:4: Cannot include [/var/www/html/does_not_exist.lp]: not found' ]]
-+  [[ ${lines[2]} == '[string "/opt/share/pihole/www/broken_lua_2.lp"]:4: Cannot include [/opt/share/pihole/www/does_not_exist.lp]: not found' ]]
-   [[ ${lines[3]} == 'stack traceback:' ]]
-   [[ ${lines[4]} == "	[C]: in field 'include'" ]]
--  [[ ${lines[5]} == '	[string "/var/www/html/broken_lua.lp"]:4: in main chunk' ]]
-+  [[ ${lines[5]} == '	[string "/opt/share/pihole/www/broken_lua.lp"]:4: in main chunk' ]]
-   [[ ${lines[6]} == 'aborting' ]]
-   [[ ${lines[7]} == '' ]]
- 
-   # Check if the error is logged (-F = fixed string (no regex), -q = quiet)
--  run grep -qF 'LSP Kepler: call failed: runtime error: [string "/var/www/html/broken_lua_2.lp"]:4: Cannot include [/var/www/html/does_not_exist.lp]: not found' /var/log/pihole/webserver.log
-+  run grep -qF 'LSP Kepler: call failed: runtime error: [string "/opt/share/pihole/www/broken_lua_2.lp"]:4: Cannot include [/opt/share/pihole/www/does_not_exist.lp]: not found' /opt/var/log/pihole/webserver.log
-   [[ $status == 0 ]]
- }
- 
 @@ -1949,7 +1949,7 @@
  
    run bash -c './pihole-FTL --config dns.revServers "[\"true,1.1.1.1,def,ghi\"]"'
@@ -222,25 +187,17 @@ index 021530bd..2a84e4ea 100644
    printf "%s\n" "${lines[@]}"
    [[ $status == 0 ]]
  
-@@ -2279,13 +2279,13 @@
-   # 1. Setting force4 = true (and others)
-   # 2. Setting dns.blocking.mode = "IP"
-   # 3. PATCH /api/config/webserver/api/password
--  run bash -c 'grep -c "INFO: Config file written to /etc/pihole/pihole.toml" /var/log/pihole/FTL.log'
-+  run bash -c 'grep -c "INFO: Config file written to /opt/etc/pihole/pihole.toml" /var/log/pihole/FTL.log'
+@@ -1477,7 +1477,7 @@ setup() {
+   run bash -c 'curl -s -X PATCH http://127.0.0.1/api/config -d "{\"config\":{\"dns\":{\"reply\":{\"host\":{\"force4\":true,\"IPv4\":\"10.100.0.10\",\"force6\":true,\"IPv6\":\"fe80::10\"}}}}}"'
+ 
+   # Wait for change to be applied
+-  run bash -c "./pihole-FTL wait-for 'INFO: Config file written to /etc/pihole/pihole.toml' /var/log/pihole/FTL.log 5 $logsize_before"
++  run bash -c "./pihole-FTL wait-for 'INFO: Config file written to /opt/etc/pihole/pihole.toml' /var/log/pihole/FTL.log 5 $logsize_before"
    printf "%s\n" "${lines[@]}"
-   [[ ${lines[0]} == "3" ]]
--  run bash -c 'grep -c "DEBUG_CONFIG: Config file written to /etc/pihole/dnsmasq.conf" /var/log/pihole/FTL.log'
-+  run bash -c 'grep -c "DEBUG_CONFIG: Config file written to /opt/etc/pihole/dnsmasq.conf" /var/log/pihole/FTL.log'
-   printf "%s\n" "${lines[@]}"
-   [[ ${lines[0]} == "1" ]]
--  run bash -c 'grep -c "DEBUG_CONFIG: HOSTS file written to /etc/pihole/hosts/custom.list" /var/log/pihole/FTL.log'
-+  run bash -c 'grep -c "DEBUG_CONFIG: HOSTS file written to /opt/etc/pihole/hosts/custom.list" /var/log/pihole/FTL.log'
-   printf "%s\n" "${lines[@]}"
-   [[ ${lines[0]} == "3" ]]
- }
-@@ -2313,9 +2313,9 @@
- }
+   [[ $status == 0 ]]
+ 
+@@ -2092,9 +2092,9 @@ setup() {
+ 
  
  @test "Webserver options are logged as expected" {
 -  run bash -c 'grep -F "Webserver option 0/12: document_root=/var/www/html" /var/log/pihole/FTL.log'
@@ -276,6 +233,45 @@ index 021530bd..2a84e4ea 100644
    [[ $status == 0 ]]
    run bash -c "rm ${filename}"
  }
+diff --git a/test/api/test_api.py b/test/api/test_api.py
+index c7921174..248c6acb 100644
+--- a/test/api/test_api.py
++++ b/test/api/test_api.py
+@@ -348,7 +348,7 @@ class TestLuaServerPages:
+         lines = r.text.splitlines()
+         assert lines[0] == "Hello, world 1!", f"Unexpected response:\n{r.text}"
+         assert lines[1] == "Hello, world 2!"
+-        assert 'Cannot include [/var/www/html/does_not_exist.lp]: not found' in lines[2]
++        assert 'Cannot include [/opt/share/pihole/www/does_not_exist.lp]: not found' in lines[2]
+         assert lines[3] == "stack traceback:"
+ 
+     def test_lua_page_outside_webhome_served_without_login(self, api_session):
+diff --git a/test/test_final.bats b/test/test_final.bats
+index 372e2701..eca5f62c 100644
+--- a/test/test_final.bats
++++ b/test/test_final.bats
+@@ -37,7 +37,7 @@
+   # pytest: 2x pihole.toml writes (dns/blocking disable + enable)
+   # pytest: 4x pihole.toml writes (config PATCH round-trips: bool + int, change + restore each)
+   # pytest: 2x pihole.toml writes (auth stress test password set + remove)
+-  run bash -c 'grep -c "INFO: Config file written to /etc/pihole/pihole.toml" /var/log/pihole/FTL.log'
++  run bash -c 'grep -c "INFO: Config file written to /opt/etc/pihole/pihole.toml" /var/log/pihole/FTL.log'
+   printf "pihole.toml write count: %s\n" "${lines[0]}"
+   # On RISCV64, pytest is skipped (too slow), so only BATS writes occur
+   if [[ "${CI_ARCH}" == "linux/riscv64" ]]; then
+@@ -50,10 +50,10 @@
+   run bash -c 'grep -c "pihole.toml unchanged" /var/log/pihole/FTL.log'
+   printf "pihole.toml unchanged count: %s\n" "${lines[0]}"
+   [[ ${lines[0]} -ge 2 ]]
+-  run bash -c 'grep -c "DEBUG_CONFIG: Config file written to /etc/pihole/dnsmasq.conf" /var/log/pihole/FTL.log'
++  run bash -c 'grep -c "DEBUG_CONFIG: Config file written to /opt/etc/pihole/dnsmasq.conf" /var/log/pihole/FTL.log'
+   printf "dnsmasq.conf write count: %s\n" "${lines[0]}"
+   [[ ${lines[0]} == "1" ]]
+-  run bash -c 'grep -c "DEBUG_CONFIG: HOSTS file written to /etc/pihole/hosts/custom.list" /var/log/pihole/FTL.log'
++  run bash -c 'grep -c "DEBUG_CONFIG: HOSTS file written to /opt/etc/pihole/hosts/custom.list" /var/log/pihole/FTL.log'
+   printf "custom.list write count: %s\n" "${lines[0]}"
+   # On RISCV64, pytest is skipped, so only BATS writes occur (3x)
+   # Otherwise, pytest dns/hosts config array PUT + DELETE add 2 more (5x)
 diff --git a/test/api/libs/responseVerifyer.py b/test/api/libs/responseVerifyer.py
 index 50a5c1c9..e2381e24 100644
 --- a/test/api/libs/responseVerifyer.py
