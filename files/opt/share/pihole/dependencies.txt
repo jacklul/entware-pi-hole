@@ -52,6 +52,9 @@ coreutils-stty
 coreutils-tr
  - used by gravity.sh, api.sh, utils.sh and piholeDebug.sh
 
+coreutils-truncate
+ - used in updatecheck.sh
+
 coreutils-whoami
  - used by 'pihole' command
 
