@@ -5,8 +5,9 @@
 readonly script_dir="$(dirname "$(readlink -f "$0")")"
 prefix="$1"
 target="$2"
+[ -z "$target" ] && target="$script_dir/../dev/$prefix"
 
-if [ -z "$prefix" ] || [ -z "$target" ] || [ ! -d "$target" ]; then
+if [ -z "$prefix" ] || [ ! -d "$target" ]; then
     echo "Usage: $0 <file prefix> <repository path> [no-patches/no-checks]"
     exit 1
 fi

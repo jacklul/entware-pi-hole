@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 # Made by Jack'lul <jacklul.github.io>
 
+#shellcheck disable=SC2155
+readonly script_dir="$(dirname "$(readlink -f "$0")")"
 repository="$1"
+[ ! -d "$repository" ] && [ -d "$script_dir/../dev/$repository" ] && repository="$script_dir/../dev/$repository"
 
 if [ -z "$repository" ] || [ ! -d "$repository" ]; then
     echo "Usage: $0 <repository path>"
