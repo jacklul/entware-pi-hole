@@ -1,10 +1,8 @@
 #!/bin/sh
 
-# Drop caches, to make sure checks here are done on the updated files
-# If the kernel is still writing the files in the background some reads
-# might return old data instead of new
+# Flush all changes to disk before starting this script
+# to make sure everything we read is up to date
 sync
-echo 3 > /proc/sys/vm/drop_caches
 
 # Prioritize /opt binaries
 PATH="/opt/sbin:/opt/bin:$PATH:/opt/share/pihole/polyfill"
