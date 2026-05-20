@@ -77,7 +77,7 @@ if [ ! -f "$destination_dir/opt/etc/pihole/macvendor.db" ]; then
     fi
 fi
 
-if [ ! -f "$destination_dir/opt/etc/pihole/versions" ]; then
+if [ ! -f "$destination_dir/opt/share/pihole/versions" ]; then
     echo "Creating versions file..."
 
     for part in core web ftl; do
