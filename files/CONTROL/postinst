@@ -202,12 +202,13 @@ fi
 # We cannot execute it now because it calls opkg and it is running right now
 {
     timeout=300
-    while [ -f /opt/tmp/opkg.lock ] && [ "$timeout" -gt 0 ]; do
+
+    #shellcheck disable=SC2009
+    while ps | grep -q '[o]pkg' && [ "$timeout" -gt 0 ]; do
         timeout=$((timeout-1))
         sleep 1
     done
 
-    sleep 60
     bash /opt/share/pihole/updatecheck.sh
 } > /dev/null 2>&1 &
 
