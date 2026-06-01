@@ -97,6 +97,9 @@ if [ -f /opt/etc/cron.d/pihole ] && grep -q "59 1 \|59 17 " /opt/etc/cron.d/piho
     uc_time_m="$(random_number 1 58)"
     sed "s/59 17 /$uc_time_m $uc_time_h /" -i /opt/etc/cron.d/pihole
     echo "  ${INFO} Update checker time: ${COL_CYAN}$(add_leading_zero "$uc_time_h"):$(add_leading_zero "$uc_time_m")${COL_NC}"
+
+    # Touch cron.d directory to force cron to reload
+    touch /opt/etc/cron.d
 fi
 
 # Set user and group used by logrotate, inherited from /opt/var/log
