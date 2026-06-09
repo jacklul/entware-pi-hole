@@ -473,6 +473,9 @@ jobs:
           path: ./gh-pages
           ignored: css
 
+      - name: Update titles in indexes
+        run: find ./gh-pages -type f -name index.html -exec sed "s|Index of .|Index of ${GITHUB_REPOSITORY##*/}|g" -i {} \;
+
       - name: List files
         uses: ./.github/actions/list-files
         with:
