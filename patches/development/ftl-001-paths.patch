@@ -296,7 +296,7 @@ index b04f964f..7e161a74 100644
 --- a/src/dnsmasq/config.h
 +++ b/src/dnsmasq/config.h
 @@ -44,8 +44,8 @@
- #define SMALLDNAME 50 /* most domain names are smaller than this */
+ #define SMALLDNAME 75 /* most domain names are smaller than this */
  #define CNAME_CHAIN 10 /* chains longer than this atr dropped for loop protection */
  #define DNSSEC_MIN_TTL 60 /* DNSKEY and DS records in cache last at least this long */
 -#define HOSTSFILE "/etc/hosts"
