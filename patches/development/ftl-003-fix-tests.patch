@@ -160,77 +160,77 @@ diff --git a/test/test_suite.bats b/test/test_suite.bats
 index 021530bd..2a84e4ea 100644
 --- a/test/test_suite.bats
 +++ b/test/test_suite.bats
-@@ -1949,7 +1949,7 @@
+@@ -1571,7 +1571,7 @@ setup() {
+   assert_failure 3
  
    run bash -c './pihole-FTL --config dns.revServers "[\"true,1.1.1.1,def,ghi\"]"'
-   printf "%s\n" "${lines[@]}"
--  [[ ${lines[0]} == 'New dnsmasq configuration is not valid ('*'resolve at line '*' of /etc/pihole/dnsmasq.conf.temp: "rev-server=1.1.1.1,def"), config remains unchanged' ]]
-+  [[ ${lines[0]} == 'New dnsmasq configuration is not valid ('*'resolve at line '*' of /opt/etc/pihole/dnsmasq.conf.temp: "rev-server=1.1.1.1,def"), config remains unchanged' ]]
-   [[ $status == 3 ]]
+-  assert_line --regexp --index 0 'New dnsmasq configuration is not valid \(.+resolve at line [[:digit:]]+ of /etc/pihole/dnsmasq.conf.temp: "rev-server=1.1.1.1,def"\), config remains unchanged'
++  assert_line --regexp --index 0 'New dnsmasq configuration is not valid \(.+resolve at line [[:digit:]]+ of /opt/etc/pihole/dnsmasq.conf.temp: "rev-server=1.1.1.1,def"\), config remains unchanged'
+   assert_failure 3
  
    run bash -c './pihole-FTL --config webserver.api.excludeClients "[\".*\",\"$$$\",\"[[[\"]"'
-@@ -1965,7 +1965,7 @@
-   [[ $status == 0 ]]
+@@ -1586,7 +1586,7 @@ setup() {
+   assert_success
  
    # Wait for change to become effective
 -  run bash -c "./pihole-FTL wait-for 'HOSTS file written to /etc/pihole/hosts/custom.list' /var/log/pihole/FTL.log 5 $logsize_before"
 +  run bash -c "./pihole-FTL wait-for 'HOSTS file written to /opt/etc/pihole/hosts/custom.list' /var/log/pihole/FTL.log 5 $logsize_before"
-   printf "%s\n" "${lines[@]}"
-   [[ $status == 0 ]]
+   assert_success
  
-@@ -1982,7 +1982,7 @@
-   [[ $status == 0 ]]
+   # Check that the sanitized entries are properly formatted
+@@ -1601,7 +1601,7 @@ setup() {
+   assert_success
  
    # Wait for change to become effective
 -  run bash -c "./pihole-FTL wait-for 'HOSTS file written to /etc/pihole/hosts/custom.list' /var/log/pihole/FTL.log 5 $logsize_before"
 +  run bash -c "./pihole-FTL wait-for 'HOSTS file written to /opt/etc/pihole/hosts/custom.list' /var/log/pihole/FTL.log 5 $logsize_before"
-   printf "%s\n" "${lines[@]}"
-   [[ $status == 0 ]]
+   assert_success
  
-@@ -1477,7 +1477,7 @@ setup() {
+   # Check that the sanitized entries are properly formatted
+@@ -1300,7 +1300,7 @@ setup() {
    run bash -c 'curl -s -X PATCH http://127.0.0.1/api/config -d "{\"config\":{\"dns\":{\"reply\":{\"host\":{\"force4\":true,\"IPv4\":\"10.100.0.10\",\"force6\":true,\"IPv6\":\"fe80::10\"}}}}}"'
  
    # Wait for change to be applied
 -  run bash -c "./pihole-FTL wait-for 'INFO: Config file written to /etc/pihole/pihole.toml' /var/log/pihole/FTL.log 5 $logsize_before"
 +  run bash -c "./pihole-FTL wait-for 'INFO: Config file written to /opt/etc/pihole/pihole.toml' /var/log/pihole/FTL.log 5 $logsize_before"
-   printf "%s\n" "${lines[@]}"
-   [[ $status == 0 ]]
+   assert_success
  
-@@ -2092,9 +2092,9 @@ setup() {
+   run bash -c "dig A pi.hole +short @127.0.0.1"
+@@ -1818,9 +1818,9 @@ setup() {
  
  
  @test "Webserver options are logged as expected" {
 -  run bash -c 'grep -F "Webserver option 0/12: document_root=/var/www/html" /var/log/pihole/FTL.log'
 +  run bash -c 'grep -F "Webserver option 0/12: document_root=/opt/share/pihole/www" /var/log/pihole/FTL.log'
-   [[ $status == 0 ]]
+   assert_success
 -  run bash -c 'grep -F "Webserver option 1/12: error_pages=/var/www/html/admin/" /var/log/pihole/FTL.log'
 +  run bash -c 'grep -F "Webserver option 1/12: error_pages=/opt/share/pihole/www/admin/" /var/log/pihole/FTL.log'
-   [[ $status == 0 ]]
+   assert_success
    run bash -c 'grep -F "Webserver option 2/12: listening_ports=80o,443os,[::]:80o,[::]:443os" /var/log/pihole/FTL.log'
-   [[ $status == 0 ]]
-@@ -2259,15 +2259,15 @@
- #  [[ $status == 0 ]]
+   assert_success
+@@ -1788,15 +1788,15 @@ setup() {
+ #  printf "%s\n" "${lines[@]}"
+ #  assert_success
    run bash -c "./pihole-FTL --teleporter ${filename}"
-   printf "%s\n" "${lines[@]}"
--  [[ "${lines[-9]}" == "Imported etc/pihole/pihole.toml" ]]
--  [[ "${lines[-8]}" == "Imported etc/pihole/dhcp.leases" ]]
--  [[ "${lines[-7]}" == "Imported etc/pihole/gravity.db->group" ]]
--  [[ "${lines[-6]}" == "Imported etc/pihole/gravity.db->adlist" ]]
--  [[ "${lines[-5]}" == "Imported etc/pihole/gravity.db->adlist_by_group" ]]
--  [[ "${lines[-4]}" == "Imported etc/pihole/gravity.db->domainlist" ]]
--  [[ "${lines[-3]}" == "Imported etc/pihole/gravity.db->domainlist_by_group" ]]
--  [[ "${lines[-2]}" == "Imported etc/pihole/gravity.db->client" ]]
--  [[ "${lines[-1]}" == "Imported etc/pihole/gravity.db->client_by_group" ]]
-+  [[ "${lines[-9]}" == "Imported opt/etc/pihole/pihole.toml" ]]
-+  [[ "${lines[-8]}" == "Imported opt/etc/pihole/dhcp.leases" ]]
-+  [[ "${lines[-7]}" == "Imported opt/etc/pihole/gravity.db->group" ]]
-+  [[ "${lines[-6]}" == "Imported opt/etc/pihole/gravity.db->adlist" ]]
-+  [[ "${lines[-5]}" == "Imported opt/etc/pihole/gravity.db->adlist_by_group" ]]
-+  [[ "${lines[-4]}" == "Imported opt/etc/pihole/gravity.db->domainlist" ]]
-+  [[ "${lines[-3]}" == "Imported opt/etc/pihole/gravity.db->domainlist_by_group" ]]
-+  [[ "${lines[-2]}" == "Imported opt/etc/pihole/gravity.db->client" ]]
-+  [[ "${lines[-1]}" == "Imported opt/etc/pihole/gravity.db->client_by_group" ]]
-   [[ $status == 0 ]]
+-  assert_line --index -9 "Imported etc/pihole/pihole.toml"
+-  assert_line --index -8 "Imported etc/pihole/dhcp.leases"
+-  assert_line --index -7 "Imported etc/pihole/gravity.db->group"
+-  assert_line --index -6 "Imported etc/pihole/gravity.db->adlist"
+-  assert_line --index -5 "Imported etc/pihole/gravity.db->adlist_by_group"
+-  assert_line --index -4 "Imported etc/pihole/gravity.db->domainlist"
+-  assert_line --index -3 "Imported etc/pihole/gravity.db->domainlist_by_group"
+-  assert_line --index -2 "Imported etc/pihole/gravity.db->client"
+-  assert_line --index -1 "Imported etc/pihole/gravity.db->client_by_group"
++  assert_line --index -9 "Imported opt/etc/pihole/pihole.toml"
++  assert_line --index -8 "Imported opt/etc/pihole/dhcp.leases"
++  assert_line --index -7 "Imported opt/etc/pihole/gravity.db->group"
++  assert_line --index -6 "Imported opt/etc/pihole/gravity.db->adlist"
++  assert_line --index -5 "Imported opt/etc/pihole/gravity.db->adlist_by_group"
++  assert_line --index -4 "Imported opt/etc/pihole/gravity.db->domainlist"
++  assert_line --index -3 "Imported opt/etc/pihole/gravity.db->domainlist_by_group"
++  assert_line --index -2 "Imported opt/etc/pihole/gravity.db->client"
++  assert_line --index -1 "Imported opt/etc/pihole/gravity.db->client_by_group"
+   assert_success
    run bash -c "rm ${filename}"
  }
 diff --git a/test/api/test_api.py b/test/api/test_api.py
@@ -259,14 +259,14 @@ index 372e2701..eca5f62c 100644
    printf "pihole.toml write count: %s\n" "${lines[0]}"
    # On RISCV64, pytest is skipped (too slow), so only BATS writes occur
    if [[ "${CI_ARCH}" == "linux/riscv64" ]]; then
-@@ -50,10 +50,10 @@
-   run bash -c 'grep -c "pihole.toml unchanged" /var/log/pihole/FTL.log'
+@@ -52,10 +52,10 @@ load 'bats_helper.bash'
    printf "pihole.toml unchanged count: %s\n" "${lines[0]}"
    [[ ${lines[0]} -ge 2 ]]
+   assert_success
 -  run bash -c 'grep -c "DEBUG_CONFIG: Config file written to /etc/pihole/dnsmasq.conf" /var/log/pihole/FTL.log'
 +  run bash -c 'grep -c "DEBUG_CONFIG: Config file written to /opt/etc/pihole/dnsmasq.conf" /var/log/pihole/FTL.log'
    printf "dnsmasq.conf write count: %s\n" "${lines[0]}"
-   [[ ${lines[0]} == "1" ]]
+   assert_line --index 0 "1"
 -  run bash -c 'grep -c "DEBUG_CONFIG: HOSTS file written to /etc/pihole/hosts/custom.list" /var/log/pihole/FTL.log'
 +  run bash -c 'grep -c "DEBUG_CONFIG: HOSTS file written to /opt/etc/pihole/hosts/custom.list" /var/log/pihole/FTL.log'
    printf "custom.list write count: %s\n" "${lines[0]}"
