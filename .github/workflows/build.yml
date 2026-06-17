@@ -77,7 +77,7 @@ jobs:
 
     steps:
       - name: Checkout own repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ ( github.event.inputs.NIGHTLY == 'true' || inputs.NIGHTLY == 'true' ) && 'develop' || github.ref_name }}
 
@@ -101,12 +101,12 @@ jobs:
 
     steps:
       - name: Checkout own repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ needs.variables.outputs.SELF_REF }}
 
       - name: Checkout pi-hole/pi-hole repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: pi-hole/pi-hole
           ref: ${{ needs.variables.outputs.CORE_REF }}
@@ -146,12 +146,12 @@ jobs:
 
     steps:
       - name: Checkout own repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ needs.variables.outputs.SELF_REF }}
 
       - name: Checkout pi-hole/web repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: pi-hole/web
           ref: ${{ needs.variables.outputs.WEB_REF }}
@@ -209,12 +209,12 @@ jobs:
 
     steps:
       - name: Checkout own repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ needs.variables.outputs.SELF_REF }}
 
       - name: Checkout pi-hole/FTL repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: pi-hole/FTL
           ref: ${{ needs.variables.outputs.FTL_REF }}
@@ -291,24 +291,24 @@ jobs:
 
     steps:
       - name: Checkout own repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ needs.variables.outputs.SELF_REF }}
 
       - name: Download core artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: core
           path: ./artifacts/core
 
       - name: Download web artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: web
           path: ./artifacts/web
 
       - name: Download FTL binary artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: ftl-*
           path: ./artifacts/ftl
@@ -336,7 +336,7 @@ jobs:
           paths: ./packages
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: packages
           path: ./packages/*
@@ -368,7 +368,7 @@ jobs:
 
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: packages
           path: ./artifacts
@@ -392,7 +392,7 @@ jobs:
 
       - name: Create or Edit a release
         if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: ./artifacts/*/*.ipk
           tag_name: ${{ needs.build-packages.outputs.IPK_VERSION }}
@@ -410,21 +410,21 @@ jobs:
 
     steps:
       - name: Checkout own repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ needs.variables.outputs.SELF_REF }}
           sparse-checkout: /.github/*
           sparse-checkout-cone-mode: false
 
       - name: Checkout gh-pages branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         continue-on-error: true
         with:
           ref: gh-pages
           path: ./gh-pages
 
       - name: Download artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: packages
           path: ./artifacts
@@ -446,7 +446,7 @@ jobs:
           cp -rv ./artifacts/* ./gh-pages
 
       - name: Checkout Entware/ipk-html-indexer repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: Entware/ipk-html-indexer
           path: ./ipk-html-indexer

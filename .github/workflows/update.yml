@@ -25,7 +25,7 @@ jobs:
 
     steps:
       - name: Checkout own repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: develop
 
@@ -39,21 +39,21 @@ jobs:
           cat $GITHUB_OUTPUT
 
       - name: Checkout pi-hole/pi-hole repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: pi-hole/pi-hole
           ref: ${{ steps.branches.outputs.CORE }}
           path: ./dev/core
 
       - name: Checkout pi-hole/web repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: pi-hole/web
           ref: ${{ steps.branches.outputs.WEB }}
           path: ./dev/web
 
       - name: Checkout pi-hole/FTL repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: pi-hole/FTL
           ref: ${{ steps.branches.outputs.FTL }}
@@ -158,7 +158,7 @@ jobs:
 
     steps:
       - name: Checkout own repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: develop
 

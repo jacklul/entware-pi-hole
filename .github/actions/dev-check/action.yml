@@ -16,7 +16,7 @@ runs:
         echo "HASH=$(sha1sum ./.versions | awk '{print $1}')" >> $GITHUB_OUTPUT
         cat $GITHUB_OUTPUT
 
-    - uses: actions/cache/restore@v4
+    - uses: actions/cache/restore@v5
       id: last
       with:
         path: ./.versions
@@ -24,7 +24,7 @@ runs:
         fail-on-cache-miss: false
         lookup-only: true
 
-    - uses: actions/cache/save@v4
+    - uses: actions/cache/save@v5
       if: steps.last.outputs.cache-hit != 'true'
       with:
         path: ./.versions
