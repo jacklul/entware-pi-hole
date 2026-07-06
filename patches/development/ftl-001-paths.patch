@@ -429,7 +429,7 @@ index 47f2edc3..48410465 100644
  	memcpy(buffer, ptr, size);
  	buffer[size] = '\0';
  
-@@ -305,7 +305,7 @@ static const char *test_and_import_pihole_toml(void *ptr, size_t size, char * co
+@@ -317,7 +317,7 @@ static const char *test_and_import_pihole_toml(void *ptr, size_t size, char * co
  	{
  		free(buffer);
  		log_err("ZIP TOML file is not valid: %s", toml.errmsg);
@@ -438,21 +438,24 @@ index 47f2edc3..48410465 100644
  	}
  	free(buffer);
  
-@@ -314,12 +314,12 @@ static const char *test_and_import_pihole_toml(void *ptr, size_t size, char * co
- 	struct config teleporter_config = { 0 };
- 	duplicate_config(&teleporter_config, &config);
- 	if(!readFTLtoml(NULL, &teleporter_config, toml.toptab, true, NULL, 0, true))
+@@ -329,7 +329,7 @@ static const char *test_and_import_pihole_toml(void *ptr, size_t size, char * co
+ 	{
+ 		free_config(&teleporter_config, false);
+ 		toml_free(toml);
 -		return "File etc/pihole/pihole.toml in ZIP archive contains invalid TOML configuration";
 +		return "File opt/etc/pihole/pihole.toml in ZIP archive contains invalid TOML configuration";
+ 	}
  
  	// Test dnsmasq config in the imported configuration
- 	// The dnsmasq configuration will be overwritten if the test succeeds
- 	if(!write_dnsmasq_config(&teleporter_config, true, hint))
+@@ -338,7 +338,7 @@ static const char *test_and_import_pihole_toml(void *ptr, size_t size, char * co
+ 	{
+ 		free_config(&teleporter_config, false);
+ 		toml_free(toml);
 -		return "File etc/pihole/pihole.toml in ZIP archive contains invalid dnsmasq configuration";
 +		return "File opt/etc/pihole/pihole.toml in ZIP archive contains invalid dnsmasq configuration";
+ 	}
  
  	// When we reach this point, we know that the file is a valid TOML file and contains
- 	// a valid configuration for Pi-hole. We can now safely overwrite the current
 @@ -554,8 +554,8 @@ const char *read_teleporter_zip(uint8_t *buffer, const size_t buflen, char * con
  
  		// List of files to process from a Teleporter ZIP archive
