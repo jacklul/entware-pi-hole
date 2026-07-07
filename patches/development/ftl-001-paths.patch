@@ -96,7 +96,7 @@ index eee5a8c0..51c882cd 100644
  	conf->files.log.webserver.f = FLAG_RESTART_FTL;
 -	conf->files.log.webserver.d.s = (char*)"/var/log/pihole/webserver.log";
 +	conf->files.log.webserver.d.s = (char*)"/opt/var/log/pihole/webserver.log";
- 	conf->files.log.webserver.c = validate_filepath;
+ 	conf->files.log.webserver.c = validate_webserver_logfile;
  
  	// struct misc
 @@ -1225,7 +1225,7 @@ void initConfig(struct config *conf)

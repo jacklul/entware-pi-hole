@@ -30,7 +30,7 @@ core_path="$(readlink -f "$(dirname "$core_path")")"
 web_path="$(readlink -f "$(dirname "$web_path")")"
 ftl_path="$(readlink -f "$(dirname "$ftl_path")")"
 
-mkdir -p "$destination_dir/opt"/{bin,etc/{pihole,cron.d,dnsmasq.d},share/pihole,var/log/pihole}
+mkdir -p "$destination_dir/opt"/{bin,etc/{pihole,cron.d,dnsmasq.d,logrotate.d},share/pihole,var/log/pihole}
 
 if [ -z "$(ls -A "$destination_dir/opt/share/pihole")" ]; then
     echo "Copying core files..."
@@ -38,7 +38,7 @@ if [ -z "$(ls -A "$destination_dir/opt/share/pihole")" ]; then
     cp --update=none "$core_path/advanced/Templates"/*.sh "$destination_dir/opt/share/pihole"
     cp --update=none "$core_path/advanced/Templates"/*.sql "$destination_dir/opt/share/pihole"
     cp --update=none "$core_path/advanced/Templates/pihole.cron" "$destination_dir/opt/etc/cron.d/pihole"
-    cp --update=none "$core_path/advanced/Templates/logrotate" "$destination_dir/opt/etc/pihole"
+    cp --update=none "$core_path/advanced/Templates/logrotate" "$destination_dir/opt/etc/logrotate.d/pihole"
     cp --update=none "$core_path/gravity.sh" "$destination_dir/opt/share/pihole/gravity.sh"
     #cp --update=none "$core_path/automated install/basic-install.sh" "$destination_dir/opt/share/pihole/basic-install.sh"
     cp --update=none "$core_path/pihole" "$destination_dir/opt/bin/pihole"
