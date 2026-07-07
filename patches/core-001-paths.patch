@@ -221,7 +221,7 @@ index 34d96318..b4ffc79b 100755
 -    mkdir -p "${STATEFILE%/*}"
 +    #mkdir -p "${STATEFILE%/*}"
 -    /usr/sbin/logrotate --force --state "${STATEFILE}" /etc/logrotate.d/pihole
-+    /opt/sbin/logrotate --force /opt/etc/logrotate.d/pihole
++    /opt/sbin/logrotate --force --state /opt/var/lib/logrotate.status /opt/etc/logrotate.d/pihole
  else
      # Manual flushing
      flush_log "${LOGFILE}"
@@ -433,7 +433,7 @@ index c62d31ab..403ffe97 100644
 +00 00   * * *   root    PATH="$PATH:/opt/bin" pihole flush once quiet
  
 -@reboot root /usr/sbin/logrotate --state /var/lib/logrotate/pihole /etc/logrotate.d/pihole
-+@reboot root /opt/sbin/logrotate /opt/etc/logrotate.d/pihole
++@reboot root /opt/sbin/logrotate --state /opt/var/lib/logrotate.status /opt/etc/logrotate.d/pihole
  
  # Pi-hole: Grab remote and local version every 24 hours
 -59 17  * * *   root    PATH="$PATH:/usr/sbin:/usr/local/bin/" pihole updatechecker
