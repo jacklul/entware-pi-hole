@@ -57,6 +57,11 @@ service_action() {
 
 ##########
 
+# Show a warning when required 'pihole' user does not exist
+if [ -z "$(id -u pihole 2> /dev/null)" ]; then
+    echo "  ${INFO} ${COL_BOLD}${COL_YELLOW}User 'pihole' does not exist - make sure it is added to the system!${COL_NC}"
+fi
+
 # Is this a fresh install or an upgrade?
 if [ ! -f /opt/etc/pihole/pihole.toml ]; then
     fresh_install=true
@@ -69,24 +74,20 @@ fi
 [ ! -f /opt/etc/hosts ] && [ -f /etc/hosts ] && ln -s /etc/hosts /opt/etc/hosts && symlinks="$symlinks /opt/etc/hosts"
 [ ! -f /opt/etc/ethers ] && [ -f /etc/ethers ] && ln -s /etc/ethers /opt/etc/ethers && symlinks="$symlinks /opt/etc/ethers"
 [ ! -f /opt/etc/resolv.conf ] && [ -f /etc/resolv.conf ] && ln -s /etc/resolv.conf /opt/etc/resolv.conf && symlinks="$symlinks /opt/etc/resolv.conf"
-[ -n "$symlinks" ] && echo "  ${INFO} Created symlinks:${COL_BOLD}$symlinks${COL_NC}"
-
-# Show a warning when required 'pihole' user does not exist
-if [ -z "$(id -u pihole 2> /dev/null)" ]; then
-    echo "  ${INFO} ${COL_BOLD}${COL_YELLOW}User 'pihole' does not exist - expect issues!${COL_NC}"
-fi
+[ -n "$symlinks" ] && echo "  ${INFO} Created symlinks: ${COL_BOLD}$(echo "$symlinks" | awk '{$1=$1;print}')${COL_NC}"
 
 # Show a warning when root user is not called 'root' and update the crontab file
 root_user="$(id -nu 0 2> /dev/null)"
 if [ "$root_user" != "root" ]; then
-    echo "  ${INFO} ${COL_BOLD}${COL_YELLOW}It looks like the root user is not called 'root' - this can cause issues!${COL_NC}"
-    echo "  ${INFO} Correcting username in crontab file..."
+    echo "  ${INFO} ${COL_BOLD}${COL_YELLOW}The superuser account is not named 'root' - this may cause issues!${COL_NC}"
+    echo "  ${INFO} Updating the username in the cron file..."
+
     sed "s/ root / $root_user /g" -i /opt/etc/cron.d/pihole
 fi
 
 # Set random gravity update and updatechecker times
 if [ -f /opt/etc/cron.d/pihole ] && grep -q "59 1 \|59 17 " /opt/etc/cron.d/pihole; then
-    echo "  ${INFO} Setting random gravity update and updatechecker times..."
+    echo "  ${INFO} Setting random times for gravity updates and update checks..."
 
     ga_time_h="$(random_number 3 4)"
     ga_time_m="$(random_number 1 58)"
@@ -122,22 +123,23 @@ if [ -f /opt/etc/logrotate.d/pihole ]; then
     log_user_group="$(stat -c '%U %G' /opt/var/log)"
 
     if [ -n "$log_user_group" ]; then
-        echo "  ${INFO} Setting user and group (${COL_CYAN}$(echo "$log_user_group" | tr  -s ' ' ':')${COL_NC}) in logrotate file..."
+        echo "  ${INFO} Setting user and group (${COL_CYAN}$(echo "$log_user_group" | tr  -s ' ' ':')${COL_NC}) in the logrotate configuration..."
         sed "s/# su #/su $log_user_group/g;" -i /opt/etc/logrotate.d/pihole
     fi
 fi
 
 # Initialize pihole.toml using our starting config on fresh installs
-if [ -n "$fresh_install" ] && [ -f /opt/share/pihole/dist/pihole.toml ]; then
-    echo "  ${INFO} ${COL_BOLD}Creating configuration file...${COL_NC}"
+if [ -n "$fresh_install" ]; then
+    echo "  ${INFO} ${COL_BOLD}Creating the configuration file...${COL_NC}"
     install -m 644 /opt/share/pihole/dist/pihole.toml /opt/etc/pihole/pihole.toml
 fi
 
 # Get gravity database file path
 gravitydb="$(pihole-FTL --config -q files.gravity)"
+[ -f "$gravitydb" ] && gravitydb_exists=true
 
 # Upgrade existing gravity database if needed
-if [ -n "$gravitydb" ] && [ -f "$gravitydb" ]; then
+if [ -n "$gravitydb_exists" ]; then
     gravitydb_version="$(gravitydb_version "$gravitydb")"
     bash /opt/share/pihole/gravity.sh --upgrade
 
@@ -158,13 +160,13 @@ elif [ -n "$was_running" ]; then # or start it if it was running before
     service_action "start"
 fi
 
-# Create adlists.list file with default blocklists if it doesn't exist
-if [ ! -f /opt/etc/pihole/adlists.list ] && [ -f /opt/share/pihole/dist/adlists.list ]; then
-    install -m 644 /opt/share/pihole/dist/adlists.list /opt/etc/pihole/adlists.list
-fi
-
 # Run gravity update if database was upgraded or does not exist
-if [ -n "$gravitydb_upgraded" ] || { [ -n "$gravitydb" ] && [ ! -f "$gravitydb" ] ; }; then
+if [ -n "$gravitydb_upgraded" ] || [ -z "$gravitydb_exists" ]; then
+    # Create adlists.list file with default blocklists if the database doesn't exist
+    if [ -z "$gravitydb_exists" ] && [ ! -f /opt/etc/pihole/adlists.list ]; then
+        install -m 644 /opt/share/pihole/dist/adlists.list /opt/etc/pihole/adlists.list
+    fi
+
     bash /opt/share/pihole/gravity.sh
 fi
 
@@ -177,7 +179,7 @@ if [ -n "$fresh_install" ]; then
 
         if [ -n "$new_interface" ]; then
             pihole-FTL --config dns.interface "$new_interface" > /dev/null
-            echo "  ${INFO} Using interface: ${COL_NC}${COL_CYAN}$new_interface${COL_NC}"
+            echo "  ${INFO} Using network interface: ${COL_NC}${COL_CYAN}$new_interface${COL_NC}"
         fi
     fi
 
@@ -185,8 +187,8 @@ if [ -n "$fresh_install" ]; then
     new_password=$(tr -dc _A-Z-a-z-0-9 < /dev/urandom | head -c 8)
     pihole-FTL --config webserver.api.password "$new_password" > /dev/null # Will be automatically hashed
 
-    echo "  ${INFO} ${COL_BOLD}${COL_GREEN}Generated password for the web interface: ${COL_NC}${COL_CYAN}$new_password${COL_NC}"
-    echo "  ${INFO} It can be changed using '${COL_BOLD}pihole setpassword${COL_NC}' command."
+    echo "  ${INFO} ${COL_BOLD}${COL_GREEN}Generated web interface password: ${COL_NC}${COL_CYAN}$new_password${COL_NC}"
+    echo "  ${INFO} You can change it using the '${COL_BOLD}pihole setpassword${COL_NC}' command."
 
     # Perform a ports check
     dns_port="$(pihole-FTL --config -q dns.port)"
@@ -202,17 +204,17 @@ if [ -n "$fresh_install" ]; then
 
     # Show a warning if something is already listening on one of the ports
     if [ -n "$ports_in_use" ]; then
-        echo "  ${INFO} ${COL_RED}The following ports are already in use:${COL_NC}${COL_CYAN}$ports_in_use${COL_NC}"
-        echo "  ${INFO} ${COL_BOLD}Pi-hole might not start - check the wiki for help.${COL_NC}"
+        echo "  ${INFO} ${COL_RED}The following ports are already in use: ${COL_NC}${COL_CYAN}$(echo "$ports_in_use" | awk '{$1=$1;print}')${COL_NC}"
+        echo "  ${INFO} ${COL_BOLD}Pi-hole may fail to start - check the wiki for help.${COL_NC}"
     fi
 elif [ -z "$(pihole-FTL --config -q webserver.api.pwhash)" ]; then # Show a warning if the password is not set
-    echo "  ${INFO} ${COL_RED}Password for the web interface is not set - this is a security risk!${COL_NC}"
-    echo "  ${INFO} ${COL_YELLOW}Please set it using '${COL_NC}${COL_BOLD}pihole setpassword${COL_NC}${COL_YELLOW}' command.${COL_NC}"
+    echo "  ${INFO} ${COL_RED}The web interface password is not set - this is a security risk!${COL_NC}"
+    echo "  ${INFO} ${COL_YELLOW}Please set it using the '${COL_NC}${COL_BOLD}pihole setpassword${COL_NC}${COL_YELLOW}' command.${COL_NC}"
 fi
 
 # Run custom post install script if it exists
 if [ -x /opt/share/pihole/postinstall.sh ]; then
-    echo "  ${INFO} ${COL_BOLD}Running custom post install script...${COL_NC}"
+    echo "  ${INFO} ${COL_BOLD}Running custom post-install script...${COL_NC}"
     bash /opt/share/pihole/postinstall.sh
 fi
 
