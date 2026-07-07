@@ -102,6 +102,9 @@ if [ -f /opt/etc/cron.d/pihole ] && grep -q "59 1 \|59 17 " /opt/etc/cron.d/piho
     touch /opt/etc/cron.d
 fi
 
+# Remove obsolete logrotate state file if it exists
+[ -f /opt/etc/pihole/logrotate.state ] && rm -f /opt/etc/pihole/logrotate.state
+
 # @TODO uncomment this when adding logrotate config to conffiles!
 # Show a warning when logrotate configuration does not exclude OPKG-created files
 #if
@@ -113,18 +116,6 @@ fi
 #    echo "  ${INFO} ${COL_BOLD}${COL_YELLOW}Logrotate is not configured to exclude '*-opkg' files!${COL_NC}"
 #    echo "  ${INFO} Add '${COL_CYAN}taboopat + *-opkg${COL_NC}' above the include directive in the logrotate configuration."
 #fi
-
-# Make sure directory containing logrotate state exists
-[ ! -d /opt/var/lib/logrotate ] && mkdir -p /opt/var/lib/logrotate
-
-# Move old logrotate state file to the new location if it exists
-if [ -f /opt/etc/pihole/logrotate.state ]; then
-    if [ ! -f /opt/var/lib/logrotate/pihole ]; then
-        mv /opt/etc/pihole/logrotate.state /opt/var/lib/logrotate/pihole
-    else
-        rm -f /opt/etc/pihole/logrotate.state
-    fi
-fi
 
 # Set user and group used by logrotate, inherited from /opt/var/log
 if [ -f /opt/etc/logrotate.d/pihole ]; then
