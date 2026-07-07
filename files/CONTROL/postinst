@@ -211,9 +211,9 @@ elif [ -z "$(pihole-FTL --config -q webserver.api.pwhash)" ]; then # Show a warn
 fi
 
 # Run custom post install script if it exists
-if [ -x /opt/etc/pihole/postinstall.sh ]; then
+if [ -x /opt/share/pihole/postinstall.sh ]; then
     echo "  ${INFO} ${COL_BOLD}Running custom post install script...${COL_NC}"
-    bash /opt/etc/pihole/postinstall.sh
+    bash /opt/share/pihole/postinstall.sh
 fi
 
 # Update remote versions via updatechecker (/opt/etc/pihole/versions)
