@@ -32,7 +32,7 @@ jobs:
       - name: Set branches to pull
         id: branches
         run: |
-          export $(grep -v '^#' ${{ env.ENV_FILE }} | xargs -d '\n')
+          export $(grep -v '^#' ${{ env.ENV_FILE }} | sed -E 's/[[:space:]]+#.*$//; /^[[:space:]]*$/d' | xargs -d '\n')
           echo "CORE=$CORE_BRANCH" >> $GITHUB_OUTPUT
           echo "WEB=$WEB_BRANCH" >> $GITHUB_OUTPUT
           echo "FTL=$FTL_BRANCH" >> $GITHUB_OUTPUT

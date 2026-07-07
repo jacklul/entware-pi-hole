@@ -84,7 +84,7 @@ jobs:
       - name: Set outputs
         id: variables
         run: |
-          export $(grep -v '^#' ${{ env.ENV_FILE }} | xargs -d '\n')
+          export $(grep -v '^#' ${{ env.ENV_FILE }} | sed -E 's/[[:space:]]+#.*$//; /^[[:space:]]*$/d' | xargs -d '\n')
           export NIGHTLY=${{ github.event.inputs.NIGHTLY || inputs.NIGHTLY || 'false' }}
           export CORE_REF_OVERRIDE=${{ github.event.inputs.CORE_REF }}
           export WEB_REF_OVERRIDE=${{ github.event.inputs.WEB_REF }}
