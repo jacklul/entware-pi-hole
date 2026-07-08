@@ -380,14 +380,14 @@ jobs:
           FTL_VERSION: ${{ needs.build-packages.outputs.FTL_VERSION }}
         run: |
           CORE_VERSION_OUT="[$CORE_VERSION](https://github.com/pi-hole/pi-hole/releases/tag/$CORE_VERSION)"
-          WEB_VERSION_OUT="[$WEB_VERSION](https://github.com/pi-hole/web/releases/tag/$WEB_VERSION)"
           FTL_VERSION_OUT="[$FTL_VERSION](https://github.com/pi-hole/FTL/releases/tag/$FTL_VERSION)"
+          WEB_VERSION_OUT="[$WEB_VERSION](https://github.com/pi-hole/web/releases/tag/$WEB_VERSION)"
           [ "$(echo "$CORE_VERSION" | cut -c1)" != "v" ] && CORE_VERSION_OUT="[$CORE_VERSION](https://github.com/pi-hole/pi-hole/commit/$CORE_VERSION)"
-          [ "$(echo "$WEB_VERSION" | cut -c1)" != "v" ] && WEB_VERSION_OUT="[$WEB_VERSION](https://github.com/pi-hole/web/commit/$WEB_VERSION)"
           [ "$(echo "$FTL_VERSION" | cut -c1)" != "v" ] && FTL_VERSION_OUT="[$FTL_VERSION](https://github.com/pi-hole/FTL/commit/$FTL_VERSION)"
+          [ "$(echo "$WEB_VERSION" | cut -c1)" != "v" ] && WEB_VERSION_OUT="[$WEB_VERSION](https://github.com/pi-hole/web/commit/$WEB_VERSION)"
           echo "Core version: $CORE_VERSION_OUT  " >> changelog.md
-          echo "Web version: $WEB_VERSION_OUT  " >> changelog.md
           echo "FTL version: $FTL_VERSION_OUT  " >> changelog.md
+          echo "Web version: $WEB_VERSION_OUT  " >> changelog.md
           cat changelog.md
 
       - name: Create or Edit a release
