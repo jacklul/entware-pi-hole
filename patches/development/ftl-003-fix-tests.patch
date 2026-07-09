@@ -1,0 +1,285 @@
+diff --git a/test/run.sh b/test/run.sh
+index 5d490a82..dfd08dac 100755
+--- a/test/run.sh
++++ b/test/run.sh
+@@ -73,6 +73,23 @@ bash test/pdns/setup.sh
+ OLDUMASK=$(umask)
+ umask 0022
+ 
++# Symlink paths to not create patches for every single path...
++declare -A LINKS=(
++    ["/etc"]="/opt/etc"
++    ["/tmp"]="/opt/tmp"
++    ["/var/log"]="/opt/var/log"
++    ["/run"]="/opt/var/run"
++    ["/var/www/html"]="/opt/share/pihole/www"
++)
++for KEY in "${!LINKS[@]}"; do
++    DIRNAME="$(dirname "${LINKS[$KEY]}")"
++    [ ! -d "$DIRNAME" ] && mkdir -pv "$DIRNAME"
++
++    if [ -e "$KEY" ] && [ ! -L "${LINKS[$KEY]}" ]; then
++        ln -sv "$KEY" "${LINKS[$KEY]}"
++    fi
++done
++
+ # Set exemplary config value by environment variable
+ export FTLCONF_misc_nice="-11"
+ export FTLCONF_dns_upstrrr="-11"
+@@ -119,8 +119,8 @@ $BATS -p "test/test_suite.bats"
+ fi
+ 
+ curl_to_tricorder() {
+-  curl --silent --upload-file "${1}" https://tricorder.pi-hole.net
++  echo "null"
+ }
+ 
+ if [[ $RET != 0 ]]; then
+   echo -n "pihole/pihole.log: "
+diff --git a/test/pihole.toml b/test/pihole.toml
+index 0b433266..85d8a45c 100644
+--- a/test/pihole.toml
++++ b/test/pihole.toml
+@@ -665,29 +665,29 @@
+     #
+     # Allowed values are:
+     #     A valid TLS certificate file (*.pem)
+-    cert = "/etc/pihole/test.pem" ### CHANGED, default = "/etc/pihole/tls.pem"
++    cert = "/etc/pihole/test.pem" ### CHANGED, default = "/opt/etc/pihole/tls.pem"
+ 
+     # Number of days the automatically generated self-signed TLS/SSL certificate will be
+     # valid for.
+     #
+     # Defaults to 47 days. A minimum of 7 days is enforced.
+     # Some devices may enforce shorter validity ranges. Note that defining a lower
+     # validity range may require you to accept the self-signed certificate more often in
+     # your browser.
+     # Pi-hole will regenerate certificates it created itself two days prior to expiration.
+     # If you are using your own certificate, you need to regenerate it yourself. In this
+     # case, it is advised to set the validity range to 0 days, so that Pi-hole does not
+     # try to regenerate your certificate. If you set the validity range to 0 days and
+     # still try to generate a certificate, Pi-hole will set a fixed validity range of
+     # roughly 30 years for the certificate.
+     validity = 47
+
+   [webserver.paths]
+     # Server root on the host
+     #
+     # Allowed values are:
+     #     A valid path
+-    webroot = "/var/www/html"
++    webroot = "/opt/share/pihole/www"
+ 
+     # Sub-directory of the root containing the web interface
+     #
+@@ -822,33 +822,33 @@
+   #
+   # Allowed values are:
+   #     Any FTL database
+-  database = "/etc/pihole/pihole-FTL.db"
++  database = "/opt/etc/pihole/pihole-FTL.db"
+ 
+   # The location of FTL's short-term temporary database (only used when
+   # database.forceDisk is true)
+   #
+   # Allowed values are:
+   #     Any FTL database
+-  tmp_db = "/etc/pihole/pihole-tmp.db"
++  tmp_db = "/opt/etc/pihole/pihole-tmp.db"
+ 
+   # The location of Pi-hole's gravity database
+   #
+   # Allowed values are:
+   #     Any Pi-hole gravity database
+-  gravity = "/etc/pihole/gravity.db"
++  gravity = "/opt/etc/pihole/gravity.db"
+ 
+   # A temporary directory where Pi-hole can store files during gravity updates. This
+   # directory must be writable by the user running gravity (typically pihole).
+   #
+   # Allowed values are:
+   #     Any existing world-writable writable directory
+-  gravity_tmp = "/tmp"
++  gravity_tmp = "/opt/tmp"
+ 
+   # The database containing MAC -> Vendor information for the network table
+   #
+   # Allowed values are:
+   #     Any Pi-hole macvendor database
+-  macvendor = "/etc/pihole/macvendor.db"
++  macvendor = "/opt/etc/pihole/macvendor.db"
+ 
+   # An optional file containing a pcap capture of the network traffic. This file is used
+   # for debugging purposes only. If you don't know what this is, you don't need it.
+@@ -871,19 +871,19 @@
+     #
+     # Allowed values are:
+     #     any writable file
+-    ftl = "/var/log/pihole/FTL.log"
++    ftl = "/opt/var/log/pihole/FTL.log"
+ 
+     # The log file used by the embedded dnsmasq DNS server
+     #
+     # Allowed values are:
+     #     Any writable file
+-    dnsmasq = "/var/log/pihole/pihole.log"
++    dnsmasq = "/opt/var/log/pihole/pihole.log"
+ 
+     # The log file used by the webserver
+     #
+     # Allowed values are:
+     #     Any writable file
+-    webserver = "/var/log/pihole/webserver.log"
++    webserver = "/opt/var/log/pihole/webserver.log"
+ 
+ [misc]
+   # Using privacy levels you can specify which level of detail you want to see in your
+@@ -1305,7 +1305,7 @@
+   # Warning: This is an advanced setting and should only be used with care.
+   # Incorrectly formatted or config files specifying options which can only be defined
+   # once can result in conflicts with the automatic configuration of Pi-hole (see
+-  # /etc/pihole/dnsmasq.conf) and may stop DNS resolution from working.
++  # /opt/etc/pihole/dnsmasq.conf) and may stop DNS resolution from working.
+   #
+   # Allowed values are:
+   #     true or false
+diff --git a/test/test_suite.bats b/test/test_suite.bats
+index 021530bd..2a84e4ea 100644
+--- a/test/test_suite.bats
++++ b/test/test_suite.bats
+@@ -1571,7 +1571,7 @@ setup() {
+   assert_failure 3
+ 
+   run bash -c './pihole-FTL --config dns.revServers "[\"true,1.1.1.1,def,ghi\"]"'
+-  assert_line --regexp --index 0 'New dnsmasq configuration is not valid \(.+resolve at line [[:digit:]]+ of /etc/pihole/dnsmasq.conf.temp: "rev-server=1.1.1.1,def"\), config remains unchanged'
++  assert_line --regexp --index 0 'New dnsmasq configuration is not valid \(.+resolve at line [[:digit:]]+ of /opt/etc/pihole/dnsmasq.conf.temp: "rev-server=1.1.1.1,def"\), config remains unchanged'
+   assert_failure 3
+ 
+   run bash -c './pihole-FTL --config webserver.api.excludeClients "[\".*\",\"$$$\",\"[[[\"]"'
+@@ -1586,7 +1586,7 @@ setup() {
+   assert_success
+ 
+   # Wait for change to become effective
+-  run bash -c "./pihole-FTL wait-for 'HOSTS file written to /etc/pihole/hosts/custom.list' /var/log/pihole/FTL.log 5 $logsize_before"
++  run bash -c "./pihole-FTL wait-for 'HOSTS file written to /opt/etc/pihole/hosts/custom.list' /var/log/pihole/FTL.log 5 $logsize_before"
+   assert_success
+ 
+   # Check that the sanitized entries are properly formatted
+@@ -1601,7 +1601,7 @@ setup() {
+   assert_success
+ 
+   # Wait for change to become effective
+-  run bash -c "./pihole-FTL wait-for 'HOSTS file written to /etc/pihole/hosts/custom.list' /var/log/pihole/FTL.log 5 $logsize_before"
++  run bash -c "./pihole-FTL wait-for 'HOSTS file written to /opt/etc/pihole/hosts/custom.list' /var/log/pihole/FTL.log 5 $logsize_before"
+   assert_success
+ 
+   # Check that the sanitized entries are properly formatted
+@@ -1300,7 +1300,7 @@ setup() {
+   run bash -c 'curl -s -X PATCH http://127.0.0.1/api/config -d "{\"config\":{\"dns\":{\"reply\":{\"host\":{\"force4\":true,\"IPv4\":\"10.100.0.10\",\"force6\":true,\"IPv6\":\"fe80::10\"}}}}}"'
+ 
+   # Wait for change to be applied
+-  run bash -c "./pihole-FTL wait-for 'INFO: Config file written to /etc/pihole/pihole.toml' /var/log/pihole/FTL.log 5 $logsize_before"
++  run bash -c "./pihole-FTL wait-for 'INFO: Config file written to /opt/etc/pihole/pihole.toml' /var/log/pihole/FTL.log 5 $logsize_before"
+   assert_success
+ 
+   run bash -c "dig A pi.hole +short @127.0.0.1"
+@@ -1818,9 +1818,9 @@ setup() {
+ 
+ 
+ @test "Webserver options are logged as expected" {
+-  run bash -c 'grep -F "Webserver option 0/12: document_root=/var/www/html" /var/log/pihole/FTL.log'
++  run bash -c 'grep -F "Webserver option 0/12: document_root=/opt/share/pihole/www" /var/log/pihole/FTL.log'
+   assert_success
+-  run bash -c 'grep -F "Webserver option 1/12: error_pages=/var/www/html/admin/" /var/log/pihole/FTL.log'
++  run bash -c 'grep -F "Webserver option 1/12: error_pages=/opt/share/pihole/www/admin/" /var/log/pihole/FTL.log'
+   assert_success
+   run bash -c 'grep -F "Webserver option 2/12: listening_ports=80o,443os,[::]:80o,[::]:443os" /var/log/pihole/FTL.log'
+   assert_success
+@@ -1788,15 +1788,15 @@ setup() {
+ #  printf "%s\n" "${lines[@]}"
+ #  assert_success
+   run bash -c "./pihole-FTL --teleporter ${filename}"
+-  assert_line --index -9 "Imported etc/pihole/pihole.toml"
+-  assert_line --index -8 "Imported etc/pihole/dhcp.leases"
+-  assert_line --index -7 "Imported etc/pihole/gravity.db->group"
+-  assert_line --index -6 "Imported etc/pihole/gravity.db->adlist"
+-  assert_line --index -5 "Imported etc/pihole/gravity.db->adlist_by_group"
+-  assert_line --index -4 "Imported etc/pihole/gravity.db->domainlist"
+-  assert_line --index -3 "Imported etc/pihole/gravity.db->domainlist_by_group"
+-  assert_line --index -2 "Imported etc/pihole/gravity.db->client"
+-  assert_line --index -1 "Imported etc/pihole/gravity.db->client_by_group"
++  assert_line --index -9 "Imported opt/etc/pihole/pihole.toml"
++  assert_line --index -8 "Imported opt/etc/pihole/dhcp.leases"
++  assert_line --index -7 "Imported opt/etc/pihole/gravity.db->group"
++  assert_line --index -6 "Imported opt/etc/pihole/gravity.db->adlist"
++  assert_line --index -5 "Imported opt/etc/pihole/gravity.db->adlist_by_group"
++  assert_line --index -4 "Imported opt/etc/pihole/gravity.db->domainlist"
++  assert_line --index -3 "Imported opt/etc/pihole/gravity.db->domainlist_by_group"
++  assert_line --index -2 "Imported opt/etc/pihole/gravity.db->client"
++  assert_line --index -1 "Imported opt/etc/pihole/gravity.db->client_by_group"
+   assert_success
+   run bash -c "rm ${filename}"
+ }
+diff --git a/test/api/test_api.py b/test/api/test_api.py
+index c7921174..248c6acb 100644
+--- a/test/api/test_api.py
++++ b/test/api/test_api.py
+@@ -348,7 +348,7 @@ class TestLuaServerPages:
+         lines = r.text.splitlines()
+         assert lines[0] == "Hello, world 1!", f"Unexpected response:\n{r.text}"
+         assert lines[1] == "Hello, world 2!"
+-        assert 'Cannot include [/var/www/html/does_not_exist.lp]: not found' in lines[2]
++        assert 'Cannot include [/opt/share/pihole/www/does_not_exist.lp]: not found' in lines[2]
+         assert lines[3] == "stack traceback:"
+ 
+     def test_lua_page_outside_webhome_served_without_login(self, api_session):
+diff --git a/test/test_final.bats b/test/test_final.bats
+index 372e2701..eca5f62c 100644
+--- a/test/test_final.bats
++++ b/test/test_final.bats
+@@ -39,7 +39,7 @@ load 'bats_helper.bash'
+   # pytest: 2x pihole.toml writes (TOTP stress test secret set + remove)
+   # pytest: 2x pihole.toml writes (auth security test password set + remove)
+   # pytest: 2x pihole.toml writes (auth security test TOTP secret set + remove)
+-  run bash -c 'grep -c "INFO: Config file written to /etc/pihole/pihole.toml" /var/log/pihole/FTL.log'
++  run bash -c 'grep -c "INFO: Config file written to /opt/etc/pihole/pihole.toml" /var/log/pihole/FTL.log'
+   printf "pihole.toml write count: %s\n" "${lines[0]}"
+   # On RISCV64, pytest is skipped (too slow), so only BATS writes occur
+   if [[ "${CI_ARCH}" == "linux/riscv64" ]]; then
+@@ -52,10 +52,10 @@ load 'bats_helper.bash'
+   printf "pihole.toml unchanged count: %s\n" "${lines[0]}"
+   [[ ${lines[0]} -ge 2 ]]
+   assert_success
+-  run bash -c 'grep -c "DEBUG_CONFIG: Config file written to /etc/pihole/dnsmasq.conf" /var/log/pihole/FTL.log'
++  run bash -c 'grep -c "DEBUG_CONFIG: Config file written to /opt/etc/pihole/dnsmasq.conf" /var/log/pihole/FTL.log'
+   printf "dnsmasq.conf write count: %s\n" "${lines[0]}"
+   assert_line --index 0 "1"
+-  run bash -c 'grep -c "DEBUG_CONFIG: HOSTS file written to /etc/pihole/hosts/custom.list" /var/log/pihole/FTL.log'
++  run bash -c 'grep -c "DEBUG_CONFIG: HOSTS file written to /opt/etc/pihole/hosts/custom.list" /var/log/pihole/FTL.log'
+   printf "custom.list write count: %s\n" "${lines[0]}"
+   # On RISCV64, pytest is skipped, so only BATS writes occur (3x)
+   # Otherwise, pytest dns/hosts config array PUT + DELETE add 2 more (5x)
+diff --git a/test/api/libs/responseVerifyer.py b/test/api/libs/responseVerifyer.py
+index 50a5c1c9..e2381e24 100644
+--- a/test/api/libs/responseVerifyer.py
++++ b/test/api/libs/responseVerifyer.py
+@@ -23,8 +23,8 @@ class ResponseVerifyer():
+ 
+ 	# Translate between OpenAPI and Python types
+ 	YAML_TYPES = { "string": [str], "integer": [int], "number": [int, float], "boolean": [bool], "array": [list] }
+-	TELEPORTER_FILES_EXPORT = ["etc/pihole/gravity.db", "etc/pihole/pihole.toml", "etc/pihole/pihole-FTL.db", "etc/hosts"]
+-	TELEPORTER_FILES_IMPORT = ['etc/pihole/pihole.toml', 'etc/pihole/dhcp.leases', 'etc/pihole/gravity.db->group', 'etc/pihole/gravity.db->adlist', 'etc/pihole/gravity.db->adlist_by_group', 'etc/pihole/gravity.db->domainlist', 'etc/pihole/gravity.db->domainlist_by_group', 'etc/pihole/gravity.db->client', 'etc/pihole/gravity.db->client_by_group' ]
++	TELEPORTER_FILES_EXPORT = ["opt/etc/pihole/gravity.db", "opt/etc/pihole/pihole.toml", "opt/etc/pihole/pihole-FTL.db", "opt/etc/hosts"]
++	TELEPORTER_FILES_IMPORT = ['opt/etc/pihole/pihole.toml', 'opt/etc/pihole/dhcp.leases', 'opt/etc/pihole/gravity.db->group', 'opt/etc/pihole/gravity.db->adlist', 'opt/etc/pihole/gravity.db->adlist_by_group', 'opt/etc/pihole/gravity.db->domainlist', 'opt/etc/pihole/gravity.db->domainlist_by_group', 'opt/etc/pihole/gravity.db->client', 'opt/etc/pihole/gravity.db->client_by_group' ]
+ 
+ 	auth_method = "?"
+ 	teleporter_archive = None
+@@ -187,7 +187,7 @@ class ResponseVerifyer():
+ 					for expected_file in self.TELEPORTER_FILES_EXPORT:
+ 						if expected_file not in zipfile_obj.namelist():
+ 							self.errors.append("File " + expected_file + " is missing in received archive.")
+-					pihole_toml = zipfile_obj.read("etc/pihole/pihole.toml")
++					pihole_toml = zipfile_obj.read("opt/etc/pihole/pihole.toml")
+ 					if not pihole_toml.startswith(b"# Pi-hole configuration file (v"):
+ 						self.errors.append("Received ZIP file's pihole.toml starts with wrong header")
+ 				except Exception as err:
