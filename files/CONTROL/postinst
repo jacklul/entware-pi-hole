@@ -57,6 +57,16 @@ service_action() {
 
 ##########
 
+# Show an error when Entware was installed in alternative mode because we don't support it
+if [ -x /opt/bin/busybox ]; then
+    for file in passwd group shadow gshadow; do
+        if [ ! -h "$file" ]; then
+            echo "  ${INFO} ${COL_BOLD}${COL_RED}Alternative Entware install is not supported - expect issues!${COL_NC}"
+            break
+        fi
+    done
+fi
+
 # Show a warning when required 'pihole' user does not exist
 if [ -z "$(id -u pihole 2> /dev/null)" ]; then
     echo "  ${INFO} ${COL_BOLD}${COL_YELLOW}User 'pihole' does not exist - make sure it is added to the system!${COL_NC}"
@@ -180,6 +190,8 @@ if [ -n "$fresh_install" ]; then
         if [ -n "$new_interface" ]; then
             pihole-FTL --config dns.interface "$new_interface" > /dev/null
             echo "  ${INFO} Using network interface: ${COL_NC}${COL_CYAN}$new_interface${COL_NC}"
+        else
+            echo "  ${INFO} ${COL_BOLD}${COL_RED}Failed to detect LAN network interface - leaving unconfigured!${COL_NC}"
         fi
     fi
 
