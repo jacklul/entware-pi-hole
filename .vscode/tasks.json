@@ -37,18 +37,18 @@
             }
         },
         {
-            "label": "Create dev/web patch",
+            "label": "Create dev/FTL patch",
             "type": "shell",
-            "command": "git -C dev/web diff --cached --abbrev=8 > dev/patch_web.patch && code dev/patch_web.patch",
+            "command": "git -C dev/FTL diff --cached --abbrev=8 > dev/patch_ftl.patch && code dev/patch_ftl.patch",
             "problemMatcher": [],
             "options": {
                 "cwd": "${workspaceFolder}"
             }
         },
         {
-            "label": "Create dev/FTL patch",
+            "label": "Create dev/web patch",
             "type": "shell",
-            "command": "git -C dev/FTL diff --cached --abbrev=8 > dev/patch_ftl.patch && code dev/patch_ftl.patch",
+            "command": "git -C dev/web diff --cached --abbrev=8 > dev/patch_web.patch && code dev/patch_web.patch",
             "problemMatcher": [],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -64,15 +64,6 @@
             }
         },
         {
-            "label": "Patch dev/web",
-            "type": "shell",
-            "command": "bash scripts/patch.sh web dev/web",
-            "problemMatcher": [],
-            "options": {
-                "cwd": "${workspaceFolder}"
-            }
-        },
-        {
             "label": "Patch dev/FTL",
             "type": "shell",
             "command": "bash scripts/patch.sh ftl dev/FTL",
@@ -82,26 +73,26 @@
             }
         },
         {
-            "label": "Patch all repositories",
-            "dependsOn": [
-                "Patch dev/core",
-                "Patch dev/web",
-                "Patch dev/FTL"
-            ]
-        },
-        {
-            "label": "Reset dev/core",
+            "label": "Patch dev/web",
             "type": "shell",
-            "command": "git -C dev/core reset --hard && git -C dev/core clean -fd",
+            "command": "bash scripts/patch.sh web dev/web",
             "problemMatcher": [],
             "options": {
                 "cwd": "${workspaceFolder}"
             }
         },
         {
-            "label": "Reset dev/web",
+            "label": "Patch all repositories",
+            "dependsOn": [
+                "Patch dev/core",
+                "Patch dev/FTL",
+                "Patch dev/web"
+            ]
+        },
+        {
+            "label": "Reset dev/core",
             "type": "shell",
-            "command": "git -C dev/web reset --hard && git -C dev/web clean -fd",
+            "command": "git -C dev/core reset --hard && git -C dev/core clean -fd",
             "problemMatcher": [],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -117,26 +108,26 @@
             }
         },
         {
-            "label": "Reset all repositories",
-            "dependsOn": [
-                "Reset dev/core",
-                "Reset dev/web",
-                "Reset dev/FTL"
-            ]
-        },
-        {
-            "label": "Test dev/core",
+            "label": "Reset dev/web",
             "type": "shell",
-            "command": "bash scripts/patch.sh core dev/core no-patches",
+            "command": "git -C dev/web reset --hard && git -C dev/web clean -fd",
             "problemMatcher": [],
             "options": {
                 "cwd": "${workspaceFolder}"
             }
         },
         {
-            "label": "Test dev/web",
+            "label": "Reset all repositories",
+            "dependsOn": [
+                "Reset dev/core",
+                "Reset dev/FTL",
+                "Reset dev/web"
+            ]
+        },
+        {
+            "label": "Test dev/core",
             "type": "shell",
-            "command": "bash scripts/patch.sh web dev/web no-patches",
+            "command": "bash scripts/patch.sh core dev/core no-patches",
             "problemMatcher": [],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -152,12 +143,50 @@
             }
         },
         {
+            "label": "Test dev/web",
+            "type": "shell",
+            "command": "bash scripts/patch.sh web dev/web no-patches",
+            "problemMatcher": [],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        },
+        {
             "label": "Test all repositories",
             "dependsOn": [
                 "Test dev/core",
-                "Test dev/web",
-                "Test dev/FTL"
+                "Test dev/FTL",
+                "Test dev/web"
             ]
-        }
+        },
+        {
+            "label": "Repatch dev/core",
+            "dependsOn": [
+                "Reset dev/core",
+                "Patch dev/core",
+            ]
+        },
+        {
+            "label": "Repatch dev/FTL",
+            "dependsOn": [
+                "Reset dev/FTL",
+                "Patch dev/FTL",
+            ]
+        },
+        {
+            "label": "Repatch dev/web",
+            "dependsOn": [
+                "Reset dev/web",
+                "Patch dev/web",
+            ]
+        },
+        {
+            "label": "Repatch all repositories",
+            "dependsOn": [
+                "Repatch dev/core",
+                "Repatch dev/FTL",
+                "Repatch dev/web"
+            ]
+        },
     ]
 }
