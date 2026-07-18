@@ -99,6 +99,11 @@ BEGIN { multi_line_comment = 0 }
         contents="$(echo "$contents" | grep -aFv "Reading certificate from")" # /test/test_suite.bats
     fi
 
+    if [ "$basename" = "tls_client.c" ]; then
+        contents="$(echo "$contents" | grep -aFv ".crt\",")" # /src/dotdoh/tls_client.c
+        contents="$(echo "$contents" | grep -aFv ".pem\",")" # /src/dotdoh/tls_client.c
+    fi
+
     # Checks
     echo -e "$contents" | grep -aEn "(^|\s+|\")/etc" && exit 1
     echo -e "$contents" | grep -aEn "(^|\s+|\")/var" && exit 1

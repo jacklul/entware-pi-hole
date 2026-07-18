@@ -238,9 +238,9 @@ index 372e2701..eca5f62c 100644
 --- a/test/test_final.bats
 +++ b/test/test_final.bats
 @@ -39,7 +39,7 @@ load 'bats_helper.bash'
-   # pytest: 2x pihole.toml writes (TOTP stress test secret set + remove)
    # pytest: 2x pihole.toml writes (auth security test password set + remove)
    # pytest: 2x pihole.toml writes (auth security test TOTP secret set + remove)
+   # dotdoh.bats: 2x pihole.toml writes (encrypted setup + plaintext teardown)
 -  run bash -c 'grep -c "INFO: Config file written to /etc/pihole/pihole.toml" /var/log/pihole/FTL.log'
 +  run bash -c 'grep -c "INFO: Config file written to /opt/etc/pihole/pihole.toml" /var/log/pihole/FTL.log'
    printf "pihole.toml write count: %s\n" "${lines[0]}"
@@ -253,7 +253,7 @@ index 372e2701..eca5f62c 100644
 -  run bash -c 'grep -c "DEBUG_CONFIG: Config file written to /etc/pihole/dnsmasq.conf" /var/log/pihole/FTL.log'
 +  run bash -c 'grep -c "DEBUG_CONFIG: Config file written to /opt/etc/pihole/dnsmasq.conf" /var/log/pihole/FTL.log'
    printf "dnsmasq.conf write count: %s\n" "${lines[0]}"
-   assert_line --index 0 "1"
+   assert_line --index 0 "3"
 -  run bash -c 'grep -c "DEBUG_CONFIG: HOSTS file written to /etc/pihole/hosts/custom.list" /var/log/pihole/FTL.log'
 +  run bash -c 'grep -c "DEBUG_CONFIG: HOSTS file written to /opt/etc/pihole/hosts/custom.list" /var/log/pihole/FTL.log'
    printf "custom.list write count: %s\n" "${lines[0]}"
