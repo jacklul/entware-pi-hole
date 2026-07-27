@@ -485,8 +485,8 @@ index 266de914..552dfff5 100644
 --- a/src/dotdoh/tls_client.c
 +++ b/src/dotdoh/tls_client.c
 @@ -61,12 +61,13 @@
- // a musl binary that can run on any of these, so this is deliberately not
- // Debian-only.
+ // place the bundle differently, so try the common single-file locations then the
+ // hashed directory. FTL's musl binary runs on any of these, so not Debian-only.
  static const char *const TLS_DEFAULT_CA_FILES[] = {
 +	"/opt/etc/ssl/certs/ca-certificates.crt", // Entware
  	"/etc/ssl/certs/ca-certificates.crt", // Debian, Ubuntu, Alpine, Gentoo
@@ -497,5 +497,5 @@ index 266de914..552dfff5 100644
 -#define TLS_DEFAULT_CA_DIR  "/etc/ssl/certs"
 +#define TLS_DEFAULT_CA_DIR  "/opt/etc/ssl/certs"
  
- // Shared, read-only-after-init crypto state. One trust store and (pre-4.0) one
- // DRBG are enough for all upstreams; each connection gets its own SSL context.
+ // Shared, read-only-after-init crypto state: one SSL_CTX carries the trust store,
+ // fail-closed verify mode and client session cache for all upstreams; each
