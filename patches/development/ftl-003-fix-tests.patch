@@ -193,8 +193,8 @@ index 021530bd..2a84e4ea 100644
 -  run bash -c 'grep -F "Webserver option 1/12: error_pages=/var/www/html/admin/" /var/log/pihole/FTL.log'
 +  run bash -c 'grep -F "Webserver option 1/12: error_pages=/opt/share/pihole/www/admin/" /var/log/pihole/FTL.log'
    assert_success
-   run bash -c 'grep -F "Webserver option 2/12: listening_ports=80o,443os,[::]:80o,[::]:443os" /var/log/pihole/FTL.log'
-   assert_success
+   # The terminator owns the secure ports; CivetWeb gets the plaintext ports plus its loopback backend.
+   run bash -c 'grep -F "Webserver option 2/12: listening_ports=80o,[::]:80o,127.0.0.1:0" /var/log/pihole/FTL.log'
 @@ -1788,15 +1788,15 @@ setup() {
  #  printf "%s\n" "${lines[@]}"
  #  assert_success

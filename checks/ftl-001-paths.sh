@@ -99,9 +99,9 @@ BEGIN { multi_line_comment = 0 }
         contents="$(echo "$contents" | grep -aFv "Reading certificate from")" # /test/test_suite.bats
     fi
 
-    if [ "$basename" = "tls_client.c" ]; then
-        contents="$(echo "$contents" | grep -aFv ".crt\",")" # /src/dotdoh/tls_client.c
-        contents="$(echo "$contents" | grep -aFv ".pem\",")" # /src/dotdoh/tls_client.c
+    if [ "$basename" = "tls_client.c" ] || [ "$basename" = "quic_client.c" ]; then
+        contents="$(echo "$contents" | grep -aFv ".crt\",")" # /src/dotdoh/tls_client.c, /src/dotdoh/quic_client.c
+        contents="$(echo "$contents" | grep -aFv ".pem\",")" # /src/dotdoh/tls_client.c, /src/dotdoh/quic_client.c
     fi
 
     # Checks

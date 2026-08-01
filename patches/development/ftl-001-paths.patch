@@ -499,3 +499,22 @@ index 266de914..552dfff5 100644
  
  // Shared, read-only-after-init crypto state: one SSL_CTX carries the trust store,
  // fail-closed verify mode and client session cache for all upstreams; each
+diff --git a/src/dotdoh/quic_client.c b/src/dotdoh/quic_client.c
+index 7b0c3b8e..905d1ca6 100644
+--- a/src/dotdoh/quic_client.c
++++ b/src/dotdoh/quic_client.c
+@@ -57,12 +57,13 @@
+ // Trust-anchor locations when no CA path is set, kept in step with tls_client.c.
+ // FTL's musl binary runs on any of these distros, so this is not Debian-only.
+ static const char *const QUIC_DEFAULT_CA_FILES[] = {
++	"/opt/etc/ssl/certs/ca-certificates.crt", // Entware
+ 	"/etc/ssl/certs/ca-certificates.crt", // Debian, Ubuntu, Alpine, Gentoo
+ 	"/etc/pki/tls/certs/ca-bundle.crt",   // RHEL, Fedora, CentOS
+ 	"/etc/ssl/ca-bundle.pem",             // openSUSE
+ 	"/etc/ssl/cert.pem",                  // Alpine, *BSD, macOS
+ };
+-#define QUIC_DEFAULT_CA_DIR "/etc/ssl/certs"
++#define QUIC_DEFAULT_CA_DIR "/opt/etc/ssl/certs"
+ 
+ // Shared, read-only-after-init QUIC context: one SSL_CTX carries the trust store
+ // and fail-closed verify for all DoH3 upstreams. Built once (single-threaded) in
