@@ -187,14 +187,14 @@ index 021530bd..2a84e4ea 100644
  
  
  @test "Webserver options are logged as expected" {
--  run bash -c 'grep -F "Webserver option 0/12: document_root=/var/www/html" /var/log/pihole/FTL.log'
-+  run bash -c 'grep -F "Webserver option 0/12: document_root=/opt/share/pihole/www" /var/log/pihole/FTL.log'
+-  run bash -c 'grep -F "Webserver option 0/13: document_root=/var/www/html" /var/log/pihole/FTL.log'
++  run bash -c 'grep -F "Webserver option 0/13: document_root=/opt/share/pihole/www" /var/log/pihole/FTL.log'
    assert_success
--  run bash -c 'grep -F "Webserver option 1/12: error_pages=/var/www/html/admin/" /var/log/pihole/FTL.log'
-+  run bash -c 'grep -F "Webserver option 1/12: error_pages=/opt/share/pihole/www/admin/" /var/log/pihole/FTL.log'
+-  run bash -c 'grep -F "Webserver option 1/13: error_pages=/var/www/html/admin/" /var/log/pihole/FTL.log'
++  run bash -c 'grep -F "Webserver option 1/13: error_pages=/opt/share/pihole/www/admin/" /var/log/pihole/FTL.log'
    assert_success
    # The terminator owns the secure ports; CivetWeb gets the plaintext ports plus its loopback backend.
-   run bash -c 'grep -F "Webserver option 2/12: listening_ports=80o,[::]:80o,127.0.0.1:0" /var/log/pihole/FTL.log'
+   run bash -c 'grep -F "Webserver option 2/13: listening_ports=80o,[::]:80o,127.0.0.1:0" /var/log/pihole/FTL.log'
 @@ -1788,15 +1788,15 @@ setup() {
  #  printf "%s\n" "${lines[@]}"
  #  assert_success
@@ -238,9 +238,9 @@ index 372e2701..eca5f62c 100644
 --- a/test/test_final.bats
 +++ b/test/test_final.bats
 @@ -39,7 +39,7 @@ load 'bats_helper.bash'
-   # pytest: 2x pihole.toml writes (auth security test TOTP secret set + remove)
    # dotdoh.bats: 2x pihole.toml writes (encrypted setup + plaintext teardown)
    # dotdoh.bats: 2x pihole.toml writes (debug.dotdoh enable + disable)
+   # dotdoh_server.bats: 1x pihole.toml write (reset dns.reply.host force to default)
 -  run bash -c 'grep -c "INFO: Config file written to /etc/pihole/pihole.toml" /var/log/pihole/FTL.log'
 +  run bash -c 'grep -c "INFO: Config file written to /opt/etc/pihole/pihole.toml" /var/log/pihole/FTL.log'
    printf "pihole.toml write count: %s\n" "${lines[0]}"

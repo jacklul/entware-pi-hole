@@ -36,41 +36,41 @@ index 63197d35..171ab748 100644
      }
  
 @@ -575,6 +585,25 @@ function updateVersionInfo() {
-           }
          }
+       }
  
-+        if (v.name === "Entware Package") {
-+          if (v.branch === "pi-hole") { // Display the link to the current release when running the main package
-+            localVersion =
-+              '<a href="' +
-+              v.url +
-+              "/" +
-+              localVersion +
-+              '" rel="noopener" target="_blank">' +
-+              localVersion +
-+              "</a>";
-+          }
++       if (v.name === "Entware Package") {
++         if (v.branch === "pi-hole") { // Display the link to the current release when running the main package
++           localVersion =
++             '<a href="' +
++             v.url +
++             "/" +
++             localVersion +
++             '" rel="noopener" target="_blank">' +
++             localVersion +
++             "</a>";
++         }
 +
-+          if (v.remote != 'null' && versionCompare(v.local.replace(/\D/g, '.'), v.remote.replace(/\D/g, '.')) === -1) {
-+            updateComponentAvailable = true;
-+            entwareUpdate = true;
-+            isDocker = false;
-+          }
-+        }
++         if (v.remote != 'null' && versionCompare(v.local.replace(/\D/g, '.'), v.remote.replace(/\D/g, '.')) === -1) {
++           updateComponentAvailable = true;
++           entwareUpdate = true;
++           isDocker = false;
++         }
++       }
 +
-         // Display update information of individual components only if we are not running in a Docker container
-         if ((!isDocker || v.name === "Docker Tag") && updateComponentAvailable) {
-           $("#versions").append(
+       // Display update information of individual components only if we are not running in a Docker container
+       if ((!isDocker || v.name === "Docker Tag") && updateComponentAvailable) {
+         $("#versions").append(
 @@ -598,7 +598,11 @@ function updateVersionInfo() {
-       $("#update-hint").html(
-         'To install updates, <a href="https://github.com/pi-hole/docker-pi-hole#upgrading-persistence-and-customizations" rel="noopener noreferrer" target="_blank">replace this old container with a fresh upgraded image</a>.'
-       );
+           'To install updates, <a href="https://github.com/pi-hole/docker-pi-hole#upgrading-persistence-and-customizations" rel="noopener noreferrer" target="_blank">replace this old container with a fresh upgraded image</a>.'
+         )
+         .addClass("w-100");
 -    } else if (updateAvailable) {
 +    } else if (entwareUpdate) {
 +      $("#update-hint").html(
 +        'To install updates, run <code><a href="https://github.com/jacklul/entware-pi-hole/wiki#updating" rel="noopener" target="_blank">pihole -up</a></code>.'
 +      );
 +    } else if (updateAvailable && !packaged) {
-       $("#update-hint").html(
-         'To install updates, run <code><a href="https://docs.pi-hole.net/main/update/" rel="noopener noreferrer" target="_blank">pihole -up</a></code>.'
-       );
+       $("#update-hint")
+         .html(
+           'To install updates, run <code><a href="https://docs.pi-hole.net/main/update/" rel="noopener noreferrer" target="_blank">pihole -up</a></code>.'
