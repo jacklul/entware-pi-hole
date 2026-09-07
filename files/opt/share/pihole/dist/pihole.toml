@@ -17,6 +17,10 @@
   # Change DNS port as most devices will use the default port already. (default is 53)
   #port = 5053
 
+  # Disable DNS-over-HTTPS and DNS-over-TLS servers as their ports might conflict with existing services. (default is true)
+  doh = false
+  dot = false
+
 # Disable NTP features as it may conflict with system's build-in time synchronization.
 [ntp]
   [ntp.ipv4]

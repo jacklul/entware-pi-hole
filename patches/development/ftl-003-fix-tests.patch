@@ -143,6 +143,33 @@ index 0b433266..85d8a45c 100644
    #
    # Allowed values are:
    #     true or false
+@@ -1199,11 +1199,12 @@
+ 
+     # Should FTL create a temporary CLI password?
+     #
+-    # This password is stored in clear in /etc/pihole and can be used by the CLI (pihole
+-    # ...  commands) to authenticate against the API. Note that the password is only valid
+-    # for the current session and regenerated on each FTL restart. Sessions initiated with
+-    # this password cannot modify the Pi-hole configuration (change passwords, etc.) for
+-    # security reasons but can still use the API to query data and manage lists.
++    # This password is stored in clear in /opt/etc/pihole and can be used by the CLI
++    # (pihole ...  commands) to authenticate against the API. Note that the password is
++    # only valid for the current session and regenerated on each FTL restart. Sessions
++    # initiated with this password cannot modify the Pi-hole configuration (change
++    # passwords, etc.) for security reasons but can still use the API to query data and
++    # manage lists.
+     #
+     # Allowed values are:
+     #     true or false
+@@ -1693,7 +1694,7 @@
+   #     true or false
+   config = true ### CHANGED, default = false
+ 
+-  # Debug monitoring of /etc/pihole filesystem events
++  # Debug monitoring of /opt/etc/pihole filesystem events
+   #
+   # Allowed values are:
+   #     true or false
 diff --git a/test/test_suite.bats b/test/test_suite.bats
 index 021530bd..2a84e4ea 100644
 --- a/test/test_suite.bats
@@ -195,31 +222,6 @@ index 021530bd..2a84e4ea 100644
    assert_success
    # The terminator owns the secure ports; CivetWeb gets the plaintext ports plus its loopback backend.
    run bash -c 'grep -F "Webserver option 2/13: listening_ports=80o,[::]:80o,127.0.0.1:0" /var/log/pihole/webserver.log'
-@@ -1788,15 +1788,15 @@ setup() {
- #  printf "%s\n" "${lines[@]}"
- #  assert_success
-   run bash -c "./pihole-FTL --teleporter ${filename}"
--  assert_line --index -9 "Imported etc/pihole/pihole.toml"
--  assert_line --index -8 "Imported etc/pihole/dhcp.leases"
--  assert_line --index -7 "Imported etc/pihole/gravity.db->group"
--  assert_line --index -6 "Imported etc/pihole/gravity.db->adlist"
--  assert_line --index -5 "Imported etc/pihole/gravity.db->adlist_by_group"
--  assert_line --index -4 "Imported etc/pihole/gravity.db->domainlist"
--  assert_line --index -3 "Imported etc/pihole/gravity.db->domainlist_by_group"
--  assert_line --index -2 "Imported etc/pihole/gravity.db->client"
--  assert_line --index -1 "Imported etc/pihole/gravity.db->client_by_group"
-+  assert_line --index -9 "Imported opt/etc/pihole/pihole.toml"
-+  assert_line --index -8 "Imported opt/etc/pihole/dhcp.leases"
-+  assert_line --index -7 "Imported opt/etc/pihole/gravity.db->group"
-+  assert_line --index -6 "Imported opt/etc/pihole/gravity.db->adlist"
-+  assert_line --index -5 "Imported opt/etc/pihole/gravity.db->adlist_by_group"
-+  assert_line --index -4 "Imported opt/etc/pihole/gravity.db->domainlist"
-+  assert_line --index -3 "Imported opt/etc/pihole/gravity.db->domainlist_by_group"
-+  assert_line --index -2 "Imported opt/etc/pihole/gravity.db->client"
-+  assert_line --index -1 "Imported opt/etc/pihole/gravity.db->client_by_group"
-   assert_success
-   run bash -c "rm ${filename}"
- }
 diff --git a/test/api/test_api.py b/test/api/test_api.py
 index c7921174..248c6acb 100644
 --- a/test/api/test_api.py
@@ -259,27 +261,3 @@ index 372e2701..eca5f62c 100644
    printf "custom.list write count: %s\n" "${lines[0]}"
    # On RISCV64, pytest is skipped, so only BATS writes occur (3x)
    # Otherwise, pytest dns/hosts config array PUT + DELETE add 2 more (5x)
-diff --git a/test/api/libs/responseVerifyer.py b/test/api/libs/responseVerifyer.py
-index 50a5c1c9..e2381e24 100644
---- a/test/api/libs/responseVerifyer.py
-+++ b/test/api/libs/responseVerifyer.py
-@@ -23,8 +23,8 @@ class ResponseVerifyer():
- 
- 	# Translate between OpenAPI and Python types
- 	YAML_TYPES = { "string": [str], "integer": [int], "number": [int, float], "boolean": [bool], "array": [list] }
--	TELEPORTER_FILES_EXPORT = ["etc/pihole/gravity.db", "etc/pihole/pihole.toml", "etc/pihole/pihole-FTL.db", "etc/hosts"]
--	TELEPORTER_FILES_IMPORT = ['etc/pihole/pihole.toml', 'etc/pihole/dhcp.leases', 'etc/pihole/gravity.db->group', 'etc/pihole/gravity.db->adlist', 'etc/pihole/gravity.db->adlist_by_group', 'etc/pihole/gravity.db->domainlist', 'etc/pihole/gravity.db->domainlist_by_group', 'etc/pihole/gravity.db->client', 'etc/pihole/gravity.db->client_by_group' ]
-+	TELEPORTER_FILES_EXPORT = ["opt/etc/pihole/gravity.db", "opt/etc/pihole/pihole.toml", "opt/etc/pihole/pihole-FTL.db", "opt/etc/hosts"]
-+	TELEPORTER_FILES_IMPORT = ['opt/etc/pihole/pihole.toml', 'opt/etc/pihole/dhcp.leases', 'opt/etc/pihole/gravity.db->group', 'opt/etc/pihole/gravity.db->adlist', 'opt/etc/pihole/gravity.db->adlist_by_group', 'opt/etc/pihole/gravity.db->domainlist', 'opt/etc/pihole/gravity.db->domainlist_by_group', 'opt/etc/pihole/gravity.db->client', 'opt/etc/pihole/gravity.db->client_by_group' ]
- 
- 	auth_method = "?"
- 	teleporter_archive = None
-@@ -187,7 +187,7 @@ class ResponseVerifyer():
- 					for expected_file in self.TELEPORTER_FILES_EXPORT:
- 						if expected_file not in zipfile_obj.namelist():
- 							self.errors.append("File " + expected_file + " is missing in received archive.")
--					pihole_toml = zipfile_obj.read("etc/pihole/pihole.toml")
-+					pihole_toml = zipfile_obj.read("opt/etc/pihole/pihole.toml")
- 					if not pihole_toml.startswith(b"# Pi-hole configuration file (v"):
- 						self.errors.append("Received ZIP file's pihole.toml starts with wrong header")
- 				except Exception as err:

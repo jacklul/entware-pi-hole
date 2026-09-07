@@ -337,7 +337,7 @@ index 9e52776b..17eb150d 100644
      # su #
      daily
      create 640 pihole pihole
-@@ -8,12 +8,12 @@
+@@ -9,12 +9,12 @@
      nomail
      nodateext
      postrotate
@@ -346,21 +346,21 @@ index 9e52776b..17eb150d 100644
      endscript
  }
  
- # FTL.log and webserver.log are opened and closed for each line, therefore no postrotate is needed
--/var/log/pihole/FTL.log {
-+/opt/var/log/pihole/FTL.log {
-     # su #
-     weekly
-     create 640 pihole pihole
-@@ -24,7 +24,7 @@
-     nodateext
- }
- 
+-/var/log/pihole/FTL.log
 -/var/log/pihole/webserver.log {
++/opt/var/log/pihole/FTL.log
 +/opt/var/log/pihole/webserver.log {
      # su #
      weekly
      create 640 pihole pihole
+@@ -26,6 +26,6 @@
+     nodateext
+     sharedscripts
+     postrotate
+-        kill -USR2 $(cat /run/pihole-FTL.pid 2>/dev/null) 2>/dev/null || true
++        kill -USR2 $(cat /opt/var/run/pihole-FTL.pid 2>/dev/null) 2>/dev/null || true
+     endscript
+ }
 diff --git a/advanced/Templates/pihole-FTL-poststop.sh b/advanced/Templates/pihole-FTL-poststop.sh
 index b5ddbc97..4d7a10e3 100755
 --- a/advanced/Templates/pihole-FTL-poststop.sh
