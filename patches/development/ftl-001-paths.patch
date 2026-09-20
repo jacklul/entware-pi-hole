@@ -42,12 +42,12 @@ index eee5a8c0..51c882cd 100644
 --- a/src/config/config.c
 +++ b/src/config/config.c
 @@ -1004,7 +1004,7 @@ void initConfig(struct config *conf)
- 	conf->webserver.paths.webroot.a = cJSON_CreateStringReference("A valid path");
+ 	conf->webserver.paths.webroot.a = cJSON_CreateStringReference("A valid absolute path not containing \""CONFIG_DIR"\"");
  	conf->webserver.paths.webroot.t = CONF_STRING;
- 	conf->webserver.paths.webroot.f = FLAG_RESTART_FTL;
+ 	conf->webserver.paths.webroot.f = FLAG_RESTART_FTL | FLAG_API_READ_ONLY;
 -	conf->webserver.paths.webroot.d.s = (char*)"/var/www/html";
 +	conf->webserver.paths.webroot.d.s = (char*)"/opt/share/pihole/www";
- 	conf->webserver.paths.webroot.c = validate_filepath;
+ 	conf->webserver.paths.webroot.c = validate_webroot;
  
  	conf->webserver.paths.webhome.k = "webserver.paths.webhome";
 @@ -1184,7 +1184,7 @@ void initConfig(struct config *conf)
@@ -56,7 +56,7 @@ index eee5a8c0..51c882cd 100644
  	conf->files.gravity_tmp.f = FLAG_RESTART_FTL;
 -	conf->files.gravity_tmp.d.s = (char*)"/tmp";
 +	conf->files.gravity_tmp.d.s = (char*)"/opt/tmp";
- 	conf->files.gravity_tmp.c = validate_stub; // Only type-based checking
+ 	conf->files.gravity_tmp.c = validate_filepath;
  
  	conf->files.macvendor.k = "files.macvendor";
 @@ -1217,7 +1217,7 @@ void initConfig(struct config *conf)
@@ -65,7 +65,7 @@ index eee5a8c0..51c882cd 100644
  	conf->files.log.webserver.f = FLAG_RESTART_FTL;
 -	conf->files.log.webserver.d.s = (char*)"/var/log/pihole/webserver.log";
 +	conf->files.log.webserver.d.s = (char*)"/opt/var/log/pihole/webserver.log";
- 	conf->files.log.webserver.c = validate_webserver_logfile;
+ 	conf->files.log.webserver.c = validate_filepath;
  
  	// struct misc
 @@ -1225,7 +1225,7 @@ void initConfig(struct config *conf)
@@ -300,17 +300,23 @@ index 47f2edc3..48410465 100644
  	}
  	free(buffer);
  
-@@ -329,7 +329,7 @@ static const char *test_and_import_pihole_toml(void *ptr, size_t size, char * co
- 	{
- 		free_config(&teleporter_config, false);
- 		toml_free(toml);
--		return "File etc/pihole/pihole.toml in ZIP archive contains invalid TOML configuration";
-+		return "File opt/etc/pihole/pihole.toml in ZIP archive contains invalid TOML configuration";
+@@ -338,11 +338,11 @@ static const char *test_and_import_pihole_toml(void *ptr, size_t size, char * co
+ 		// The buffer names the offending item when a value was refused, and
+ 		// stays empty when the file could not be read at all
+ 		if(valerr[0] == '\0')
+-			return "File etc/pihole/pihole.toml in ZIP archive contains invalid TOML configuration";
++			return "File opt/etc/pihole/pihole.toml in ZIP archive contains invalid TOML configuration";
+ 
+ 		log_err("Teleporter: %s", valerr);
+ 		set_hint(hint, valerr);
+-		return "File etc/pihole/pihole.toml in ZIP archive contains an invalid value";
++		return "File opt/etc/pihole/pihole.toml in ZIP archive contains an invalid value";
  	}
  
  	// Test dnsmasq config in the imported configuration
-@@ -338,7 +338,7 @@ static const char *test_and_import_pihole_toml(void *ptr, size_t size, char * co
+@@ -338,8 +338,8 @@ static const char *test_and_import_pihole_toml(void *ptr, size_t size, char * co
  	{
+ 		report_teleporter_skipped(false);
  		free_config(&teleporter_config, false);
  		toml_free(toml);
 -		return "File etc/pihole/pihole.toml in ZIP archive contains invalid dnsmasq configuration";
