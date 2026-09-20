@@ -53,38 +53,6 @@ diff --git a/test/pihole.toml b/test/pihole.toml
 index 0b433266..85d8a45c 100644
 --- a/test/pihole.toml
 +++ b/test/pihole.toml
-@@ -665,29 +665,29 @@
-     #
-     # Allowed values are:
-     #     A valid TLS certificate file (*.pem)
--    cert = "/etc/pihole/test.pem" ### CHANGED, default = "/etc/pihole/tls.pem"
-+    cert = "/etc/pihole/test.pem" ### CHANGED, default = "/opt/etc/pihole/tls.pem"
- 
-     # Number of days the automatically generated self-signed TLS/SSL certificate will be
-     # valid for.
-     #
-     # Defaults to 47 days. A minimum of 7 days is enforced.
-     # Some devices may enforce shorter validity ranges. Note that defining a lower
-     # validity range may require you to accept the self-signed certificate more often in
-     # your browser.
-     # Pi-hole will regenerate certificates it created itself two days prior to expiration.
-     # If you are using your own certificate, you need to regenerate it yourself. In this
-     # case, it is advised to set the validity range to 0 days, so that Pi-hole does not
-     # try to regenerate your certificate. If you set the validity range to 0 days and
-     # still try to generate a certificate, Pi-hole will set a fixed validity range of
-     # roughly 30 years for the certificate.
-     validity = 47
-
-   [webserver.paths]
-     # Server root on the host
-     #
-     # Allowed values are:
-     #     A valid path
--    webroot = "/var/www/html"
-+    webroot = "/opt/share/pihole/www"
- 
-     # Sub-directory of the root containing the web interface
-     #
 @@ -822,33 +822,33 @@
    #
    # Allowed values are:
@@ -147,6 +115,65 @@ index 0b433266..85d8a45c 100644
  
  [misc]
    # Using privacy levels you can specify which level of detail you want to see in your
+@@ -1011,7 +1011,7 @@
+   #
+   # Options given here reach the web server unchecked, and some of them decide which
+   # files it serves or executes, so this option cannot be set through the API. Set it in
+-  # /etc/pihole/pihole.toml, through an environment variable, or with "pihole-FTL
++  # /opt/etc/pihole/pihole.toml, through an environment variable, or with "pihole-FTL
+   # --config" - all of which require access to the host.
+   #
+   # Example: [ "num_threads=8", "max_request_size=32768" ]
+@@ -1060,7 +1060,7 @@
+     #
+     # Allowed values are:
+     #     A valid TLS certificate file (*.pem)
+-    cert = "/etc/pihole/test.pem" ### CHANGED, default = "/etc/pihole/tls.pem"
++    cert = "/etc/pihole/test.pem" ### CHANGED, default = "/opt/etc/pihole/tls.pem"
+ 
+     # Number of days the automatically generated self-signed TLS/SSL certificate will be
+     # valid for.
+@@ -1082,21 +1082,22 @@
+     #
+     # Every file below this directory can be requested over the network once
+     # webserver.serve_all is enabled, so it cannot be "/" or any other directory
+-    # containing "/etc/pihole".
++    # containing "/opt/etc/pihole".
+     #
+     # Relocating the document root decides which files the web server serves, so it cannot
+-    # be set through the API. Set it in /etc/pihole/pihole.toml, through an environment
+-    # variable, or with "pihole-FTL --config" - all of which require access to the host.
++    # be set through the API. Set it in /opt/etc/pihole/pihole.toml, through an
++    # environment variable, or with "pihole-FTL --config" - all of which require access to
++    # the host.
+     #
+     # Allowed values are:
+-    #     A valid absolute path not containing "/etc/pihole"
+-    webroot = "/var/www/html"
++    #     A valid absolute path not containing "/opt/etc/pihole"
++    webroot = "/opt/share/pihole/www"
+ 
+     # Sub-directory of the root containing the web interface
+     #
+     # This decides where the web server serves the interface from, so it cannot be set
+-    # through the API. Set it in /etc/pihole/pihole.toml, through an environment variable,
+-    # or with "pihole-FTL --config" - all of which require access to the host.
++    # through the API. Set it in /opt/etc/pihole/pihole.toml, through an environment
++    # variable, or with "pihole-FTL --config" - all of which require access to the host.
+     #
+     # Allowed values are:
+     #     A valid subpath, both slashes are needed!
+@@ -1116,8 +1116,8 @@
+     # Don't use this setting if you are not using a reverse proxy!
+     #
+     # This decides where the web server serves the interface from, so it cannot be set
+-    # through the API. Set it in /etc/pihole/pihole.toml, through an environment variable,
+-    # or with "pihole-FTL --config" - all of which require access to the host.
++    # through the API. Set it in /opt/etc/pihole/pihole.toml, through an environment
++    # variable, or with "pihole-FTL --config" - all of which require access to the host.
+     #
+     # Allowed values are:
+     #     A valid URL prefix or empty
 @@ -1305,7 +1305,7 @@
    # Warning: This is an advanced setting and should only be used with care.
    # Incorrectly formatted or config files specifying options which can only be defined
@@ -156,6 +183,15 @@ index 0b433266..85d8a45c 100644
    #
    # Allowed values are:
    #     true or false
+@@ -1437,7 +1437,7 @@
+   #
+   # dnsmasq directives such as "dhcp-script" and "conf-script" name programs that
+   # dnsmasq then executes, so this option cannot be set through the API. Set it in
+-  # /etc/pihole/pihole.toml, through an environment variable, or with "pihole-FTL
++  # /opt/etc/pihole/pihole.toml, through an environment variable, or with "pihole-FTL
+   # --config" - all of which require access to the host, which anyone placing such a
+   # script has anyway.
+   #
 diff --git a/test/test_suite.bats b/test/test_suite.bats
 index 021530bd..2a84e4ea 100644
 --- a/test/test_suite.bats
@@ -196,17 +232,35 @@ index 021530bd..2a84e4ea 100644
    assert_success
  
    run bash -c "dig A pi.hole +short @127.0.0.1"
+@@ -1617,7 +1617,7 @@ setup() {
+ 
+   # Wait for change to become effective, otherwise the running FTL can coalesce
+   # this change and the restore below into a single reload
+-  run bash -c "./pihole-FTL wait-for 'HOSTS file written to /etc/pihole/hosts/custom.list' /var/log/pihole/FTL.log 5 $logsize_before"
++  run bash -c "./pihole-FTL wait-for 'HOSTS file written to /opt/etc/pihole/hosts/custom.list' /var/log/pihole/FTL.log 5 $logsize_before"
+   assert_success
+ 
+   # Only sequences a decoder accepts: no overlong encoding, no UTF-16 surrogate,
+@@ -1633,7 +1633,7 @@ setup() {
+   run ./pihole-FTL --config dns.hosts '[ "1.1.1.1 abc-custom.com def-custom.de", "2.2.2.2 äste.com steä.com" ]'
+   assert_success
+ 
+-  run bash -c "./pihole-FTL wait-for 'HOSTS file written to /etc/pihole/hosts/custom.list' /var/log/pihole/FTL.log 5 $logsize_before"
++  run bash -c "./pihole-FTL wait-for 'HOSTS file written to /opt/etc/pihole/hosts/custom.list' /var/log/pihole/FTL.log 5 $logsize_before"
+   assert_success
+ }
+ 
 @@ -1818,9 +1818,9 @@ setup() {
  
  
  @test "Webserver options are logged as expected" {
--  run bash -c 'grep -F "Webserver option 0/12: document_root=/var/www/html" /var/log/pihole/FTL.log'
-+  run bash -c 'grep -F "Webserver option 0/12: document_root=/opt/share/pihole/www" /var/log/pihole/FTL.log'
+-  run bash -c 'grep -F "Webserver option 0/15: document_root=/var/www/html" /var/log/pihole/FTL.log'
++  run bash -c 'grep -F "Webserver option 0/15: document_root=/opt/share/pihole/www" /var/log/pihole/FTL.log'
    assert_success
--  run bash -c 'grep -F "Webserver option 1/12: error_pages=/var/www/html/admin/" /var/log/pihole/FTL.log'
-+  run bash -c 'grep -F "Webserver option 1/12: error_pages=/opt/share/pihole/www/admin/" /var/log/pihole/FTL.log'
+-  run bash -c 'grep -F "Webserver option 1/15: error_pages=/var/www/html/admin/" /var/log/pihole/FTL.log'
++  run bash -c 'grep -F "Webserver option 1/15: error_pages=/opt/share/pihole/www/admin/" /var/log/pihole/FTL.log'
    assert_success
-   run bash -c 'grep -F "Webserver option 2/12: listening_ports=80o,443os,[::]:80o,[::]:443os" /var/log/pihole/FTL.log'
+   run bash -c 'grep -F "Webserver option 2/15: listening_ports=80o,443os,[::]:80o,[::]:443os" /var/log/pihole/FTL.log'
    assert_success
 @@ -1788,15 +1788,15 @@ setup() {
  #  printf "%s\n" "${lines[@]}"
@@ -251,15 +305,15 @@ index 372e2701..eca5f62c 100644
 --- a/test/test_final.bats
 +++ b/test/test_final.bats
 @@ -39,7 +39,7 @@ load 'bats_helper.bash'
-   # pytest: 2x pihole.toml writes (TOTP stress test secret set + remove)
    # pytest: 2x pihole.toml writes (auth security test password set + remove)
    # pytest: 2x pihole.toml writes (auth security test TOTP secret set + remove)
+   # pytest: 2x pihole.toml writes (top_domains exclude filter set + reset)
 -  run bash -c 'grep -c "INFO: Config file written to /etc/pihole/pihole.toml" /var/log/pihole/FTL.log'
 +  run bash -c 'grep -c "INFO: Config file written to /opt/etc/pihole/pihole.toml" /var/log/pihole/FTL.log'
    printf "pihole.toml write count: %s\n" "${lines[0]}"
    # On RISCV64, pytest is skipped (too slow), so only BATS writes occur
    if [[ "${CI_ARCH}" == "linux/riscv64" ]]; then
-@@ -52,10 +52,10 @@ load 'bats_helper.bash'
+@@ -55,10 +55,10 @@ load 'bats_helper.bash'
    printf "pihole.toml unchanged count: %s\n" "${lines[0]}"
    [[ ${lines[0]} -ge 2 ]]
    assert_success
@@ -270,8 +324,8 @@ index 372e2701..eca5f62c 100644
 -  run bash -c 'grep -c "DEBUG_CONFIG: HOSTS file written to /etc/pihole/hosts/custom.list" /var/log/pihole/FTL.log'
 +  run bash -c 'grep -c "DEBUG_CONFIG: HOSTS file written to /opt/etc/pihole/hosts/custom.list" /var/log/pihole/FTL.log'
    printf "custom.list write count: %s\n" "${lines[0]}"
-   # On RISCV64, pytest is skipped, so only BATS writes occur (3x)
-   # Otherwise, pytest dns/hosts config array PUT + DELETE add 2 more (5x)
+   # On RISCV64, pytest is skipped, so only BATS writes occur (5x)
+   # Otherwise, pytest dns/hosts config array PUT + DELETE add 2 more (7x)
 diff --git a/test/api/libs/responseVerifyer.py b/test/api/libs/responseVerifyer.py
 index 50a5c1c9..e2381e24 100644
 --- a/test/api/libs/responseVerifyer.py
@@ -296,3 +350,36 @@ index 50a5c1c9..e2381e24 100644
  					if not pihole_toml.startswith(b"# Pi-hole configuration file (v"):
  						self.errors.append("Received ZIP file's pihole.toml starts with wrong header")
  				except Exception as err:
+diff --git a/test/api/test_n_teleporter_validation.py b/test/api/test_n_teleporter_validation.py
+index b38af0f3..85d53433 100644
+--- a/test/api/test_n_teleporter_validation.py
++++ b/test/api/test_n_teleporter_validation.py
+@@ -33,8 +33,8 @@ import pytest
+ 
+ from libs.FTLAPI import AuthenticationMethods
+ 
+-PIHOLE_TOML = "/etc/pihole/pihole.toml"
+-FTL_LOG = "/var/log/pihole/FTL.log"
++PIHOLE_TOML = "/opt/etc/pihole/pihole.toml"
++FTL_LOG = "/opt/var/log/pihole/FTL.log"
+ RESTART_MARKER = "CLI password set and stored in file"
+ 
+ 
+@@ -73,7 +73,7 @@ def _archive(toml_text: str) -> bytes:
+     """Pack a pihole.toml into a Teleporter ZIP archive."""
+     buf = io.BytesIO()
+     with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+-        zf.writestr("etc/pihole/pihole.toml", toml_text)
++        zf.writestr("opt/etc/pihole/pihole.toml", toml_text)
+     return buf.getvalue()
+ 
+ 
+@@ -178,7 +178,7 @@ def test_migrated_value_is_validated(ftl):
+ # API either, otherwise the archive would be the way around that restriction.
+ LOCKED_ITEMS = [
+     ("dnsmasq_lines", '[ "log-queries" ]', "misc.dnsmasq_lines"),
+-    ("advancedOpts", '[ "put_delete_auth_file", "/etc/pihole/pihole.toml" ]',
++    ("advancedOpts", '[ "put_delete_auth_file", "/opt/etc/pihole/pihole.toml" ]',
+      "webserver.advancedOpts"),
+     # Relocating the document root is host-only; "/" would serve the filesystem
+     ("webroot", '"/"', "webserver.paths.webroot"),
