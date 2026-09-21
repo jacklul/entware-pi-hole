@@ -245,7 +245,7 @@ index 021530bd..2a84e4ea 100644
 +  run bash -c "./pihole-FTL wait-for 'HOSTS file written to /opt/etc/pihole/hosts/custom.list' /var/log/pihole/FTL.log 5 $logsize_before"
    assert_success
  
-   # Only sequences a decoder accepts: no overlong encoding, no UTF-16 surrogate,
+   # Malformed UTF-8: overlong encoding, UTF-16 surrogate, above U+10FFFF,
 @@ -1633,7 +1633,7 @@ setup() {
    run ./pihole-FTL --config dns.hosts '[ "1.1.1.1 abc-custom.com def-custom.de", "2.2.2.2 äste.com steä.com" ]'
    assert_success
