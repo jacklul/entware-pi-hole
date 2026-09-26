@@ -1,0 +1,34 @@
+Package: pi-hole
+Version: 2026.09.20-1
+Depends: bash, bind-dig, ca-bundle, coreutils-cut, coreutils-expr, coreutils-id, coreutils-install, coreutils-ls, coreutils-mktemp, coreutils-printf, coreutils-seq, coreutils-sha1sum, coreutils-sleep, coreutils-stat, coreutils-stty, coreutils-tee, coreutils-timeout, coreutils-tr, coreutils-truncate, coreutils-tty, coreutils-whoami, cron, curl, findutils, gawk, git-http, grep, iputils-ping, jq, libcap-bin, logrotate, lscpu, ncurses-bin, nonroot, rev, sed, ss
+Source: https://github.com/jacklul/entware-pi-hole
+License: EUPL-1.2
+LicenseFiles: LICENSE
+Section: net
+URL: https://github.com/pi-hole/pi-hole
+Maintainer: Jack'lul, https://jacklul.github.io
+Architecture: armv7-3.2
+Installed-Size: 36147200
+Filename: pi-hole_2026.09.20-1_armv7-3.2.ipk
+Size: 15265919
+SHA256sum: ca2a4ca212244653f4119debbc9371edbf1aa10d34205058c61cbb635071f2a2
+Description:  The Pi-hole is a DNS sinkhole that protects your devices from unwanted content without installing any client-side software.
+ This is an unofficial package not supported by the Pi-hole developers!
+
+Package: pi-hole-dev
+Version: 2026.09.26-054810-c2fbe128
+Depends: bash, bind-dig, ca-bundle, coreutils-cut, coreutils-expr, coreutils-id, coreutils-install, coreutils-ls, coreutils-mktemp, coreutils-printf, coreutils-seq, coreutils-sha1sum, coreutils-sleep, coreutils-stat, coreutils-stty, coreutils-tee, coreutils-timeout, coreutils-tr, coreutils-truncate, coreutils-tty, coreutils-whoami, cron, curl, findutils, gawk, git-http, grep, iputils-ping, jq, libcap-bin, logrotate, lscpu, ncurses-bin, nonroot, rev, sed, ss
+Source: https://github.com/jacklul/entware-pi-hole
+License: EUPL-1.2
+LicenseFiles: LICENSE
+Section: net
+URL: https://github.com/pi-hole/pi-hole
+Maintainer: Jack'lul, https://jacklul.github.io
+Architecture: armv7-3.2
+Installed-Size: 28805120
+Filename: pi-hole-dev_2026.09.26-054810-c2fbe128_armv7-3.2.ipk
+Size: 17333764
+SHA256sum: ea5a95e3bfcdc6fb7e7e5de6e2592270f11686bd23a88dd7168e560f01fcaae4
+Description:  The Pi-hole is a DNS sinkhole that protects your devices from unwanted content without installing any client-side software.
+ This is an unofficial package not supported by the Pi-hole developers!
+
