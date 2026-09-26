@@ -210,6 +210,15 @@ diff --git a/test/test_suite.bats b/test/test_suite.bats
 index 021530bd..2a84e4ea 100644
 --- a/test/test_suite.bats
 +++ b/test/test_suite.bats
+@@ -1300,7 +1300,7 @@ setup() {
+   run bash -c 'curl -s -X PATCH http://127.0.0.1/api/config -d "{\"config\":{\"dns\":{\"reply\":{\"host\":{\"force4\":true,\"IPv4\":\"10.100.0.10\",\"force6\":true,\"IPv6\":\"fe80::10\"}}}}}"'
+ 
+   # Wait for change to be applied
+-  run bash -c "./pihole-FTL wait-for 'INFO: Config file written to /etc/pihole/pihole.toml' /var/log/pihole/FTL.log 5 $logsize_before"
++  run bash -c "./pihole-FTL wait-for 'INFO: Config file written to /opt/etc/pihole/pihole.toml' /var/log/pihole/FTL.log 5 $logsize_before"
+   assert_success
+ 
+   run bash -c "dig A pi.hole +short @127.0.0.1"
 @@ -1571,7 +1571,7 @@ setup() {
    assert_failure 3
  
@@ -255,15 +264,17 @@ index 021530bd..2a84e4ea 100644
    assert_success
  }
  
-@@ -1300,7 +1300,7 @@ setup() {
-   run bash -c 'curl -s -X PATCH http://127.0.0.1/api/config -d "{\"config\":{\"dns\":{\"reply\":{\"host\":{\"force4\":true,\"IPv4\":\"10.100.0.10\",\"force6\":true,\"IPv6\":\"fe80::10\"}}}}}"'
- 
-   # Wait for change to be applied
--  run bash -c "./pihole-FTL wait-for 'INFO: Config file written to /etc/pihole/pihole.toml' /var/log/pihole/FTL.log 5 $logsize_before"
-+  run bash -c "./pihole-FTL wait-for 'INFO: Config file written to /opt/etc/pihole/pihole.toml' /var/log/pihole/FTL.log 5 $logsize_before"
+@@ -1788,8 +1788,8 @@ setup() {
    assert_success
  
-   run bash -c "dig A pi.hole +short @127.0.0.1"
+   # The certificate is written with its private key, so it stays out of the webroot
+-  run bash -c './pihole-FTL --config -t webserver.tls.cert /var/www/html/tls.pem'
+-  assert_line --index 0 'Invalid value: webserver.tls.cert ("/var/www/html/tls.pem") must not be inside webserver.paths.webroot ("/var/www/html")'
++  run bash -c './pihole-FTL --config -t webserver.tls.cert /opt/share/pihole/www/tls.pem'
++  assert_line --index 0 'Invalid value: webserver.tls.cert ("/opt/share/pihole/www/tls.pem") must not be inside webserver.paths.webroot ("/opt/share/pihole/www")'
+   assert_failure 3
+ }
+ 
 @@ -1916,9 +1916,9 @@ setup() {
  
  
