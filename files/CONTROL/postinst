@@ -241,6 +241,7 @@ fi
         sleep 1
     done
 
+    sleep 60
     bash /opt/share/pihole/updatecheck.sh
 } > /dev/null 2>&1 &
 
