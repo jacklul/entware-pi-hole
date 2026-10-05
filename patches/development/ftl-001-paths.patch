@@ -315,9 +315,9 @@ index 47f2edc3..48410465 100644
  
  	// Test dnsmasq config in the imported configuration
 @@ -338,8 +338,8 @@ static const char *test_and_import_pihole_toml(void *ptr, size_t size, char * co
- 	{
  		report_teleporter_skipped(false);
  		free_config(&teleporter_config, false);
+ 		unlock_config();
  		toml_free(toml);
 -		return "File etc/pihole/pihole.toml in ZIP archive contains invalid dnsmasq configuration";
 +		return "File opt/etc/pihole/pihole.toml in ZIP archive contains invalid dnsmasq configuration";
