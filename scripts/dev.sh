@@ -4,8 +4,8 @@
 #shellcheck disable=SC2155
 readonly script_dir="$(dirname "$(readlink -f "$0")")"
 readonly repository_core="https://github.com/pi-hole/pi-hole.git"
-readonly repository_web="https://github.com/pi-hole/web.git"
 readonly repository_ftl="https://github.com/pi-hole/FTL.git"
+readonly repository_web="https://github.com/pi-hole/web.git"
 
 [ -f "$script_dir/../dev/.shallow" ] && shallow=true && echo "Shallow clone enabled"
 
@@ -29,6 +29,41 @@ function install_or_update_repository() {
     if [ -z "$new_branch" ]; then
         new_branch="$(git -C "$destination" remote show "$repository" | grep 'HEAD branch' | cut -d':' -f2 | tr -d ' ')"
         echo "No branch specified, using remote HEAD branch: $new_branch"
+    fi
+
+    case "$new_branch" in
+        reset)
+            git -C "$destination" reset --hard
+            git -C "$destination" clean -fd
+            return
+        ;;
+        patch)
+            type="$(basename "$destination")"
+            type="${type,,}"
+            bash "$script_dir/patch.sh" $type
+            return
+        ;;
+        test)
+            type="$(basename "$destination")"
+            type="${type,,}"
+            bash "$script_dir/patch.sh" $type "$script_dir/../dev/$type" no-patches
+            return
+        ;;
+        diff)
+            git -C "$destination" diff --cached --abbrev=8 > "$script_dir/../dev/patch_core.patch"
+            return
+        ;;
+        repatch)
+            install_or_update_repository "$repository" "$destination" reset
+            install_or_update_repository "$repository" "$destination" patch
+            return
+        ;;
+    esac
+
+    if [ "$new_branch" = "reset" ]; then
+        git -C "$destination" reset --hard
+        git -C "$destination" clean -fd
+        return
     fi
 
     if [ ! -f "$destination/.git/config" ]; then
@@ -84,37 +119,37 @@ repo=all
 [ -n "$2" ] && repo="$2"
 
 case $branch in
-    "master"|"release")
+    master|release)
         core_branch=master
-        web_branch=master
         ftl_branch=master
+        web_branch=master
     ;;
-    "development"|"dev")
+    development|dev)
         core_branch=development
-        web_branch=development
         ftl_branch=development
+        web_branch=development
     ;;
     *)
         core_branch=$branch
-        web_branch=$branch
         ftl_branch=$branch
+        web_branch=$branch
     ;;
 esac
 
 case $repo in
     all)
         install_or_update_repository "$repository_core" "$script_dir/../dev/core" "$core_branch"
-        install_or_update_repository "$repository_web" "$script_dir/../dev/web" "$web_branch"
         install_or_update_repository "$repository_ftl" "$script_dir/../dev/FTL" "$ftl_branch"
+        install_or_update_repository "$repository_web" "$script_dir/../dev/web" "$web_branch"
     ;;
     core)
         install_or_update_repository "$repository_core" "$script_dir/../dev/core" "$core_branch"
     ;;
-    web)
-        install_or_update_repository "$repository_web" "$script_dir/../dev/web" "$web_branch"
-    ;;
     ftl|FTL)
         install_or_update_repository "$repository_ftl" "$script_dir/../dev/FTL" "$ftl_branch"
+    ;;
+    web)
+        install_or_update_repository "$repository_web" "$script_dir/../dev/web" "$web_branch"
     ;;
     *)
         echo "Invalid repo selected, valid values: all, core, web, FTL"

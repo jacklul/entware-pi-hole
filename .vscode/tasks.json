@@ -21,7 +21,7 @@
         {
             "label": "Clone Pi-hole repositories (development)",
             "type": "shell",
-            "command": "bash scripts/dev.sh dev",
+            "command": "bash scripts/dev.sh development",
             "problemMatcher": [],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -30,7 +30,7 @@
         {
             "label": "Create dev/core patch",
             "type": "shell",
-            "command": "git -C dev/core diff --cached --abbrev=8 > dev/patch_core.patch && code dev/patch_core.patch",
+            "command": "bash scripts/dev.sh diff core && code dev/patch_core.patch",
             "problemMatcher": [],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -39,7 +39,7 @@
         {
             "label": "Create dev/FTL patch",
             "type": "shell",
-            "command": "git -C dev/FTL diff --cached --abbrev=8 > dev/patch_ftl.patch && code dev/patch_ftl.patch",
+            "command": "bash scripts/dev.sh diff ftl && code dev/patch_ftl.patch",
             "problemMatcher": [],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -48,7 +48,7 @@
         {
             "label": "Create dev/web patch",
             "type": "shell",
-            "command": "git -C dev/web diff --cached --abbrev=8 > dev/patch_web.patch && code dev/patch_web.patch",
+            "command": "bash scripts/dev.sh diff web && code dev/patch_web.patch",
             "problemMatcher": [],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -57,7 +57,7 @@
         {
             "label": "Patch dev/core",
             "type": "shell",
-            "command": "bash scripts/patch.sh core dev/core",
+            "command": "bash scripts/dev.sh patch core",
             "problemMatcher": [],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -66,7 +66,7 @@
         {
             "label": "Patch dev/FTL",
             "type": "shell",
-            "command": "bash scripts/patch.sh ftl dev/FTL",
+            "command": "bash scripts/dev.sh patch ftl",
             "problemMatcher": [],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -75,7 +75,7 @@
         {
             "label": "Patch dev/web",
             "type": "shell",
-            "command": "bash scripts/patch.sh web dev/web",
+            "command": "bash scripts/dev.sh patch web",
             "problemMatcher": [],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -92,7 +92,7 @@
         {
             "label": "Reset dev/core",
             "type": "shell",
-            "command": "git -C dev/core reset --hard && git -C dev/core clean -fd",
+            "command": "bash scripts/dev.sh reset core",
             "problemMatcher": [],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -101,7 +101,7 @@
         {
             "label": "Reset dev/FTL",
             "type": "shell",
-            "command": "git -C dev/FTL reset --hard && git -C dev/FTL clean -fd",
+            "command": "bash scripts/dev.sh reset ftl",
             "problemMatcher": [],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -110,7 +110,7 @@
         {
             "label": "Reset dev/web",
             "type": "shell",
-            "command": "git -C dev/web reset --hard && git -C dev/web clean -fd",
+            "command": "bash scripts/dev.sh reset web",
             "problemMatcher": [],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -127,7 +127,7 @@
         {
             "label": "Test dev/core",
             "type": "shell",
-            "command": "bash scripts/patch.sh core dev/core no-patches",
+            "command": "bash scripts/dev.sh test core",
             "problemMatcher": [],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -136,7 +136,7 @@
         {
             "label": "Test dev/FTL",
             "type": "shell",
-            "command": "bash scripts/patch.sh ftl dev/FTL no-patches",
+            "command": "bash scripts/dev.sh test ftl",
             "problemMatcher": [],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -145,7 +145,7 @@
         {
             "label": "Test dev/web",
             "type": "shell",
-            "command": "bash scripts/patch.sh web dev/web no-patches",
+            "command": "bash scripts/dev.sh test web",
             "problemMatcher": [],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -161,24 +161,30 @@
         },
         {
             "label": "Repatch dev/core",
-            "dependsOn": [
-                "Reset dev/core",
-                "Patch dev/core",
-            ]
+            "type": "shell",
+            "command": "bash scripts/dev.sh repatch core",
+            "problemMatcher": [],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
         },
         {
             "label": "Repatch dev/FTL",
-            "dependsOn": [
-                "Reset dev/FTL",
-                "Patch dev/FTL",
-            ]
+            "type": "shell",
+            "command": "bash scripts/dev.sh repatch ftl",
+            "problemMatcher": [],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
         },
         {
             "label": "Repatch dev/web",
-            "dependsOn": [
-                "Reset dev/web",
-                "Patch dev/web",
-            ]
+            "type": "shell",
+            "command": "bash scripts/dev.sh repatch web",
+            "problemMatcher": [],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
         },
         {
             "label": "Repatch all repositories",
