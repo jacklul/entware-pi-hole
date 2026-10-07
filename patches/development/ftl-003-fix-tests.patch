@@ -2,7 +2,7 @@ diff --git a/test/run.sh b/test/run.sh
 index 5d490a82..dfd08dac 100755
 --- a/test/run.sh
 +++ b/test/run.sh
-@@ -73,6 +73,23 @@ bash test/pdns/setup.sh
+@@ -73,6 +73,24 @@ bash test/pdns/setup.sh
  OLDUMASK=$(umask)
  umask 0022
  
@@ -13,6 +13,7 @@ index 5d490a82..dfd08dac 100755
 +    ["/var/log"]="/opt/var/log"
 +    ["/run"]="/opt/var/run"
 +    ["/var/www/html"]="/opt/share/pihole/www"
++    ["/usr/local/bin/pihole"]="/opt/bin/pihole"
 +)
 +for KEY in "${!LINKS[@]}"; do
 +    DIRNAME="$(dirname "${LINKS[$KEY]}")"
@@ -326,3 +327,33 @@ index 372e2701..eca5f62c 100644
    printf "custom.list write count: %s\n" "${lines[0]}"
    # On RISCV64, pytest is skipped, so only BATS writes occur (5x)
    # Otherwise, pytest dns/hosts config array PUT + DELETE add 2 more (7x)
+@@ -127,12 +127,12 @@ load 'bats_helper.bash'
+ 
+ @test "Gravity action streams NUL bytes, reports a failure and refuses a second run" {
+   # Stand-in for pihole -g: output with a NUL byte in it, then fail after a moment
+-  if [ -e /usr/local/bin/pihole ]; then
+-    mv /usr/local/bin/pihole /usr/local/bin/pihole.test-backup
++  if [ -e /opt/bin/pihole ]; then
++    mv /opt/bin/pihole /opt/bin/pihole.test-backup
+   fi
+   rm -f /tmp/gravity_started
+-  printf '#!/bin/sh\ntouch /tmp/gravity_started\nprintf "before\\000after\\n"\nsleep 2\nexit 3\n' > /usr/local/bin/pihole
+-  chmod +x /usr/local/bin/pihole
++  printf '#!/bin/sh\ntouch /tmp/gravity_started\nprintf "before\\000after\\n"\nsleep 2\nexit 3\n' > /opt/bin/pihole
++  chmod +x /opt/bin/pihole
+   curl -s -X POST 127.0.0.1/api/action/gravity -o /tmp/gravity_first.out &
+   first=$!
+   for i in $(seq 1 50); do
+@@ -143,9 +143,9 @@ load 'bats_helper.bash'
+   wait "${first}"
+   # Once the first run is done, a new one is accepted again
+   third=$(curl -s -o /dev/null -w "%{http_code}" -X POST 127.0.0.1/api/action/gravity)
+-  rm -f /usr/local/bin/pihole
+-  if [ -e /usr/local/bin/pihole.test-backup ]; then
+-    mv /usr/local/bin/pihole.test-backup /usr/local/bin/pihole
++  rm -f /opt/bin/pihole
++  if [ -e /opt/bin/pihole.test-backup ]; then
++    mv /opt/bin/pihole.test-backup /opt/bin/pihole
+   fi
+   assert_output "409"
+   [ "${third}" = "200" ]
