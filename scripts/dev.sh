@@ -50,7 +50,9 @@ function install_or_update_repository() {
             return
         ;;
         diff)
-            git -C "$destination" diff --cached --abbrev=8 > "$script_dir/../dev/patch_core.patch"
+            type="$(basename "$destination")"
+            type="${type,,}"
+            git -C "$destination" diff --cached --abbrev=8 > "$script_dir/../dev/patch_$type.patch"
             return
         ;;
         repatch)
