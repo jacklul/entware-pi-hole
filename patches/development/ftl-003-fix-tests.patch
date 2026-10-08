@@ -306,9 +306,9 @@ index 372e2701..eca5f62c 100644
 --- a/test/test_final.bats
 +++ b/test/test_final.bats
 @@ -44,7 +44,7 @@ load 'bats_helper.bash'
-   # dotdoh.bats: 2x pihole.toml writes (encrypted setup + plaintext teardown)
    # dotdoh.bats: 2x pihole.toml writes (debug.dotdoh enable + disable)
    # dotdoh_server.bats: 1x pihole.toml write (reset dns.reply.host force to default)
+   # webserver_acl.bats: 4x pihole.toml writes (three ACLs + restore)
 -  run bash -c 'grep -c "INFO: Config file written to /etc/pihole/pihole.toml" /var/log/pihole/FTL.log'
 +  run bash -c 'grep -c "INFO: Config file written to /opt/etc/pihole/pihole.toml" /var/log/pihole/FTL.log'
    printf "pihole.toml write count: %s\n" "${lines[0]}"
