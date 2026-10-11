@@ -1,5 +1,5 @@
 diff --git a/test/api/test_api.py b/test/api/test_api.py
-index 2e5d490b..c8773907 100644
+index 600be7dd..4f31d8bc 100644
 --- a/test/api/test_api.py
 +++ b/test/api/test_api.py
 @@ -466,7 +466,7 @@ class TestLuaServerPages:
@@ -293,7 +293,7 @@ index 3007c80c..a00ca096 100644
    assert_output "409"
    [ "${third}" = "200" ]
 diff --git a/test/test_suite.bats b/test/test_suite.bats
-index e252f629..a6dc9c83 100644
+index 5a0b8be4..59939cb1 100644
 --- a/test/test_suite.bats
 +++ b/test/test_suite.bats
 @@ -1481,7 +1481,7 @@ except socket.timeout:
@@ -332,7 +332,7 @@ index e252f629..a6dc9c83 100644
    assert_failure 3
  
    run bash -c './pihole-FTL --config webserver.api.excludeClients "[\".*\",\"$$$\",\"[[[\"]"'
-@@ -1904,8 +1904,8 @@ except socket.timeout:
+@@ -1904,21 +1904,21 @@ except socket.timeout:
    assert_success
  
    # The certificate is written with its private key, so it stays out of the webroot
@@ -343,7 +343,26 @@ index e252f629..a6dc9c83 100644
    assert_failure 3
  }
  
-@@ -1916,7 +1916,7 @@ except socket.timeout:
+ @test "files.tmp_db cannot name a file Pi-hole keeps" {
+   # database.forceDisk empties files.tmp_db on every start
+-  run bash -c './pihole-FTL --config -t files.tmp_db /etc/pihole/pihole-FTL.db'
+-  assert_line --index 0 'Invalid value: files.tmp_db ("/etc/pihole/pihole-FTL.db") must not be the same file as files.database'
++  run bash -c './pihole-FTL --config -t files.tmp_db /opt/etc/pihole/pihole-FTL.db'
++  assert_line --index 0 'Invalid value: files.tmp_db ("/opt/etc/pihole/pihole-FTL.db") must not be the same file as files.database'
+   assert_failure 3
+-  run bash -c './pihole-FTL --config -t files.tmp_db /etc/pihole//./gravity.db'
+-  assert_line --index 0 'Invalid value: files.tmp_db ("/etc/pihole//./gravity.db") must not be the same file as files.gravity'
++  run bash -c './pihole-FTL --config -t files.tmp_db /opt/etc/pihole//./gravity.db'
++  assert_line --index 0 'Invalid value: files.tmp_db ("/opt/etc/pihole//./gravity.db") must not be the same file as files.gravity'
+   assert_failure 3
+-  run bash -c './pihole-FTL --config -t files.tmp_db /etc/pihole/pihole.toml'
+-  assert_line --index 0 'Invalid value: files.tmp_db ("/etc/pihole/pihole.toml") must not be Pi-hole'"'"'s configuration file'
++  run bash -c './pihole-FTL --config -t files.tmp_db /opt/etc/pihole/pihole.toml'
++  assert_line --index 0 'Invalid value: files.tmp_db ("/opt/etc/pihole/pihole.toml") must not be Pi-hole'"'"'s configuration file'
+   assert_failure 3
+ }
+ 
+@@ -1929,7 +1929,7 @@ except socket.timeout:
    assert_success
  
    # Wait for change to become effective
@@ -352,7 +371,7 @@ index e252f629..a6dc9c83 100644
    assert_success
  
    # Check that the sanitized entries are properly formatted
-@@ -1931,7 +1931,7 @@ except socket.timeout:
+@@ -1944,7 +1944,7 @@ except socket.timeout:
    assert_success
  
    # Wait for change to become effective
@@ -361,7 +380,7 @@ index e252f629..a6dc9c83 100644
    assert_success
  
    # Check that the sanitized entries are properly formatted
-@@ -2283,9 +2283,9 @@ except socket.timeout:
+@@ -2296,9 +2296,9 @@ except socket.timeout:
  
  
  @test "Webserver options are logged as expected" {
