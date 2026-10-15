@@ -356,11 +356,11 @@ index 266de914..552dfff5 100644
  
  // Shared, read-only-after-init crypto state: one SSL_CTX carries the trust store,
  // fail-closed verify mode and client session cache for all upstreams; each
-diff --git a/src/dotdoh/quic_client.c b/src/dotdoh/quic_client.c
-index 7b0c3b8e..905d1ca6 100644
---- a/src/dotdoh/quic_client.c
-+++ b/src/dotdoh/quic_client.c
-@@ -57,12 +57,13 @@
+diff --git a/src/dotdoh/quic_common.c b/src/dotdoh/quic_common.c
+index 61a2bcf0..e4168591 100644
+--- a/src/dotdoh/quic_common.c
++++ b/src/dotdoh/quic_common.c
+@@ -42,12 +42,13 @@
  // Trust-anchor locations when no CA path is set, kept in step with tls_client.c.
  // FTL's musl binary runs on any of these distros, so this is not Debian-only.
  static const char *const QUIC_DEFAULT_CA_FILES[] = {
@@ -373,5 +373,5 @@ index 7b0c3b8e..905d1ca6 100644
 -#define QUIC_DEFAULT_CA_DIR "/etc/ssl/certs"
 +#define QUIC_DEFAULT_CA_DIR "/opt/etc/ssl/certs"
  
- // Shared, read-only-after-init QUIC context: one SSL_CTX carries the trust store
- // and fail-closed verify for all DoH3 upstreams. Built once (single-threaded) in
+ // Shared, read-only-after-init QUIC context. Built once (single-threaded) in
+ // quic_client_global_init(), so a plain flag is enough.
