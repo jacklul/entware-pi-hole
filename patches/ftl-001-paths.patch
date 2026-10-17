@@ -1,14 +1,27 @@
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 1a9ad2ef..ecd2fe54 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -461,7 +461,7 @@ if(BUILD_TXT_STAT_REGRESSION)
+             ${PROJECT_SOURCE_DIR}/src/dnsmasq)
+     target_compile_definitions(txt_stat_regression PRIVATE
+             VERSION=\"${DNSMASQ_VERSION}\"
+-            CONFFILE=\"/etc/pihole/dnsmasq.conf\"
++            CONFFILE=\"/opt/etc/pihole/dnsmasq.conf\"
+             HAVE_POLL_H)
+ 
+     # Optional ASan/UBSan instrumentation for local runs:
 diff --git a/src/api/action.c b/src/api/action.c
 index 138c1c6c..89ac3a1d 100644
 --- a/src/api/action.c
 +++ b/src/api/action.c
 @@ -145,7 +145,7 @@ int api_action_gravity(struct ftl_conn *api)
- 	const char *extra_env = color ? "FORCE_COLOR" : NULL;
+ 		                       "Gravity is already running",
+ 		                       NULL);
  
- 	gravity_running = 1;
 -	const int ret = run_and_stream_command(api, "/usr/local/bin/pihole", (const char *const []){ "pihole", "-g", NULL }, extra_env);
 +	const int ret = run_and_stream_command(api, "/opt/bin/pihole", (const char *const []){ "pihole", "-g", NULL }, extra_env);
- 	gravity_running = 0;
+ 	atomic_store(&gravity_running, false);
  
  	// If a termination/restart was requested while gravity was running,
 diff --git a/src/api/info.c b/src/api/info.c
@@ -28,13 +41,13 @@ diff --git a/src/config/config.c b/src/config/config.c
 index eee5a8c0..51c882cd 100644
 --- a/src/config/config.c
 +++ b/src/config/config.c
-@@ -983,7 +983,7 @@ void initConfig(struct config *conf)
+@@ -1164,7 +1164,7 @@ void initConfig(struct config *conf)
  	conf->webserver.tls.cert.a = cJSON_CreateStringReference("A valid TLS certificate file (*.pem)");
  	conf->webserver.tls.cert.f = FLAG_RESTART_FTL;
  	conf->webserver.tls.cert.t = CONF_STRING;
 -	conf->webserver.tls.cert.d.s = (char*)"/etc/pihole/tls.pem";
 +	conf->webserver.tls.cert.d.s = (char*)"/opt/etc/pihole/tls.pem";
- 	conf->webserver.tls.cert.c = validate_filepath;
+ 	conf->webserver.tls.cert.c = validate_filepath_empty;
  
  	// sub-struct paths
 @@ -1004,7 +1004,7 @@ void initConfig(struct config *conf)
@@ -353,8 +366,21 @@ index fc10ad23..839cde69 100644
 -#define BACKUP_DIR "/etc/pihole/config_backups"
 +#define BACKUP_DIR "/opt/etc/pihole/config_backups"
  
+ bool in_pihole_dir(const char *path);
  bool chmod_file(const char *filename, const mode_t mode);
- bool file_exists(const char *filename);
+diff --git a/src/dnsmasq/log.c b/src/dnsmasq/log.c
+index 4f83add0..a8be2c9e 100644
+--- a/src/dnsmasq/log.c
++++ b/src/dnsmasq/log.c
+@@ -117,7 +117,7 @@ int log_start(struct passwd *ent_pw, int errfd)
+ 	    S_ISREG(ps.st_mode) && ps.st_dev == ls.st_dev && ps.st_ino == ls.st_ino &&
+ 	    ls.st_nlink == 1;
+ 	  if (!own_file)
+-	    log_warn("Not changing ownership of %s, it is not a regular file in /etc/pihole or /var/log/pihole",
++	    log_warn("Not changing ownership of %s, it is not a regular file in /opt/etc/pihole or /opt/var/log/pihole",
+ 		     daemon->log_file);
+ 	}
+       if (own_file)
 diff --git a/src/lua/CMakeLists.txt b/src/lua/CMakeLists.txt
 index 90ddda91..20586468 100644
 --- a/src/lua/CMakeLists.txt
@@ -453,7 +479,7 @@ index 47f2edc3..48410465 100644
  
  	// Test dnsmasq config in the imported configuration
 @@ -338,7 +338,7 @@ static const char *test_and_import_pihole_toml(void *ptr, size_t size, char * co
- 	{
+ 		report_teleporter_skipped(false);
  		free_config(&teleporter_config, false);
  		toml_free(toml);
 -		return "File etc/pihole/pihole.toml in ZIP archive contains invalid dnsmasq configuration";
@@ -471,6 +497,43 @@ index 47f2edc3..48410465 100644
 +			"opt/etc/pihole/dhcp.leases",
  			config.files.gravity.v.s[0] == '/' ? config.files.gravity.v.s + 1 : config.files.gravity.v.s
  		};
+ 
+diff --git a/src/dnsmasq_interface.c b/src/dnsmasq_interface.c
+index fd01a6bd..4f2928c8 100644
+--- a/src/dnsmasq_interface.c
++++ b/src/dnsmasq_interface.c
+@@ -3750,7 +3750,7 @@ static void chown_pihole_own_dir(const char *path, struct passwd *pwd)
+ 	if(in_pihole_dir(path))
+ 		chown_pihole(path, pwd);
+ 	else
+-		log_warn("Not changing ownership of %s, it is outside of /etc/pihole and /var/log/pihole", path);
++		log_warn("Not changing ownership of %s, it is outside of /opt/etc/pihole and /opt/var/log/pihole", path);
+ }
+ 
+ void FTL_fork_and_bind_sockets(struct passwd *ent_pw, bool dnsmasq_start)
+diff --git a/src/files.c b/src/files.c
+index 49c90de0..799528f7 100644
+--- a/src/files.c
++++ b/src/files.c
+@@ -52,8 +52,8 @@ bool in_pihole_dir(const char *path)
+ 		return false;
+ 
+ 	const size_t dirlen = slash - path;
+-	return (dirlen == strlen("/etc/pihole") && strncmp(path, "/etc/pihole", dirlen) == 0) ||
+-	       (dirlen == strlen("/var/log/pihole") && strncmp(path, "/var/log/pihole", dirlen) == 0);
++	return (dirlen == strlen("/opt/etc/pihole") && strncmp(path, "/opt/etc/pihole", dirlen) == 0) ||
++	       (dirlen == strlen("/opt/var/log/pihole") && strncmp(path, "/opt/var/log/pihole", dirlen) == 0);
+ }
+ 
+ // chmod_file() changes the file mode bits of a given regular file according
+@@ -63,7 +63,7 @@ bool chmod_file(const char *filename, const mode_t mode)
+ {
+ 	if(geteuid() == 0 && !in_pihole_dir(filename))
+ 	{
+-		log_warn("Not changing mode of %s, it is outside of /etc/pihole and /var/log/pihole", filename);
++		log_warn("Not changing mode of %s, it is outside of /opt/etc/pihole and /opt/var/log/pihole", filename);
+ 		return false;
+ 	}
  
 diff --git a/src/shmem.c b/src/shmem.c
 index e1569f34..dd58d88d 100644

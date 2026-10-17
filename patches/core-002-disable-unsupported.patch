@@ -47,7 +47,7 @@ index 7c84771..f4125a9 100755
    exit 0
  }
  
-@@ -600,15 +600,15 @@ fi
+@@ -600,14 +600,14 @@ fi
  case "${1}" in
    "-d" | "debug"                  ) debugFunc "$@";;
    "-f" | "flush"                  ) flushFunc "$@";;
@@ -65,5 +65,4 @@ index 7c84771..f4125a9 100755
 -  "checkout"                      ) piholeCheckoutFunc "$@";;
 +  "checkout"                      ) unsupportedFunc;;
    "updatechecker"                 ) shift; updateCheckFunc "$@";;
-   "arpflush"                      ) arpFunc "$@";; # Deprecated, use networkflush instead
    "networkflush"                  ) networkFlush "$@";;
