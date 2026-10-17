@@ -1,0 +1,92 @@
+diff --git a/advanced/Scripts/piholeLogFlush.sh b/advanced/Scripts/piholeLogFlush.sh
+index c380bb37..b3b77561 100755
+--- a/advanced/Scripts/piholeLogFlush.sh
++++ b/advanced/Scripts/piholeLogFlush.sh
+@@ -38,7 +38,7 @@ fi
+ # The log paths come from the pihole-owned config, so never write to them as root
+ as_pihole() {
+     if [[ "${EUID}" -eq 0 ]]; then
+-        sudo -u pihole "$@"
++        nonroot pihole "$@"
+     else
+         "$@"
+     fi
+diff --git a/advanced/Scripts/updatecheck.sh b/advanced/Scripts/updatecheck.sh
+index 80e86d36..66662001 100755
+--- a/advanced/Scripts/updatecheck.sh
++++ b/advanced/Scripts/updatecheck.sh
+@@ -20,7 +20,7 @@ if [[ "$(id -u)" -eq 0 ]]; then
+     # Only the literal "reboot" argument (see below) is passed on
+     reboot_arg=""
+     [[ "${1:-}" == "reboot" ]] && reboot_arg="reboot"
+-    su -s /bin/sh pihole -c "/opt/share/pihole/updatecheck.sh ${reboot_arg}"
++    nonroot pihole /bin/sh -c "/opt/share/pihole/updatecheck.sh ${reboot_arg}"
+     exit "$?"
+ fi
+ 
+diff --git a/advanced/Templates/pihole-FTL-prestart.sh b/advanced/Templates/pihole-FTL-prestart.sh
+index dda59c26..00c84e98 100755
+--- a/advanced/Templates/pihole-FTL-prestart.sh
++++ b/advanced/Templates/pihole-FTL-prestart.sh
+@@ -17,7 +17,7 @@ chown -R pihole:pihole /etc/pihole/ /var/log/pihole/
+ # the pihole user do it: it owns everything below these directories, and a
+ # symlink pointing anywhere else only results in a permission error.
+ # A failure here is deliberately non-fatal so it can never prevent FTL starting.
+-su -s /bin/sh pihole -c '
++nonroot pihole /bin/sh -c '
+     find /opt/etc/pihole/ /opt/var/log/pihole/ -type d -exec chmod 0755 {} +
+     find /opt/etc/pihole/ /opt/var/log/pihole/ -type f ! \( -name "*.pem" -o -name "*.crt" \) -exec chmod 0640 {} +
+     find /opt/etc/pihole/ -type f \( -name "*.pem" -o -name "*.crt" \) -exec chmod 0600 {} +
+@@ -37,7 +37,7 @@ su -s /bin/sh pihole -c '
+ # commands simply fail with a permission error and the target is left untouched.
+ # A failure here is deliberately non-fatal so it can never prevent FTL starting.
+ # su is needed to change user; both files are handled in a single call.
+-su -s /bin/sh pihole -c 'touch /opt/etc/pihole/versions /opt/etc/pihole/dhcp.leases && chmod 0644 /opt/etc/pihole/versions /opt/etc/pihole/dhcp.leases' || true
++nonroot pihole /bin/sh -c 'touch /opt/etc/pihole/versions /opt/etc/pihole/dhcp.leases && chmod 0644 /opt/etc/pihole/versions /opt/etc/pihole/dhcp.leases' || true
+ 
+ # Touch files to ensure they exist (create if non-existing, preserve if existing)
+ # Hardcoded PID path — see GHSA-6w8x-p785-6pm4
+diff --git a/gravity.sh b/gravity.sh
+index 1a78d8c2..78044941 100755
+--- a/gravity.sh
++++ b/gravity.sh
+@@ -17,7 +17,7 @@ export LC_ALL=C
+ # Without a terminal on stdin, mv replaces leftover root-owned files instead of prompting
+ if [[ "${EUID}" -eq 0 ]]; then
+   chown pihole:pihole /opt/etc/pihole
+-  exec sudo -u pihole bash "$0" "$@" </dev/null
++  exec nonroot pihole /bin/sh -c "$0 $*" </dev/null
+ fi
+ 
+ PI_HOLE_SCRIPT_DIR="/opt/share/pihole"
+@@ -763,7 +763,7 @@ gravity_DownloadBlocklistFromUrl() {
+         if [ "$(id -un)" == "root" ]; then
+             # If we are root, we need to check if the pihole user has read permission
+             #  otherwise, we might read files that the pihole user should not be able to read
+-            if sudo -u pihole test -r "${file_path}"; then
++            if nonroot pihole test -r "${file_path}"; then
+                 echo -e "${OVER}  ${INFO} Using local file ${file_path}"
+             else
+                 echo -e "${OVER}  ${CROSS} Cannot read file (user 'pihole' lacks read permission)"
+@@ -827,7 +827,7 @@ gravity_DownloadBlocklistFromUrl() {
+         if [ "$(id -un)" == "root" ]; then
+           # The buffer belongs to the calling user, only the read must happen as pihole
+           # shellcheck disable=SC2024
+-          sudo -u pihole cat -- "${file_path}" >"${listCurlBuffer}"
++          nonroot pihole cat -- "${file_path}" >"${listCurlBuffer}"
+         else
+           cat -- "${file_path}" >"${listCurlBuffer}"
+         fi
+diff --git a/pihole b/pihole
+index a0d0e1ef..ccde5478 100755
+--- a/pihole
++++ b/pihole
+@@ -572,7 +572,7 @@ fi
+ # Add an exception for the user "pihole" to allow the webserver running gravity
+ if [[ ( $EUID -ne 0 && ${USER} != "pihole" ) && -n "${need_root}" ]]; then
+   echo -e "  ${CROSS} This Pi-hole command requires root privileges, try:"
+-  echo -e "      ${COL_GREEN}sudo pihole $*${COL_NC}"
++  echo -e "      ${COL_GREEN}nonroot pihole $*${COL_NC}"
+   exit 1
+ fi
+ 

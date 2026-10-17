@@ -198,7 +198,7 @@ diff --git a/test/run.sh b/test/run.sh
 index 04ce54a5..b5f680f7 100755
 --- a/test/run.sh
 +++ b/test/run.sh
-@@ -111,6 +111,24 @@ trap 'kill "${DOTDOH_SHIM_PID}" 2>/dev/null; pkill -f "${SHIM_PATTERN}" 2>/dev/n
+@@ -114,6 +114,24 @@ trap 'kill "${DOTDOH_SHIM_PID}" 2>/dev/null; pkill -f "${SHIM_PATTERN}" 2>/dev/n
  OLDUMASK=$(umask)
  umask 0022
  
@@ -244,8 +244,8 @@ index 3007c80c..a00ca096 100644
 +  run bash -c 'grep -c "INFO: Config file written to /opt/etc/pihole/pihole.toml" /var/log/pihole/FTL.log'
    printf "pihole.toml write count: %s\n" "${lines[0]}"
    # On RISCV64, pytest AND both encrypted-DNS suites are skipped (too
-   # slow), leaving the dns.reply.host PATCH and webserver_acl.bats. The CLI
-@@ -66,14 +66,14 @@ load 'bats_helper.bash'
+   # slow), leaving the dns.reply.host PATCH, the removed dns.hosts entry and
+@@ -73,14 +73,14 @@ load 'bats_helper.bash'
    # arrange - on riscv64 they are skipped, leaving a single write.
    # pytest adds one more: the ZIP restore drops the reverse server of the v5
    # setupVars.conf import again
@@ -260,8 +260,8 @@ index 3007c80c..a00ca096 100644
 -  run bash -c 'grep -c "DEBUG_CONFIG: HOSTS file written to /etc/pihole/hosts/custom.list" /var/log/pihole/FTL.log'
 +  run bash -c 'grep -c "DEBUG_CONFIG: HOSTS file written to /opt/etc/pihole/hosts/custom.list" /var/log/pihole/FTL.log'
    printf "custom.list write count: %s\n" "${lines[0]}"
-   # On RISCV64, pytest is skipped, so only BATS writes occur (5x)
-   # Otherwise, pytest dns/hosts config array PUT + DELETE add 2 more (7x)
+   # On RISCV64, pytest is skipped, so only BATS writes occur (7x)
+   # Otherwise, pytest dns/hosts config array PUT + DELETE add 2 more (9x)
 @@ -234,12 +234,12 @@ load 'bats_helper.bash'
  
  @test "Gravity action streams NUL bytes, reports a failure and refuses a second run" {
@@ -318,6 +318,24 @@ index 5a0b8be4..59939cb1 100644
    run ./pihole-FTL --config dns.hosts '[ "1.1.1.1 abc-custom.com def-custom.de", "2.2.2.2 äste.com steä.com" ]'
    assert_success
  
+-  run bash -c "./pihole-FTL wait-for 'HOSTS file written to /etc/pihole/hosts/custom.list' /var/log/pihole/FTL.log 5 $logsize_before"
++  run bash -c "./pihole-FTL wait-for 'HOSTS file written to /opt/etc/pihole/hosts/custom.list' /var/log/pihole/FTL.log 5 $logsize_before"
+   assert_success
+ }
+ 
+@@ -1782,7 +1782,7 @@ except socket.timeout:
+   # Break one of the two shipped entries in the file itself
+   logsize_before=$(stat -c%s /var/log/pihole/FTL.log)
+   sed -i 's|"2.2.2.2 äste.com steä.com"|"2.2.2.2 äste!.com steä.com"|' /etc/pihole/pihole.toml
+-  run bash -c "./pihole-FTL wait-for 'HOSTS file written to /etc/pihole/hosts/custom.list' /var/log/pihole/FTL.log 5 $logsize_before"
++  run bash -c "./pihole-FTL wait-for 'HOSTS file written to /opt/etc/pihole/hosts/custom.list' /var/log/pihole/FTL.log 5 $logsize_before"
+   assert_success
+ 
+   run bash -c "tail -c +$((logsize_before + 1)) /var/log/pihole/FTL.log | grep -c -F -e 'Invalid value: dns.hosts[1]: invalid hostname (\"äste!.com\")' -e '----> dns.hosts[1] has been removed'"
+@@ -1796,7 +1796,7 @@ except socket.timeout:
+   logsize_before=$(stat -c%s /var/log/pihole/FTL.log)
+   run ./pihole-FTL --config dns.hosts '[ "1.1.1.1 abc-custom.com def-custom.de", "2.2.2.2 äste.com steä.com" ]'
+   assert_success
 -  run bash -c "./pihole-FTL wait-for 'HOSTS file written to /etc/pihole/hosts/custom.list' /var/log/pihole/FTL.log 5 $logsize_before"
 +  run bash -c "./pihole-FTL wait-for 'HOSTS file written to /opt/etc/pihole/hosts/custom.list' /var/log/pihole/FTL.log 5 $logsize_before"
    assert_success
