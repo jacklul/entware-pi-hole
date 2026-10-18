@@ -1,12 +1,21 @@
 #!/bin/sh
 
-# Stop the service before removal
+#shellcheck disable=SC2174
+[ ! -d /opt/tmp ] && mkdir -pm 755 /opt/tmp
+
+# Stop the service
 if [ -f /opt/etc/init.d/S65pihole-FTL ] && /opt/etc/init.d/S65pihole-FTL check | grep -q 'alive'; then
     /opt/etc/init.d/S65pihole-FTL stop
 
-    # Create a temporary file for postinst script to know it was running
-    [ ! -d /opt/tmp ] && mkdir -p /opt/tmp
+    # Create a temporary file for postinst script to know that it was running
     date '+%Y-%m-%d' > /opt/tmp/pihole_was_running.tmp
+fi
+
+# Create Teleporter backup
+if [ -f /opt/bin/pihole-FTL ]; then
+    echo "Creating Teleporter backup..."
+    cd /opt/tmp || exit 1
+    /opt/bin/pihole-FTL --teleporter || true
 fi
 
 exit 0
