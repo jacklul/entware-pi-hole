@@ -237,9 +237,9 @@ index 3007c80c..a00ca096 100644
 --- a/test/test_final.bats
 +++ b/test/test_final.bats
 @@ -48,7 +48,7 @@ load 'bats_helper.bash'
-   # dotdoh.bats: 2x pihole.toml writes (debug.dotdoh enable + disable)
    # dotdoh_server.bats: 1x pihole.toml write (reset dns.reply.host force to default)
    # webserver_acl.bats: 4x pihole.toml writes (three ACLs + restore)
+   # pytest: 6x pihole.toml writes (v5 Teleporter import: migration, restart and restoring the config, twice)
 -  run bash -c 'grep -c "INFO: Config file written to /etc/pihole/pihole.toml" /var/log/pihole/FTL.log'
 +  run bash -c 'grep -c "INFO: Config file written to /opt/etc/pihole/pihole.toml" /var/log/pihole/FTL.log'
    printf "pihole.toml write count: %s\n" "${lines[0]}"
@@ -261,7 +261,7 @@ index 3007c80c..a00ca096 100644
 +  run bash -c 'grep -c "DEBUG_CONFIG: HOSTS file written to /opt/etc/pihole/hosts/custom.list" /var/log/pihole/FTL.log'
    printf "custom.list write count: %s\n" "${lines[0]}"
    # On RISCV64, pytest is skipped, so only BATS writes occur (7x)
-   # Otherwise, pytest dns/hosts config array PUT + DELETE add 2 more (9x)
+   # Otherwise, pytest dns/hosts config array PUT + DELETE add 2 more, and
 @@ -234,12 +234,12 @@ load 'bats_helper.bash'
  
  @test "Gravity action streams NUL bytes, reports a failure and refuses a second run" {
@@ -380,6 +380,32 @@ index 5a0b8be4..59939cb1 100644
    assert_failure 3
  }
  
+@@ -1937,13 +1937,13 @@ setup() {
+   # Lexically /proc/self/root is a directory of its own, but it is a link
+   # the kernel plants to /, so it has to be judged by where it leads
+   run bash -c './pihole-FTL --config webserver.paths.webroot /proc/self/root'
+-  assert_line --index 0 'Invalid value: webserver.paths.webroot: "/proc/self/root" resolves to "/", which must not be "/" or overlap Pi-hole'"'"'s configuration directory ("/etc/pihole")'
++  assert_line --index 0 'Invalid value: webserver.paths.webroot: "/proc/self/root" resolves to "/", which must not be "/" or overlap Pi-hole'"'"'s configuration directory ("/opt/etc/pihole")'
+   assert_failure 3
+ 
+   # A link into the configuration directory is caught the same way
+-  ln -s /etc/pihole /tmp/webroot-link
++  ln -s /opt/etc/pihole /tmp/webroot-link
+   run bash -c './pihole-FTL --config webserver.paths.webroot /tmp/webroot-link'
+-  assert_line --index 0 'Invalid value: webserver.paths.webroot: "/tmp/webroot-link" resolves to "/etc/pihole", which must not be "/" or overlap Pi-hole'"'"'s configuration directory ("/etc/pihole")'
++  assert_line --index 0 'Invalid value: webserver.paths.webroot: "/tmp/webroot-link" resolves to "/etc/pihole", which must not be "/" or overlap Pi-hole'"'"'s configuration directory ("/opt/etc/pihole")'
+   assert_failure 3
+   rm -f /tmp/webroot-link
+ 
+@@ -1954,7 +1954,7 @@ setup() {
+   rm -f /var/webroot-ok
+ 
+   run bash -c './pihole-FTL --config webserver.paths.webroot'
+-  assert_line --index 0 '/var/www/html'
++  assert_line --index 0 '/opt/share/pihole/www'
+ }
+ 
+ @test "DNS hosts sanitization: Whitespace is normalized when saving" {
 @@ -1929,7 +1929,7 @@ except socket.timeout:
    assert_success
  

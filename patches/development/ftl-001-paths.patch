@@ -11,6 +11,19 @@ index 9aa6decc..fe676e45 100644
  if(NOT PIHOLE_INSTALL_DIR MATCHES "^/")
      message(FATAL_ERROR "PIHOLE_INSTALL_DIR must be an absolute path, got \"${PIHOLE_INSTALL_DIR}\"")
  endif()
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 1a9ad2ef..ecd2fe54 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -461,7 +461,7 @@ if(BUILD_TXT_STAT_REGRESSION)
+             ${PROJECT_SOURCE_DIR}/src/dnsmasq)
+     target_compile_definitions(txt_stat_regression PRIVATE
+             VERSION=\"${DNSMASQ_VERSION}\"
+-            CONFFILE=\"/etc/pihole/dnsmasq.conf\"
++            CONFFILE=\"/opt/etc/pihole/dnsmasq.conf\"
+             HAVE_POLL_H)
+ 
+     # Optional ASan/UBSan instrumentation for local runs:
 diff --git a/src/install_paths.h b/src/install_paths.h
 index 22e42ce0..d3329053 100644
 --- a/src/install_paths.h
@@ -324,6 +337,43 @@ index 47f2edc3..48410465 100644
  	}
  
  	// When we reach this point, we know that the file is a valid TOML file and contains
+diff --git a/src/dnsmasq_interface.c b/src/dnsmasq_interface.c
+index fd01a6bd..4f2928c8 100644
+--- a/src/dnsmasq_interface.c
++++ b/src/dnsmasq_interface.c
+@@ -3750,7 +3750,7 @@ static void chown_pihole_own_dir(const char *path, struct passwd *pwd)
+ 	if(in_pihole_dir(path))
+ 		chown_pihole(path, pwd);
+ 	else
+-		log_warn("Not changing ownership of %s, it is outside of /etc/pihole and /var/log/pihole", path);
++		log_warn("Not changing ownership of %s, it is outside of /opt/etc/pihole and /opt/var/log/pihole", path);
+ }
+ 
+ void FTL_fork_and_bind_sockets(struct passwd *ent_pw, bool dnsmasq_start)
+diff --git a/src/files.c b/src/files.c
+index 49c90de0..799528f7 100644
+--- a/src/files.c
++++ b/src/files.c
+@@ -52,8 +52,8 @@ bool in_pihole_dir(const char *path)
+ 		return false;
+ 
+ 	const size_t dirlen = slash - path;
+-	return (dirlen == strlen("/etc/pihole") && strncmp(path, "/etc/pihole", dirlen) == 0) ||
+-	       (dirlen == strlen("/var/log/pihole") && strncmp(path, "/var/log/pihole", dirlen) == 0);
++	return (dirlen == strlen("/opt/etc/pihole") && strncmp(path, "/opt/etc/pihole", dirlen) == 0) ||
++	       (dirlen == strlen("/opt/var/log/pihole") && strncmp(path, "/opt/var/log/pihole", dirlen) == 0);
+ }
+ 
+ // chmod_file() changes the file mode bits of a given regular file according
+@@ -63,7 +63,7 @@ bool chmod_file(const char *filename, const mode_t mode)
+ {
+ 	if(geteuid() == 0 && !in_pihole_dir(filename))
+ 	{
+-		log_warn("Not changing mode of %s, it is outside of /etc/pihole and /var/log/pihole", filename);
++		log_warn("Not changing mode of %s, it is outside of /opt/etc/pihole and /opt/var/log/pihole", filename);
+ 		return false;
+ 	}
+ 
 diff --git a/src/shmem.c b/src/shmem.c
 index e1569f34..dd58d88d 100644
 --- a/src/shmem.c
