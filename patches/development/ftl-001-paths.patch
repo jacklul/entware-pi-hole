@@ -149,19 +149,6 @@ diff --git a/src/database/sqlite3.c b/src/database/sqlite3.c
 index 4458f270..7f53cffc 100644
 --- a/src/database/sqlite3.c
 +++ b/src/database/sqlite3.c
-@@ -44339,9 +44339,9 @@ static int fillInUnixFile(
- static const char *azTempDirs[] = {
-   0,
-   0,
--  "/var/tmp",
--  "/usr/tmp",
--  "/tmp",
-+  "/opt/var/tmp",
-+  "/opt/usr/tmp",
-+  "/opt/tmp",
-   "."
- };
- 
 @@ -45512,7 +45512,7 @@ static int proxyGetLockPath(const char *dbPath, char *lPath, size_t maxLen){
      len = strlcat(lPath, "sqliteplocks", maxLen);
    }
@@ -171,6 +158,19 @@ index 4458f270..7f53cffc 100644
  # endif
  #endif
  
+@@ -46925,9 +46925,9 @@ static const char *unixTempFileDir(void){
+       case 0:  zDir = sqlite3_temp_directory;   break;
+       case 1:  zDir = getenv("SQLITE_TMPDIR");  break;
+       case 2:  zDir = getenv("TMPDIR");         break;
+-      case 3:  zDir = "/var/tmp";               break;
+-      case 4:  zDir = "/usr/tmp";               break;
+-      case 5:  zDir = "/tmp";                   break;
++      case 3:  zDir = "/opt/var/tmp";               break;
++      case 4:  zDir = "/opt/usr/tmp";               break;
++      case 5:  zDir = "/opt/tmp";                   break;
+       default: zDir = ".";                      break;
+     }
+     if( zDir!=0
 @@ -51455,9 +51455,9 @@ static int winGetTempname(sqlite3_vfs *pVfs, char **pzBuf){
         0, /* getenv("TMP") */
         0, /* getenv("TEMP") */
