@@ -244,7 +244,7 @@ index 3007c80c..a00ca096 100644
 +  run bash -c 'grep -c "INFO: Config file written to /opt/etc/pihole/pihole.toml" /var/log/pihole/FTL.log'
    printf "pihole.toml write count: %s\n" "${lines[0]}"
    # On RISCV64, pytest AND both encrypted-DNS suites are skipped (too
-   # slow), leaving the dns.reply.host PATCH, the removed dns.hosts entry and
+   # slow), leaving the dns.reply.host PATCH, the boxed PATCH + restore, the
 @@ -73,14 +73,14 @@ load 'bats_helper.bash'
    # arrange - on riscv64 they are skipped, leaving a single write.
    # pytest adds one more: the ZIP restore drops the reverse server of the v5
