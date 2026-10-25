@@ -386,7 +386,7 @@ index e1569f34..dd58d88d 100644
 +#define STRING_DUMPFILE "/opt/tmp/stringdump.txt"
  void dump_strings(void)
  {
- 	// Dump string table to temporary file
+ 	// Copy the string table under the lock and write the copy without it
 diff --git a/src/dotdoh/tls_client.c b/src/dotdoh/tls_client.c
 index 266de914..552dfff5 100644
 --- a/src/dotdoh/tls_client.c
