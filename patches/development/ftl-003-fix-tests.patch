@@ -105,20 +105,12 @@ index 78bd2331..6633eb72 100644
      #
      # Allowed values are:
      #     true or false
-@@ -1316,33 +1318,33 @@
+@@ -1316,26 +1318,26 @@
    #
    # Allowed values are:
    #     Any FTL database
 -  database = "/etc/pihole/pihole-FTL.db"
 +  database = "/opt/etc/pihole/pihole-FTL.db"
- 
-   # The location of FTL's short-term temporary database (only used when
-   # database.forceDisk is true)
-   #
-   # Allowed values are:
-   #     Any FTL database
--  tmp_db = "/etc/pihole/pihole-tmp.db"
-+  tmp_db = "/opt/etc/pihole/pihole-tmp.db"
  
    # The location of Pi-hole's gravity database
    #
@@ -237,8 +229,8 @@ index 3007c80c..a00ca096 100644
 --- a/test/test_final.bats
 +++ b/test/test_final.bats
 @@ -48,7 +48,7 @@ load 'bats_helper.bash'
-   # dotdoh_server.bats: 1x pihole.toml write (reset dns.reply.host force to default)
-   # webserver_acl.bats: 4x pihole.toml writes (three ACLs + restore)
+   # webserver_acl.bats: 6x pihole.toml writes (three ACLs + restore, proxy ACL + restore)
+   # webserver_tls_ports.bats: 7x pihole.toml writes (six port lists + restore)
    # pytest: 6x pihole.toml writes (v5 Teleporter import: migration, restart and restoring the config, twice)
 -  run bash -c 'grep -c "INFO: Config file written to /etc/pihole/pihole.toml" /var/log/pihole/FTL.log'
 +  run bash -c 'grep -c "INFO: Config file written to /opt/etc/pihole/pihole.toml" /var/log/pihole/FTL.log'
@@ -350,7 +342,7 @@ index 5a0b8be4..59939cb1 100644
    assert_failure 3
  
    run bash -c './pihole-FTL --config webserver.api.excludeClients "[\".*\",\"$$$\",\"[[[\"]"'
-@@ -1904,21 +1904,21 @@ except socket.timeout:
+@@ -1904,8 +1904,8 @@ except socket.timeout:
    assert_success
  
    # The certificate is written with its private key, so it stays out of the webroot
@@ -358,25 +350,6 @@ index 5a0b8be4..59939cb1 100644
 -  assert_line --index 0 'Invalid value: webserver.tls.cert ("/var/www/html/tls.pem") must not be inside webserver.paths.webroot ("/var/www/html")'
 +  run bash -c './pihole-FTL --config -t webserver.tls.cert /opt/share/pihole/www/tls.pem'
 +  assert_line --index 0 'Invalid value: webserver.tls.cert ("/opt/share/pihole/www/tls.pem") must not be inside webserver.paths.webroot ("/opt/share/pihole/www")'
-   assert_failure 3
- }
- 
- @test "files.tmp_db cannot name a file Pi-hole keeps" {
-   # database.forceDisk empties files.tmp_db on every start
--  run bash -c './pihole-FTL --config -t files.tmp_db /etc/pihole/pihole-FTL.db'
--  assert_line --index 0 'Invalid value: files.tmp_db ("/etc/pihole/pihole-FTL.db") must not be the same file as files.database'
-+  run bash -c './pihole-FTL --config -t files.tmp_db /opt/etc/pihole/pihole-FTL.db'
-+  assert_line --index 0 'Invalid value: files.tmp_db ("/opt/etc/pihole/pihole-FTL.db") must not be the same file as files.database'
-   assert_failure 3
--  run bash -c './pihole-FTL --config -t files.tmp_db /etc/pihole//./gravity.db'
--  assert_line --index 0 'Invalid value: files.tmp_db ("/etc/pihole//./gravity.db") must not be the same file as files.gravity'
-+  run bash -c './pihole-FTL --config -t files.tmp_db /opt/etc/pihole//./gravity.db'
-+  assert_line --index 0 'Invalid value: files.tmp_db ("/opt/etc/pihole//./gravity.db") must not be the same file as files.gravity'
-   assert_failure 3
--  run bash -c './pihole-FTL --config -t files.tmp_db /etc/pihole/pihole.toml'
--  assert_line --index 0 'Invalid value: files.tmp_db ("/etc/pihole/pihole.toml") must not be Pi-hole'"'"'s configuration file'
-+  run bash -c './pihole-FTL --config -t files.tmp_db /opt/etc/pihole/pihole.toml'
-+  assert_line --index 0 'Invalid value: files.tmp_db ("/opt/etc/pihole/pihole.toml") must not be Pi-hole'"'"'s configuration file'
    assert_failure 3
  }
  
@@ -428,11 +401,11 @@ index 5a0b8be4..59939cb1 100644
  
  
  @test "Webserver options are logged as expected" {
--  run bash -c 'grep -F "Webserver option 0/16: document_root=/var/www/html" /var/log/pihole/webserver.log'
-+  run bash -c 'grep -F "Webserver option 0/16: document_root=/opt/share/pihole/www" /var/log/pihole/webserver.log'
+-  run bash -c 'grep -F "Webserver option 0/17: document_root=/var/www/html" /var/log/pihole/webserver.log'
++  run bash -c 'grep -F "Webserver option 0/17: document_root=/opt/share/pihole/www" /var/log/pihole/webserver.log'
    assert_success
--  run bash -c 'grep -F "Webserver option 1/16: error_pages=/var/www/html/admin/" /var/log/pihole/webserver.log'
-+  run bash -c 'grep -F "Webserver option 1/16: error_pages=/opt/share/pihole/www/admin/" /var/log/pihole/webserver.log'
+-  run bash -c 'grep -F "Webserver option 1/17: error_pages=/var/www/html/admin/" /var/log/pihole/webserver.log'
++  run bash -c 'grep -F "Webserver option 1/17: error_pages=/opt/share/pihole/www/admin/" /var/log/pihole/webserver.log'
    assert_success
    # The terminator owns the secure ports; CivetWeb gets the plaintext ports plus its loopback backend.
-   run bash -c 'grep -F "Webserver option 2/16: listening_ports=80o,[::]:80o,8081,127.0.0.1:0" /var/log/pihole/webserver.log'
+   run bash -c 'grep -F "Webserver option 2/17: listening_ports=80o,[::]:80o,8081,127.0.0.1:0" /var/log/pihole/webserver.log'
