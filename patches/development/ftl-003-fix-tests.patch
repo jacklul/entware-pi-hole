@@ -341,7 +341,7 @@ index 5a0b8be4..59939cb1 100644
 +  assert_line --regexp --index 0 'New dnsmasq configuration is not valid \(.+resolve at line [[:digit:]]+ of /opt/etc/pihole/dnsmasq.conf.temp: "rev-server=1.1.1.1,def"\), config remains unchanged'
    assert_failure 3
  
-   run bash -c './pihole-FTL --config webserver.api.excludeClients "[\".*\",\"$$$\",\"[[[\"]"'
+   # dns.fastRetry carries FLAG_RESTART_FTL, so check it with -t
 @@ -1904,8 +1904,8 @@ except socket.timeout:
    assert_success
  
@@ -378,7 +378,7 @@ index 5a0b8be4..59939cb1 100644
 +  assert_line --index 0 '/opt/share/pihole/www'
  }
  
- @test "DNS hosts sanitization: Whitespace is normalized when saving" {
+ @test "Fast retry is off by default and accepted by dnsmasq when enabled" {
 @@ -1929,7 +1929,7 @@ except socket.timeout:
    assert_success
  

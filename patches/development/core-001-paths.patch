@@ -418,22 +418,12 @@ diff --git a/advanced/Templates/pihole.cron b/advanced/Templates/pihole.cron
 index d6c4f04d..c0c0ab6b 100644
 --- a/advanced/Templates/pihole.cron
 +++ b/advanced/Templates/pihole.cron
-@@ -18,19 +18,19 @@
+@@ -18,11 +18,11 @@
  #          early morning. Download any updates from the adlists
  #          Squash output to log, then splat the log to stdout on error to allow for
  #          standard crontab job error handling.
 -59 1    * * 7   pihole    PATH="$PATH:/usr/sbin:/usr/local/bin/" pihole updateGravity >/var/log/pihole/pihole_updateGravity.log || cat /var/log/pihole/pihole_updateGravity.log
 +59 1    * * 7   pihole    PATH="$PATH:/opt/bin" pihole updateGravity >/opt/var/log/pihole/pihole_updateGravity.log || cat /opt/var/log/pihole/pihole_updateGravity.log
- 
- # Pi-hole: Flush the log daily at 00:00
- #          The flush script uses logrotate
- #          parameter "once": logrotate only once (default is twice)
- #          parameter "quiet": don't print messages
--00 00   * * *   root    PATH="$PATH:/usr/sbin:/usr/local/bin/" pihole flush once quiet
-+00 00   * * *   root    PATH="$PATH:/opt/bin" pihole flush once quiet
- 
--@reboot root /usr/sbin/logrotate /etc/logrotate.d/pihole
-+@reboot root /opt/sbin/logrotate --state /opt/var/lib/logrotate.status /opt/etc/logrotate.d/pihole
  
  # Pi-hole: Grab remote and local version every 24 hours.
  #          Runs as the unprivileged "pihole" user (like updateGravity above) so
