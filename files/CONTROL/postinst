@@ -138,6 +138,16 @@ if [ -f /opt/etc/logrotate.d/pihole ]; then
     fi
 fi
 
+# Create cron.d logrotate file if it doesn't exist
+if [ ! -f /opt/etc/cron.d/logrotate ]; then
+    echo "  ${INFO} Creating cron.d logrotate file..."
+    cat <<EOF > /opt/etc/cron.d/logrotate
+PATH=/opt/sbin:/opt/bin:/opt/usr/sbin:/opt/usr/bin:/sbin:/bin:/usr/sbin:/usr/bin
+@reboot    admin  /opt/sbin/logrotate --state=/opt/var/lib/logrotate.status --log=/opt/var/log/logrotate.log /opt/etc/logrotate.conf
+0 0 * * *  admin  /opt/sbin/logrotate --state=/opt/var/lib/logrotate.status --log=/opt/var/log/logrotate.log /opt/etc/logrotate.conf
+EOF
+fi
+
 # Initialize pihole.toml using our starting config on fresh installs
 if [ -n "$fresh_install" ]; then
     echo "  ${INFO} ${COL_BOLD}Creating the configuration file...${COL_NC}"
