@@ -20,12 +20,13 @@ case $1 in
                 if
                     setcap CAP_NET_BIND_SERVICE,CAP_NET_RAW,CAP_NET_ADMIN,CAP_SYS_NICE,CAP_IPC_LOCK,CAP_CHOWN,CAP_SYS_TIME+eip /opt/bin/pihole-FTL
                 then
-                    PREARGS="nonroot pihole"
+                    PATH="$PATH:/opt/share/pihole/polyfill"
+                    PREARGS="setpriv --reuid=pihole --regid=pihole --init-groups --"
                 else
-                    echo "Warning: Setting capabilities is not supported on this system" >&2
+                    echo "Warning: Starting as root user because setting capabilities is not supported on this system" >&2
                 fi
             else
-                echo "Warning: Starting as root user - this is unsupported and will cause issues!" >&2
+                echo "Warning: Starting and running as root user because user 'pihole' is not available" >&2
 
                 root_user="$(id -un 0 2> /dev/null)"
                 root_group="$(id -gn 0 2> /dev/null)"
@@ -35,6 +36,8 @@ case $1 in
 
             # Prevent processes started by FTL from inheriting USER variable
             export USER=""
+        else
+            echo "Warning: ARGS/PREARGS were set outside the start script - ensure proper FTL launch!" >&2
         fi
 
         [ -n "$PRECMD" ] && PRECMD_USER="$PRECMD"

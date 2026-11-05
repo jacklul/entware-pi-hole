@@ -8,7 +8,7 @@ index 6424c793..2cc9dddb 100755
    local tricorder_token
 +
 +  if [ ! -e /dev/stdin ] || [ "$(readlink /dev/stdin)" != "/proc/self/fd/0" ]; then
-+      ln -s /proc/self/fd/0 /dev/stdin
++      ln -fs /proc/self/fd/0 /dev/stdin
 +  fi
 +
    if [[ ! -p "/dev/stdin" ]]; then

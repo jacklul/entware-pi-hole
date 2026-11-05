@@ -240,8 +240,8 @@ index b325ee9c..c1efe13b 100755
      # Only the literal "reboot" argument (see below) is passed on
      reboot_arg=""
      [[ "${1:-}" == "reboot" ]] && reboot_arg="reboot"
--    su -s /bin/sh pihole -c "/opt/pihole/updatecheck.sh ${reboot_arg}"
-+    su -s /bin/sh pihole -c "/opt/share/pihole/updatecheck.sh ${reboot_arg}"
+-    setpriv --reuid=pihole --regid=pihole --init-groups -- /opt/pihole/updatecheck.sh ${reboot_arg}
++    setpriv --reuid=pihole --regid=pihole --init-groups -- /opt/share/pihole/updatecheck.sh ${reboot_arg}
      exit "$?"
  fi
  
@@ -386,17 +386,16 @@ index dda59c26..07c715f4 100755
 +mkdir -p /opt/var/log/pihole
 +chown -R pihole:pihole /opt/etc/pihole/ /opt/var/log/pihole/
  
- # Set permissions on everything below /etc/pihole and /var/log/pihole:
- #   directories:           rwxr-xr-x (so pihole can access subdirs)
+ # setpriv changes the user without opening a PAM session. su's logind session
+ # waits for remote-fs.target at boot, which can depend on this very DNS server,
 @@ -17,10 +17,10 @@ chown -R pihole:pihole /etc/pihole/ /var/log/pihole/
  # the pihole user do it: it owns everything below these directories, and a
  # symlink pointing anywhere else only results in a permission error.
  # A failure here is deliberately non-fatal so it can never prevent FTL starting.
--su -s /bin/sh pihole -c '
+ as_pihole '
 -    find /etc/pihole/ /var/log/pihole/ -type d -exec chmod 0755 {} +
 -    find /etc/pihole/ /var/log/pihole/ -type f ! \( -name "*.pem" -o -name "*.crt" \) -exec chmod 0640 {} +
 -    find /etc/pihole/ -type f \( -name "*.pem" -o -name "*.crt" \) -exec chmod 0600 {} +
-+su -s /bin/sh pihole -c '
 +    find /opt/etc/pihole/ /opt/var/log/pihole/ -type d -exec chmod 0755 {} +
 +    find /opt/etc/pihole/ /opt/var/log/pihole/ -type f ! \( -name "*.pem" -o -name "*.crt" \) -exec chmod 0640 {} +
 +    find /opt/etc/pihole/ -type f \( -name "*.pem" -o -name "*.crt" \) -exec chmod 0600 {} +
@@ -406,9 +405,9 @@ index dda59c26..07c715f4 100755
 @@ -37,8 +37,8 @@ su -s /bin/sh pihole -c '
  # commands simply fail with a permission error and the target is left untouched.
  # A failure here is deliberately non-fatal so it can never prevent FTL starting.
- # su is needed to change user; both files are handled in a single call.
--su -s /bin/sh pihole -c 'touch /etc/pihole/versions /etc/pihole/dhcp.leases && chmod 0644 /etc/pihole/versions /etc/pihole/dhcp.leases' || true
-+su -s /bin/sh pihole -c 'touch /opt/etc/pihole/versions /opt/etc/pihole/dhcp.leases && chmod 0644 /opt/etc/pihole/versions /opt/etc/pihole/dhcp.leases' || true
+ # Both files are handled in a single call.
+-as_pihole 'touch /etc/pihole/versions /etc/pihole/dhcp.leases && chmod 0644 /etc/pihole/versions /etc/pihole/dhcp.leases' || true
++as_pihole 'touch /opt/etc/pihole/versions /opt/etc/pihole/dhcp.leases && chmod 0644 /opt/etc/pihole/versions /opt/etc/pihole/dhcp.leases' || true
  
  # Touch files to ensure they exist (create if non-existing, preserve if existing)
  # Hardcoded PID path — see GHSA-6w8x-p785-6pm4
@@ -487,7 +486,7 @@ index 71f428fb..d96c040c 100755
  if [[ "${EUID}" -eq 0 ]]; then
 -  chown pihole:pihole /etc/pihole
 +  chown pihole:pihole /opt/etc/pihole
-   exec sudo -u pihole bash "$0" "$@" </dev/null
+   exec setpriv --reuid=pihole --regid=pihole --init-groups -- bash "$0" "$@" </dev/null
  fi
  
 -PI_HOLE_SCRIPT_DIR="/opt/pihole"

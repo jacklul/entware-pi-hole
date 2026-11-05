@@ -349,7 +349,7 @@ index fd01a6bd..4f2928c8 100644
 +		log_warn("Not changing ownership of %s, it is outside of /opt/etc/pihole and /opt/var/log/pihole", path);
  }
  
- void FTL_fork_and_bind_sockets(struct passwd *ent_pw, bool dnsmasq_start)
+ // TCP children dnsmasq serves to clients, see dnsmasq_max_tcp_children()
 diff --git a/src/files.c b/src/files.c
 index 49c90de0..799528f7 100644
 --- a/src/files.c

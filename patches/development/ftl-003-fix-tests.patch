@@ -254,7 +254,7 @@ index 3007c80c..a00ca096 100644
    printf "custom.list write count: %s\n" "${lines[0]}"
    # On RISCV64, pytest is skipped, so only BATS writes occur (7x)
    # Otherwise, pytest dns/hosts config array PUT + DELETE add 2 more, and
-@@ -234,12 +234,12 @@ load 'bats_helper.bash'
+@@ -506,12 +506,12 @@ for s in socks:
  
  @test "Gravity action streams NUL bytes, reports a failure and refuses a second run" {
    # Stand-in for pihole -g: output with a NUL byte in it, then fail after a moment
@@ -271,7 +271,7 @@ index 3007c80c..a00ca096 100644
    curl -s -X POST 127.0.0.1/api/action/gravity -o /tmp/gravity_first.out &
    first=$!
    for i in $(seq 1 50); do
-@@ -250,9 +250,9 @@ load 'bats_helper.bash'
+@@ -522,9 +522,9 @@ for s in socks:
    wait "${first}"
    # Once the first run is done, a new one is accepted again
    third=$(curl -s -o /dev/null -w "%{http_code}" -X POST 127.0.0.1/api/action/gravity)
@@ -284,6 +284,29 @@ index 3007c80c..a00ca096 100644
    fi
    assert_output "409"
    [ "${third}" = "200" ]
+@@ -539,15 +539,15 @@ for s in socks:
+   # Stand-in for pihole -g that lists what its file descriptors point at. Those
+   # of FTL's helper process waiting for it cannot be read here: FTL has file
+   # capabilities, which keeps the pihole user out of the helper's /proc entry
+-  if [ -e /usr/local/bin/pihole ]; then
+-    mv /usr/local/bin/pihole /usr/local/bin/pihole.test-backup
++  if [ -e /opt/bin/pihole ]; then
++    mv /opt/bin/pihole /opt/bin/pihole.test-backup
+   fi
+-  printf '#!/bin/sh\nfor fd in /proc/$$/fd/*; do echo "${fd##*/} $(readlink "$fd")"; done\n' > /usr/local/bin/pihole
+-  chmod +x /usr/local/bin/pihole
++  printf '#!/bin/sh\nfor fd in /proc/$$/fd/*; do echo "${fd##*/} $(readlink "$fd")"; done\n' > /opt/bin/pihole
++  chmod +x /opt/bin/pihole
+   run bash -c 'curl -s -X POST 127.0.0.1/api/action/gravity'
+-  rm -f /usr/local/bin/pihole
+-  if [ -e /usr/local/bin/pihole.test-backup ]; then
+-    mv /usr/local/bin/pihole.test-backup /usr/local/bin/pihole
++  rm -f /opt/bin/pihole
++  if [ -e /opt/bin/pihole.test-backup ]; then
++    mv /opt/bin/pihole.test-backup /usr/local/bin/pihole
+   fi
+   printf "%s\n" "${output}"
+   assert_line --regexp '^1 pipe:'
 diff --git a/test/test_suite.bats b/test/test_suite.bats
 index 5a0b8be4..59939cb1 100644
 --- a/test/test_suite.bats
