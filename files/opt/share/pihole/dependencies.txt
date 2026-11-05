@@ -28,9 +28,6 @@ findutils, gawk, grep, sed, jq, coreutils-cut, coreutils-ls, coreutils-printf, c
 logrotate
  - used by piholeLogFlush.sh and cron tasks
 
-coreutils-expr
- - used by utils.sh
-
 coreutils-id
  - used by rc.sh and postinst script
 
@@ -51,9 +48,6 @@ coreutils-stty
 
 coreutils-tr
  - used by gravity.sh, api.sh, utils.sh and piholeDebug.sh
-
-coreutils-truncate
- - used in updatecheck.sh
 
 coreutils-whoami
  - used by 'pihole' command
