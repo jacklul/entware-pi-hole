@@ -1,8 +1,8 @@
 #!/bin/sh
 # https://github.com/jacklul/entware-pi-hole/
 #shellcheck disable=SC2034
-# Overriding ARGS or PREARGS will prevent FTL from starting correctly
 
+# Overriding ARGS or PREARGS will prevent FTL from starting correctly
 ENABLED=yes
 PROCS=pihole-FTL
 ARGS=""
