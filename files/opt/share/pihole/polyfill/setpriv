@@ -32,4 +32,11 @@ if [ -z "$user" ]; then
 fi
 
 export USER="$user"
+
+if [ -d "/opt/home/$user" ]; then
+    export HOME="/opt/home/$user"
+else
+    export HOME=""
+fi
+
 exec nonroot "$user" "$@"
