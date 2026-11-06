@@ -146,6 +146,7 @@ PATH=/opt/sbin:/opt/bin:/opt/usr/sbin:/opt/usr/bin:/sbin:/bin:/usr/sbin:/usr/bin
 @reboot    $root_user  /opt/sbin/logrotate --state=/opt/var/lib/logrotate.status --log=/opt/var/log/logrotate.log /opt/etc/logrotate.conf
 0 0 * * *  $root_user  /opt/sbin/logrotate --state=/opt/var/lib/logrotate.status --log=/opt/var/log/logrotate.log /opt/etc/logrotate.conf
 EOF
+    chmod 700 /opt/etc/cron.d/logrotate
 fi
 
 # Initialize pihole.toml using our starting config on fresh installs
