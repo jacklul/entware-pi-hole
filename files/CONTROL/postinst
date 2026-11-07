@@ -109,7 +109,7 @@ if [ -f /opt/etc/cron.d/pihole ] && grep -q "59 1 \|59 17 " /opt/etc/cron.d/piho
     sed "s/59 17 /$uc_time_m $uc_time_h /" -i /opt/etc/cron.d/pihole
     echo "  ${INFO} Update checker time: ${COL_CYAN}$(add_leading_zero "$uc_time_h"):$(add_leading_zero "$uc_time_m")${COL_NC}"
 
-    refresh_crond=true
+    reload_crond=true
 fi
 
 # Remove obsolete logrotate state file if it exists
@@ -146,11 +146,11 @@ PATH=/opt/sbin:/opt/bin:/opt/usr/sbin:/opt/usr/bin:/sbin:/bin:/usr/sbin:/usr/bin
 0 0 * * *  $root_user  /opt/sbin/logrotate /opt/etc/logrotate.conf
 EOF
     chmod 700 /opt/etc/cron.d/logrotate
-    refresh_crond=true
+    reload_crond=true
 fi
 
 # Touch cron.d directory to force cron to reload it
-if [ "$refresh_crond" = true ]; then
+if [ "$reload_crond" = true ]; then
     touch /opt/etc/cron.d
 fi
 
