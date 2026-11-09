@@ -229,8 +229,8 @@ index 3007c80c..a00ca096 100644
 --- a/test/test_final.bats
 +++ b/test/test_final.bats
 @@ -48,7 +48,7 @@ load 'bats_helper.bash'
-   # webserver_acl.bats: 6x pihole.toml writes (three ACLs + restore, proxy ACL + restore)
    # webserver_tls_ports.bats: 7x pihole.toml writes (six port lists + restore)
+   # restart.bats: 6x pihole.toml writes (blocking disabled permanently + enabled again, three times)
    # pytest: 6x pihole.toml writes (v5 Teleporter import: migration, restart and restoring the config, twice)
 -  run bash -c 'grep -c "INFO: Config file written to /etc/pihole/pihole.toml" /var/log/pihole/FTL.log'
 +  run bash -c 'grep -c "INFO: Config file written to /opt/etc/pihole/pihole.toml" /var/log/pihole/FTL.log'
