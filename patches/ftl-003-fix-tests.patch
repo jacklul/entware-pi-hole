@@ -266,6 +266,29 @@ index 6a1c13f9..7e10d156 100644
    curl -s -X POST 127.0.0.1/api/action/gravity -o /tmp/gravity_first.out &
    first=$!
    for i in $(seq 1 50); do
+@@ -539,15 +539,15 @@ for s in socks:
+   # Stand-in for pihole -g that lists what its file descriptors point at. Those
+   # of FTL's helper process waiting for it cannot be read here: FTL has file
+   # capabilities, which keeps the pihole user out of the helper's /proc entry
+-  if [ -e /usr/local/bin/pihole ]; then
+-    mv /usr/local/bin/pihole /usr/local/bin/pihole.test-backup
++  if [ -e /opt/bin/pihole ]; then
++    mv /opt/bin/pihole /opt/bin/pihole.test-backup
+   fi
+-  printf '#!/bin/sh\nfor fd in /proc/$$/fd/*; do echo "${fd##*/} $(readlink "$fd")"; done\n' > /usr/local/bin/pihole
+-  chmod +x /usr/local/bin/pihole
++  printf '#!/bin/sh\nfor fd in /proc/$$/fd/*; do echo "${fd##*/} $(readlink "$fd")"; done\n' > /opt/bin/pihole
++  chmod +x /opt/bin/pihole
+   run bash -c 'curl -s -X POST 127.0.0.1/api/action/gravity'
+-  rm -f /usr/local/bin/pihole
+-  if [ -e /usr/local/bin/pihole.test-backup ]; then
+-    mv /usr/local/bin/pihole.test-backup /usr/local/bin/pihole
++  rm -f /opt/bin/pihole
++  if [ -e /opt/bin/pihole.test-backup ]; then
++    mv /opt/bin/pihole.test-backup /usr/local/bin/pihole
+   fi
+   printf "%s\n" "${output}"
+   assert_line --regexp '^1 pipe:'
 diff --git a/test/test_suite.bats b/test/test_suite.bats
 index 081030f8..ed295e68 100644
 --- a/test/test_suite.bats
@@ -492,3 +515,29 @@ index b38af0f3..85d53433 100644
       "webserver.advancedOpts"),
      # Relocating the document root is host-only; "/" would serve the filesystem
      ("webroot", '"/"', "webserver.paths.webroot"),
+diff --git a/test/test_final.bats b/test/test_final.bats
+index feb64f1e..107ce0a8 100644
+--- a/test/test_final.bats
++++ b/test/test_final.bats
+@@ -457,7 +457,7 @@ first_start_stop() {
+   [[ "${dns}" == "status: NOERROR" ]]
+   [[ "${level}" == "2" ]]
+   [[ "${upstreams}" == '["127.0.0.1#5555","127.0.0.2"]' ]]
+-  [[ "${tmp_db}" == "/etc/pihole/pihole-tmp.db" ]]
++  [[ "${tmp_db}" == "/opt/etc/pihole/pihole-tmp.db" ]]
+   [[ "${forced}" == "true" && "${unforced}" == "false" ]]
+   # pihole-FTL --config still shows the plain defaults without a file
+   [[ "${first_start_cli}" == "53" ]]
+diff --git a/test/test_final.bats b/test/test_final.bats
+index feb64f1e..5d3691ff 100644
+--- a/test/test_final.bats
++++ b/test/test_final.bats
+@@ -55,7 +55,7 @@ load 'bats_helper.bash'
+   if [[ "${CI_ARCH}" == "linux/riscv64" ]]; then
+       assert_line --index 0 "8"
+   else
+-    [[ ${lines[0]} == "50" ]]
++    [[ ${lines[0]} == "51" ]]
+   fi
+   # CLI password set/remove trigger inotify reload but result in
+   # "pihole.toml unchanged" as the in-memory config already matches

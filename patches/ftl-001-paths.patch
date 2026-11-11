@@ -193,8 +193,8 @@ diff --git a/src/config/dnsmasq_config.h b/src/config/dnsmasq_config.h
 index df660790..d3866bac 100644
 --- a/src/config/dnsmasq_config.h
 +++ b/src/config/dnsmasq_config.h
-@@ -22,14 +22,14 @@ bool read_legacy_cnames_config(void);
- bool read_legacy_custom_hosts_config(void);
+@@ -29,14 +29,14 @@ bool read_legacy_cnames_config(struct config *conf);
+ bool read_legacy_custom_hosts_config(struct config *conf);
  bool write_custom_list(void);
  
 -#define DNSMASQ_PH_CONFIG "/etc/pihole/dnsmasq.conf"
@@ -256,19 +256,6 @@ diff --git a/src/database/sqlite3.c b/src/database/sqlite3.c
 index 4458f270..7f53cffc 100644
 --- a/src/database/sqlite3.c
 +++ b/src/database/sqlite3.c
-@@ -44339,9 +44339,9 @@ static int fillInUnixFile(
- static const char *azTempDirs[] = {
-   0,
-   0,
--  "/var/tmp",
--  "/usr/tmp",
--  "/tmp",
-+  "/opt/var/tmp",
-+  "/opt/usr/tmp",
-+  "/opt/tmp",
-   "."
- };
- 
 @@ -45512,7 +45512,7 @@ static int proxyGetLockPath(const char *dbPath, char *lPath, size_t maxLen){
      len = strlcat(lPath, "sqliteplocks", maxLen);
    }
@@ -278,6 +265,19 @@ index 4458f270..7f53cffc 100644
  # endif
  #endif
  
+@@ -46925,9 +46925,9 @@ static const char *unixTempFileDir(void){
+       case 0:  zDir = sqlite3_temp_directory;   break;
+       case 1:  zDir = getenv("SQLITE_TMPDIR");  break;
+       case 2:  zDir = getenv("TMPDIR");         break;
+-      case 3:  zDir = "/var/tmp";               break;
+-      case 4:  zDir = "/usr/tmp";               break;
+-      case 5:  zDir = "/tmp";                   break;
++      case 3:  zDir = "/opt/var/tmp";               break;
++      case 4:  zDir = "/opt/usr/tmp";               break;
++      case 5:  zDir = "/opt/tmp";                   break;
+       default: zDir = ".";                      break;
+     }
+     if( zDir!=0
 @@ -51455,9 +51455,9 @@ static int winGetTempname(sqlite3_vfs *pVfs, char **pzBuf){
         0, /* getenv("TMP") */
         0, /* getenv("TEMP") */
@@ -367,7 +367,7 @@ index fc10ad23..839cde69 100644
 +#define BACKUP_DIR "/opt/etc/pihole/config_backups"
  
  bool in_pihole_dir(const char *path);
- bool chmod_file(const char *filename, const mode_t mode);
+ 
 diff --git a/src/dnsmasq/log.c b/src/dnsmasq/log.c
 index 4f83add0..a8be2c9e 100644
 --- a/src/dnsmasq/log.c
@@ -478,9 +478,10 @@ index 47f2edc3..48410465 100644
  	}
  
  	// Test dnsmasq config in the imported configuration
-@@ -338,7 +338,7 @@ static const char *test_and_import_pihole_toml(void *ptr, size_t size, char * co
+@@ -338,8 +338,8 @@ static const char *test_and_import_pihole_toml(void *ptr, size_t size, char * co
  		report_teleporter_skipped(false);
  		free_config(&teleporter_config, false);
+ 		unlock_config();
  		toml_free(toml);
 -		return "File etc/pihole/pihole.toml in ZIP archive contains invalid dnsmasq configuration";
 +		return "File opt/etc/pihole/pihole.toml in ZIP archive contains invalid dnsmasq configuration";

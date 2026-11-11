@@ -2,22 +2,22 @@ diff --git a/advanced/Scripts/piholeDebug.sh b/advanced/Scripts/piholeDebug.sh
 index 741ff2f4..264e0e89 100755
 --- a/advanced/Scripts/piholeDebug.sh
 +++ b/advanced/Scripts/piholeDebug.sh
-@@ -128,7 +128,7 @@ REQUIRED_FILES=("${PIHOLE_CRON_FILE}"
- "${DNSMASQ_CONF}"
- "${PIHOLE_VERSIONS_FILE}")
+@@ -155,7 +155,7 @@ read_pihole_file() {
+     esac
+ }
  
 -DISCLAIMER="This process collects information from your Pi-hole, and optionally uploads it to a unique and random directory on tricorder.pi-hole.net.
 +DISCLAIMER="This process collects information from your Pi-hole, and optionally uploads it to a unique and random directory on lurking-cat.appspot.com/upload.
  
  The intent of this script is to allow users to self-diagnose their installations.  This is accomplished by running tests against our software and providing the user with links to FAQ articles when a problem is detected.  Since we are a small team and Pi-hole has been growing steadily, it is our hope that this will help us spend more time on development.
  
-@@ -1307,8 +1362,8 @@ curl_to_tricorder() {
-     # Users can submit their debug logs using curl (encrypted)
-     log_write "    * Using ${COL_GREEN}curl${COL_NC} for transmission."
+@@ -1270,8 +1270,8 @@ curl_to_tricorder() {
      # transmit the log via TLS and store the token returned in a variable
--    tricorder_token=$(curl --silent --fail --show-error --upload-file ${PIHOLE_DEBUG_LOG} https://tricorder.pi-hole.net 2>&1)
+     # Run as the pihole user so a symlink planted at the log path cannot make
+     # root upload some other file (see as_pihole)
+-    tricorder_token=$(as_pihole curl --silent --fail --show-error --upload-file "${PIHOLE_DEBUG_LOG}" https://tricorder.pi-hole.net 2>&1)
 -    if [[ "${tricorder_token}" != "https://tricorder.pi-hole.net/"* ]]; then
-+    tricorder_token=$(curl --silent --fail --show-error --upload-file ${PIHOLE_DEBUG_LOG} https://lurking-cat.appspot.com/upload 2>&1)
++    tricorder_token=$(as_pihole curl --silent --fail --show-error --upload-file "${PIHOLE_DEBUG_LOG}" https://lurking-cat.appspot.com/upload 2>&1)
 +    if [[ "${tricorder_token}" != "https://lurking-cat.appspot.com/upload/"* ]]; then
          log_write "    * ${COL_GREEN}curl${COL_NC} failed, contact Pi-hole support for assistance."
          # Log curl error (if available)
