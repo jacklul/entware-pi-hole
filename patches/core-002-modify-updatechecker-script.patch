@@ -73,11 +73,11 @@ index 23abf7a6..904920be 100755
 +    ENTWARE_VERSION="$(opkg list-installed "${ENTWARE_PACKAGE}" | awk '{print $3}')"
 +    addOrEditKeyValPair "${VERSION_FILE_TMP}" "ENTWARE_VERSION" "${ENTWARE_VERSION}"
 +
-+    if [ "$ENTWARE_PACKAGE" = "pi-hole" ] && [[ ! "${ENTWARE_VERSION}" =~ $release_regex ]]; then
++    if [ "${ENTWARE_PACKAGE}" = "pi-hole" ] && [[ ! "${ENTWARE_VERSION}" =~ $release_regex ]]; then
 +        unset ENTWARE_PACKAGE
 +    fi
 +
-+    GITHUB_ENTWARE_VERSION="$(get_remote_version_entware "$ENTWARE_PACKAGE")"
++    GITHUB_ENTWARE_VERSION="$(get_remote_version_entware "${ENTWARE_PACKAGE}")"
 +    addOrEditKeyValPair "${VERSION_FILE_TMP}" "GITHUB_ENTWARE_VERSION" "${GITHUB_ENTWARE_VERSION}"
 +fi
 +

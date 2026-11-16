@@ -86,6 +86,9 @@ fi
 [ ! -f /opt/etc/resolv.conf ] && [ -f /etc/resolv.conf ] && ln -s /etc/resolv.conf /opt/etc/resolv.conf && symlinks="$symlinks /opt/etc/resolv.conf"
 [ -n "$symlinks" ] && echo "  ${INFO} Created symlinks: ${COL_BOLD}$(echo "$symlinks" | awk '{$1=$1;print}')${COL_NC}"
 
+# Remove obsolete logrotate state file if it exists
+[ -f /opt/etc/pihole/logrotate.state ] && rm -f /opt/etc/pihole/logrotate.state
+
 # Show a warning when root user is not called 'root' and update the crontab file
 root_user="$(id -nu 0 2> /dev/null)"
 if [ "$root_user" != "root" ]; then
@@ -111,21 +114,6 @@ if [ -f /opt/etc/cron.d/pihole ] && grep -q "59 1 \|59 17 " /opt/etc/cron.d/piho
 
     reload_crond=true
 fi
-
-# Remove obsolete logrotate state file if it exists
-[ -f /opt/etc/pihole/logrotate.state ] && rm -f /opt/etc/pihole/logrotate.state
-
-# @TODO uncomment this when adding logrotate config to conffiles!
-# Show a warning when logrotate configuration does not exclude OPKG-created files
-#if
-#    [ -f /opt/etc/logrotate.conf ] &&
-#    [ -n "$(find /opt/etc/logrotate.d -mindepth 1 ! -name 'pihole' ! -name 'pihole-opkg' -print -quit 2> /dev/null)" ] &&
-#    grep -Eq '^[[:space:]]*include[[:space:]]*/opt/etc/logrotate.d' /opt/etc/logrotate.conf &&
-#    ! grep -Eq '^[[:space:]]*taboopat .*\*-opkg$' /opt/etc/logrotate.conf
-#then
-#    echo "  ${INFO} ${COL_BOLD}${COL_YELLOW}Logrotate is not configured to exclude '*-opkg' files!${COL_NC}"
-#    echo "  ${INFO} Add '${COL_CYAN}taboopat + *-opkg${COL_NC}' above the include directive in the logrotate configuration."
-#fi
 
 # Set user and group used by logrotate, inherited from /opt/var/log
 if [ -f /opt/etc/logrotate.d/pihole ]; then
@@ -171,6 +159,9 @@ if [ -n "$gravitydb_exists" ]; then
 
     # Force gravity update if database version has changed
     [ "$(gravitydb_version "$gravitydb")" != "$gravitydb_version" ] && gravitydb_upgraded=true
+else # Create new gravity database with default blocklists if it doesn't exist
+    bash /opt/share/pihole/gravity.sh --newdb
+    bash /opt/share/pihole/gravity.sh --addadlist "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts"
 fi
 
 # Check if service was running before the package install
@@ -186,14 +177,9 @@ elif [ -n "$was_running" ]; then # or start it if it was running before
     service_action "start"
 fi
 
-# Run gravity update if database was upgraded or does not exist
+# Run gravity update if the database was upgraded or did not exist
 if [ -n "$gravitydb_upgraded" ] || [ -z "$gravitydb_exists" ]; then
-    # Create adlists.list file with default blocklists if the database doesn't exist
-    if [ -z "$gravitydb_exists" ] && [ ! -f /opt/etc/pihole/adlists.list ]; then
-        install -m 644 /opt/share/pihole/dist/adlists.list /opt/etc/pihole/adlists.list
-    fi
-
-    bash /opt/share/pihole/gravity.sh
+    bash /opt/share/pihole/gravity.sh --force
 fi
 
 # Late fresh install tasks
@@ -238,12 +224,6 @@ if [ -n "$fresh_install" ]; then
 elif [ -z "$(pihole-FTL --config -q webserver.api.pwhash)" ]; then # Show a warning if the password is not set
     echo "  ${INFO} ${COL_RED}The web interface password is not set - this is a security risk!${COL_NC}"
     echo "  ${INFO} ${COL_YELLOW}Please set it using the '${COL_NC}${COL_BOLD}pihole setpassword${COL_NC}${COL_YELLOW}' command.${COL_NC}"
-fi
-
-# Run custom post install script if it exists
-if [ -x /opt/share/pihole/postinstall.sh ]; then
-    echo "  ${INFO} ${COL_BOLD}Running custom post-install script...${COL_NC}"
-    bash /opt/share/pihole/postinstall.sh
 fi
 
 # Update remote versions via updatechecker (/opt/etc/pihole/versions)
