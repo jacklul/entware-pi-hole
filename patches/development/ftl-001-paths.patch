@@ -28,7 +28,7 @@ diff --git a/src/install_paths.h b/src/install_paths.h
 index 22e42ce0..d3329053 100644
 --- a/src/install_paths.h
 +++ b/src/install_paths.h
-@@ -17,7 +17,7 @@
+@@ -17,11 +17,11 @@
  // This is a build-time knob only; it deliberately does not expose a runtime
  // override (see GHSA-6w8x-p785-6pm4 for why some paths must stay fixed).
  #ifndef PIHOLE_INSTALL_DIR
@@ -36,20 +36,12 @@ index 22e42ce0..d3329053 100644
 +#define PIHOLE_INSTALL_DIR "/opt/etc/pihole"
  #endif
  
+ #ifndef PIHOLE_SCRIPT
+-#define PIHOLE_SCRIPT "/usr/local/bin/pihole"
++#define PIHOLE_SCRIPT "/opt/bin/pihole"
+ #endif
+ 
  #endif // INSTALL_PATHS_H
-diff --git a/src/api/action.c b/src/api/action.c
-index 138c1c6c..89ac3a1d 100644
---- a/src/api/action.c
-+++ b/src/api/action.c
-@@ -145,7 +145,7 @@ int api_action_gravity(struct ftl_conn *api)
- 		                       "Gravity is already running",
- 		                       NULL);
- 
--	const int ret = run_and_stream_command(api, "/usr/local/bin/pihole", (const char *const []){ "pihole", "-g", NULL }, extra_env);
-+	const int ret = run_and_stream_command(api, "/opt/bin/pihole", (const char *const []){ "pihole", "-g", NULL }, extra_env);
- 	atomic_store(&gravity_running, false);
- 
- 	// If a termination/restart was requested while gravity was running,
 diff --git a/src/config/config.c b/src/config/config.c
 index eee5a8c0..51c882cd 100644
 --- a/src/config/config.c
@@ -87,7 +79,7 @@ index eee5a8c0..51c882cd 100644
  	conf->files.log.dnsmasq.f = FLAG_RESTART_FTL;
 -	conf->files.log.dnsmasq.d.s = (char*)"/var/log/pihole/pihole.log";
 +	conf->files.log.dnsmasq.d.s = (char*)"/opt/var/log/pihole/pihole.log";
- 	conf->files.log.dnsmasq.c = validate_filepath;
+ 	conf->files.log.dnsmasq.c = validate_filepath_empty;
  
  	conf->files.log.webserver.k = "files.log.webserver";
 @@ -1689,7 +1689,7 @@ bool getLogFilePath(void)

@@ -136,7 +136,7 @@ index 78bd2331..6633eb72 100644
  
    # An optional file containing a pcap capture of the network traffic. This file is used
    # for debugging purposes only. If you don't know what this is, you don't need it.
-@@ -1361,19 +1363,19 @@
+@@ -1361,22 +1363,22 @@
      #
      # Allowed values are:
      #     any writable file
@@ -144,6 +144,9 @@ index 78bd2331..6633eb72 100644
 +    ftl = "/opt/var/log/pihole/FTL.log"
  
      # The log file used by the embedded dnsmasq DNS server
+     #
+     # Setting this to an empty string disables pihole.log. Everything dnsmasq logs,
+     # including queries and DHCP activity, then goes to syslog.
      #
      # Allowed values are:
      #     Any writable file
@@ -254,59 +257,15 @@ index 3007c80c..a00ca096 100644
    printf "custom.list write count: %s\n" "${lines[0]}"
    # On RISCV64, pytest is skipped, so only BATS writes occur (7x)
    # Otherwise, pytest dns/hosts config array PUT + DELETE add 2 more, and
-@@ -506,12 +506,12 @@ for s in socks:
- 
- @test "Gravity action streams NUL bytes, reports a failure and refuses a second run" {
-   # Stand-in for pihole -g: output with a NUL byte in it, then fail after a moment
--  if [ -e /usr/local/bin/pihole ]; then
--    mv /usr/local/bin/pihole /usr/local/bin/pihole.test-backup
-+  if [ -e /opt/bin/pihole ]; then
-+    mv /opt/bin/pihole /opt/bin/pihole.test-backup
-   fi
-   rm -f /tmp/gravity_started
--  printf '#!/bin/sh\ntouch /tmp/gravity_started\nprintf "before\\000after\\n"\nsleep 2\nexit 3\n' > /usr/local/bin/pihole
--  chmod +x /usr/local/bin/pihole
-+  printf '#!/bin/sh\ntouch /tmp/gravity_started\nprintf "before\\000after\\n"\nsleep 2\nexit 3\n' > /opt/bin/pihole
-+  chmod +x /opt/bin/pihole
-   curl -s -X POST 127.0.0.1/api/action/gravity -o /tmp/gravity_first.out &
-   first=$!
-   for i in $(seq 1 50); do
-@@ -522,9 +522,9 @@ for s in socks:
-   wait "${first}"
-   # Once the first run is done, a new one is accepted again
-   third=$(curl -s -o /dev/null -w "%{http_code}" -X POST 127.0.0.1/api/action/gravity)
--  rm -f /usr/local/bin/pihole
--  if [ -e /usr/local/bin/pihole.test-backup ]; then
--    mv /usr/local/bin/pihole.test-backup /usr/local/bin/pihole
-+  rm -f /opt/bin/pihole
-+  if [ -e /opt/bin/pihole.test-backup ]; then
-+    mv /opt/bin/pihole.test-backup /opt/bin/pihole
-   fi
-   assert_output "409"
-   [ "${third}" = "200" ]
-@@ -539,15 +539,15 @@ for s in socks:
-   # Stand-in for pihole -g that lists what its file descriptors point at. Those
-   # of FTL's helper process waiting for it cannot be read here: FTL has file
-   # capabilities, which keeps the pihole user out of the helper's /proc entry
--  if [ -e /usr/local/bin/pihole ]; then
--    mv /usr/local/bin/pihole /usr/local/bin/pihole.test-backup
-+  if [ -e /opt/bin/pihole ]; then
-+    mv /opt/bin/pihole /opt/bin/pihole.test-backup
-   fi
--  printf '#!/bin/sh\nfor fd in /proc/$$/fd/*; do echo "${fd##*/} $(readlink "$fd")"; done\n' > /usr/local/bin/pihole
--  chmod +x /usr/local/bin/pihole
-+  printf '#!/bin/sh\nfor fd in /proc/$$/fd/*; do echo "${fd##*/} $(readlink "$fd")"; done\n' > /opt/bin/pihole
-+  chmod +x /opt/bin/pihole
-   run bash -c 'curl -s -X POST 127.0.0.1/api/action/gravity'
--  rm -f /usr/local/bin/pihole
--  if [ -e /usr/local/bin/pihole.test-backup ]; then
--    mv /usr/local/bin/pihole.test-backup /usr/local/bin/pihole
-+  rm -f /opt/bin/pihole
-+  if [ -e /opt/bin/pihole.test-backup ]; then
-+    mv /opt/bin/pihole.test-backup /usr/local/bin/pihole
-   fi
-   printf "%s\n" "${output}"
-   assert_line --regexp '^1 pipe:'
+@@ -727,7 +727,7 @@ first_start_stop() {
+   cp -p /etc/pihole/pihole.toml /tmp/pihole.toml.logempty
+   cp -p /etc/pihole/dnsmasq.conf /tmp/dnsmasq.conf.logempty
+   mv /var/log/pihole/pihole.log /var/log/pihole/pihole.log.kept
+-  sed -i 's|^    dnsmasq = "/var/log/pihole/pihole.log"$|    dnsmasq = ""|' /etc/pihole/pihole.toml
++  sed -i 's|^    dnsmasq = "/opt/var/log/pihole/pihole.log"$|    dnsmasq = ""|' /etc/pihole/pihole.toml
+   # Receive what FTL sends to syslog, unless a syslog daemon listens already
+   syslog_file=""
+   if [[ ! -e /dev/log && ! -L /dev/log ]]; then
 diff --git a/test/test_suite.bats b/test/test_suite.bats
 index 5a0b8be4..59939cb1 100644
 --- a/test/test_suite.bats
