@@ -17,9 +17,10 @@
   # Change DNS port as most devices will use the default port already. (default is 53)
   #port = 5053
 
-  # Disable DNS-over-HTTPS and DNS-over-TLS servers as their ports might conflict with existing services. (default is true)
-  doh = false
-  dot = false
+  # Disable DNS-over-HTTPS, DNS-over-TLS and DNS-over-QUIC servers as their ports might conflict with existing services. (default is true)
+  doh = false # uses webserver's secure port
+  dot = false # uses TCP 853 port
+  doq = false # uses UDP 853 port
 
 # Disable NTP features as it may conflict with system's build-in time synchronization.
 [ntp]
