@@ -329,6 +329,19 @@ index ed11b61a..b27bd6e5 100644
  
  BEGIN TRANSACTION;
  
+diff --git a/advanced/Templates/gravity_resync.sql b/advanced/Templates/gravity_resync.sql
+index e023f8fc..2b4ab27e 100644
+--- a/advanced/Templates/gravity_resync.sql
++++ b/advanced/Templates/gravity_resync.sql
+@@ -2,7 +2,7 @@
+ 
+ PRAGMA foreign_keys=OFF;
+ 
+-ATTACH DATABASE '/etc/pihole/gravity.db' AS OLD;
++ATTACH DATABASE '/opt/etc/pihole/gravity.db' AS OLD;
+ 
+ BEGIN TRANSACTION;
+ 
 diff --git a/advanced/Templates/logrotate b/advanced/Templates/logrotate
 index 5984fb7b..1cec05ee 100644
 --- a/advanced/Templates/logrotate
